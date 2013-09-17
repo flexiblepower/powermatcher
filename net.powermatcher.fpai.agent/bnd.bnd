@@ -1,0 +1,11 @@
+Bundle-Version: 2.0.1
+-buildpath: \
+	flexiblepower.api;version=latest,\
+	net.powermatcher.core.adapter;version=latest,\
+	net.powermatcher.core.adapter.service;version=latest,\
+	net.powermatcher.core.agent;version=latest,\
+	net.powermatcher.core.configurable;version=latest,\
+	net.powermatcher.core.scheduler.service;version=latest,\
+	biz.aQute.bnd.annotation;version="[1.50.0,2)"
+Export-Package: net.powermatcher.fpai.agent
+-sign: fps

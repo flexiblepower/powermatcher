@@ -1,0 +1,34 @@
+Bundle-Version: 3.0.1
+-buildpath: \
+	biz.aQute.bnd.annotation;version=latest,\
+	org.eclipse.paho.client.mqttv3;version=latest,\
+	osgi.cmpn,\
+	osgi.core,\
+	slf4j.api,\
+	flexiblepower.api;version=latest,\
+	net.powermatcher.core.adapter;version=latest,\
+	net.powermatcher.core.adapter.service;version=latest,\
+	net.powermatcher.core.agent;version=latest,\
+	net.powermatcher.core.agent.auctioneer;version=latest,\
+	net.powermatcher.core.agent.concentrator;version=latest,\
+	net.powermatcher.core.agent.marketbasis.adapter;version=latest,\
+	net.powermatcher.core.configurable;version=latest,\
+	net.powermatcher.core.scheduler.service;version=latest,\
+	net.powermatcher.core.messaging.framework;version=latest,\
+	net.powermatcher.core.messaging.mqttv3;version=latest,\
+	net.powermatcher.core.messaging.protocol.adapter;version=latest,\
+	net.powermatcher.fpai.agent;version=latest,\
+	net.powermatcher.fpai.agent.buffer;version=latest,\
+	net.powermatcher.fpai.agent.storage;version=latest,\
+	net.powermatcher.fpai.agent.timeshifter;version=latest,\
+	net.powermatcher.fpai.agent.uncontrolled;version=latest
+Include-Resource: res
+
+Service-Component: net.powermatcher.fpai.controller.*
+
+Export-Package: net.powermatcher.fpai.controller
+Import-Package: aQute.bnd.annotation.metatype;resolution:=optional,\
+	*
+
+-sign: fps
+

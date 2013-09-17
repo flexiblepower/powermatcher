@@ -1,0 +1,13 @@
+default-buildpath: \
+	flexiblepower.api;version=latest,\
+	flexiblepower.api.ext;version=latest,\
+	biz.aQute.bnd.annotation;version="[1.43,2.0)",\
+	osgi.core;version="[4.3,5.0)",\
+	osgi.cmpn;version="[4.3,5.0)",\
+	slf4j.api;version="[1.7,2.0)"
+	
+Bundle-Category: FlexiblePower Application Infrastructure
+Bundle-Vendor: TNO
+Include-Resource: res
+
+-sign: fps

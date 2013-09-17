@@ -1,0 +1,12 @@
+Bundle-Version: 2.0.0
+Export-Package: net.powermatcher.fpai.agent.timeshifter
+-buildpath: net.powermatcher.core.agent;version=latest,\
+	net.powermatcher.core.configurable;version=latest,\
+	net.powermatcher.core.adapter;version=latest,\
+	net.powermatcher.fpai.agent;version=latest,\
+	net.powermatcher.core.scheduler.service;version=latest,\
+	net.powermatcher.core.adapter.service;version=latest,\
+	flexiblepower.api;version=latest,\
+	biz.aQute.bnd.annotation;version=latest
+Service-Component: *
+-sign: fps
