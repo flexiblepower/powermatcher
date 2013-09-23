@@ -2,5 +2,6 @@
 .metadata
 *.swp
 cnf/cache
+cnf/release
 bin
 generated

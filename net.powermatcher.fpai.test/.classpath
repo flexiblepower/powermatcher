@@ -10,22 +10,5 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/net.powermatcher.fpai.agent.uncontrolled"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/net.powermatcher.fpai.controller"/>
 	<classpathentry kind="con" path="aQute.bnd.classpath.container"/>
-	<classpathentry kind="lib" path="../../Release/flexiblepower.api/flexiblepower.api-3.0.0.jar"/>
-	<classpathentry kind="lib" path="../../Repository/ch.qos.logback.classic/ch.qos.logback.classic-1.0.7.jar"/>
-	<classpathentry kind="lib" path="../../Repository/ch.qos.logback.core/ch.qos.logback.core-1.0.7.jar"/>
-	<classpathentry kind="lib" path="../../Repository/net.powermatcher.core.messaging.protocol.adapter/net.powermatcher.core.messaging.protocol.adapter-0.9.0.jar"/>
-	<classpathentry kind="lib" path="../../Repository/net.powermatcher.core.adapter/net.powermatcher.core.adapter-0.9.0.jar"/>
-	<classpathentry kind="lib" path="../../Repository/net.powermatcher.core.adapter.service/net.powermatcher.core.adapter.service-0.9.0.jar"/>
-	<classpathentry kind="lib" path="../../Repository/net.powermatcher.core.agent/net.powermatcher.core.agent-0.9.0.jar"/>
-	<classpathentry kind="lib" path="../../Repository/net.powermatcher.core.agent.concentrator/net.powermatcher.core.agent.concentrator-0.9.0.jar"/>
-	<classpathentry kind="lib" path="../../Repository/net.powermatcher.core.agent.marketbasis.adapter/net.powermatcher.core.agent.marketbasis.adapter-0.9.0.jar"/>
-	<classpathentry kind="lib" path="../../Repository/net.powermatcher.core.configurable/net.powermatcher.core.configurable-0.9.0.jar"/>
-	<classpathentry kind="lib" path="../../Repository/net.powermatcher.core.messaging.framework/net.powermatcher.core.messaging.framework-0.9.0.jar"/>
-	<classpathentry kind="lib" path="../../Repository/net.powermatcher.core.messaging.mqttv3/net.powermatcher.core.messaging.mqttv3-0.9.0.jar"/>
-	<classpathentry kind="lib" path="../../Repository/net.powermatcher.core.scheduler.service/net.powermatcher.core.scheduler.service-0.9.0.jar"/>
-	<classpathentry kind="lib" path="../../Repository/osgi.core/osgi.core-4.3.0.jar"/>
-	<classpathentry kind="lib" path="../../Repository/osgi.cmpn/osgi.cmpn-4.3.0.jar"/>
-	<classpathentry kind="lib" path="lib/activemq-all-5.8.0.jar"/>
-	<classpathentry kind="lib" path="lib/mqtt-client-1.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

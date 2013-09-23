@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="fpai-powermatcher" default="build">
+
+	<property name="version" value="development" />
+
+	<property name="releasedir" value="/var/www/html/releases/fpai-powermatcher" />
+
+	<target name="build">
+		<ant dir="../net.powermatcher.fpai.agent" target="build" />
+		<ant dir="../net.powermatcher.fpai.agent.buffer" target="build" />
+		<ant dir="../net.powermatcher.fpai.agent.storage" target="build" />
+		<ant dir="../net.powermatcher.fpai.agent.timeshifter" target="build" />
+		<ant dir="../net.powermatcher.fpai.agent.uncontrolled" target="build" />
+		<ant dir="../net.powermatcher.fpai.auctioneer" target="build" />
+	</target>
+
+	<target name="release">
+		<ant dir="../net.powermatcher.fpai.agent" target="release" />
+		<ant dir="../net.powermatcher.fpai.agent.buffer" target="release" />
+		<ant dir="../net.powermatcher.fpai.agent.storage" target="release" />
+		<ant dir="../net.powermatcher.fpai.agent.timeshifter" target="release" />
+		<ant dir="../net.powermatcher.fpai.agent.uncontrolled" target="release" />
+		<ant dir="../net.powermatcher.fpai.auctioneer" target="release" />
+	</target>
+
+	<target name="clean">
+		<ant dir="../net.powermatcher.fpai.agent" target="clean" />
+		<ant dir="../net.powermatcher.fpai.agent.buffer" target="clean" />
+		<ant dir="../net.powermatcher.fpai.agent.storage" target="clean" />
+		<ant dir="../net.powermatcher.fpai.agent.timeshifter" target="clean" />
+		<ant dir="../net.powermatcher.fpai.agent.uncontrolled" target="clean" />
+		<ant dir="../net.powermatcher.fpai.auctioneer" target="clean" />
+	</target>
+
+	<target name="publishrelease" depends="release">
+		<delete dir="${releasedir}/${version}/repo" />
+		<mkdir dir="${releasedir}/${version}/repo" />
+		<copy todir="${releasedir}/${version}/repo">
+			<fileset dir="release" />
+		</copy>
+	</target>
+
+
+
+</project>
