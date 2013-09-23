@@ -246,7 +246,7 @@ public class BufferAgent extends FPAIAgent implements
         BufferControlSpace bufferControlSpace = (BufferControlSpace) controlSpace;
         long now = getTimeSource().currentTimeMillis();
 
-        // ignore deviations from the current target below the threshold (as ratio of the max charge speed, e.g. 1‰)
+        // ignore deviations from the current target below the threshold (as ratio of the max charge speed, e.g. 1)
         // but only if we have an allocation for the current point in time
         if (getCurrentlyAllocatedPowerOrNull() != null) {
             double updateThreadholdRatio = getProperty("allocation.update.threshold", 0.001d);
