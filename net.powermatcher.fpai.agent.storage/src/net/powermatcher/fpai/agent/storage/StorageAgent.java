@@ -128,10 +128,10 @@ public class StorageAgent extends FPAIAgent<StorageControlSpace> implements
         double[] demand = new double[marketBasis.getPriceSteps()];
         int i = 0;
         for (; i < lowerLimit; i++) {
-            demand[i] = BidUtil.getClosestPower(currentControlSpace.getChargeSpeed(),
-                                                Measure.valueOf((maxChargePower.doubleValue(WATT) * (1.0 - (i / (double) lowerLimit))),
-                                                                WATT))
-                               .doubleValue(WATT);
+            demand[i] = ConstraintListUtil.getClosestPower(currentControlSpace.getChargeSpeed(),
+                                                           Measure.valueOf((maxChargePower.doubleValue(WATT) * (1.0 - (i / (double) lowerLimit))),
+                                                                           WATT))
+                                          .doubleValue(WATT);
         }
 
         for (; i <= upperLimit; i++) {
@@ -140,10 +140,10 @@ public class StorageAgent extends FPAIAgent<StorageControlSpace> implements
 
         for (; i < demand.length; i++) {
             // TODO should it be lowerLimit in this formula?
-            demand[i] = -BidUtil.getClosestPower(currentControlSpace.getDischargeSpeed(),
-                                                 Measure.valueOf((maxDischargePower.doubleValue(WATT) * ((i - demand.length - 1) / (double) lowerLimit)),
-                                                                 WATT))
-                                .doubleValue(WATT);
+            demand[i] = -ConstraintListUtil.getClosestPower(currentControlSpace.getDischargeSpeed(),
+                                                            Measure.valueOf((maxDischargePower.doubleValue(WATT) * ((i - demand.length - 1) / (double) lowerLimit)),
+                                                                            WATT))
+                                           .doubleValue(WATT);
         }
 
         BidInfo bid = new BidInfo(marketBasis, demand);

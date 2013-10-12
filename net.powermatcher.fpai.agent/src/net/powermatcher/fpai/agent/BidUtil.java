@@ -151,21 +151,4 @@ public class BidUtil {
         }
     }
 
-    public static Measurable<Power> getClosestPower(ConstraintList<Power> pcl, final Measurable<Power> wantedPower) {
-        Measurable<Power> resultValue = null;
-        double result = Double.NaN;
-        final double wantedPowerWatt = wantedPower.doubleValue(WATT);
-
-        for (Constraint<Power> pc : pcl) {
-            Measurable<Power> powerValue = pc.getClosestValue(wantedPower);
-            double power = powerValue.doubleValue(WATT);
-
-            if (resultValue == null || (Math.abs(power - wantedPowerWatt) < Math.abs(result - wantedPowerWatt))) {
-                resultValue = powerValue;
-                result = power;
-            }
-        }
-
-        return resultValue;
-    }
 }
