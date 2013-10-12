@@ -87,6 +87,7 @@
 	</target>
 
 	<target name="release" depends="build">
+		<sleep seconds="2"/>
 		<subant target="release" inheritAll="false" buildpath="${project.dependson}">
 			<property name="donotrecurse" value="true" />
 		</subant>

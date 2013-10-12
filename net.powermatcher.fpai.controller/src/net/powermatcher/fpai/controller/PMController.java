@@ -2,7 +2,6 @@ package net.powermatcher.fpai.controller;
 
 import java.util.Collection;
 import java.util.Dictionary;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
@@ -34,11 +33,15 @@ import net.powermatcher.fpai.agent.uncontrolled.UncontrolledAgent;
 import net.powermatcher.fpai.controller.PMController.Config;
 
 import org.flexiblepower.control.ControllerManager;
+import org.flexiblepower.rai.BufferControlSpace;
+import org.flexiblepower.rai.ControlSpace;
 import org.flexiblepower.rai.ControllableResource;
 import org.flexiblepower.rai.Controller;
-import org.flexiblepower.rai.ResourceType;
+import org.flexiblepower.rai.StorageControlSpace;
+import org.flexiblepower.rai.TimeShifterControlSpace;
+import org.flexiblepower.rai.UncontrolledControlSpace;
 import org.flexiblepower.time.TimeService;
-import org.flexiblepower.ui.WidgetService;
+import org.flexiblepower.ui.Widget;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
@@ -86,10 +89,10 @@ public class PMController implements ControllerManager {
     private static final Logger logger = LoggerFactory.getLogger(PMController.class);
 
     /** the agent classes that can be used for specific types of resources */
-    private final Map<ResourceType, Class<? extends FPAIAgent>> agentMap;
+    private final Map<Class<? extends ControlSpace>, Class<? extends FPAIAgent<?>>> agentMap;
 
     /** the agents, mapped by the ControllableResource their attached to */
-    private final ConcurrentMap<ControllableResource, FPAIAgent> agents;
+    private final ConcurrentMap<ControllableResource<?>, FPAIAgent<?>> agents;
 
     /** the counter that is used to generate unique agent ids */
     private final AtomicInteger agentId;
@@ -108,14 +111,16 @@ public class PMController implements ControllerManager {
 
     private ServiceRegistration<AgentService> serviceRegistration;
 
-    public PMController() {
-        agentMap = new EnumMap<ResourceType, Class<? extends FPAIAgent>>(ResourceType.class);
-        agentMap.put(ResourceType.BUFFER, BufferAgent.class);
-        agentMap.put(ResourceType.STORAGE, StorageAgent.class);
-        agentMap.put(ResourceType.TIMESHIFTER, TimeshifterAgent.class);
-        agentMap.put(ResourceType.UNCONTROLLED, UncontrolledAgent.class);
+    private ServiceRegistration<Widget> widgetRegistration;
 
-        agents = new ConcurrentHashMap<ControllableResource, FPAIAgent>();
+    public PMController() {
+        agentMap = new HashMap<Class<? extends ControlSpace>, Class<? extends FPAIAgent<?>>>();
+        agentMap.put(BufferControlSpace.class, BufferAgent.class);
+        agentMap.put(StorageControlSpace.class, StorageAgent.class);
+        agentMap.put(TimeShifterControlSpace.class, TimeshifterAgent.class);
+        agentMap.put(UncontrolledControlSpace.class, UncontrolledAgent.class);
+
+        agents = new ConcurrentHashMap<ControllableResource<?>, FPAIAgent<?>>();
 
         agentId = new AtomicInteger();
     }
@@ -140,6 +145,11 @@ public class PMController implements ControllerManager {
         } else {
             createConcentratorUplink(concentrator);
         }
+
+        // Widget
+        widget = new PMWidgetImpl(this);
+        widgetRegistration = context.registerService(Widget.class, widget, null);
+
     }
 
     protected AbstractConcentrator createConcentrator(ConfigurationService concentratorConfiguration) {
@@ -155,7 +165,7 @@ public class PMController implements ControllerManager {
 
             init(context, properties);
 
-            for (FPAIAgent agent : agents.values()) {
+            for (FPAIAgent<?> agent : agents.values()) {
                 concentrator.bind(agent);
                 agent.bind(concentrator);
             }
@@ -170,7 +180,7 @@ public class PMController implements ControllerManager {
             deactivateConcentratorUplink(concentrator);
         }
 
-        for (FPAIAgent agent : agents.values()) {
+        for (FPAIAgent<?> agent : agents.values()) {
             concentrator.unbind(agent);
             agent.unbind(concentrator);
         }
@@ -178,6 +188,7 @@ public class PMController implements ControllerManager {
         concentrator.unbind(executorService);
         concentrator.unbind(timeService);
         concentrator = null;
+        widgetRegistration.unregister();
     }
 
     /** executor service for periodic tasks performed by agents */
@@ -206,34 +217,6 @@ public class PMController implements ControllerManager {
     }
 
     private PMWidget widget;
-
-    @Reference(optional = true)
-    public void setWidgetService(WidgetService widgetService) {
-        if (widget == null) {
-            widget = createWidget();
-            widgetService.registerWidget(widget);
-
-            for (Agent agent : agents.values()) {
-                agent.bind(widget);
-            }
-        }
-    }
-
-    protected PMWidget createWidget() {
-        return new PMWidgetImpl(this);
-    }
-
-    public void unsetWidgetService(WidgetService widgetService) {
-        if (widget != null) {
-            if (widgetService.unregisterWidget(widget)) {
-                widget = null;
-            }
-
-            for (Agent agent : agents.values()) {
-                agent.unbind(widget);
-            }
-        }
-    }
 
     // These represent the default uplink for the concentrator
     private MarketBasisAdapter marketBasisAdapter;
@@ -288,21 +271,24 @@ public class PMController implements ControllerManager {
      * 
      * @see Controller#registerResource(ControllableResource)
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public synchronized void registerResource(ControllableResource controllableResource) {
-        logger.debug("Adding ControllableResource of type " + controllableResource.getResourceType());
+    public synchronized void registerResource(ControllableResource<? extends ControlSpace> controllableResource) {
+        logger.debug("Adding ControllableResource of type " + controllableResource.getControlSpaceType());
 
-        Class<? extends FPAIAgent> agentClass = agentMap.get(controllableResource.getResourceType());
+        Class<? extends FPAIAgent<?>> agentClass = agentMap.get(controllableResource.getControlSpaceType());
         if (agentClass == null) {
-            logger.warn("No support for ControllableResource of type: ", controllableResource.getResourceType());
+            logger.warn("No support for ControllableResource of type: ", controllableResource.getControlSpaceType());
             return;
         }
 
-        String agentId = controllableResource.getResourceType().toString().toLowerCase() + this.agentId.incrementAndGet();
+        String agentId = controllableResource.getControlSpaceType().toString().toLowerCase() + this.agentId.incrementAndGet();
 
         // create the agent, and bind the agent to the ControllableResource
         FPAIAgent agent = createAgent(agentId, agentClass);
-        agent.bind(controllableResource); // also binds ControllableResource to agent
+        agent.bind(controllableResource); // also binds
+                                          // ControllableResource to
+                                          // agent
 
         // bind the agent to the concentrator and vice versa
         concentrator.bind(agent);
@@ -326,7 +312,8 @@ public class PMController implements ControllerManager {
      *            The configuration from which to use the defaults.
      * @return The configured agent.
      */
-    protected FPAIAgent createAgent(String agentId, Class<? extends FPAIAgent> agentClass) {
+    protected FPAIAgent<? extends ControlSpace>
+            createAgent(String agentId, Class<? extends FPAIAgent<? extends ControlSpace>> agentClass) {
         Map<String, Object> agentProperties = new HashMap<String, Object>(properties);
 
         String prefix = "agent" + ConfigurationService.SEPARATOR + agentId;
@@ -337,7 +324,7 @@ public class PMController implements ControllerManager {
         agentProperties.put(prefix + ".agent.price.log.level", "FULL_LOGGING");
 
         try {
-            FPAIAgent agent = agentClass.newInstance();
+            FPAIAgent<? extends ControlSpace> agent = agentClass.newInstance();
 
             agent.setConfiguration(new PrefixedConfiguration(agentProperties, prefix));
             agent.bind(executorService);
@@ -360,8 +347,9 @@ public class PMController implements ControllerManager {
      * @see Controller#registerResource(ControllableResource)
      */
     @Override
-    public synchronized void unregisterResource(ControllableResource controllableResource) {
-        logger.debug("Removing agent associated with ControllableResource of type " + controllableResource.getResourceType());
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public synchronized void unregisterResource(ControllableResource<?> controllableResource) {
+        logger.debug("Removing agent associated with ControllableResource of type " + controllableResource.getControlSpaceType());
 
         // remove the agent from the list
         FPAIAgent agent = agents.remove(controllableResource);
