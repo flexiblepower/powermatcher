@@ -1,6 +1,16 @@
 package net.powermatcher.fpai.agent.storage;
 
+import static javax.measure.unit.SI.JOULE;
+import static javax.measure.unit.SI.MILLI;
+import static javax.measure.unit.SI.SECOND;
+import static javax.measure.unit.SI.WATT;
+
 import java.util.Date;
+
+import javax.measure.Measurable;
+import javax.measure.Measure;
+import javax.measure.quantity.Duration;
+import javax.measure.quantity.Power;
 
 import net.powermatcher.core.agent.framework.config.AgentConfiguration;
 import net.powermatcher.core.agent.framework.data.BidInfo;
@@ -13,22 +23,16 @@ import net.powermatcher.core.configurable.service.ConfigurationService;
 import net.powermatcher.core.object.config.IdentifiableObjectConfiguration;
 import net.powermatcher.core.scheduler.service.SchedulerConnectorService;
 import net.powermatcher.core.scheduler.service.TimeConnectorService;
-import net.powermatcher.fpai.agent.BidUtils;
+import net.powermatcher.fpai.agent.BidUtil;
+import net.powermatcher.fpai.agent.ConstraintListUtil;
 import net.powermatcher.fpai.agent.FPAIAgent;
 import net.powermatcher.fpai.agent.storage.StorageAgent.Config;
 
 import org.flexiblepower.rai.Allocation;
-import org.flexiblepower.rai.ControlSpace;
 import org.flexiblepower.rai.StorageControlSpace;
-import org.flexiblepower.rai.unit.EnergyUnit;
-import org.flexiblepower.rai.unit.PowerUnit;
-import org.flexiblepower.rai.unit.TimeUnit;
-import org.flexiblepower.rai.values.Duration;
+import org.flexiblepower.rai.values.ConstraintList;
 import org.flexiblepower.rai.values.EnergyProfile;
-import org.flexiblepower.rai.values.EnergyValue;
-import org.flexiblepower.rai.values.PowerConstraint;
-import org.flexiblepower.rai.values.PowerConstraintList;
-import org.flexiblepower.rai.values.PowerValue;
+import org.flexiblepower.time.TimeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,11 +40,11 @@ import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.metatype.Meta;
 
 @Component(designateFactory = Config.class)
-public class StorageAgent extends FPAIAgent implements
-                                           AgentConnectorService,
-                                           LoggingConnectorService,
-                                           TimeConnectorService,
-                                           SchedulerConnectorService {
+public class StorageAgent extends FPAIAgent<StorageControlSpace> implements
+                                                                AgentConnectorService,
+                                                                LoggingConnectorService,
+                                                                TimeConnectorService,
+                                                                SchedulerConnectorService {
 
     private final static Logger logger = LoggerFactory.getLogger(StorageAgent.class);
 
@@ -51,7 +55,6 @@ public class StorageAgent extends FPAIAgent implements
      * by a negative value
      */
     private double currentChargeSpeed;
-    // private Date lastChange = new Date(0);
 
     /** If the device in the minTurnOn period the end time, otherwise null */
     private Date underMinTurnOnUntil = null;
@@ -67,47 +70,49 @@ public class StorageAgent extends FPAIAgent implements
     }
 
     @Override
-    public synchronized Allocation createAllocation(BidInfo bid, PriceInfo price, ControlSpace controlSpace) {
+    public synchronized Allocation createAllocation(BidInfo bid, PriceInfo price, StorageControlSpace controlSpace) {
         double targetChargeSpeed = bid.getDemand(price.getCurrentPrice());
 
         if (currentChargeSpeed == 0 && targetChargeSpeed != 0) {
             // Turn ON
             logDebug("Turning device ON");
             underMinTurnOnUntil = new Date(getTimeSource().currentTimeMillis() + currentControlSpace.getMinOnPeriod()
-                                                                                                    .getMilliseconds());
+                                                                                                    .longValue(MILLI(SECOND)));
         } else if (currentChargeSpeed != 0 && targetChargeSpeed == 0) {
             // Turn OFF
             logDebug("Turning device OFF");
             underMinTurnOffUntil = new Date(getTimeSource().currentTimeMillis() + currentControlSpace.getMinOffPeriod()
-                                                                                                     .getMilliseconds());
+                                                                                                     .longValue(MILLI(SECOND)));
         }
 
         currentChargeSpeed = targetChargeSpeed;
 
-        Duration duration = new Duration(controlSpace.getValidThru().getTime() - getTimeSource().currentTimeMillis(),
-                                         TimeUnit.MILLISECONDS);
+        Measurable<Duration> duration = TimeUtil.difference(new Date(getTimeSource().currentTimeMillis()),
+                                                            controlSpace.getValidThru());
 
-        double energyAmount = currentChargeSpeed * (duration.getValueAs(TimeUnit.SECONDS)); // in joules
-        EnergyProfile energyProfile = new EnergyProfile(duration, EnergyUnit.JOULE, energyAmount);
+        double energyAmount = currentChargeSpeed * (duration.doubleValue(SECOND)); // in joules
+        EnergyProfile energyProfile = EnergyProfile.create()
+                                                   .add(duration, Measure.valueOf(energyAmount, JOULE))
+                                                   .build();
         return new Allocation(currentControlSpace, new Date(getTimeSource().currentTimeMillis()), energyProfile);
     }
 
     @Override
-    public synchronized BidInfo createBid(ControlSpace controlSpace, MarketBasis marketBasis) {
+    public synchronized BidInfo createBid(StorageControlSpace controlSpace, MarketBasis marketBasis) {
         assert controlSpace != null;
         assert marketBasis != null;
 
         logger.debug("Processing storage control space {}", controlSpace);
 
-        currentControlSpace = (StorageControlSpace) controlSpace;
+        currentControlSpace = controlSpace;
 
         // If must run, do not change anything, so return a constant bid of the current charge speed
         if (isUnderMinTurnOff() || isUnderMinTurnOn()) {
             return new BidInfo(marketBasis, new PricePoint(0, currentChargeSpeed));
         }
 
-        double maxChargePower = getMaxPower(currentControlSpace.getChargeSpeed());
-        double maxDischargePower = getMaxPower(currentControlSpace.getDischargeSpeed());
+        Measurable<Power> maxChargePower = currentControlSpace.getChargeSpeed().getMaximum();
+        Measurable<Power> maxDischargePower = currentControlSpace.getDischargeSpeed().getMaximum();
 
         double efficiency = currentControlSpace.getChargeEfficiency() * currentControlSpace.getDischargeEfficiency();
         efficiency = Math.min(1.0, efficiency);
@@ -123,8 +128,10 @@ public class StorageAgent extends FPAIAgent implements
         double[] demand = new double[marketBasis.getPriceSteps()];
         int i = 0;
         for (; i < lowerLimit; i++) {
-            demand[i] = getClosestPower(currentControlSpace.getChargeSpeed(),
-                                        maxChargePower * (1.0 - (i / (double) lowerLimit))).getValueAs(PowerUnit.WATT);
+            demand[i] = BidUtil.getClosestPower(currentControlSpace.getChargeSpeed(),
+                                                Measure.valueOf((maxChargePower.doubleValue(WATT) * (1.0 - (i / (double) lowerLimit))),
+                                                                WATT))
+                               .doubleValue(WATT);
         }
 
         for (; i <= upperLimit; i++) {
@@ -133,34 +140,36 @@ public class StorageAgent extends FPAIAgent implements
 
         for (; i < demand.length; i++) {
             // TODO should it be lowerLimit in this formula?
-            demand[i] = -getClosestPower(currentControlSpace.getDischargeSpeed(),
-                                         maxDischargePower * ((i - demand.length - 1) / (double) lowerLimit)).getValueAs(PowerUnit.WATT);
+            demand[i] = -BidUtil.getClosestPower(currentControlSpace.getDischargeSpeed(),
+                                                 Measure.valueOf((maxDischargePower.doubleValue(WATT) * ((i - demand.length - 1) / (double) lowerLimit)),
+                                                                 WATT))
+                                .doubleValue(WATT);
         }
 
         BidInfo bid = new BidInfo(marketBasis, demand);
 
-        PowerConstraintList combinedPCL = combinePowerConstraintLists(currentControlSpace.getChargeSpeed(),
-                                                                      currentControlSpace.getDischargeSpeed());
+        ConstraintList<Power> combinedPCL = ConstraintListUtil.combinePowerConstraintLists(currentControlSpace.getChargeSpeed(),
+                                                                                           currentControlSpace.getDischargeSpeed());
         if (currentChargeSpeed != 0 && !canTurnOffNow(currentControlSpace)) {
             // We can't turn off now, so must run situation
             if (currentChargeSpeed > 0) { // We're charging
-                bid = BidUtils.setMinimumDemand(bid, combinedPCL, currentChargeSpeed);
+                bid = BidUtil.setMinimumDemand(bid, combinedPCL, Measure.valueOf(currentChargeSpeed, WATT));
             } else if (currentChargeSpeed < 0) { // We're discharging
-                bid = BidUtils.setMaximumDemand(bid, combinedPCL, currentChargeSpeed);
+                bid = BidUtil.setMaximumDemand(bid, combinedPCL, Measure.valueOf(currentChargeSpeed, WATT));
             }
         } else if (currentChargeSpeed <= 0 && !canStartCharging(currentControlSpace)) {
             // Can't start charging now
-            bid = BidUtils.setMaximumDemand(bid, combinedPCL, 0);
+            bid = BidUtil.setMaximumDemand(bid, combinedPCL, Measure.valueOf(0, WATT));
         } else if (currentChargeSpeed >= 0 && !canStartDischarging(currentControlSpace)) {
             // Can't start discharging now
-            bid = BidUtils.setMinimumDemand(bid, combinedPCL, 0);
+            bid = BidUtil.setMinimumDemand(bid, combinedPCL, Measure.valueOf(0, WATT));
         } else if (hasTarget(currentControlSpace)) {
             logDebug("Agent is working towards a target");
-            double requiredWatt = requiredDemandForTarget(currentControlSpace).getValueAs(PowerUnit.WATT);
-            if (requiredWatt > 0) {
-                bid = BidUtils.setMinimumDemand(bid, combinedPCL, requiredWatt);
-            } else if (requiredWatt < 0) {
-                bid = BidUtils.setMaximumDemand(bid, combinedPCL, requiredWatt);
+            Measurable<Power> requiredPower = requiredDemandForTarget(currentControlSpace);
+            if (requiredPower.doubleValue(WATT) > 0) {
+                bid = BidUtil.setMinimumDemand(bid, combinedPCL, requiredPower);
+            } else if (requiredPower.doubleValue(WATT) < 0) {
+                bid = BidUtil.setMaximumDemand(bid, combinedPCL, requiredPower);
             }
         }
 
@@ -172,51 +181,15 @@ public class StorageAgent extends FPAIAgent implements
         return !(storageControlSpace.getTargetStateOfCharge() == null || storageControlSpace.getTargetTime() == null);
     }
 
-    private PowerValue requiredDemandForTarget(StorageControlSpace controlSpace) {
+    private Measurable<Power> requiredDemandForTarget(StorageControlSpace controlSpace) {
         double deltaSOC = controlSpace.getTargetStateOfCharge() - controlSpace.getStateOfCharge();
-        EnergyValue requiredEnergy = new EnergyValue(controlSpace.getTotalCapacity().getValueAs(EnergyUnit.WATTHOUR) * deltaSOC,
-                                                     EnergyUnit.WATTHOUR);
-        double hoursToDeadline = Math.max((controlSpace.getTargetTime().getTime() - getTimeSource().currentTimeMillis()) / 3600000.0,
-                                          1 / 60.0);
-        double minimumChareSpeedWatt = requiredEnergy.getValueAs(EnergyUnit.WATTHOUR) / hoursToDeadline;
-        double correctedMinimumChareSpeedWatt = minimumChareSpeedWatt - controlSpace.getSelfDischarge()
-                                                                                    .getValueAs(PowerUnit.WATT);
-        return new PowerValue(correctedMinimumChareSpeedWatt, PowerUnit.WATT);
-    }
-
-    private double getMaxPower(PowerConstraintList pcl) {
-        double maxPower = 0;
-
-        for (PowerConstraint chargeSpeed : pcl) {
-            double cs = chargeSpeed.getLowerBound().getValueAs(PowerUnit.WATT);
-            if (cs > maxPower) {
-                maxPower = cs;
-            }
-
-            cs = chargeSpeed.getUpperBound().getValueAs(PowerUnit.WATT);
-            if (cs > maxPower) {
-                maxPower = cs;
-            }
-        }
-
-        return maxPower;
-    }
-
-    private PowerValue getClosestPower(PowerConstraintList pcl, double wantedPower) {
-        PowerValue resultValue = null;
-        double result = Double.NaN;
-
-        for (PowerConstraint pc : pcl) {
-            PowerValue powerValue = pc.getClosestValue(new PowerValue(wantedPower, PowerUnit.WATT));
-            double power = powerValue.getValueAs(PowerUnit.WATT);
-
-            if (resultValue == null || (Math.abs(power - wantedPower) < Math.abs(result - wantedPower))) {
-                resultValue = powerValue;
-                result = power;
-            }
-        }
-
-        return resultValue;
+        double requiredEnergyJoule = controlSpace.getTotalCapacity().doubleValue(JOULE) * deltaSOC;
+        Measurable<Duration> timeToDeadline = TimeUtil.difference(new Date(getTimeSource().currentTimeMillis()),
+                                                                  controlSpace.getTargetTime());
+        double minimumChargeSpeedWatt = requiredEnergyJoule / timeToDeadline.doubleValue(SECOND);
+        double correctedMinimumChargeSpeedWatt = minimumChargeSpeedWatt + controlSpace.getSelfDischarge()
+                                                                                      .doubleValue(WATT);
+        return Measure.valueOf(correctedMinimumChargeSpeedWatt, WATT);
     }
 
     private boolean isUnderMinTurnOn() {
@@ -253,11 +226,11 @@ public class StorageAgent extends FPAIAgent implements
             // device IS off
             return false;
         } else {
-            double selfDischargeWatt = storageControlSpace.getSelfDischarge().getValueAs(PowerUnit.WATT);
-            double minOffHours = storageControlSpace.getMinOffPeriod().getValueAs(TimeUnit.HOURS);
-            double minChargeEnergyWH = selfDischargeWatt * minOffHours;
-            double totalCapacityWH = storageControlSpace.getTotalCapacity().getValueAs(EnergyUnit.WATTHOUR);
-            double minSOC = minChargeEnergyWH / totalCapacityWH;
+            double selfDischargeWatt = storageControlSpace.getSelfDischarge().doubleValue(WATT);
+            double minOffSeconds = storageControlSpace.getMinOffPeriod().doubleValue(SECOND);
+            double minChargeEnergyJoule = selfDischargeWatt * minOffSeconds;
+            double totalCapacityJoule = storageControlSpace.getTotalCapacity().doubleValue(JOULE);
+            double minSOC = minChargeEnergyJoule / totalCapacityJoule;
             return storageControlSpace.getStateOfCharge() >= minSOC;
         }
     }
@@ -265,18 +238,17 @@ public class StorageAgent extends FPAIAgent implements
     /**
      * Check if the device can turn on now in order to prevent over charging
      */
-    private boolean canStartCharging(StorageControlSpace storageControlSpace) { // TODO
+    private boolean canStartCharging(StorageControlSpace storageControlSpace) {
         if (currentChargeSpeed > 0) {
             // device IS charging
             return false;
         } else {
-            double demandWatt = BidUtils.highestPowerValue(storageControlSpace.getChargeSpeed())
-                                        .getValueAs(PowerUnit.WATT);
-            double netDemandWatt = demandWatt - storageControlSpace.getSelfDischarge().getValueAs(PowerUnit.WATT);
-            double minOnHours = storageControlSpace.getMinOnPeriod().getValueAs(TimeUnit.HOURS);
-            double minChargeEnergyWH = minOnHours * netDemandWatt;
-            double totalCapacityWH = storageControlSpace.getTotalCapacity().getValueAs(EnergyUnit.WATTHOUR);
-            double maxSOC = 1 - (minChargeEnergyWH / totalCapacityWH);
+            double demandWatt = storageControlSpace.getChargeSpeed().getMaximum().doubleValue(WATT);
+            double netDemandWatt = demandWatt - storageControlSpace.getSelfDischarge().doubleValue(WATT);
+            double minOnSeconds = storageControlSpace.getMinOnPeriod().doubleValue(SECOND);
+            double minChargeEnergyJoule = minOnSeconds * netDemandWatt;
+            double totalCapacityJoule = storageControlSpace.getTotalCapacity().doubleValue(JOULE);
+            double maxSOC = 1 - (minChargeEnergyJoule / totalCapacityJoule);
             return storageControlSpace.getStateOfCharge() < maxSOC;
         }
     }
@@ -284,46 +256,20 @@ public class StorageAgent extends FPAIAgent implements
     /**
      * Check if the device can turn on now in order to prevent drainage
      */
-    private boolean canStartDischarging(StorageControlSpace storageControlSpace) { // TODO
+    private boolean canStartDischarging(StorageControlSpace storageControlSpace) {
         if (currentChargeSpeed < 0) {
             // device IS discharging
             return false;
         } else {
-            double dischargeSpeedWatt = BidUtils.highestPowerValue(storageControlSpace.getDischargeSpeed())
-                                                .getValueAs(PowerUnit.WATT);
+            double dischargeSpeedWatt = storageControlSpace.getDischargeSpeed().getMaximum().doubleValue(WATT);
             double netDischargeSpeedWatt = dischargeSpeedWatt + storageControlSpace.getSelfDischarge()
-                                                                                   .getValueAs(PowerUnit.WATT);
-            double minOnHours = storageControlSpace.getMinOnPeriod().getValueAs(TimeUnit.HOURS);
-            double minChargeEnergyWH = minOnHours * netDischargeSpeedWatt;
-            double totalCapacityWH = storageControlSpace.getTotalCapacity().getValueAs(EnergyUnit.WATTHOUR);
-            double minSOC = minChargeEnergyWH / totalCapacityWH;
+                                                                                   .doubleValue(WATT);
+            double minOnSeconds = storageControlSpace.getMinOnPeriod().doubleValue(SECOND);
+            double minChargeEnergyJoule = minOnSeconds * netDischargeSpeedWatt;
+            double totalCapacityJoule = storageControlSpace.getTotalCapacity().doubleValue(JOULE);
+            double minSOC = minChargeEnergyJoule / totalCapacityJoule;
             return storageControlSpace.getStateOfCharge() > minSOC;
         }
-    }
-
-    private static PowerConstraint negate(PowerConstraint pc) {
-        PowerValue l = pc.getLowerBound(), u = pc.getUpperBound();
-        return new PowerConstraint(new PowerValue(-u.getValue(), u.getUnit()), new PowerValue(-l.getValue(),
-                                                                                              l.getUnit()));
-    }
-
-    private static PowerConstraintList combinePowerConstraintLists(PowerConstraintList charge,
-                                                                   PowerConstraintList discharge) {
-        if (discharge == null) {
-            return charge;
-        }
-        // Make a clone and merge powerConstraintLists
-        PowerConstraint[] values = charge.toArray(new PowerConstraint[charge.size() + discharge.size()]);
-        int i = 0;
-        for (PowerConstraint pc : charge) {
-            values[i] = pc;
-            i++;
-        }
-        for (PowerConstraint pc : discharge) {
-            values[i] = negate(pc);
-            i++;
-        }
-        return new PowerConstraintList(values);
     }
 
     public static interface Config extends AgentConfiguration {

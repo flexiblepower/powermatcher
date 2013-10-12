@@ -1,6 +1,13 @@
 package net.powermatcher.fpai.agent.timeshifter;
 
+import static javax.measure.unit.SI.WATT;
+
 import java.util.Date;
+
+import javax.measure.Measurable;
+import javax.measure.Measure;
+import javax.measure.quantity.Duration;
+import javax.measure.quantity.Power;
 
 import net.powermatcher.core.agent.framework.config.AgentConfiguration;
 import net.powermatcher.core.agent.framework.data.BidInfo;
@@ -17,23 +24,20 @@ import net.powermatcher.fpai.agent.FPAIAgent;
 import net.powermatcher.fpai.agent.timeshifter.TimeshifterAgent.Config;
 
 import org.flexiblepower.rai.Allocation;
-import org.flexiblepower.rai.ControlSpace;
 import org.flexiblepower.rai.TimeShifterControlSpace;
-import org.flexiblepower.rai.unit.EnergyUnit;
-import org.flexiblepower.rai.unit.TimeUnit;
-import org.flexiblepower.rai.values.Duration;
 import org.flexiblepower.rai.values.EnergyProfile.Element;
+import org.flexiblepower.time.TimeUtil;
 
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
 @Component(designateFactory = Config.class)
-public class TimeshifterAgent extends FPAIAgent implements
-                                               AgentConnectorService,
-                                               LoggingConnectorService,
-                                               TimeConnectorService,
-                                               SchedulerConnectorService {
+public class TimeshifterAgent extends FPAIAgent<TimeShifterControlSpace> implements
+                                                                        AgentConnectorService,
+                                                                        LoggingConnectorService,
+                                                                        TimeConnectorService,
+                                                                        SchedulerConnectorService {
 
     private static final double DEFAULT_EAGERNESS = 1.0 / 0.3;
 
@@ -58,7 +62,7 @@ public class TimeshifterAgent extends FPAIAgent implements
     }
 
     @Override
-    public Allocation createAllocation(BidInfo lastBid, PriceInfo price, ControlSpace controlSpace) {
+    public Allocation createAllocation(BidInfo lastBid, PriceInfo price, TimeShifterControlSpace controlSpace) {
         // the device has already been started
         if (deviceStartTime != null) {
             return null;
@@ -69,10 +73,6 @@ public class TimeshifterAgent extends FPAIAgent implements
             return null;
         }
 
-        return this.createAllocation(lastBid, price, (TimeShifterControlSpace) controlSpace);
-    }
-
-    protected Allocation createAllocation(BidInfo lastBid, PriceInfo price, TimeShifterControlSpace controlSpace) {
         Date now = new Date(getTimeSource().currentTimeMillis());
 
         // are we in a must run state?
@@ -94,10 +94,6 @@ public class TimeshifterAgent extends FPAIAgent implements
     }
 
     @Override
-    public BidInfo createBid(ControlSpace controlSpace, MarketBasis marketBasis) {
-        return this.createBid((TimeShifterControlSpace) controlSpace, marketBasis);
-    }
-
     public BidInfo createBid(TimeShifterControlSpace controlSpace, MarketBasis marketBasis) {
         // there is no flexibility
         if (controlSpace == null) {
@@ -116,7 +112,7 @@ public class TimeshifterAgent extends FPAIAgent implements
 
             // we're at the very end of or after the flexibility so we're in a must run situation
             else if (now.after(controlSpace.getStartBefore()) || now.equals(controlSpace.getStartBefore())) {
-                return new BidInfo(marketBasis, new PricePoint(0, getInitialDemand(controlSpace)));
+                return new BidInfo(marketBasis, new PricePoint(0, getInitialDemand(controlSpace).doubleValue(WATT)));
             }
 
             // determine step price and create a step bid with the initial consumption before the step price
@@ -127,7 +123,7 @@ public class TimeshifterAgent extends FPAIAgent implements
 
         // The time-shifter is turned on, send must-run bid with current demand
         else {
-            return new BidInfo(marketBasis, new PricePoint(0, getCurrentDemand(controlSpace)));
+            return new BidInfo(marketBasis, new PricePoint(0, getCurrentDemand(controlSpace).doubleValue(WATT)));
         }
     }
 
@@ -140,10 +136,10 @@ public class TimeshifterAgent extends FPAIAgent implements
         double timeSinceAllowableStart = (getTimeSource().currentTimeMillis() - startAfter);
         double ratio = Math.pow(timeSinceAllowableStart / startWindow, eagerness);
 
-        double initialDemand = getInitialDemand(controlSpace);
+        double initialDemandWatt = getInitialDemand(controlSpace).doubleValue(WATT);
 
         // if the initial demand is supply, the ratio flips
-        if (initialDemand < 0) {
+        if (initialDemandWatt < 0) {
             ratio = 1 - ratio;
         }
 
@@ -154,32 +150,30 @@ public class TimeshifterAgent extends FPAIAgent implements
         int normalizedStepPrice = marketBasis.toNormalizedPrice(stepPrice);
 
         // the bid depends on whether the initial demand is actually demand or is supply
-        if (initialDemand > 0) {
+        if (initialDemandWatt > 0) {
             return new BidInfo(marketBasis,
-                               new PricePoint(normalizedStepPrice, initialDemand),
+                               new PricePoint(normalizedStepPrice, initialDemandWatt),
                                new PricePoint(normalizedStepPrice, 0));
         } else {
             return new BidInfo(marketBasis, new PricePoint(normalizedStepPrice, 0), new PricePoint(normalizedStepPrice,
-                                                                                                   initialDemand));
+                                                                                                   initialDemandWatt));
         }
     }
 
-    private double getInitialDemand(TimeShifterControlSpace controlSpace) {
+    private Measurable<Power> getInitialDemand(TimeShifterControlSpace controlSpace) {
         Element initialElement = controlSpace.getEnergyProfile().get(0);
-        double joules = initialElement.getEnergy().getValueAs(EnergyUnit.JOULE);
-        long duration = initialElement.getDuration().getMilliseconds();
-        return joules * 1000 / duration;
+        return initialElement.getAveragePower();
     }
 
-    private double getCurrentDemand(TimeShifterControlSpace controlSpace) {
-        long timeOffset = getTimeSource().currentTimeMillis() - deviceStartTime.getTime();
-        Duration durationOffset = new Duration(timeOffset, TimeUnit.MILLISECONDS);
-        Element value = controlSpace.getEnergyProfile().getElementForOffset(durationOffset);
+    private Measurable<Power> getCurrentDemand(TimeShifterControlSpace controlSpace) {
+        Measurable<Duration> offset = TimeUtil.difference(deviceStartTime,
+                                                          new Date(getTimeSource().currentTimeMillis()));
+        Element value = controlSpace.getEnergyProfile().getElementForOffset(offset);
 
         if (value == null) {
-            return 0;
+            return Measure.valueOf(0, WATT);
         } else {
-            return value.getEnergy().getValueAs(EnergyUnit.JOULE) / value.getDuration().getValueAs(TimeUnit.SECONDS);
+            return value.getAveragePower();
         }
     }
 

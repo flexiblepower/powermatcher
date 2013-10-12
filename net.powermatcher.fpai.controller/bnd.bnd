@@ -1,7 +1,5 @@
 Bundle-Version: 3.0.1
--buildpath: \
-	biz.aQute.bnd.annotation;version=latest,\
-	org.eclipse.paho.client.mqttv3;version=latest,\
+-buildpath: biz.aQute.bnd.annotation;version=latest,\
 	osgi.cmpn,\
 	osgi.core,\
 	slf4j.api,\

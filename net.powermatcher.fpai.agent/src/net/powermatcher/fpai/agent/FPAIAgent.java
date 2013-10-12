@@ -12,10 +12,10 @@ import org.flexiblepower.rai.ControlSpace;
 import org.flexiblepower.rai.ControllableResource;
 import org.flexiblepower.rai.Controller;
 
-public abstract class FPAIAgent extends Agent implements Controller {
+public abstract class FPAIAgent<CS extends ControlSpace> extends Agent implements Controller<CS> {
 
-    private ControlSpace currentControlSpace;
-    private ControllableResource controllableResource;
+    private CS currentControlSpace;
+    private ControllableResource<? extends ControlSpace> controllableResource;
 
     protected FPAIAgent() {
         super();
@@ -25,21 +25,21 @@ public abstract class FPAIAgent extends Agent implements Controller {
         super(configuration);
     }
 
-    protected abstract BidInfo createBid(ControlSpace controlSpace, MarketBasis marketBasis);
+    protected abstract BidInfo createBid(CS controlSpace, MarketBasis marketBasis);
 
-    protected abstract Allocation createAllocation(BidInfo lastBid, PriceInfo newPriceInfo, ControlSpace controlSpace);
+    protected abstract Allocation createAllocation(BidInfo lastBid, PriceInfo newPriceInfo, CS controlSpace);
 
     @Override
     protected synchronized void doBidUpdate() {
         // force a bid update based on the current control space
         ControlSpace controlSpace = getCurrentControlSpace();
         if (controlSpace != null) {
-            controlSpaceUpdated(controllableResource, controlSpace);
+            // controlSpaceUpdated(controllableResource, controlSpace);
         }
     }
 
     @Override
-    public synchronized void controlSpaceUpdated(ControllableResource resource, ControlSpace controlSpace) {
+    public synchronized void controlSpaceUpdated(ControllableResource<? extends CS> resource, CS controlSpace) {
         assert controllableResource == resource;
         assert controlSpace != null;
 
@@ -70,7 +70,7 @@ public abstract class FPAIAgent extends Agent implements Controller {
         super.updatePriceInfo(newPriceInfo);
 
         // check if there is control space information available
-        ControlSpace currentControlSpace = getCurrentControlSpace();
+        CS currentControlSpace = getCurrentControlSpace();
         if (currentControlSpace == null) {
             this.logDebug("Ignoring price update, no control space information available");
             return;
@@ -96,13 +96,13 @@ public abstract class FPAIAgent extends Agent implements Controller {
         }
     }
 
-    public synchronized void bind(ControllableResource controllableResource) {
+    public synchronized void bind(ControllableResource<CS> controllableResource) {
         assert controllableResource == null;
         this.controllableResource = controllableResource;
         controllableResource.setController(this);
     }
 
-    public synchronized void unbind(ControllableResource controllableResource) {
+    public synchronized void unbind(ControllableResource<CS> controllableResource) {
         // send out 0 bid to say bye-bye
         publishBidUpdate(new BidInfo(getCurrentMarketBasis(), new PricePoint(0, 0)));
 
@@ -112,7 +112,7 @@ public abstract class FPAIAgent extends Agent implements Controller {
         controllableResource = null;
     }
 
-    private ControlSpace getCurrentControlSpace() {
+    private CS getCurrentControlSpace() {
         if (controllableResource == null) {
             return null;
         }
@@ -122,7 +122,7 @@ public abstract class FPAIAgent extends Agent implements Controller {
         }
     }
 
-    private void setCurrentControlSpace(ControlSpace controlSpace) {
+    private void setCurrentControlSpace(CS controlSpace) {
         synchronized (controllableResource) {
             currentControlSpace = controlSpace;
         }

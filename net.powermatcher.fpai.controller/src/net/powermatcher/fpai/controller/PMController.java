@@ -56,7 +56,7 @@ import aQute.bnd.annotation.metatype.Meta;
 public class PMController implements ControllerManager {
     interface Config {
         @Meta.AD(deflt = "pvpanel,dishwasher,refrigerator,battery", cardinality = Integer.MAX_VALUE)
-        String[] applianceIds();
+        String[] resourceIds();
 
         @Meta.AD(deflt = "ExampleCluster")
         String cluster_id();
