@@ -7,9 +7,9 @@ import net.powermatcher.core.agent.framework.log.LogListenerService;
 import net.powermatcher.core.agent.framework.log.PriceLogInfo;
 import net.powermatcher.fpai.auctioneer.AuctioneerPricePublisher.Price;
 
-import org.flexiblepower.observation.AbstractObservationProvider;
 import org.flexiblepower.observation.Observation;
-import org.flexiblepower.observation.ObservationProviderRegistrationHelper;
+import org.flexiblepower.observation.ext.AbstractObservationProvider;
+import org.flexiblepower.observation.ext.ObservationProviderRegistrationHelper;
 import org.flexiblepower.time.TimeService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -26,11 +26,10 @@ public class AuctioneerPricePublisher extends AbstractObservationProvider<Price>
 
     public AuctioneerPricePublisher(BundleContext context, TimeService timeService) {
         this.timeService = timeService;
-        serviceRegistration = new ObservationProviderRegistrationHelper(context).observationOf("auctioneer")
-                                                                                .observationType(Price.class)
-                                                                                .observedBy(getClass().getName())
-                                                                                .serviceObject(this)
-                                                                                .register();
+        serviceRegistration = new ObservationProviderRegistrationHelper(this).observationOf("auctioneer")
+                                                                             .observationType(Price.class)
+                                                                             .observedBy(getClass().getName())
+                                                                             .register();
     }
 
     @Override

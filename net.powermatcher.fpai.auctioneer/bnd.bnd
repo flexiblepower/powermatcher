@@ -1,5 +1,6 @@
-Bundle-Version: 1.0.2
+Bundle-Version: 1.0.0
 -buildpath: flexiblepower.api;version=latest,\
+	flexiblepower.api.ext;version=latest,\
 	net.powermatcher.core.adapter;version=latest,\
 	net.powermatcher.core.adapter.service;version=latest,\
 	net.powermatcher.core.agent;version=latest,\
@@ -10,6 +11,7 @@ Bundle-Version: 1.0.2
 	slf4j.api,\
 	osgi.core,\
 	net.powermatcher.core.agent.marketbasis.adapter
-Private-Package: net.powermatcher.fpai.auctioneer
-Service-Component: net.powermatcher.fpai.auctioneer.*;
+	
 -sign: fps
+Service-Component: *
+Private-Package: net.powermatcher.fpai.auctioneer
