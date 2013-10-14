@@ -3,7 +3,10 @@ Bundle-Version: 1.0.0
 	osgi.cmpn,\
 	osgi.core,\
 	slf4j.api,\
+	junit.osgi,\
+	org.apache.felix.scr,\
 	flexiblepower.api;version=latest,\
+	flexiblepower.api.ext;version=latest,\
 	net.powermatcher.core.adapter;version=latest,\
 	net.powermatcher.core.adapter.service;version=latest,\
 	net.powermatcher.core.agent;version=latest,\
@@ -20,11 +23,9 @@ Bundle-Version: 1.0.0
 	net.powermatcher.fpai.agent.storage;version=latest,\
 	net.powermatcher.fpai.agent.timeshifter;version=latest,\
 	net.powermatcher.fpai.agent.uncontrolled;version=latest,\
-	junit.osgi,\
 	net.powermatcher.fpai.controller;version=latest
 Include-Resource: res
 
--sign: fps
 Private-Package: net.powermatcher.fpai.agent.buffer.test,\
 	net.powermatcher.fpai.agent.storage.test,\
 	net.powermatcher.fpai.agent.timeshifter.test,\

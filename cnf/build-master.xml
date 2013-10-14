@@ -5,31 +5,55 @@
 
 	<property name="releasedir" value="/var/www/html/releases/fpai-powermatcher" />
 
+	<fileset id="build" dir="..">
+		<include name="*/build.xml" />
+		<exclude name="cnf/*" />
+	</fileset>
+
+	<fileset id="release" dir="..">
+		<include name="*/build.xml" />
+		<exclude name="cnf/*" />
+		<exclude name="*.test/*" />
+	</fileset>
+
+	<target name="echo">
+		<subant target="echo">
+			<fileset refId="build" />
+		</subant>
+	</target>
+	
 	<target name="build">
-		<ant dir="../net.powermatcher.fpai.agent" target="build" />
-		<ant dir="../net.powermatcher.fpai.agent.buffer" target="build" />
-		<ant dir="../net.powermatcher.fpai.agent.storage" target="build" />
-		<ant dir="../net.powermatcher.fpai.agent.timeshifter" target="build" />
-		<ant dir="../net.powermatcher.fpai.agent.uncontrolled" target="build" />
-		<ant dir="../net.powermatcher.fpai.auctioneer" target="build" />
+		<subant target="build">
+			<fileset refId="build" />
+		</subant>
 	</target>
 
 	<target name="release">
-		<ant dir="../net.powermatcher.fpai.agent" target="release" />
-		<ant dir="../net.powermatcher.fpai.agent.buffer" target="release" />
-		<ant dir="../net.powermatcher.fpai.agent.storage" target="release" />
-		<ant dir="../net.powermatcher.fpai.agent.timeshifter" target="release" />
-		<ant dir="../net.powermatcher.fpai.agent.uncontrolled" target="release" />
-		<ant dir="../net.powermatcher.fpai.auctioneer" target="release" />
+		<subant target="release">
+			<fileset refId="release" />
+		</subant>
+	</target>
+
+	<target name="junit">
+		<subant target="junit">
+			<fileset refId="build" />
+		</subant>
+	</target>
+
+	<target name="test" depends="build">
+		<subant target="test">
+			<fileset dir="..">
+				<include name="*.test/build.xml" />
+			</fileset>
+		</subant>
 	</target>
 
 	<target name="clean">
-		<ant dir="../net.powermatcher.fpai.agent" target="clean" />
-		<ant dir="../net.powermatcher.fpai.agent.buffer" target="clean" />
-		<ant dir="../net.powermatcher.fpai.agent.storage" target="clean" />
-		<ant dir="../net.powermatcher.fpai.agent.timeshifter" target="clean" />
-		<ant dir="../net.powermatcher.fpai.agent.uncontrolled" target="clean" />
-		<ant dir="../net.powermatcher.fpai.auctioneer" target="clean" />
+		<delete dir="release" />
+		<mkdir dir="release" />
+		<subant target="clean">
+			<fileset refId="build" />
+		</subant>
 	</target>
 
 	<target name="publishrelease" depends="release">
