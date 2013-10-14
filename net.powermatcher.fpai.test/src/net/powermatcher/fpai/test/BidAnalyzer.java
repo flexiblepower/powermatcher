@@ -1,14 +1,16 @@
 package net.powermatcher.fpai.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static javax.measure.unit.SI.WATT;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
+
+import javax.measure.Measurable;
+import javax.measure.quantity.Power;
+
 import net.powermatcher.core.agent.framework.data.BidInfo;
 import net.powermatcher.core.agent.framework.data.PricePoint;
-
-import org.flexiblepower.rai.unit.PowerUnit;
-import org.flexiblepower.rai.values.PowerValue;
 
 public class BidAnalyzer {
     public static void assertFlatBid(BidInfo bid) {
@@ -16,12 +18,12 @@ public class BidAnalyzer {
         assertTrue(demandIsFlat(bid.getDemand()));
     }
 
-    public static void assertFlatBidWithValue(BidInfo bid, PowerValue p) {
+    public static void assertFlatBidWithValue(BidInfo bid, Measurable<Power> p) {
         assertNotNull("Expected a bid, but was null", bid);
         double[] demand = bid.getDemand();
         assertTrue("Expected a flat bid with value " + p + ", but it is not flat", demandIsFlat(demand));
         assertTrue("Expected a flat bid with value " + p + ", but found value of " + demand[0] + "W",
-                   demand[0] == p.getValueAs(PowerUnit.WATT));
+                   demand[0] == p.doubleValue(WATT));
     }
 
     public static void assertNonFlatBid(BidInfo bid) {
@@ -36,17 +38,17 @@ public class BidAnalyzer {
         assertTrue(isStepBid(bid, null, null, null));
     }
 
-    public static void assertDemandAtMost(BidInfo bid, PowerValue demand) {
+    public static void assertDemandAtMost(BidInfo bid, Measurable<Power> demand) {
         assertNotNull(bid);
-        double demandWatt = demand.getValueAs(PowerUnit.WATT);
+        double demandWatt = demand.doubleValue(WATT);
         for (double v : bid.getDemand()) {
             assertTrue(demandWatt >= v);
         }
     }
 
-    public static void assertDemandAtLeast(BidInfo bid, PowerValue demand) {
+    public static void assertDemandAtLeast(BidInfo bid, Measurable<Power> demand) {
         assertNotNull(bid);
-        double demandWatt = demand.getValueAs(PowerUnit.WATT);
+        double demandWatt = demand.doubleValue(WATT);
         for (double v : bid.getDemand()) {
             assertTrue("Demand in bid may not be lower than " + demandWatt + " for any price, (was " + v + ")",
                        demandWatt <= v);
@@ -66,18 +68,18 @@ public class BidAnalyzer {
      * @param price
      *            The price at which the bid has a step.
      */
-    public static void assertStepBid(BidInfo bid, PowerValue power1, PowerValue power2, Double price) {
+    public static void assertStepBid(BidInfo bid, Measurable<Power> power1, Measurable<Power> power2, Double price) {
         assertNotNull(bid);
         assertTrue(isStepBid(bid, power1, power2, price));
     }
 
-    private static boolean isStepBid(BidInfo bid, PowerValue power1, PowerValue power2, Double price) {
+    private static boolean isStepBid(BidInfo bid, Measurable<Power> power1, Measurable<Power> power2, Double price) {
         assertNotNull(bid);
 
         double[] demand = bid.getDemand();
 
         // check the first power value
-        if (power1 != null && power1.getValueAs(PowerUnit.WATT) != demand[0]) {
+        if (power1 != null && power1.doubleValue(WATT) != demand[0]) {
             return false;
         }
 
@@ -103,7 +105,7 @@ public class BidAnalyzer {
         priceIndex += 1;
 
         // check the second power value
-        if (power2 != null && power2.getValueAs(PowerUnit.WATT) != demand[priceIndex]) {
+        if (power2 != null && power2.doubleValue(WATT) != demand[priceIndex]) {
             return false;
         }
 

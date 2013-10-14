@@ -9,12 +9,13 @@ import org.flexiblepower.observation.ObservationProvider;
 import org.flexiblepower.rai.Allocation;
 import org.flexiblepower.rai.ControlSpace;
 import org.flexiblepower.rai.Controller;
-import org.flexiblepower.rai.ResourceType;
+import org.flexiblepower.ral.ResourceControlParameters;
 import org.flexiblepower.ral.ResourceDriver;
 import org.flexiblepower.ral.ResourceManager;
 import org.flexiblepower.ral.ResourceState;
 
-public class MockResourceManager<RS extends ResourceState> implements ResourceManager<RS> {
+public class MockResourceManager<CS extends ControlSpace, RS extends ResourceState, RCP extends ResourceControlParameters> implements
+                                                                                                                           ResourceManager<CS, RS, RCP> {
     /** the allocations received */
     private final List<Allocation> allAllocations = new ArrayList<Allocation>();
 
@@ -25,23 +26,18 @@ public class MockResourceManager<RS extends ResourceState> implements ResourceMa
     private final String applianceId;
 
     /** the type of appliance managed */
-    private final ResourceType resourceType;
+    private final Class<CS> controlSpaceType;
 
     /** the last / current control space */
     private ControlSpace controlSpace;
 
-    public MockResourceManager(String applianceId, ResourceType resourceType) {
+    public MockResourceManager(String applianceId, Class<CS> controlSpaceType) {
         this.applianceId = applianceId;
-        this.resourceType = resourceType;
+        this.controlSpaceType = controlSpaceType;
     }
 
-    public String getApplianceId() {
+    public String getResourceId() {
         return applianceId;
-    }
-
-    @Override
-    public ResourceType getResourceType() {
-        return resourceType;
     }
 
     public ControlSpace getCurrentControlSpace() {
@@ -113,27 +109,32 @@ public class MockResourceManager<RS extends ResourceState> implements ResourceMa
     }
 
     @Override
-    public void setController(Controller controller) {
+    public void consume(ObservationProvider<? extends RS> source, Observation<? extends RS> observation) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Class<CS> getControlSpaceType() {
+        return this.controlSpaceType;
+    }
+
+    @Override
+    public void setController(Controller<? super CS> controller) {
         controllers.add(controller);
     }
 
     @Override
-    public void unsetController(Controller controller) {
+    public void unsetController(Controller<? super CS> controller) {
         controllers.remove(controller);
     }
 
     @Override
-    public void consume(ObservationProvider source, Observation observation) {
+    public void registerDriver(ResourceDriver<RS, RCP> driver) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void registerDriver(ResourceDriver driver) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void unregisterDriver(ResourceDriver driver) {
+    public void unregisterDriver(ResourceDriver<RS, RCP> driver) {
         throw new UnsupportedOperationException();
     }
 }

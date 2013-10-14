@@ -1,12 +1,21 @@
 package net.powermatcher.fpai.controller.test;
 
+import static javax.measure.unit.SI.MILLI;
+import static javax.measure.unit.SI.SECOND;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+import javax.measure.Measurable;
+import javax.measure.quantity.Duration;
+import javax.measure.quantity.Energy;
 
 import junit.framework.Assert;
+import junit.framework.TestCase;
 import net.powermatcher.core.agent.concentrator.framework.AbstractConcentrator;
 import net.powermatcher.core.agent.framework.data.BidInfo;
 import net.powermatcher.core.agent.framework.service.MatcherService;
@@ -22,26 +31,17 @@ import net.powermatcher.fpai.test.MockMatcherService;
 import net.powermatcher.fpai.test.MockResourceManager;
 
 import org.flexiblepower.rai.BufferControlSpace;
-import org.flexiblepower.rai.ResourceType;
+import org.flexiblepower.rai.ControlSpace;
 import org.flexiblepower.rai.StorageControlSpace;
 import org.flexiblepower.rai.TimeShifterControlSpace;
-import org.flexiblepower.rai.UncontrolledLGControlSpace;
-import org.flexiblepower.rai.unit.EnergyUnit;
-import org.flexiblepower.rai.unit.PowerUnit;
-import org.flexiblepower.rai.unit.TimeUnit;
-import org.flexiblepower.rai.values.Duration;
+import org.flexiblepower.rai.UncontrolledControlSpace;
 import org.flexiblepower.rai.values.EnergyProfile;
-import org.flexiblepower.rai.values.EnergyValue;
-import org.flexiblepower.rai.values.PowerConstraint;
-import org.flexiblepower.rai.values.PowerConstraintList;
-import org.flexiblepower.rai.values.PowerValue;
 import org.flexiblepower.ral.ResourceManager;
 import org.flexiblepower.time.TimeService;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 
-public class PMControllerTest {
+public class PMControllerTest extends TestCase {
     private static final int WAIT_TIME = -2000;
 
     private final Map<String, Object> configuration;
@@ -71,8 +71,12 @@ public class PMControllerTest {
     private ScheduledThreadPoolExecutor executorService;
     private PMController controller;
 
-    @Before
-    public void initController() throws Exception {
+    private BundleContext bundleContext;
+
+    @Override
+    public void setUp() throws Exception {
+        bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
+
         marketBasisAdapter = new MarketBasisAdapter(new PrefixedConfiguration(configuration, "market"));
         mockMatcherService = new MockMatcherService();
 
@@ -109,10 +113,10 @@ public class PMControllerTest {
                 return new Date();
             }
         });
-        controller.init(configuration);
+        controller.init(bundleContext, configuration);
     }
 
-    @After
+    @Override
     public void tearDown() throws InterruptedException {
         controller.deactive();
         controller = null;
@@ -123,25 +127,22 @@ public class PMControllerTest {
         executorService.awaitTermination(1, java.util.concurrent.TimeUnit.MINUTES);
     }
 
-    private MockResourceManager createRM(ResourceType type) {
-        String applianceId = type + "-" + UUID.randomUUID().toString();
-        MockResourceManager resourceManager = new MockResourceManager(applianceId, type);
-        resourceMangers.put(resourceManager, applianceId);
+    private MockResourceManager createRM(Class<? extends ControlSpace> type) {
+        String resourceIdId = type + "-" + UUID.randomUUID().toString();
+        MockResourceManager resourceManager = new MockResourceManager(resourceIdId, type);
+        resourceMangers.put(resourceManager, resourceIdId);
         controller.registerResource(resourceManager);
         return resourceManager;
     }
 
-    private void updateUncontrolledCS(MockResourceManager resourceManager, Duration duration, EnergyValue energy) {
-        Date now = new Date();
-        Date limit = duration.addTo(now);
-        Date start = duration.removeFrom(now);
-        EnergyProfile energyProfile = new EnergyProfile.Builder().setDuration(duration).add(energy).build();
-        resourceManager.updateControlSpace(new UncontrolledLGControlSpace(resourceMangers.get(resourceManager),
-                                                                          now,
-                                                                          limit,
-                                                                          limit,
-                                                                          start,
-                                                                          energyProfile));
+    private void updateUncontrolledCS(MockResourceManager resourceManager,
+                                      Measurable<Duration> duration,
+                                      Measurable<Energy> energy) {
+        Date start = new Date(System.currentTimeMillis() - duration.longValue(MILLI(SECOND)));
+        EnergyProfile energyProfile = EnergyProfile.create().add(duration, energy).build();
+        resourceManager.updateControlSpace(new UncontrolledControlSpace(resourceMangers.get(resourceManager),
+                                                                        start,
+                                                                        energyProfile));
     }
 
     private void updateBufferCS(MockResourceManager resourceManager,
@@ -209,7 +210,6 @@ public class PMControllerTest {
                                                                        new Duration(1, TimeUnit.MILLISECONDS).removeFrom(now)));
     }
 
-    @Test
     public void testSingleUncontrolled() throws Exception {
         Assert.assertEquals(0, controller.getAgentList().size());
 
@@ -231,11 +231,10 @@ public class PMControllerTest {
         BidAnalyzer.assertFlatBidWithValue(bid, new PowerValue(0, PowerUnit.WATT));
     }
 
-    @Test
     public void testSingleBuffer() throws Exception {
         Assert.assertEquals(0, controller.getAgentList().size());
 
-        MockResourceManager resourceManager = createRM(ResourceType.BUFFER);
+        MockResourceManager resourceManager = createRM(BufferControlSpace.class);
         Assert.assertEquals(1, controller.getAgentList().size());
         Assert.assertEquals(BufferAgent.class, controller.getAgentList().iterator().next().getClass());
 
@@ -254,11 +253,10 @@ public class PMControllerTest {
         BidAnalyzer.assertFlatBidWithValue(bid, new PowerValue(0, PowerUnit.WATT));
     }
 
-    @Test
     public void testSingleStorage() throws Exception {
         Assert.assertEquals(0, controller.getAgentList().size());
 
-        MockResourceManager resourceManager = createRM(ResourceType.STORAGE);
+        MockResourceManager resourceManager = createRM(StorageControlSpace.class);
         Assert.assertEquals(1, controller.getAgentList().size());
         Assert.assertEquals(StorageAgent.class, controller.getAgentList().iterator().next().getClass());
 
@@ -278,11 +276,10 @@ public class PMControllerTest {
         BidAnalyzer.assertFlatBidWithValue(bid, new PowerValue(0, PowerUnit.WATT));
     }
 
-    @Test
     public void testSingleTimeShifter() throws Exception {
         Assert.assertEquals(0, controller.getAgentList().size());
 
-        MockResourceManager resourceManager = createRM(ResourceType.TIMESHIFTER);
+        MockResourceManager resourceManager = createRM(TimeShifterControlSpace.class);
         Assert.assertEquals(1, controller.getAgentList().size());
         Assert.assertEquals(TimeshifterAgent.class, controller.getAgentList().iterator().next().getClass());
 
@@ -299,12 +296,11 @@ public class PMControllerTest {
         BidAnalyzer.assertFlatBidWithValue(bid, new PowerValue(0, PowerUnit.WATT));
     }
 
-    @Test
     public void testMultipbleUncontrolled() throws Exception {
         MockResourceManager[] rms = new MockResourceManager[4];
 
         for (int ix = 0; ix < rms.length; ix++) {
-            rms[ix] = createRM(ResourceType.UNCONTROLLED);
+            rms[ix] = createRM(UncontrolledControlSpace.class);
             updateUncontrolledCS(rms[ix], new Duration(1, TimeUnit.HOURS), new EnergyValue(1, EnergyUnit.KILO_WATTHOUR));
 
             BidInfo bid = mockMatcherService.getLastBid(concentratorId, WAIT_TIME);

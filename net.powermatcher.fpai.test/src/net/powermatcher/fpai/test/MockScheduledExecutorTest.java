@@ -7,27 +7,24 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import junit.framework.Assert;
+import junit.framework.TestCase;
 
-public class MockScheduledExecutorTest {
+public class MockScheduledExecutorTest extends TestCase {
     private MockTimeService timeService;
     private MockScheduledExecutor executor;
 
-    @Before
+    @Override
     public void setUp() throws Exception {
         timeService = new MockTimeService();
         executor = new MockScheduledExecutor(timeService.getFlexiblePowerTimeService());
     }
 
-    @After
+    @Override
     public void tearDown() throws Exception {
         executor.shutdown();
     }
 
-    @Test
     public void testExecute() throws InterruptedException, ExecutionException {
         NamedRunnable command = new NamedRunnable("command");
         Assert.assertEquals(0, command.getExecutionCount());
@@ -42,7 +39,6 @@ public class MockScheduledExecutorTest {
         Assert.assertEquals(1, command.getExecutionCount());
     }
 
-    @Test
     public void testSubmitCommand() throws InterruptedException, ExecutionException {
         NamedCallable command = new NamedCallable("command");
         Assert.assertEquals(0, command.getExecutionCount());
@@ -58,7 +54,6 @@ public class MockScheduledExecutorTest {
         Assert.assertEquals(1, command.getExecutionCount());
     }
 
-    @Test
     public void testScheduleRunnableWithDelay() throws InterruptedException, ExecutionException {
         NamedRunnable command = new NamedRunnable("command");
         Assert.assertEquals(0, command.getExecutionCount());
@@ -78,7 +73,6 @@ public class MockScheduledExecutorTest {
         Assert.assertEquals(1, command.getExecutionCount());
     }
 
-    @Test
     public void testScheduleCallableWithDelay() throws InterruptedException, ExecutionException {
         NamedCallable command = new NamedCallable("command");
         Assert.assertEquals(0, command.getExecutionCount());
@@ -99,7 +93,6 @@ public class MockScheduledExecutorTest {
 
     }
 
-    @Test
     public void testScheduleAtFixedRate() throws InterruptedException, ExecutionException {
         NamedRunnable command = new NamedRunnable("command");
         Assert.assertEquals(0, command.getExecutionCount());
@@ -130,7 +123,6 @@ public class MockScheduledExecutorTest {
         Assert.assertEquals(2, command.getExecutionCount());
     }
 
-    @Test
     public void testScheduleWithFixedDelay() throws InterruptedException, ExecutionException {
         NamedRunnable command = new NamedRunnable("command");
         Assert.assertEquals(0, command.getExecutionCount());

@@ -1,0 +1,35 @@
+Bundle-Version: 1.0.0
+-buildpath: biz.aQute.bnd.annotation;version=latest,\
+	osgi.cmpn,\
+	osgi.core,\
+	slf4j.api,\
+	flexiblepower.api;version=latest,\
+	net.powermatcher.core.adapter;version=latest,\
+	net.powermatcher.core.adapter.service;version=latest,\
+	net.powermatcher.core.agent;version=latest,\
+	net.powermatcher.core.agent.auctioneer;version=latest,\
+	net.powermatcher.core.agent.concentrator;version=latest,\
+	net.powermatcher.core.agent.marketbasis.adapter;version=latest,\
+	net.powermatcher.core.configurable;version=latest,\
+	net.powermatcher.core.scheduler.service;version=latest,\
+	net.powermatcher.core.messaging.framework;version=latest,\
+	net.powermatcher.core.messaging.mqttv3;version=latest,\
+	net.powermatcher.core.messaging.protocol.adapter;version=latest,\
+	net.powermatcher.fpai.agent;version=latest,\
+	net.powermatcher.fpai.agent.buffer;version=latest,\
+	net.powermatcher.fpai.agent.storage;version=latest,\
+	net.powermatcher.fpai.agent.timeshifter;version=latest,\
+	net.powermatcher.fpai.agent.uncontrolled;version=latest,\
+	junit.osgi,\
+	net.powermatcher.fpai.controller;version=latest
+Include-Resource: res
+
+-sign: fps
+
+Private-Package: net.powermatcher.fpai.agent.buffer.test,\
+	net.powermatcher.fpai.agent.storage.test,\
+	net.powermatcher.fpai.agent.timeshifter.test,\
+	net.powermatcher.fpai.agent.uncontrolled.test,\
+	net.powermatcher.fpai.controller.test,\
+	net.powermatcher.fpai.test,\
+	net.powermatcher.fpai.test.integration

@@ -1,14 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/net.powermatcher.fpai.agent"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/net.powermatcher.fpai.agent.buffer"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/net.powermatcher.fpai.agent.storage"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/net.powermatcher.fpai.agent.timeshifter"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/net.powermatcher.fpai.agent.uncontrolled"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/net.powermatcher.fpai.controller"/>
 	<classpathentry kind="con" path="aQute.bnd.classpath.container"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -1,11 +1,14 @@
 package net.powermatcher.fpai.test;
 
+import static javax.measure.unit.SI.MILLI;
+import static javax.measure.unit.SI.SECOND;
+
 import java.util.Date;
 
-import net.powermatcher.core.scheduler.service.TimeService;
+import javax.measure.Measurable;
+import javax.measure.quantity.Duration;
 
-import org.flexiblepower.rai.unit.TimeUnit;
-import org.flexiblepower.rai.values.Duration;
+import net.powermatcher.core.scheduler.service.TimeService;
 
 /**
  * Implementation of a TimeService which can be controlled programmatically
@@ -33,16 +36,12 @@ public class MockTimeService implements TimeService {
         currentTime += stepMs;
     }
 
-    public void stepInTime(double value, TimeUnit unit) {
-        currentTime += unit.convertTo(value, TimeUnit.MILLISECONDS);
-    }
-
     public void stepInTime(long value, java.util.concurrent.TimeUnit unit) {
         currentTime += java.util.concurrent.TimeUnit.MILLISECONDS.convert(value, unit);
     }
 
-    public void stepInTime(Duration duration) {
-        currentTime += duration.getMilliseconds();
+    public void stepInTime(Measurable<Duration> duration) {
+        currentTime += duration.doubleValue(MILLI(SECOND));
     }
 
     @Override

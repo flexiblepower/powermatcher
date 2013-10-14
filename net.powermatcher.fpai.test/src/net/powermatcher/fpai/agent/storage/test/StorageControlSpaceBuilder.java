@@ -2,36 +2,35 @@ package net.powermatcher.fpai.agent.storage.test;
 
 import java.util.Date;
 
+import javax.measure.Measurable;
+import javax.measure.Measure;
+import javax.measure.quantity.Duration;
+import javax.measure.quantity.Energy;
+import javax.measure.quantity.Power;
+import javax.measure.unit.NonSI;
+import javax.measure.unit.SI;
+
 import org.flexiblepower.rai.StorageControlSpace;
-import org.flexiblepower.rai.unit.EnergyUnit;
-import org.flexiblepower.rai.unit.PowerUnit;
-import org.flexiblepower.rai.unit.TimeUnit;
-import org.flexiblepower.rai.values.Duration;
-import org.flexiblepower.rai.values.EnergyValue;
-import org.flexiblepower.rai.values.PowerConstraint;
-import org.flexiblepower.rai.values.PowerConstraintList;
-import org.flexiblepower.rai.values.PowerValue;
+import org.flexiblepower.rai.values.ConstraintList;
 
 public class StorageControlSpaceBuilder {
 
     private Date validFrom = new Date(System.currentTimeMillis());
     private Date validThru = new Date(System.currentTimeMillis() + 1000);
     private Date expirationTime = null;
-    private EnergyValue totalCapacity = new EnergyValue(1, EnergyUnit.KILO_WATTHOUR);
+    private Measurable<Energy> totalCapacity = Measure.valueOf(1, NonSI.KWH);
     private float stateOfCharge = 0;
-    private PowerConstraintList chargeSpeed = new PowerConstraintList(new PowerConstraint(new PowerValue(1000,
-                                                                                                         PowerUnit.WATT)));
-    private PowerValue selfDischarge = new PowerValue(0, PowerUnit.WATT);
-    private Duration minOnPeriod = new Duration(0, TimeUnit.MINUTES);
-    private Duration minOffPeriod = new Duration(0, TimeUnit.MINUTES);
-    private Float targetStateOfCharge = null;
+    private ConstraintList<Power> chargeSpeed = ConstraintList.create(SI.WATT).addSingle(1000).build();
+    private Measurable<Power> selfDischarge = Measure.valueOf(0, SI.WATT);
+    private Measurable<Duration> minOnPeriod = Measure.valueOf(0, SI.SECOND);
+    private Measurable<Duration> minOffPeriod = Measure.valueOf(0, SI.SECOND);
+    private Double targetStateOfCharge = null;
     private Date targetTime = null;
-    private PowerConstraintList dischargeSpeed = new PowerConstraintList(new PowerConstraint(new PowerValue(1000,
-                                                                                                            PowerUnit.WATT)));
+    private ConstraintList<Power> dischargeSpeed = ConstraintList.create(SI.WATT).addSingle(1000).build();
     private float chargeEfficiency = 0.9f;
     private float dischargeEfficiency = 0.9f;
 
-    public void dischargeSpeed(PowerConstraintList dischargeSpeed) {
+    public void dischargeSpeed(ConstraintList<Power> dischargeSpeed) {
         this.dischargeSpeed = dischargeSpeed;
     }
 
@@ -58,7 +57,7 @@ public class StorageControlSpaceBuilder {
         return this;
     }
 
-    public StorageControlSpaceBuilder totalCapacity(EnergyValue totalCapacity) {
+    public StorageControlSpaceBuilder totalCapacity(Measurable<Energy> totalCapacity) {
         this.totalCapacity = totalCapacity;
         return this;
     }
@@ -68,34 +67,34 @@ public class StorageControlSpaceBuilder {
         return this;
     }
 
-    public StorageControlSpaceBuilder chargeSpeed(PowerConstraintList chargeSpeed) {
+    public StorageControlSpaceBuilder chargeSpeed(ConstraintList<Power> chargeSpeed) {
         this.chargeSpeed = chargeSpeed;
         return this;
     }
 
-    public StorageControlSpaceBuilder selfDischarge(PowerValue selfDischarge) {
+    public StorageControlSpaceBuilder selfDischarge(Measurable<Power> selfDischarge) {
         this.selfDischarge = selfDischarge;
         return this;
     }
 
-    public StorageControlSpaceBuilder minOnPeriod(Duration minOnPeriod) {
+    public StorageControlSpaceBuilder minOnPeriod(Measurable<Duration> minOnPeriod) {
         this.minOnPeriod = minOnPeriod;
         return this;
     }
 
-    public StorageControlSpaceBuilder minOffPeriod(Duration minOffPeriod) {
+    public StorageControlSpaceBuilder minOffPeriod(Measurable<Duration> minOffPeriod) {
         this.minOffPeriod = minOffPeriod;
         return this;
     }
 
-    public StorageControlSpaceBuilder target(Float targetStateOfCharge, Date targetTime) {
+    public StorageControlSpaceBuilder target(Double targetStateOfCharge, Date targetTime) {
         this.targetStateOfCharge = targetStateOfCharge;
         this.targetTime = targetTime;
         return this;
     }
 
-    public StorageControlSpace build(String applianceId) {
-        return new StorageControlSpace(applianceId,
+    public StorageControlSpace build(String resourceId) {
+        return new StorageControlSpace(resourceId,
                                        validFrom,
                                        validThru,
                                        expirationTime,

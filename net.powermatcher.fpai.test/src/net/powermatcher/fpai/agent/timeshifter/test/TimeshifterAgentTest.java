@@ -1,8 +1,22 @@
 package net.powermatcher.fpai.agent.timeshifter.test;
 
+import static javax.measure.unit.NonSI.HOUR;
+import static javax.measure.unit.NonSI.MINUTE;
+import static javax.measure.unit.SI.JOULE;
+import static javax.measure.unit.SI.SECOND;
+import static javax.measure.unit.SI.WATT;
+
 import java.util.Date;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
+import javax.measure.Measurable;
+import javax.measure.Measure;
+import javax.measure.quantity.Duration;
+import javax.measure.quantity.Power;
+
+import junit.framework.Assert;
+import junit.framework.TestCase;
 import net.powermatcher.core.agent.framework.config.AgentConfiguration;
 import net.powermatcher.core.agent.framework.data.BidInfo;
 import net.powermatcher.core.agent.framework.data.MarketBasis;
@@ -17,32 +31,23 @@ import net.powermatcher.fpai.test.MockScheduledExecutor;
 import net.powermatcher.fpai.test.MockTimeService;
 
 import org.flexiblepower.rai.Allocation;
-import org.flexiblepower.rai.ResourceType;
 import org.flexiblepower.rai.TimeShifterControlSpace;
-import org.flexiblepower.rai.unit.EnergyUnit;
-import org.flexiblepower.rai.unit.PowerUnit;
-import org.flexiblepower.rai.unit.TimeUnit;
-import org.flexiblepower.rai.values.Duration;
+import org.flexiblepower.rai.UncontrolledControlSpace;
 import org.flexiblepower.rai.values.EnergyProfile;
-import org.flexiblepower.rai.values.EnergyProfile.Element;
-import org.flexiblepower.rai.values.PowerValue;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.flexiblepower.time.TimeUtil;
 
-public class TimeshifterAgentTest {
+public class TimeshifterAgentTest extends TestCase {
     private static final String APPLIANCE_ID = "appliance-id";
     private static final String CFG_PREFIX = "agent.agent1";
     private static final MarketBasis MARKET_BASIS = new MarketBasis("Electricity", "EUR", 100, 0, 50, 1, 0);
-    private static final PowerValue ZERO_POWER = new PowerValue(0, PowerUnit.WATT);
+    private static final Measurable<Power> ZERO_POWER = Measure.valueOf(0, WATT);
 
     private static final double[] PROFILE_VALUES = { 100, 1000, 500, 1000, 400, 300, 300, 300, 300, 300 };
-    private static final Duration PROFILE_ElEMENT_DURATION = new Duration(10, TimeUnit.MINUTES);
+    private static final Measurable<Duration> PROFILE_ElEMENT_DURATION = Measure.valueOf(10, MINUTE);
     private static final EnergyProfile DEMAND_PROFILE = buildProfile(1, PROFILE_VALUES, PROFILE_ElEMENT_DURATION);
     private static final EnergyProfile SUPPLY_PROFILE = buildProfile(-1, PROFILE_VALUES, PROFILE_ElEMENT_DURATION);
 
-    private static final Duration START_WINDOW = new Duration(1, TimeUnit.HOURS);
+    private static final Measurable<Duration> START_WINDOW = Measure.valueOf(1, HOUR);
 
     /** the parent matcher of the agent */
     private MockMatcherService parent;
@@ -54,7 +59,6 @@ public class TimeshifterAgentTest {
     private MockScheduledExecutor executor;
     private MockTimeService timeService;
 
-    @Test
     public void testMustRun() {
         EnergyProfile profile = DEMAND_PROFILE;
 
@@ -63,9 +67,9 @@ public class TimeshifterAgentTest {
         timeService.setAbsoluteTime(testStartTime);
 
         Date validFrom = new Date(testStartTime);
-        Date before = add(START_WINDOW, validFrom);
-        Duration profileDuration = getDuration(profile);
-        Date validThru = add(profileDuration, before);
+        Date before = TimeUtil.add(validFrom, START_WINDOW);
+        Measurable<Duration> profileDuration = profile.getDuration();
+        Date validThru = TimeUtil.add(before, profileDuration);
 
         TimeShifterControlSpaceBuilder builder = new TimeShifterControlSpaceBuilder();
         builder.setApplianceId(APPLIANCE_ID);
@@ -99,22 +103,20 @@ public class TimeshifterAgentTest {
         agent.updatePriceInfo(new PriceInfo(MARKET_BASIS, MARKET_BASIS.getMaximumPrice()));
         executor.executePending();
         bid = parent.getLastBid(agent.getId());
-        BidAnalyzer.assertFlatBidWithValue(bid, new PowerValue(PROFILE_VALUES[0], PowerUnit.WATT));
+        BidAnalyzer.assertFlatBidWithValue(bid, Measure.valueOf(PROFILE_VALUES[0], WATT));
         assertStarted(controlSpace, manager.getLastAllocation());
 
         // We don't check if the device was started in time, because starting at the startBefore time is actually to
         // late. This is acceptable (the resource manager should also act in this situation).
 
         // check that the agent correctly behaves during the execution of the profile
-        assertCorrectMustRunBidding(profile, before, add(profileDuration, before));
+        assertCorrectMustRunBidding(profile, before, TimeUtil.add(before, profileDuration));
     }
 
-    @Test
     public void testDemand() throws InterruptedException {
         testNormal(DEMAND_PROFILE, true);
     }
 
-    @Test
     public void testSupply() throws InterruptedException {
         testNormal(SUPPLY_PROFILE, false);
     }
@@ -125,9 +127,9 @@ public class TimeshifterAgentTest {
 
         Date validFrom = new Date(testStartTime);
         Date after = validFrom;
-        Date before = add(START_WINDOW, validFrom);
-        Duration profileDuration = getDuration(profile);
-        Date validThru = add(profileDuration, before);
+        Date before = TimeUtil.add(validFrom, START_WINDOW);
+        Measurable<Duration> profileDuration = profile.getDuration();
+        Date validThru = TimeUtil.add(before, profileDuration);
 
         TimeShifterControlSpaceBuilder builder = new TimeShifterControlSpaceBuilder();
         builder.setApplianceId(APPLIANCE_ID);
@@ -165,7 +167,7 @@ public class TimeshifterAgentTest {
 
         // startAfter < now < startBefore
         // progress time to half-way and assert it's a step and that there is no allocation yet
-        timeService.stepInTime(new Duration(START_WINDOW.getValue() / 2, START_WINDOW.getUnit()));
+        timeService.stepInTime(Measure.valueOf(START_WINDOW.doubleValue(SECOND) / 2, SECOND));
         executor.executePending();
         bid = parent.getLastBid(agent.getId());
         assertStepBid(bid, profile);
@@ -175,7 +177,7 @@ public class TimeshifterAgentTest {
         // startAfter < now < startBefore
         // progress time to three-quarters and assert it's a step, that there is no allocation yet and that maximum
         // accepted price is moving up or down (depending on whether it is supply or demand
-        timeService.stepInTime(new Duration(START_WINDOW.getValue() / 4, START_WINDOW.getUnit()));
+        timeService.stepInTime(Measure.valueOf(START_WINDOW.doubleValue(SECOND) / 4, SECOND));
         executor.executePending();
         bid = parent.getLastBid(agent.getId());
         assertStepBid(bid, profile);
@@ -200,7 +202,7 @@ public class TimeshifterAgentTest {
 
         // price low enough, assert started (allocation and must-run bid with initial power exists)
         Date startTime = timeService.getDate();
-        Date endTime = add(profileDuration, startTime);
+        Date endTime = TimeUtil.add(startTime, profileDuration);
 
         // we lower/raise the price by one extra, to give some room for price rounding in the PowerMatcher core
         price = isDemand ? price - 1 : price + 1;
@@ -212,16 +214,16 @@ public class TimeshifterAgentTest {
         assertStartedInTime(controlSpace, allocation);
         bid = parent.getLastBid(agent.getId());
         double initialDemand = isDemand ? PROFILE_VALUES[0] : -PROFILE_VALUES[0];
-        BidAnalyzer.assertFlatBidWithValue(bid, new PowerValue(initialDemand, PowerUnit.WATT));
+        BidAnalyzer.assertFlatBidWithValue(bid, Measure.valueOf(initialDemand, WATT));
 
         assertCorrectMustRunBidding(profile, startTime, endTime);
     }
 
     private void assertStepBid(BidInfo bid, EnergyProfile profile) {
-        if (profile.getTotalEnergy(EnergyUnit.JOULE).getValue() > 0) {
-            BidAnalyzer.assertStepBid(bid, new PowerValue(PROFILE_VALUES[0], PowerUnit.WATT), ZERO_POWER, null);
+        if (profile.getTotalEnergy().doubleValue(JOULE) > 0) {
+            BidAnalyzer.assertStepBid(bid, Measure.valueOf(PROFILE_VALUES[0], WATT), ZERO_POWER, null);
         } else {
-            BidAnalyzer.assertStepBid(bid, ZERO_POWER, new PowerValue(-PROFILE_VALUES[0], PowerUnit.WATT), null);
+            BidAnalyzer.assertStepBid(bid, ZERO_POWER, Measure.valueOf(-PROFILE_VALUES[0], WATT), null);
         }
     }
 
@@ -255,7 +257,7 @@ public class TimeshifterAgentTest {
         Assert.assertNotNull(allocation);
 
         // assert the appliance id and control space are there
-        Assert.assertEquals(manager.getApplianceId(), allocation.getApplianceId());
+        Assert.assertEquals(manager.getResourceId(), allocation.getResourceId());
         Assert.assertEquals(controlSpace.getId(), allocation.getControlSpaceId());
 
         // assert the time is the current time
@@ -275,33 +277,12 @@ public class TimeshifterAgentTest {
         Assert.assertTrue(startBefore.after(startTime) || startBefore.equals(startTime));
     }
 
-    private PowerValue getCurrentDemand(Date startTime, Date now, EnergyProfile profile) {
-        Duration offset = new Duration(now.getTime() - startTime.getTime(), TimeUnit.MILLISECONDS);
-
-        // TODO implement in flexiblepower.api
-        Element element = profile.getElementForOffset(offset);
-        double joules = element.getEnergy().getValueAs(EnergyUnit.JOULE);
-        double seconds = element.getDuration().getValueAs(TimeUnit.SECONDS);
-        return new PowerValue(joules / seconds, PowerUnit.WATT);
+    private Measurable<Power> getCurrentDemand(Date startTime, Date now, EnergyProfile profile) {
+        Measurable<Duration> offset = TimeUtil.difference(startTime, now);
+        return profile.getElementForOffset(offset).getAveragePower();
     }
 
-    // TODO implement in flexiblepower.api
-    private Date add(Duration duration, Date date) {
-        return new Date(duration.getMilliseconds() + date.getTime());
-    }
-
-    // TODO implement in flexiblepower.api
-    private Duration getDuration(EnergyProfile profile) {
-        double duration = 0;
-
-        for (Element e : profile) {
-            duration += e.getDuration().getValueAs(TimeUnit.MILLISECONDS);
-        }
-
-        return new Duration(duration, TimeUnit.MILLISECONDS);
-    }
-
-    @Before
+    @Override
     public void setUp() throws Exception {
         Properties cfg = new Properties();
         cfg.put(CFG_PREFIX + ".id", "agent1");
@@ -318,7 +299,7 @@ public class TimeshifterAgentTest {
         executor = new MockScheduledExecutor(timeService.getFlexiblePowerTimeService());
         agent.bind(executor);
 
-        manager = new MockResourceManager(APPLIANCE_ID, ResourceType.UNCONTROLLED);
+        manager = new MockResourceManager(APPLIANCE_ID, UncontrolledControlSpace.class);
         agent.bind(manager);
 
         parent = new MockMatcherService();
@@ -327,7 +308,7 @@ public class TimeshifterAgentTest {
         agent.updateMarketBasis(MARKET_BASIS);
     }
 
-    @After
+    @Override
     public void tearDown() throws Exception {
         agent.unbind(executor);
         agent.unbind(timeService);
@@ -337,11 +318,12 @@ public class TimeshifterAgentTest {
         executor.awaitTermination(1, java.util.concurrent.TimeUnit.SECONDS);
     }
 
-    private static EnergyProfile buildProfile(int multiplier, double[] powerValues, Duration elementDuration) {
-        EnergyProfile.Builder builder = new EnergyProfile.Builder().setDuration(elementDuration);
+    private static EnergyProfile
+            buildProfile(int multiplier, double[] powerValues, Measurable<Duration> elementDuration) {
+        EnergyProfile.Builder builder = EnergyProfile.create().setDuration(elementDuration);
 
         for (double profileValue : powerValues) {
-            builder.add(profileValue * multiplier * elementDuration.getValueAs(TimeUnit.SECONDS), EnergyUnit.JOULE);
+            builder.add(Measure.valueOf(profileValue * multiplier * elementDuration.doubleValue(SECOND), JOULE));
         }
 
         return builder.build();

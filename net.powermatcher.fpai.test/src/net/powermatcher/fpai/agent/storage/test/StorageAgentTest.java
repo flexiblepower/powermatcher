@@ -1,12 +1,19 @@
 package net.powermatcher.fpai.agent.storage.test;
 
-import static org.junit.Assert.assertEquals;
+import static javax.measure.unit.NonSI.HOUR;
+import static javax.measure.unit.NonSI.KWH;
+import static javax.measure.unit.NonSI.MINUTE;
+import static javax.measure.unit.SI.SECOND;
+import static javax.measure.unit.SI.WATT;
 
 import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import javax.measure.Measure;
+
+import junit.framework.TestCase;
 import net.powermatcher.core.agent.framework.config.AgentConfiguration;
 import net.powermatcher.core.agent.framework.data.BidInfo;
 import net.powermatcher.core.agent.framework.data.MarketBasis;
@@ -20,20 +27,10 @@ import net.powermatcher.fpai.test.MockResourceManager;
 import net.powermatcher.fpai.test.MockTimeService;
 
 import org.flexiblepower.rai.Allocation;
-import org.flexiblepower.rai.ResourceType;
-import org.flexiblepower.rai.unit.EnergyUnit;
-import org.flexiblepower.rai.unit.PowerUnit;
-import org.flexiblepower.rai.unit.TimeUnit;
-import org.flexiblepower.rai.values.Duration;
-import org.flexiblepower.rai.values.EnergyValue;
-import org.flexiblepower.rai.values.PowerConstraint;
-import org.flexiblepower.rai.values.PowerConstraintList;
-import org.flexiblepower.rai.values.PowerValue;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.flexiblepower.rai.StorageControlSpace;
+import org.flexiblepower.rai.values.ConstraintList;
 
-public class StorageAgentTest {
+public class StorageAgentTest extends TestCase {
 
     private static final String APPLIANCE_ID = "appliance-id";
     private static final String CFG_PREFIX = "agent.agent1";
@@ -52,7 +49,7 @@ public class StorageAgentTest {
     private MockResourceManager resourceManager;
     private MockMatcherService parent;
 
-    @Before
+    @Override
     public void setUp() {
         Properties cfg = new Properties();
         cfg.put(CFG_PREFIX + ".id", "agent1");
@@ -69,7 +66,7 @@ public class StorageAgentTest {
         timeService = new MockTimeService();
         agent.bind(timeService);
 
-        resourceManager = new MockResourceManager(APPLIANCE_ID, ResourceType.STORAGE);
+        resourceManager = new MockResourceManager(APPLIANCE_ID, StorageControlSpace.class);
         agent.bind(resourceManager);
 
         parent = new MockMatcherService();
@@ -78,7 +75,7 @@ public class StorageAgentTest {
         timeService.setAbsoluteTime(System.currentTimeMillis());
     }
 
-    @After
+    @Override
     public void tearDown() throws InterruptedException {
         agent.unbind(executor);
         agent.unbind(timeService);
@@ -93,15 +90,13 @@ public class StorageAgentTest {
      * 
      * We assume the price does not influence the bid
      */
-    @Test
     public void testBidResponse() {
         StorageControlSpaceBuilder b = new StorageControlSpaceBuilder();
         b.validFrom(timeService.getDate()).validThru(new Date(timeService.currentTimeMillis() + 10000));
         b.stateOfCharge(0.5f);
-        b.selfDischarge(new PowerValue(0, PowerUnit.WATT));
-        b.totalCapacity(new EnergyValue(1, EnergyUnit.KILO_WATTHOUR));
-        b.chargeSpeed(new PowerConstraintList(new PowerConstraint(new PowerValue(1000, PowerUnit.WATT),
-                                                                  new PowerValue(2000, PowerUnit.WATT))));
+        b.selfDischarge(Measure.valueOf(0, WATT));
+        b.totalCapacity(Measure.valueOf(0, KWH));
+        b.chargeSpeed(ConstraintList.create(WATT).addSingle(1000).addSingle(2000).build());
         // Iterate over all the price steps
         for (int i = 0; i < 100; i++) {
             double price = ((MAXIMUM_PRICE - MINIMUM_PRICE) / 100f) * i + MINIMUM_PRICE;
@@ -111,13 +106,13 @@ public class StorageAgentTest {
             agent.updatePriceInfo(new PriceInfo(MARKET_BASIS, price));
             BidInfo bid = parent.getLastBid(agent.getId(), 1000);
             Allocation allocation = resourceManager.getLastAllocation(1000);
-            AllocationAnalyzer.assertAllocationWithDemand(allocation, timeService, new PowerValue(bid.getDemand(price),
-                                                                                                  PowerUnit.WATT));
+            AllocationAnalyzer.assertAllocationWithDemand(allocation,
+                                                          timeService,
+                                                          Measure.valueOf(bid.getDemand(price), WATT));
             timeService.stepInTime(1000);
         }
     }
 
-    @Test
     public void testBidValues() {
         StorageControlSpaceBuilder b = new StorageControlSpaceBuilder();
         b.stateOfCharge(0.5f);
@@ -125,14 +120,13 @@ public class StorageAgentTest {
         for (int watts : wattValues) {
             timeService.stepInTime(1000);
             b.validFrom(timeService.getDate()).validThru(new Date(timeService.currentTimeMillis() + 10000));
-            b.chargeSpeed(new PowerConstraintList(new PowerConstraint(new PowerValue(watts, PowerUnit.WATT))));
+            b.chargeSpeed(ConstraintList.create(WATT).addSingle(watts).build());
             resourceManager.updateControlSpace(b.build(APPLIANCE_ID));
             agent.updatePriceInfo(new PriceInfo(MARKET_BASIS, MINIMUM_PRICE));
             assertEquals(watts, parent.getLastBid(agent.getId(), 1000).getDemand()[0], 0.001);
         }
     }
 
-    @Test
     public void testValidFrom() {
         StorageControlSpaceBuilder b = new StorageControlSpaceBuilder();
         b.stateOfCharge(0f);
@@ -155,7 +149,6 @@ public class StorageAgentTest {
         }
     }
 
-    @Test
     public void testValidThruExpired() {
         StorageControlSpaceBuilder b = new StorageControlSpaceBuilder();
         b.stateOfCharge(0f);
@@ -174,16 +167,15 @@ public class StorageAgentTest {
 
         // Since there is no valid control space at the moment, bid2 should be flat
         if (bid2 != null) {
-            BidAnalyzer.assertFlatBidWithValue(bid2, new PowerValue(0, PowerUnit.WATT));
+            BidAnalyzer.assertFlatBidWithValue(bid2, Measure.valueOf(0, WATT));
         }
     }
 
-    @Test
     public void testMinOnCharge() {
         // init
         timeService.stepInTime(60000);
         StorageControlSpaceBuilder b = new StorageControlSpaceBuilder();
-        b.stateOfCharge(0).minOnPeriod(new Duration(1, TimeUnit.MINUTES));
+        b.stateOfCharge(0).minOnPeriod(Measure.valueOf(0, MINUTE));
         b.validFrom(timeService.getDate()).validThru(new Date(timeService.currentTimeMillis() + 10000));
 
         // Make the agent charge
@@ -212,30 +204,27 @@ public class StorageAgentTest {
             if (seconds < 60) {
                 // Must run situation
                 AllocationAnalyzer.assertRunningAllocation(allocation, timeService);
-                BidAnalyzer.assertDemandAtLeast(lastBid, new PowerValue(1000, PowerUnit.WATT));
+                BidAnalyzer.assertDemandAtLeast(lastBid, Measure.valueOf(1000, WATT));
             } else {
                 // MinTurnOn period is over, should turn off now
-                AllocationAnalyzer.assertDemandAtMost(allocation, timeService, new PowerValue(0, PowerUnit.WATT));
-                BidAnalyzer.assertDemandAtMost(lastBid, new PowerValue(0, PowerUnit.WATT));
+                AllocationAnalyzer.assertDemandAtMost(allocation, timeService, Measure.valueOf(0, WATT));
+                BidAnalyzer.assertDemandAtMost(lastBid, Measure.valueOf(1000, WATT));
             }
         }
     }
 
-    @Test
     public void testMinOnDischarge() {
         // init
         timeService.stepInTime(3600000);
         StorageControlSpaceBuilder b = new StorageControlSpaceBuilder();
-        b.stateOfCharge(1.0f)
-         .minOnPeriod(new Duration(1, TimeUnit.MINUTES))
-         .minOffPeriod(new Duration(0, TimeUnit.SECONDS));
+        b.stateOfCharge(1.0f).minOnPeriod(Measure.valueOf(1, MINUTE)).minOffPeriod(Measure.valueOf(0, SECOND));
         b.validFrom(timeService.getDate()).validThru(new Date(timeService.currentTimeMillis() + 10000));
 
         // Make the agent discharge
         resourceManager.updateControlSpace(b.build(APPLIANCE_ID));
         agent.updatePriceInfo(new PriceInfo(MARKET_BASIS, MAXIMUM_PRICE)); // Triggers allocation
         Allocation allocation = resourceManager.getLastAllocation(1000);
-        AllocationAnalyzer.assertDemandAtMost(allocation, timeService, new PowerValue(-1, PowerUnit.WATT));
+        AllocationAnalyzer.assertDemandAtMost(allocation, timeService, Measure.valueOf(-1, WATT));
 
         // Now we let it run for two minutes. The SOC = 1, the minOnPeriod one minute, so the agent must tell the device
         // to stop discharging
@@ -257,29 +246,28 @@ public class StorageAgentTest {
             if (seconds < 60) {
                 // Must discharge situation
                 AllocationAnalyzer.assertRunningAllocation(allocation, timeService);
-                BidAnalyzer.assertDemandAtMost(lastBid, new PowerValue(-1, PowerUnit.WATT));
+                BidAnalyzer.assertDemandAtMost(lastBid, Measure.valueOf(-1, WATT));
             } else {
                 // MinTurnOn period is over, should turn off or charge now
-                AllocationAnalyzer.assertDemandAtLeast(allocation, timeService, new PowerValue(0, PowerUnit.WATT));
-                BidAnalyzer.assertDemandAtLeast(lastBid, new PowerValue(0, PowerUnit.WATT));
+                AllocationAnalyzer.assertDemandAtLeast(allocation, timeService, Measure.valueOf(0, WATT));
+                BidAnalyzer.assertDemandAtLeast(lastBid, Measure.valueOf(0, WATT));
             }
         }
     }
 
-    @Test
     public void testMinOff() {
         // make device turn on, make sure minturnon and minturnoff periods are over
         timeService.stepInTime(120000);
         StorageControlSpaceBuilder b = new StorageControlSpaceBuilder();
         timeService.stepInTime(60000);
-        b.stateOfCharge(0.5f).minOffPeriod(new Duration(1, TimeUnit.MINUTES));
+        b.stateOfCharge(0.5f).minOffPeriod(Measure.valueOf(1, MINUTE));
         b.validFrom(timeService.getDate()).validThru(new Date(timeService.currentTimeMillis() + 10000));
         resourceManager.updateControlSpace(b.build(APPLIANCE_ID));
         agent.updatePriceInfo(new PriceInfo(MARKET_BASIS, MINIMUM_PRICE));
         AllocationAnalyzer.assertRunningAllocation(resourceManager.getLastAllocation(1000), timeService);
         timeService.stepInTime(60000);
         b.validFrom(timeService.getDate()).validThru(new Date(timeService.currentTimeMillis() + 10000));
-        b.stateOfCharge(0.51f).minOffPeriod(new Duration(1, TimeUnit.MINUTES));
+        b.stateOfCharge(0.51f).minOffPeriod(Measure.valueOf(1, MINUTE));
         resourceManager.updateControlSpace(b.build(APPLIANCE_ID));
         agent.updatePriceInfo(new PriceInfo(MARKET_BASIS, MINIMUM_PRICE));
         AllocationAnalyzer.assertRunningAllocation(resourceManager.getLastAllocation(1000), timeService);
@@ -300,7 +288,7 @@ public class StorageAgentTest {
         agent.updatePriceInfo(new PriceInfo(MARKET_BASIS, turnoffPrice)); // Triggers allocation
         AllocationAnalyzer.assertDemandAtMost(resourceManager.getLastAllocation(1000),
                                               timeService,
-                                              new PowerValue(0, PowerUnit.WATT));
+                                              Measure.valueOf(0, WATT));
 
         // Now we let it run for two minutes. The SOC = 0.5, the minOffPeriod one minute, so the agent must tell the
         // device to start running again after one minute.
@@ -316,8 +304,7 @@ public class StorageAgentTest {
             if (seconds < 60) {
                 // In minturnoff period
                 AllocationAnalyzer.assertNotRunningAllocation(resourceManager.getLastAllocation(1000), timeService);
-                BidAnalyzer.assertFlatBidWithValue(parent.getLastBid(agent.getId(), 1000),
-                                                   new PowerValue(0, PowerUnit.WATT));
+                BidAnalyzer.assertFlatBidWithValue(parent.getLastBid(agent.getId(), 1000), Measure.valueOf(0, WATT));
             } else {
                 // minturnoff period over, should start charging
                 AllocationAnalyzer.assertRunningAllocation(resourceManager.getLastAllocation(1000), timeService);
@@ -333,7 +320,6 @@ public class StorageAgentTest {
      * which indicates that the buffer is full in exactly 1 hour. The minOnPeriod is 30 minutes. This means that if the
      * SOC is >= 0.5, the agent should NOT turn on the device.
      */
-    @Test
     public void testOverchargePrevention() {
         this.testOverchargePrevention(1, 1000, 0, 0.5f);
         this.testOverchargePrevention(1, 2000, 1000, 0.5f);
@@ -352,11 +338,11 @@ public class StorageAgentTest {
         StorageControlSpaceBuilder b = new StorageControlSpaceBuilder();
         b.validFrom(timeService.getDate()).validThru(new Date(timeService.currentTimeMillis() + 60000));
         b.stateOfCharge(1f);
-        b.chargeSpeed(new PowerConstraintList(new PowerConstraint(new PowerValue(chargeSpeedW, PowerUnit.WATT))));
-        b.selfDischarge(new PowerValue(dischargeSpeedW, PowerUnit.WATT));
-        b.totalCapacity(new EnergyValue(capacityKWH, EnergyUnit.KILO_WATTHOUR));
-        b.minOnPeriod(new Duration(minOnHours, TimeUnit.HOURS));
-        b.minOffPeriod(new Duration(0, TimeUnit.HOURS));
+        b.chargeSpeed(ConstraintList.create(WATT).addSingle(chargeSpeedW).build());
+        b.selfDischarge(Measure.valueOf(dischargeSpeedW, WATT));
+        b.totalCapacity(Measure.valueOf(capacityKWH, KWH));
+        b.minOnPeriod(Measure.valueOf(minOnHours, HOUR));
+        b.minOffPeriod(Measure.valueOf(0, SECOND));
         resourceManager.updateControlSpace(b.build(APPLIANCE_ID));
 
         // if(SOC >= criticalSOC) the device should NOT turn on
@@ -378,9 +364,8 @@ public class StorageAgentTest {
             Allocation a = resourceManager.getLastAllocation(1000);
             if (!charging && curSOC >= criticalSOC) {
                 // Should NOT turn on
-                AllocationAnalyzer.assertDemandAtMost(a, timeService, new PowerValue(0, PowerUnit.WATT));
-                BidAnalyzer.assertDemandAtMost(parent.getLastBid(agent.getId(), 1000),
-                                               new PowerValue(0, PowerUnit.WATT));
+                AllocationAnalyzer.assertDemandAtMost(a, timeService, Measure.valueOf(0, WATT));
+                BidAnalyzer.assertDemandAtMost(parent.getLastBid(agent.getId(), 1000), Measure.valueOf(0, WATT));
             } else {
                 // Should charge, SOC is below critical SOC
                 charging = true;
@@ -392,16 +377,15 @@ public class StorageAgentTest {
 
     }
 
-    @Test
     public void testDrainPrevention() {
         StorageControlSpaceBuilder b = new StorageControlSpaceBuilder();
         b.stateOfCharge(0.1f);
         b.validFrom(timeService.getDate()).validThru(new Date(timeService.currentTimeMillis() + 10000));
-        b.chargeSpeed(new PowerConstraintList(new PowerConstraint(new PowerValue(2000, PowerUnit.WATT))));
-        b.selfDischarge(new PowerValue(1000, PowerUnit.WATT));
-        b.totalCapacity(new EnergyValue(1, EnergyUnit.KILO_WATTHOUR));
-        b.minOnPeriod(new Duration(0, TimeUnit.HOURS));
-        b.minOffPeriod(new Duration(0.5, TimeUnit.HOURS));
+        b.chargeSpeed(ConstraintList.create(WATT).addSingle(2000).build());
+        b.selfDischarge(Measure.valueOf(1000, WATT));
+        b.totalCapacity(Measure.valueOf(1, KWH));
+        b.minOnPeriod(Measure.valueOf(0, SECOND));
+        b.minOffPeriod(Measure.valueOf(30, MINUTE));
 
         double criticalEneregyWH = 1000 * 0.5;
         double criticalSOC = criticalEneregyWH / 1000;
@@ -421,80 +405,71 @@ public class StorageAgentTest {
             if (curSOC < criticalSOC) {
                 AllocationAnalyzer.assertRunningAllocation(a, timeService);
             } else {
-                AllocationAnalyzer.assertDemandAtMost(a, timeService, new PowerValue(0, PowerUnit.WATT));
+                AllocationAnalyzer.assertDemandAtMost(a, timeService, Measure.valueOf(0, WATT));
             }
         }
     }
 
-    @Test
     public void testTargetStateOfChargeHigher() {
-        float targetSOC = 1;
+        double targetSOC = 1;
         long targetTime = timeService.currentTimeMillis() + 3600000;
         StorageControlSpaceBuilder b = new StorageControlSpaceBuilder();
         b.target(targetSOC, new Date(targetTime));
         b.stateOfCharge(0f);
-        b.selfDischarge(new PowerValue(0, PowerUnit.WATT));
-        b.totalCapacity(new EnergyValue(1, EnergyUnit.KILO_WATTHOUR));
-        b.chargeSpeed(new PowerConstraintList(new PowerConstraint(new PowerValue(100, PowerUnit.WATT)),
-                                              new PowerConstraint(new PowerValue(1000, PowerUnit.WATT))));
-        b.dischargeSpeed(new PowerConstraintList(new PowerConstraint(new PowerValue(100, PowerUnit.WATT)),
-                                                 new PowerConstraint(new PowerValue(1000, PowerUnit.WATT))));
+        b.selfDischarge(Measure.valueOf(0, WATT));
+        b.totalCapacity(Measure.valueOf(1, KWH));
+        b.chargeSpeed(ConstraintList.create(WATT).addSingle(100).addSingle(1000).build());
+        b.dischargeSpeed(ConstraintList.create(WATT).addSingle(100).addSingle(1000).build());
         for (int minute = 0; minute < 120; minute++) {
             b.validFrom(timeService.getDate()).validThru(new Date(timeService.currentTimeMillis() + 10000));
             resourceManager.updateControlSpace(b.build(APPLIANCE_ID));
             agent.updatePriceInfo(new PriceInfo(MARKET_BASIS, MAXIMUM_PRICE));
-            BidAnalyzer.assertDemandAtMost(parent.getLastBid(agent.getId(), 1000), new PowerValue(1000, PowerUnit.WATT));
+            BidAnalyzer.assertDemandAtMost(parent.getLastBid(agent.getId(), 1000), Measure.valueOf(1000, WATT));
             AllocationAnalyzer.assertRunningAllocation(resourceManager.getLastAllocation(1000), timeService);
             timeService.stepInTime(60000);
         }
     }
 
-    @Test
     public void testTargetStateOfChargeLower() {
-        float targetSOC = 0;
+        double targetSOC = 0;
         long targetTime = timeService.currentTimeMillis() + 3600000;
         StorageControlSpaceBuilder b = new StorageControlSpaceBuilder();
         b.target(targetSOC, new Date(targetTime));
         b.stateOfCharge(1);
-        b.selfDischarge(new PowerValue(0, PowerUnit.WATT));
-        b.totalCapacity(new EnergyValue(1, EnergyUnit.KILO_WATTHOUR));
-        b.chargeSpeed(new PowerConstraintList(new PowerConstraint(new PowerValue(100, PowerUnit.WATT)),
-                                              new PowerConstraint(new PowerValue(1000, PowerUnit.WATT))));
-        b.dischargeSpeed(new PowerConstraintList(new PowerConstraint(new PowerValue(100, PowerUnit.WATT)),
-                                                 new PowerConstraint(new PowerValue(1000, PowerUnit.WATT))));
+        b.selfDischarge(Measure.valueOf(0, WATT));
+        b.totalCapacity(Measure.valueOf(1, KWH));
+        b.chargeSpeed(ConstraintList.create(WATT).addSingle(100).addSingle(1000).build());
+        b.dischargeSpeed(ConstraintList.create(WATT).addSingle(100).addSingle(1000).build());
         for (int minute = 0; minute < 120; minute++) {
             b.validFrom(timeService.getDate()).validThru(new Date(timeService.currentTimeMillis() + 10000));
             resourceManager.updateControlSpace(b.build(APPLIANCE_ID));
             agent.updatePriceInfo(new PriceInfo(MARKET_BASIS, MAXIMUM_PRICE));
-            BidAnalyzer.assertDemandAtLeast(parent.getLastBid(agent.getId(), 1000), new PowerValue(-1000,
-                                                                                                   PowerUnit.WATT));
+            BidAnalyzer.assertDemandAtLeast(parent.getLastBid(agent.getId(), 1000), Measure.valueOf(-0, WATT));
             AllocationAnalyzer.assertRunningAllocation(resourceManager.getLastAllocation(1000), timeService);
             timeService.stepInTime(60000);
         }
     }
 
-    @Test
     public void testStorageFull() {
         StorageControlSpaceBuilder b = new StorageControlSpaceBuilder();
         b.stateOfCharge(1);
         resourceManager.updateControlSpace(b.build(APPLIANCE_ID));
         agent.updatePriceInfo(new PriceInfo(MARKET_BASIS, MINIMUM_PRICE));
-        BidAnalyzer.assertDemandAtMost(parent.getLastBid(agent.getId(), 1000), new PowerValue(0, PowerUnit.WATT));
+        BidAnalyzer.assertDemandAtMost(parent.getLastBid(agent.getId(), 1000), Measure.valueOf(0, WATT));
         AllocationAnalyzer.assertDemandAtMost(resourceManager.getLastAllocation(1000),
                                               timeService,
-                                              new PowerValue(0, PowerUnit.WATT));
+                                              Measure.valueOf(0, WATT));
     }
 
-    @Test
     public void testStorageEmpty() {
         StorageControlSpaceBuilder b = new StorageControlSpaceBuilder();
         b.stateOfCharge(0);
         resourceManager.updateControlSpace(b.build(APPLIANCE_ID));
         agent.updatePriceInfo(new PriceInfo(MARKET_BASIS, MINIMUM_PRICE));
-        BidAnalyzer.assertDemandAtLeast(parent.getLastBid(agent.getId(), 1000), new PowerValue(0, PowerUnit.WATT));
+        BidAnalyzer.assertDemandAtLeast(parent.getLastBid(agent.getId(), 1000), Measure.valueOf(0, WATT));
         AllocationAnalyzer.assertDemandAtLeast(resourceManager.getLastAllocation(1000),
                                                timeService,
-                                               new PowerValue(0, PowerUnit.WATT));
+                                               Measure.valueOf(0, WATT));
     }
 
 }
