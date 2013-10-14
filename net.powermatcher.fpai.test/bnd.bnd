@@ -25,11 +25,9 @@ Bundle-Version: 1.0.0
 Include-Resource: res
 
 -sign: fps
-
 Private-Package: net.powermatcher.fpai.agent.buffer.test,\
 	net.powermatcher.fpai.agent.storage.test,\
 	net.powermatcher.fpai.agent.timeshifter.test,\
 	net.powermatcher.fpai.agent.uncontrolled.test,\
 	net.powermatcher.fpai.controller.test,\
-	net.powermatcher.fpai.test,\
-	net.powermatcher.fpai.test.integration
+	net.powermatcher.fpai.test
