@@ -273,29 +273,29 @@ public class PMController implements ControllerManager {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public synchronized void registerResource(ControllableResource<? extends ControlSpace> controllableResource) {
-        logger.debug("Adding ControllableResource of type " + controllableResource.getControlSpaceType());
+    public synchronized void registerResource(ControllableResource<?> resource) {
+        logger.debug("Adding ControllableResource of type " + resource.getControlSpaceType());
 
-        Class<? extends FPAIAgent<?>> agentClass = agentMap.get(controllableResource.getControlSpaceType());
+        Class<? extends FPAIAgent<?>> agentClass = agentMap.get(resource.getControlSpaceType());
         if (agentClass == null) {
-            logger.warn("No support for ControllableResource of type: ", controllableResource.getControlSpaceType());
+            logger.warn("No support for ControllableResource of type: ", resource.getControlSpaceType());
             return;
         }
 
-        String agentId = controllableResource.getControlSpaceType().toString().toLowerCase() + this.agentId.incrementAndGet();
+        String agentId = resource.getControlSpaceType().toString().toLowerCase() + this.agentId.incrementAndGet();
 
         // create the agent, and bind the agent to the ControllableResource
         FPAIAgent agent = createAgent(agentId, agentClass);
-        agent.bind(controllableResource); // also binds
-                                          // ControllableResource to
-                                          // agent
+        agent.bind(resource); // also binds
+                              // ControllableResource to
+                              // agent
 
         // bind the agent to the concentrator and vice versa
         concentrator.bind(agent);
         agent.bind(concentrator);
 
         // remember the agent and ControllableResource association
-        agents.put(controllableResource, agent);
+        agents.put(resource, agent);
 
         logger.info("Agent bound to Concentrator and ControllableResource");
     }
@@ -348,15 +348,15 @@ public class PMController implements ControllerManager {
      */
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public synchronized void unregisterResource(ControllableResource<?> controllableResource) {
-        logger.debug("Removing agent associated with ControllableResource of type " + controllableResource.getControlSpaceType());
+    public synchronized void unregisterResource(ControllableResource<?> resource) {
+        logger.debug("Removing agent associated with ControllableResource of type " + resource.getControlSpaceType());
 
         // remove the agent from the list
-        FPAIAgent agent = agents.remove(controllableResource);
+        FPAIAgent agent = agents.remove(resource);
 
         if (agent != null) {
             // unbind the agent from the ControllableResource
-            agent.unbind(controllableResource); // also unbinds ControllableResource from Agent
+            agent.unbind(resource); // also unbinds ControllableResource from Agent
 
             // unbind the agent from the concentrator and vice versa
             concentrator.unbind(agent);
