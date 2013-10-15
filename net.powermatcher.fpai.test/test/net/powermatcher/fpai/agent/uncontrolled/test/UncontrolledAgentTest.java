@@ -2,7 +2,6 @@ package net.powermatcher.fpai.agent.uncontrolled.test;
 
 import static javax.measure.unit.NonSI.KWH;
 import static javax.measure.unit.SI.JOULE;
-import static javax.measure.unit.SI.MILLI;
 import static javax.measure.unit.SI.SECOND;
 import static javax.measure.unit.SI.WATT;
 
@@ -14,6 +13,8 @@ import javax.measure.Measurable;
 import javax.measure.Measure;
 import javax.measure.quantity.Duration;
 import javax.measure.quantity.Energy;
+import javax.measure.quantity.Power;
+import javax.measure.unit.SI;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
@@ -66,11 +67,6 @@ public class UncontrolledAgentTest extends TestCase {
         for (double durationValue : durationValues) {
             Measurable<Duration> measurementDuration = Measure.valueOf(durationValue, SECOND);
 
-            // skip over tests where the duration of the element in the profile is < 1ms (rounds to 0)
-            if (measurementDuration.doubleValue(MILLI(SECOND)) == 0) {
-                continue;
-            }
-
             for (double measurementValueNumber : measurementValueNumbers) {
                 // create a measurement value from the variations
                 Measurable<Energy> measurementValue = Measure.valueOf(measurementValueNumber, JOULE);
@@ -89,15 +85,14 @@ public class UncontrolledAgentTest extends TestCase {
         // send the control space and get the bid
         BidInfo bid = sendControlSpace(measurementDuration, measurementValue);
 
-        double expectedPower = measurementValue.doubleValue(JOULE) / measurementDuration.doubleValue(SECOND);
+        double expectedPowerWatt = measurementValue.doubleValue(JOULE) / measurementDuration.doubleValue(SECOND);
+        Measurable<Power> expectedPower = Measure.valueOf(expectedPowerWatt, WATT);
 
         // if the expected power can't be computed with double precision, we don't expect a bid
-        if (Double.isInfinite(expectedPower) || Double.isNaN(expectedPower)) {
-            Assert.assertNull("Bid received for profile out of spec, may be correct not tested", bid);
-        }
-
-        // perform the normal test
-        else {
+        if (Double.isInfinite(expectedPowerWatt) || Double.isNaN(expectedPowerWatt)) {
+            // what do we expect?
+        } else {
+            // perform the normal test
             Assert.assertNotNull("No bid received for energy profile with duration " + measurementDuration
                                  + " with value"
                                  + measurementValue, bid);
@@ -108,12 +103,7 @@ public class UncontrolledAgentTest extends TestCase {
             Assert.assertEquals("Bid does not span the market basis", MARKET_BASIS.getPriceSteps(), demand.length);
 
             // check the first power value to be equal to the expected power
-            Assert.assertEquals("Unexpected power value in bid", expectedPower, demand[0], expectedPower / 10e6);
-
-            // check that all following power values equal the first
-            for (int i = 1; i < demand.length; i++) {
-                Assert.assertEquals("Bid is not must - run (flat)", demand[i], demand[0], demand[0] / 10e6);
-            }
+            BidAnalyzer.assertFlatBidWithValue(bid, expectedPower);
         }
     }
 
@@ -123,7 +113,7 @@ public class UncontrolledAgentTest extends TestCase {
      */
     private BidInfo sendControlSpace(Measurable<Duration> measurementDuration, Measurable<Energy> measurementValue) {
         // the control space is valid from now and the profile ends now
-        Date startTime = new Date(System.currentTimeMillis() - measurementDuration.longValue(MILLI(SECOND)));
+        Date startTime = new Date();
 
         // construct the profile and control space
         EnergyProfile energyProfile = EnergyProfile.create().add(measurementDuration, measurementValue).build();
@@ -147,7 +137,9 @@ public class UncontrolledAgentTest extends TestCase {
         Measurable<Energy> maxkWh = Measure.valueOf(Double.MAX_VALUE, KWH);
         EnergyProfile energyProfile = EnergyProfile.create().add(Measure.valueOf(1, SECOND), maxkWh).build();
         UncontrolledControlSpace controlSpace = new UncontrolledControlSpace(RESOURCE_ID, startTime, energyProfile);
-        Assert.assertNull("Bid created for 'garbage input'", sendControlSpace(controlSpace));
+        BidInfo received = sendControlSpace(controlSpace);
+        // Invalid bid should return must-not-run bid
+        BidAnalyzer.assertFlatBidWithValue(received, Measure.valueOf(0, SI.WATT));
 
         // test with expired control space
         BidInfo bid = sendControlSpace(new UncontrolledControlSpace(RESOURCE_ID,
