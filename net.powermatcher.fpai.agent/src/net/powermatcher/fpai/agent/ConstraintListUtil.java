@@ -57,53 +57,65 @@ public class ConstraintListUtil {
         return resultValue;
     }
 
-    // // returns null when not found
-    // public static Measurable<Power> floorToPowerConstraintList(ConstraintList<Power> pcl,
-    // final Measurable<Power> wantedPower) {
-    // Double result = null;
-    // double wantedPowerWatt = wantedPower.doubleValue(WATT);
-    //
-    // for (Constraint<Power> pc : pcl) {
-    // double upper = pc.getUpperBound().doubleValue(WATT);
-    // double lower = pc.getLowerBound().doubleValue(WATT);
-    // if (upper >= wantedPowerWatt && lower <= wantedPowerWatt) {
-    // return wantedPower;
-    // } else if (upper < wantedPowerWatt) {
-    // if (result == null || upper > result) {
-    // result = lower;
-    // }
-    // }
-    // }
-    //
-    // if (result == null) {
-    // return null;
-    // } else {
-    // return Measure.valueOf(result, WATT);
-    // }
-    // }
-    //
-    // // TODO move to PowerConstraintList?
-    // public static Measurable<Power> ceilToPowerConstraintList(ConstraintList<Power> pcl,
-    // final Measurable<Power> wantedPower) {
-    // Double result = null;
-    // final double wantedPowerWatt = wantedPower.doubleValue(WATT);
-    //
-    // for (Constraint<Power> pc : pcl) {
-    // double upper = pc.getUpperBound().doubleValue(WATT);
-    // double lower = pc.getLowerBound().doubleValue(WATT);
-    // if (upper >= wantedPowerWatt && lower <= wantedPowerWatt) {
-    // return wantedPower;
-    // } else if (lower > wantedPowerWatt) {
-    // if (result == null || lower < result) {
-    // result = lower;
-    // }
-    // }
-    // }
-    //
-    // if (result == null) {
-    // return null;
-    // } else {
-    // return Measure.valueOf(result, WATT);
-    // }
-    // }
+    /**
+     * Find a value in the ConstraintList<Power> which is at most the wantedPower
+     * 
+     * @param pcl
+     * @param wantedPower
+     * @return
+     */
+    public static Measurable<Power> floorToPowerConstraintList(ConstraintList<Power> pcl,
+                                                               final Measurable<Power> wantedPower) {
+        Double result = null;
+        double wantedPowerWatt = wantedPower.doubleValue(WATT);
+
+        for (Constraint<Power> pc : pcl) {
+            double upper = pc.getUpperBound().doubleValue(WATT);
+            double lower = pc.getLowerBound().doubleValue(WATT);
+            if (upper >= wantedPowerWatt && lower <= wantedPowerWatt) {
+                return wantedPower;
+            } else if (upper < wantedPowerWatt) {
+                if (result == null || upper > result) {
+                    result = lower;
+                }
+            }
+        }
+
+        if (result == null) {
+            return null;
+        } else {
+            return Measure.valueOf(result, WATT);
+        }
+    }
+
+    /**
+     * Find a value in the ConstraintList<Power> which is at least the wantedPower
+     * 
+     * @param pcl
+     * @param wantedPower
+     * @return
+     */
+    public static Measurable<Power> ceilToPowerConstraintList(ConstraintList<Power> pcl,
+                                                              final Measurable<Power> wantedPower) {
+        Double result = null;
+        final double wantedPowerWatt = wantedPower.doubleValue(WATT);
+
+        for (Constraint<Power> pc : pcl) {
+            double upper = pc.getUpperBound().doubleValue(WATT);
+            double lower = pc.getLowerBound().doubleValue(WATT);
+            if (upper >= wantedPowerWatt && lower <= wantedPowerWatt) {
+                return wantedPower;
+            } else if (lower > wantedPowerWatt) {
+                if (result == null || lower < result) {
+                    result = lower;
+                }
+            }
+        }
+
+        if (result == null) {
+            return null;
+        } else {
+            return Measure.valueOf(result, WATT);
+        }
+    }
 }

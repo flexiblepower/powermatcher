@@ -85,7 +85,7 @@ public class BufferAgent extends FPAIAgent<BufferControlSpace> implements
         // check if there is a minimum charge speed and apply it
         Measurable<Power> minimumChargeSpeed = calculateMinimumChargeSpeed(controlSpace);
         if (minimumChargeSpeed.doubleValue(WATT) > 0) {
-            bid = BidUtil.setMinimumDemand(bid, controlSpace.getChargeSpeed(), minimumChargeSpeed);
+            bid = BidUtil.setMinimumDemand(bid, minimumChargeSpeed);
         }
 
         // return the bid;

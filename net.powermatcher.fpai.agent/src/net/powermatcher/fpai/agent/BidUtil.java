@@ -75,16 +75,12 @@ public class BidUtil {
      * 
      * @param bid
      *            The bid to transform
-     * @param pcl
-     *            The allowed power values
      * @param minDemandWatt
      *            The minimum demand which is allowed (will be adjusted to the given power constraint list)
      * @return The transformed bid wherein any demand in the original bid is adjusted so that it is not below the given
-     *         minimum demand (as rounded to the nearest allowed power value in the given constraint list).
+     *         minimum demand
      */
-    public static BidInfo setMinimumDemand(BidInfo bid, ConstraintList<Power> pcl, Measurable<Power> minDemand) {
-        minDemand = roundToPowerConstraintList(pcl, minDemand);
-
+    public static BidInfo setMinimumDemand(BidInfo bid, Measurable<Power> minDemand) {
         double[] demand = bid.getDemand();
         double minDemandWatt = minDemand.doubleValue(WATT);
         for (int i = 0; i < demand.length; i++) {
@@ -99,16 +95,12 @@ public class BidUtil {
      * 
      * @param bid
      *            The bid to transform
-     * @param pcl
-     *            The allowed power values
      * @param maxDemandWatt
      *            The maximum demand which is allowed (will be adjusted to the given power constraint list)
      * @return The transformed bid wherein any demand in the original bid is adjusted so that it is not above the given
      *         maximum demand (as rounded to the nearest allowed power value in the given constraint list).
      */
-    public static BidInfo setMaximumDemand(BidInfo bid, ConstraintList<Power> pcl, Measurable<Power> maxDemand) {
-        maxDemand = roundToPowerConstraintList(pcl, maxDemand);
-
+    public static BidInfo setMaximumDemand(BidInfo bid, Measurable<Power> maxDemand) {
         double[] demand = bid.getDemand();
         double maxDemandWatt = maxDemand.doubleValue(WATT);
         for (int i = 0; i < demand.length; i++) {
