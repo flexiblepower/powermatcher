@@ -13,6 +13,7 @@ import javax.measure.quantity.Power;
 import net.powermatcher.core.scheduler.service.TimeService;
 
 import org.flexiblepower.rai.Allocation;
+import org.flexiblepower.rai.values.EnergyProfile.Element;
 
 public class AllocationAnalyzer {
 
@@ -47,7 +48,11 @@ public class AllocationAnalyzer {
     public static void assertNotRunningAllocation(Allocation allocation, TimeService timeService) {
         assertNotNull(allocation);
         assertAllocationStartsNow(allocation, timeService);
-        assertEquals(0, allocation.getEnergyProfile().get(0).getEnergy().doubleValue(JOULE), 0.001);
+        Element energy = allocation.getEnergyProfile().get(0);
+        assertEquals("Exected no demand, demand was " + energy.getAveragePower(),
+                     0,
+                     energy.getEnergy().doubleValue(JOULE),
+                     0.001);
     }
 
     public static void assertRunningAllocation(Allocation allocation, TimeService timeService) {

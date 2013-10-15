@@ -5,8 +5,11 @@ import static javax.measure.unit.SI.WATT;
 import javax.measure.Measurable;
 import javax.measure.Measure;
 import javax.measure.quantity.Power;
+import javax.measure.unit.SI;
 
 import net.powermatcher.core.agent.framework.data.BidInfo;
+import net.powermatcher.core.agent.framework.data.MarketBasis;
+import net.powermatcher.core.agent.framework.data.PricePoint;
 
 import org.flexiblepower.rai.values.Constraint;
 import org.flexiblepower.rai.values.ConstraintList;
@@ -15,6 +18,20 @@ import org.flexiblepower.rai.values.ConstraintList.Builder;
 public class BidUtil {
 
     private BidUtil() {
+    }
+
+    /**
+     * Create a flat bid with a demand of 0 Watt
+     */
+    public static BidInfo zeroBid(MarketBasis marketBasis) {
+        return createFlatBid(marketBasis, Measure.valueOf(0, SI.WATT));
+    }
+
+    /**
+     * Create a flat/must run bid the provided demand
+     */
+    public static BidInfo createFlatBid(MarketBasis marketBasis, Measurable<Power> demand) {
+        return new BidInfo(marketBasis, new PricePoint(0, demand.doubleValue(WATT)));
     }
 
     public static BidInfo roundBidToPowerConstraintList(BidInfo bid, ConstraintList<Power> pcl, boolean includeZero) {

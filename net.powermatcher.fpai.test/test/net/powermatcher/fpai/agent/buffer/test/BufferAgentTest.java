@@ -53,6 +53,7 @@ public class BufferAgentTest extends TestCase {
         cfg.put(CFG_PREFIX + ".matcher.id", "concentrator1");
         cfg.put(CFG_PREFIX + ".agent.bid.log.level", AgentConfiguration.FULL_LOGGING);
         cfg.put(CFG_PREFIX + ".agent.price.log.level", AgentConfiguration.FULL_LOGGING);
+        cfg.put(CFG_PREFIX + ".allocation.update.threshold", 0d);
 
         agent = new BufferAgent(new PrefixedConfiguration(cfg, CFG_PREFIX));
         agent.updateMarketBasis(MARKET_BASIS);
@@ -82,7 +83,10 @@ public class BufferAgentTest extends TestCase {
         executor.awaitTermination(1, java.util.concurrent.TimeUnit.SECONDS);
     }
 
-    public void testMinOn() { // TODO cleanup
+    /**
+     * Test if the agent respects the MinOn property
+     */
+    public void testMinOn() {
         // init
         timeService.stepInTime(60000);
         BufferControlSpaceBuilder b = new BufferControlSpaceBuilder();
@@ -110,7 +114,7 @@ public class BufferAgentTest extends TestCase {
             allocation = resourceManager.getLastAllocation(1000);
             BidInfo lastBid = parent.getLastBid(agent.getId(), 1000);
             System.out.println(lastBid);
-            System.out.println(allocation.getEnergyProfile());
+            System.out.println(allocation.getEnergyProfile().get(0).getAveragePower());
             System.out.println("Second " + seconds);
             if (seconds < 60) {
                 // Must run situation
@@ -124,7 +128,10 @@ public class BufferAgentTest extends TestCase {
         }
     }
 
-    public void testMinOff() { // TODO cleanup
+    /**
+     * Test if the agent respects the MinOn property
+     */
+    public void testMinOff() {
         // make device turn on, make sure minturnon and minturnoff periods are over
         timeService.stepInTime(Measure.valueOf(1, NonSI.DAY));
 
@@ -180,7 +187,7 @@ public class BufferAgentTest extends TestCase {
             agent.updatePriceInfo(new PriceInfo(MARKET_BASIS, MINIMUM_PRICE));
 
             // Check allocation
-            if (seconds < 60) {
+            if (seconds <= 60) {
                 // In minturnoff period
                 AllocationAnalyzer.assertNotRunningAllocation(resourceManager.getLastAllocation(1000), timeService);
                 BidAnalyzer.assertFlatBidWithValue(parent.getLastBid(agent.getId(), 1000), Measure.valueOf(0, SI.WATT));
@@ -343,9 +350,10 @@ public class BufferAgentTest extends TestCase {
 
         timeService.stepInTime(1000);
 
+        // now create a ControlSpace which lies in the future
         b.stateOfCharge(1f); // changed
         b.validFrom(new Date(timeService.currentTimeMillis() + 10000));
-        b.validThru(new Date(timeService.currentTimeMillis() + 10001)); // INVALID
+        b.validThru(new Date(timeService.currentTimeMillis() + 10001)); // INVALID (for now)
         resourceManager.updateControlSpace(b.build(RESOURCE_ID));
         BidInfo bid2 = parent.getLastBid(agent.getId(), 1000);
 

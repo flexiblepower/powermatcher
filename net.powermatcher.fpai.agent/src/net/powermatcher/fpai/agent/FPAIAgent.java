@@ -1,5 +1,17 @@
 package net.powermatcher.fpai.agent;
 
+import static javax.measure.unit.SI.MILLI;
+import static javax.measure.unit.SI.SECOND;
+
+import java.util.Date;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
+import javax.measure.Measurable;
+import javax.measure.Measure;
+import javax.measure.quantity.Duration;
+import javax.measure.unit.NonSI;
+
 import net.powermatcher.core.agent.framework.Agent;
 import net.powermatcher.core.agent.framework.data.BidInfo;
 import net.powermatcher.core.agent.framework.data.MarketBasis;
@@ -12,10 +24,28 @@ import org.flexiblepower.rai.ControlSpace;
 import org.flexiblepower.rai.ControllableResource;
 import org.flexiblepower.rai.Controller;
 
-public abstract class FPAIAgent<CS extends ControlSpace> extends Agent implements Controller<CS> {
+/**
+ * Abstract class for PowerMatcher agents on the FPAI framework. FPAIAgents are created by the PMController
+ * 
+ * @author TNO
+ * 
+ * @param <CS>
+ *            The type of ControlSpace this agent represents
+ */
+public abstract class FPAIAgent<CS extends ControlSpace> extends Agent implements Controller<CS>, Runnable {
 
-    private CS currentControlSpace;
-    private ControllableResource<? extends ControlSpace> controllableResource;
+    private static Measurable<Duration> UPDATE_INTERVAL = Measure.valueOf(1, NonSI.MINUTE);
+
+    /** Last known ControlSpace */
+    private CS lastControlSpace = null;
+    /** Last known PriceInfo */
+    private PriceInfo lastPriceInfo = null;
+    /** Time when we received the last PriceInfo */
+    private Date lastPriceDate = null;
+    /** The resource this agent is controlling */
+    private ControllableResource<? extends CS> controllableResource;
+
+    private ScheduledFuture<?> scheduledFuture;
 
     protected FPAIAgent() {
         super();
@@ -29,48 +59,67 @@ public abstract class FPAIAgent<CS extends ControlSpace> extends Agent implement
 
     protected abstract Allocation createAllocation(BidInfo lastBid, PriceInfo newPriceInfo, CS controlSpace);
 
+    /**
+     * Force a bid update based on the current control space
+     */
     @Override
     protected synchronized void doBidUpdate() {
-        // force a bid update based on the current control space
-        ControlSpace controlSpace = getCurrentControlSpace();
+        CS controlSpace = getLastControlSpace();
         if (controlSpace != null) {
-            // controlSpaceUpdated(controllableResource, controlSpace);
+            this.controlSpaceUpdated(this.controllableResource, controlSpace);
         }
     }
 
     @Override
     public synchronized void controlSpaceUpdated(ControllableResource<? extends CS> resource, CS controlSpace) {
         assert controllableResource == resource;
-        assert controlSpace != null;
 
         BidInfo bidInfo;
-        if (controlSpace.getValidThru().getTime() > getTimeSource().currentTimeMillis()) {
+        if (controlSpace == null) {
+            // No flexibility available
+            bidInfo = BidUtil.zeroBid(getCurrentMarketBasis());
+            this.logDebug("ControlSpace was null, triggering must-off bid");
+        } else if (controlSpace.getValidThru().getTime() > getTimeSource().currentTimeMillis()) {
             // Control space hasn't expired
 
             // remember the updated control space
-            setCurrentControlSpace(controlSpace);
+            setLastControlSpace(controlSpace);
 
             // calculate a new bid
             bidInfo = createBid(controlSpace, getCurrentMarketBasis());
-            this.logDebug("Control space was updated (" + controlSpace + "), triggereing updating the bid: " + bidInfo);
+            this.logDebug("Control space was updated (" + controlSpace + "), triggering updating the bid: " + bidInfo);
         } else {
             // There is no valid control space left. We assume this indicates that there is no flexibility.
-            bidInfo = new BidInfo(getCurrentMarketBasis(), new PricePoint(0, 0));
+            bidInfo = BidUtil.zeroBid(getCurrentMarketBasis());
             this.logDebug("No valid control space found, triggering must-off bid");
         }
         // and publish it
         publishBidUpdate(bidInfo);
+    }
 
-        // FIXME it is not guaranteed that the price is updated
-        // however this is assumed for now for demonstration purposes
+    @Override
+    protected void startPeriodicTasks() {
+        scheduledFuture = getScheduler().scheduleAtFixedRate(this,
+                                                             0,
+                                                             UPDATE_INTERVAL.longValue(MILLI(SECOND)),
+                                                             TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    protected void stopPeriodicTasks() {
+        scheduledFuture.cancel(false);
     }
 
     @Override
     public void updatePriceInfo(PriceInfo newPriceInfo) {
         super.updatePriceInfo(newPriceInfo);
+        synchronized (this) {
+            this.lastPriceInfo = newPriceInfo;
+            this.lastPriceDate = new Date(getTimeSource().currentTimeMillis());
+        }
 
         // check if there is control space information available
-        CS currentControlSpace = getCurrentControlSpace();
+        CS currentControlSpace = getLastControlSpace();
         if (currentControlSpace == null) {
             this.logDebug("Ignoring price update, no control space information available");
             return;
@@ -78,7 +127,7 @@ public abstract class FPAIAgent<CS extends ControlSpace> extends Agent implement
 
         BidInfo lastBid = getLastBid();
         if (lastBid == null) {
-            this.logDebug("Ignoring price update, bid no bid published yet");
+            this.logDebug("Ignoring price update, no bid published yet");
             return;
         }
 
@@ -96,35 +145,66 @@ public abstract class FPAIAgent<CS extends ControlSpace> extends Agent implement
         }
     }
 
+    /**
+     * Bind this controller to a controllableResource
+     * 
+     * @param controllableResource
+     */
     public synchronized void bind(ControllableResource<CS> controllableResource) {
         assert controllableResource == null;
         this.controllableResource = controllableResource;
         controllableResource.setController(this);
     }
 
+    /**
+     * Unbind this controller from a controllableResource
+     * 
+     * @param controllableResource
+     */
     public synchronized void unbind(ControllableResource<CS> controllableResource) {
         // send out 0 bid to say bye-bye
         publishBidUpdate(new BidInfo(getCurrentMarketBasis(), new PricePoint(0, 0)));
 
         assert this.controllableResource == controllableResource;
         controllableResource.unsetController(this);
-        setCurrentControlSpace(null);
+        setLastControlSpace(null);
         controllableResource = null;
     }
 
-    private CS getCurrentControlSpace() {
+    private CS getLastControlSpace() {
         if (controllableResource == null) {
             return null;
         }
 
         synchronized (controllableResource) {
-            return currentControlSpace;
+            return lastControlSpace;
         }
     }
 
-    private void setCurrentControlSpace(CS controlSpace) {
+    private void setLastControlSpace(CS controlSpace) {
         synchronized (controllableResource) {
-            currentControlSpace = controlSpace;
+            lastControlSpace = controlSpace;
+        }
+    }
+
+    /**
+     * PowerMatcher doesn't guarantee price updates. A new ControlSpace triggers a bid update; a price update can
+     * trigger an allocation. Since price updates aren't guaranteed by PowerMatcher, we have to make sure that the
+     * updatePriceInfo method is called once in a while so the agent always has an opportunity to create allocations.
+     */
+    @Override
+    public void run() {
+        PriceInfo priceInfo;
+        Date priceDate;
+        synchronized (this) {
+            priceInfo = lastPriceInfo;
+            priceDate = lastPriceDate;
+        }
+        if (priceInfo != null && priceDate != null) {
+            if (priceDate.getTime() + UPDATE_INTERVAL.longValue(MILLI(SECOND)) < getTimeSource().currentTimeMillis()) {
+                // We haven't received a new PriceInfo in the last UPDATE_INTERVAL, resubmit the last one
+                this.updatePriceInfo(priceInfo);
+            }
         }
     }
 }

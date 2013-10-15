@@ -1,9 +1,6 @@
 package net.powermatcher.fpai.agent.buffer;
 
-import static javax.measure.unit.NonSI.HOUR;
-import static javax.measure.unit.NonSI.KWH;
 import static javax.measure.unit.SI.JOULE;
-import static javax.measure.unit.SI.KILO;
 import static javax.measure.unit.SI.MILLI;
 import static javax.measure.unit.SI.SECOND;
 import static javax.measure.unit.SI.WATT;
@@ -56,7 +53,7 @@ public class BufferAgent extends FPAIAgent<BufferControlSpace> implements
     }
 
     /** This value influences the bid strategy */
-    private final double bidBandWidth = 0.25; // TODO analyse this value
+    private final double bidBandWidth = 0.25; // TODO analyze this value
 
     /** The last allocation given */
     private Allocation lastAllocation;
@@ -72,19 +69,18 @@ public class BufferAgent extends FPAIAgent<BufferControlSpace> implements
      */
     @Override
     protected BidInfo createBid(BufferControlSpace controlSpace, MarketBasis marketBasis) {
-        // if there's no control space, issue a flat bid with power value 0
-        if (controlSpace == null) {
-            return createFlatBid(marketBasis, Measure.valueOf(0, WATT));
-        }
-
         // if the buffer can't turn on, return a flat bid with power value 0
         if (isInMustNotRunState() || (isOffByAllocation() && !canTurnOn(controlSpace))) {
-            return createFlatBid(marketBasis, Measure.valueOf(0, WATT));
+            return BidUtil.zeroBid(marketBasis);
         }
 
         // perform the basic bidding strategy (either with the SoC delta from the target as 'driver' or the SoC itself)
-        BidInfo bid = hasTarget(controlSpace) ? createBidByTargetSoCDelta(marketBasis, controlSpace)
-                                             : createBidBySoC(marketBasis, controlSpace);
+        BidInfo bid;
+        if (hasTarget(controlSpace)) {
+            bid = createBidByTargetSoCDelta(marketBasis, controlSpace);
+        } else {
+            bid = createBidBySoC(marketBasis, controlSpace);
+        }
 
         // check if there is a minimum charge speed and apply it
         Measurable<Power> minimumChargeSpeed = calculateMinimumChargeSpeed(controlSpace);
@@ -94,13 +90,6 @@ public class BufferAgent extends FPAIAgent<BufferControlSpace> implements
 
         // return the bid;
         return bid;
-    }
-
-    /**
-     * Create a flat/must run bid the provided demand
-     */
-    private BidInfo createFlatBid(MarketBasis marketBasis, Measurable<Power> demand) {
-        return new BidInfo(marketBasis, new PricePoint(0, demand.doubleValue(WATT)));
     }
 
     /**
@@ -144,21 +133,21 @@ public class BufferAgent extends FPAIAgent<BufferControlSpace> implements
         }
 
         // calculate the amount to charge
-        double deltaEnergy = deltaSoC * controlSpace.getTotalCapacity().doubleValue(KWH);
+        double deltaEnergyJoule = deltaSoC * controlSpace.getTotalCapacity().doubleValue(JOULE);
 
         // calculate the time required to charge to the target state of charge at maximum power
-        double discharge = controlSpace.getSelfDischarge().doubleValue(KILO(WATT));
-        double maxPower = controlSpace.getChargeSpeed().getMaximum().doubleValue(KILO(WATT));
-        double fastestChargeTime = deltaEnergy / (maxPower - discharge);
+        double dischargeWatt = controlSpace.getSelfDischarge().doubleValue(WATT);
+        double maxChargePowerWatt = controlSpace.getChargeSpeed().getMaximum().doubleValue(WATT);
+        double fastestChargeTimeSecond = deltaEnergyJoule / (maxChargePowerWatt - dischargeWatt);
 
         // calculate the time frame available
-        double timeToDeadline = getTimeSource().currentTimeMillis() - controlSpace.getTargetTime().getTime();
+        double timeToDeadlineMS = getTimeSource().currentTimeMillis() - controlSpace.getTargetTime().getTime();
 
         // if past the deadline ...
-        if (timeToDeadline <= 0) {
+        if (timeToDeadlineMS <= 0) {
             if (deltaSoC > 0) {
                 // and target SoC not yet achieved, charge as fast as possible (minimize 'damage')
-                return createFlatBid(marketBasis, controlSpace.getChargeSpeed().getMaximum());
+                return BidUtil.createFlatBid(marketBasis, controlSpace.getChargeSpeed().getMaximum());
             } else {
                 // otherwise use normal bidding strategy
                 return createBidBySoC(marketBasis, controlSpace);
@@ -168,7 +157,7 @@ public class BufferAgent extends FPAIAgent<BufferControlSpace> implements
         // the price for which the maximum demand is desirable is inversely proportional to the ratio between the
         // minimum time required to cover the delta SoC (at max power) and the time until the target deadline. I.e. the
         // closer to a must-run situation, the higher the accepted price.
-        int maxDemandPrice = (int) ((fastestChargeTime / timeToDeadline) * marketBasis.getPriceSteps());
+        int maxDemandPrice = (int) (((fastestChargeTimeSecond * 1000) / timeToDeadlineMS) * marketBasis.getPriceSteps());
         // the bid is slope shaped with a configured width, here (with a target), if the price is higher than
         // maxDemandPrice, it may still be 'acceptable', but at a lower charging power
         // i.e. the width of the slope influences the eagerness to charge the buffer, the wider the slope, the more
@@ -200,7 +189,7 @@ public class BufferAgent extends FPAIAgent<BufferControlSpace> implements
                                     int maxDemandPriceIdx) {
         // if the maximum demand is at or beyond the price range, we need to generate a must run bid
         if (maxDemandPriceIdx >= marketBasis.getPriceSteps()) {
-            return createFlatBid(marketBasis, bufferControlSpace.getChargeSpeed().getMaximum());
+            return BidUtil.createFlatBid(marketBasis, bufferControlSpace.getChargeSpeed().getMaximum());
         }
 
         // the min and max prices are bound by the price basis
@@ -222,8 +211,10 @@ public class BufferAgent extends FPAIAgent<BufferControlSpace> implements
         return BidUtil.roundBidToPowerConstraintList(bid, bufferControlSpace.getChargeSpeed(), true);
     }
 
+    /**
+     * Calculate the minimum charge speed for must-run situations
+     */
     private Measurable<Power> calculateMinimumChargeSpeed(BufferControlSpace bufferControlSpace) {
-        // calculate the charge speed for must-run situations
         if (isInMustRunState() || (isOnByAllocation() && !canTurnOff(bufferControlSpace))) {
             // determined by the lowest power which is > 0
             for (Constraint<Power> c : bufferControlSpace.getChargeSpeed()) {
@@ -234,8 +225,8 @@ public class BufferAgent extends FPAIAgent<BufferControlSpace> implements
             }
         }
 
-        // or return the minimum speed
-        return bufferControlSpace.getChargeSpeed().getMinimum();
+        // There is currently no minimum charge speed
+        return Measure.valueOf(0, WATT);
     }
 
     /**
@@ -244,35 +235,6 @@ public class BufferAgent extends FPAIAgent<BufferControlSpace> implements
     private static boolean hasTarget(BufferControlSpace bufferControlSpace) {
         return !(bufferControlSpace.getTargetStateOfCharge() == null || bufferControlSpace.getTargetTime() == null);
     }
-
-    // /**
-    // * Determines the charge speed to meet the state of charge target. TODO consider if this behavior isn't already
-    // * covered by the default bidding strategy.
-    // *
-    // * @return 0 if there is time left for 'idling' or max power if in must-run state.
-    // */
-    // private PowerValue minimumChargeSpeedForTarget(BufferControlSpace controlSpace) {
-    // // calculate the amount of energy required to achieve the target state of charge
-    // double deltaSoC = controlSpace.getTargetStateOfCharge() - controlSpace.getStateOfCharge();
-    // double deltaEnergy = deltaSoC * controlSpace.getTotalCapacity().getValueAs(EnergyUnit.KILO_WATTHOUR);
-    //
-    // // calculate the time required to charge to the target state of charge
-    // double discharge = controlSpace.getSelfDischarge().getValueAs(PowerUnit.KILO_WATT);
-    // double maxPower = controlSpace.getChargeSpeed().getMaximum().getValueAs(PowerUnit.KILO_WATT);
-    // double minDeltaTime = deltaEnergy / (maxPower - discharge);
-    //
-    // // calculate the time frame available
-    // double maxDeltaTime = new Duration(new Date(getTimeSource().currentTimeMillis()),
-    // controlSpace.getTargetTime()).getValueAs(TimeUnit.HOURS);
-    //
-    // if (minDeltaTime < maxDeltaTime) {
-    // // if there is time to idle, return 0 as minimum
-    // return new PowerValue(0, PowerUnit.WATT);
-    // } else {
-    // // otherwise, the buffer is in a must-run situation
-    // return controlSpace.getChargeSpeed().getMaximum();
-    // }
-    // }
 
     /**
      * Check if the device can turn off now in order to prevent drainage to SoC below 0
@@ -283,10 +245,10 @@ public class BufferAgent extends FPAIAgent<BufferControlSpace> implements
             return false;
         } else {
             double selfDischargeWatt = bufferControlSpace.getSelfDischarge().doubleValue(WATT);
-            double minOffHours = bufferControlSpace.getMinOffPeriod().doubleValue(HOUR);
-            double minChargeEnergyWH = selfDischargeWatt * minOffHours;
-            double totalCapacityWH = bufferControlSpace.getTotalCapacity().doubleValue(MILLI(KWH));
-            double minSOC = minChargeEnergyWH / totalCapacityWH;
+            double minOffSecond = bufferControlSpace.getMinOffPeriod().doubleValue(SECOND);
+            double minChargeEnergyJoule = selfDischargeWatt * minOffSecond;
+            double totalCapacityJoule = bufferControlSpace.getTotalCapacity().doubleValue(JOULE);
+            double minSOC = minChargeEnergyJoule / totalCapacityJoule;
             return bufferControlSpace.getStateOfCharge() >= minSOC;
         }
     }
@@ -301,10 +263,10 @@ public class BufferAgent extends FPAIAgent<BufferControlSpace> implements
         } else {
             double minDemandWatt = bufferControlSpace.getChargeSpeed().getMinimum().doubleValue(WATT);
             double netDemandWatt = minDemandWatt - bufferControlSpace.getSelfDischarge().doubleValue(WATT);
-            double minOnHours = bufferControlSpace.getMinOnPeriod().doubleValue(HOUR);
-            double minChargeEnergyWH = minOnHours * netDemandWatt;
-            double totalCapacityWH = bufferControlSpace.getTotalCapacity().doubleValue(MILLI(KWH));
-            double maxSOC = 1 - (minChargeEnergyWH / totalCapacityWH);
+            double minOnSecond = bufferControlSpace.getMinOnPeriod().doubleValue(SECOND);
+            double minChargeEnergyJoule = minOnSecond * netDemandWatt;
+            double totalCapacityJoule = bufferControlSpace.getTotalCapacity().doubleValue(JOULE);
+            double maxSOC = 1 - (minChargeEnergyJoule / totalCapacityJoule);
             return bufferControlSpace.getStateOfCharge() < maxSOC;
         }
     }
@@ -338,10 +300,10 @@ public class BufferAgent extends FPAIAgent<BufferControlSpace> implements
 
         // if we're turning on or off, calculate the time at which we can switch again
         if (currentTargetPower == 0 && targetPower != 0) {
-            logDebug("Turning device ON");
+            logDebug("Turning device ON for at least " + controlSpace.getMinOnPeriod());
             mustRunUntil = TimeUtil.add(now, controlSpace.getMinOnPeriod());
         } else if (currentTargetPower != 0 && targetPower == 0) {
-            logDebug("Turning device OFF");
+            logDebug("Turning device OFF for at least " + controlSpace.getMinOffPeriod());
             mustNotRunUntil = TimeUtil.add(now, controlSpace.getMinOffPeriod());
         }
 
