@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="master" default="none">
-	
-	<import file="build-template.xml"/>
-	
+
+	<import file="build-template.xml" />
+
 	<!--
 		Use this file to provide your workspace-specific tasks. Several examples follow.
 		
@@ -21,5 +21,75 @@
 			...
 		</target>
 	-->
+
+	<property name="cobertura.dir" value="${basedir}/../cnf/tools/cobertura" />
+	<property name="instrumented.dir" value="${basedir}/instrumented" />
+	<property name="classes.dir" value="${basedir}/bin" />
+
+	<target name="check">
+		<condition property="testdirpresent">
+			<available file="test" type="dir" />
+		</condition>
+	</target>
+	
+	<path id="cobertura.classpath">
+		<fileset dir="${cobertura.dir}">
+			<include name="cobertura-2.0.3.jar" />
+			<include name="lib/**/*.jar" />
+		</fileset>
+	</path>
+
+	<taskdef classpathref="cobertura.classpath" resource="tasks.properties" />
+	<target name="instrument" depends="init,compile">
+		<delete file="cobertura.ser" />
+		<delete dir="${instrumented.dir}" />
+		<cobertura-instrument todir="${instrumented.dir}">
+			<fileset dir="${classes.dir}">
+				<include name="**/*.class" />
+				<exclude name="**/*Test.class" />
+			</fileset>
+		</cobertura-instrument>
+	</target>
+
+
+	<target name="test-coverage" depends="check,compileTests,instrument" if="testdirpresent">
+		<junit fork="yes" dir="${basedir}">
+			<classpath path="${instrumented.dir}" />
+			<classpath path="${cobertura.dir}" />
+			<classpath location="../cnf/tools/cobertura/cobertura-2.0.3.jar" />
+			<classpath path="bin_test" />
+			<classpath path="bin" />
+			<classpath path="${project.buildpath}:bin_test/" />
+			<formatter type="xml" />
+			<batchtest todir="${target}">
+				<fileset dir="test">
+					<include name="**/*Test.java" />
+				</fileset>
+			</batchtest>
+		</junit>
+	</target>
+
+	<target name="coverage-report" depends="check,test-coverage" if="testdirpresent">
+		<delete file="coverage.xml" />
+		<cobertura-report srcdir="${project.sourcepath}" destdir="${basedir}" format="xml" />
+	</target>
+
+	<target name="clean">
+		<antcall target="template.clean" />
+		<delete dir="${instrumented.dir}" />
+		<delete dir="${reports.dir}" />
+		<delete file="cobertura.ser" />
+		<delete file="cobertura.log" />
+	</target>
+
+	
+	<taskdef resource="checkstyletask.properties" classpath="${basedir}/../cnf/tools/checkstyle/checkstyle-5.6-all.jar"/>
+	
+	<target name="checkstyle">
+		<checkstyle config="${basedir}/../cnf/tools/checkstyle/fpai_checks.xml" failOnViolation="false">
+			<fileset dir="${basedir}/src" includes="**/*.java"/>
+			<formatter type="xml" toFile="${basedir}/generated/checkstyle_errors.xml"/>
+		</checkstyle>
+	</target>
 
 </project>

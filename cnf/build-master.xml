@@ -39,6 +39,18 @@
 			<fileset refId="build" />
 		</subant>
 	</target>
+	
+	<target name="coverage-report">
+		<subant target="coverage-report">
+			<fileset refId="build" />
+		</subant>
+	</target>
+	
+	<target name="checkstyle">
+		<subant target="checkstyle">
+			<fileset refId="build" />
+		</subant>
+	</target>
 
 	<target name="test" depends="build">
 		<subant target="test">
