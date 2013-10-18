@@ -394,6 +394,21 @@ public class BufferAgent extends FPAIAgent<BufferControlSpace> implements
         return currentAllocElement.getAveragePower().doubleValue(WATT);
     }
 
+    protected static boolean isConsumingBuffer(BufferControlSpace controlSpace) {
+        for (Constraint<Power> c : controlSpace.getChargeSpeed()) {
+            double upperWatt = c.getUpperBound().doubleValue(WATT);
+            if (upperWatt != 0) {
+                return upperWatt > 0;
+            }
+        }
+        // should not get here
+        return true;
+    }
+
+    protected static boolean isProducingBuffer(BufferControlSpace controlSpace) {
+        return !isConsumingBuffer(controlSpace);
+    }
+
     public static interface Config extends AgentConfiguration {
         @Override
         @Meta.AD(required = false, deflt = CLUSTER_ID_DEFAULT)

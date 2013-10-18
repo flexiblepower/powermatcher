@@ -51,6 +51,8 @@ public class TimeshifterAgent extends FPAIAgent<TimeShifterControlSpace> impleme
      */
     private double eagerness = DEFAULT_EAGERNESS;
 
+    private TimeShifterControlSpace lastControlSpace;
+
     public TimeshifterAgent() {
     }
 
@@ -63,6 +65,7 @@ public class TimeshifterAgent extends FPAIAgent<TimeShifterControlSpace> impleme
 
     @Override
     public Allocation createAllocation(BidInfo lastBid, PriceInfo price, TimeShifterControlSpace controlSpace) {
+        lastControlSpace = controlSpace;
         // the device has already been started
         if (deviceStartTime != null) {
             return null;
@@ -91,6 +94,20 @@ public class TimeshifterAgent extends FPAIAgent<TimeShifterControlSpace> impleme
     private Allocation createStartAllocation(TimeShifterControlSpace controlSpace, Date now) {
         deviceStartTime = now;
         return new Allocation(controlSpace, deviceStartTime, controlSpace.getEnergyProfile());
+    }
+
+    /**
+     * Publish regularly a new bid when the device is started, even if there was no new ControlSpace. The EnergyProfile
+     * used to create a must-run bid can change over time.
+     * 
+     * Overrides the run in FPAIAgent
+     */
+    @Override
+    public void run() {
+        super.run();
+        if (deviceStartTime != null) {
+            publishBidUpdate(createBid(lastControlSpace, getCurrentMarketBasis()));
+        }
     }
 
     @Override

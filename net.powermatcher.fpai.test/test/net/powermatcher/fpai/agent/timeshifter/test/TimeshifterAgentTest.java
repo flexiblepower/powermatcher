@@ -37,7 +37,7 @@ import org.flexiblepower.rai.values.EnergyProfile;
 import org.flexiblepower.time.TimeUtil;
 
 public class TimeshifterAgentTest extends TestCase {
-    private static final String APPLIANCE_ID = "appliance-id";
+    private static final String RESOURCE_ID = "appliance-id";
     private static final String CFG_PREFIX = "agent.agent1";
     private static final MarketBasis MARKET_BASIS = new MarketBasis("Electricity", "EUR", 100, 0, 50, 1, 0);
     private static final Measurable<Power> ZERO_POWER = Measure.valueOf(0, WATT);
@@ -72,7 +72,7 @@ public class TimeshifterAgentTest extends TestCase {
         Date validThru = TimeUtil.add(before, profileDuration);
 
         TimeShifterControlSpaceBuilder builder = new TimeShifterControlSpaceBuilder();
-        builder.setApplianceId(APPLIANCE_ID);
+        builder.setApplianceId(RESOURCE_ID);
 
         builder.setValidFrom(validFrom);
         builder.setValidThru(validThru);
@@ -101,7 +101,9 @@ public class TimeshifterAgentTest extends TestCase {
         timeService.setAbsoluteTime(before.getTime());
         // FIXME this is now required to trigger allocation update, it shouldn't: https://tf.tno.nl/sf/go/artf46488
         agent.updatePriceInfo(new PriceInfo(MARKET_BASIS, MARKET_BASIS.getMaximumPrice()));
+        timeService.stepInTime(60000);
         executor.executePending();
+        // manager.updateControlSpace(controlSpace);
         bid = parent.getLastBid(agent.getId());
         BidAnalyzer.assertFlatBidWithValue(bid, Measure.valueOf(PROFILE_VALUES[0], WATT));
         assertStarted(controlSpace, manager.getLastAllocation());
@@ -132,7 +134,7 @@ public class TimeshifterAgentTest extends TestCase {
         Date validThru = TimeUtil.add(before, profileDuration);
 
         TimeShifterControlSpaceBuilder builder = new TimeShifterControlSpaceBuilder();
-        builder.setApplianceId(APPLIANCE_ID);
+        builder.setApplianceId(RESOURCE_ID);
 
         builder.setValidFrom(validFrom);
         builder.setValidThru(validThru);
@@ -261,7 +263,7 @@ public class TimeshifterAgentTest extends TestCase {
         Assert.assertEquals(controlSpace.getId(), allocation.getControlSpaceId());
 
         // assert the time is the current time
-        Assert.assertEquals(timeService.getDate(), allocation.getStartTime());
+        Assert.assertTrue(timeService.getDate().getTime() >= allocation.getStartTime().getTime());
 
         // assert the energy profile is exactly as in the control space
         Assert.assertEquals(controlSpace.getEnergyProfile(), allocation.getEnergyProfile());
@@ -299,7 +301,7 @@ public class TimeshifterAgentTest extends TestCase {
         executor = new MockScheduledExecutor(timeService.getFlexiblePowerTimeService());
         agent.bind(executor);
 
-        manager = new MockResourceManager(APPLIANCE_ID, UncontrolledControlSpace.class);
+        manager = new MockResourceManager(RESOURCE_ID, UncontrolledControlSpace.class);
         agent.bind(manager);
 
         parent = new MockMatcherService();

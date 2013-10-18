@@ -99,6 +99,7 @@ public abstract class FPAIAgent<CS extends ControlSpace> extends Agent implement
 
     @Override
     protected void startPeriodicTasks() {
+        super.startPeriodicTasks();
         scheduledFuture = getScheduler().scheduleAtFixedRate(this,
                                                              0,
                                                              UPDATE_INTERVAL.longValue(MILLI(SECOND)),
@@ -107,6 +108,7 @@ public abstract class FPAIAgent<CS extends ControlSpace> extends Agent implement
 
     @Override
     protected void stopPeriodicTasks() {
+        super.stopPeriodicTasks();
         scheduledFuture.cancel(false);
     }
 
