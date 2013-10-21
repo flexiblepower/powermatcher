@@ -43,7 +43,7 @@ public abstract class FPAIAgent<CS extends ControlSpace> extends Agent implement
     /** Time when we received the last PriceInfo */
     private Date lastPriceDate = null;
     /** The resource this agent is controlling */
-    private ControllableResource<? extends CS> controllableResource;
+    private ControllableResource<? extends CS> controllableResource = null;
 
     private ScheduledFuture<?> scheduledFuture;
 
@@ -153,7 +153,7 @@ public abstract class FPAIAgent<CS extends ControlSpace> extends Agent implement
      * @param controllableResource
      */
     public synchronized void bind(ControllableResource<CS> controllableResource) {
-        assert controllableResource == null;
+        assert this.controllableResource == null;
         this.controllableResource = controllableResource;
         controllableResource.setController(this);
     }

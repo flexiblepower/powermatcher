@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="net.powermatcher.fpai.integrationtest" default="build">
+
+	<import file="../cnf/build.xml" />
+	
+	<target name="test" depends="compile">
+		<bndtest runfiles="test.bndrun" />
+	</target>
+
+</project>

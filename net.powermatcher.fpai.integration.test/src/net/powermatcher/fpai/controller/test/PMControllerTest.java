@@ -135,9 +135,9 @@ public class PMControllerTest extends TestCase {
     }
 
     private MockResourceManager createRM(Class<? extends ControlSpace> type) {
-        String resourceIdId = type + "-" + UUID.randomUUID().toString();
-        MockResourceManager resourceManager = new MockResourceManager(resourceIdId, type);
-        resourceMangers.put(resourceManager, resourceIdId);
+        String resourceId = type.getName() + "-" + UUID.randomUUID().toString();
+        MockResourceManager resourceManager = new MockResourceManager(resourceId, type);
+        resourceMangers.put(resourceManager, resourceId);
         controller.registerResource(resourceManager);
         return resourceManager;
     }
@@ -145,7 +145,7 @@ public class PMControllerTest extends TestCase {
     private void updateUncontrolledCS(MockResourceManager resourceManager,
                                       Measurable<Duration> duration,
                                       Measurable<Energy> energy) {
-        Date start = new Date(System.currentTimeMillis() - duration.longValue(MILLI(SECOND)));
+        Date start = new Date();
         EnergyProfile energyProfile = EnergyProfile.create().add(duration, energy).build();
         resourceManager.updateControlSpace(new UncontrolledControlSpace(resourceMangers.get(resourceManager),
                                                                         start,

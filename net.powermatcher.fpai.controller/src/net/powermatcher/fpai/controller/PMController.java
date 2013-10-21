@@ -286,9 +286,7 @@ public class PMController implements ControllerManager {
 
         // create the agent, and bind the agent to the ControllableResource
         FPAIAgent agent = createAgent(agentId, agentClass);
-        agent.bind(resource); // also binds
-                              // ControllableResource to
-                              // agent
+        agent.bind(resource); // also binds ControllableResource to agent
 
         // bind the agent to the concentrator and vice versa
         concentrator.bind(agent);

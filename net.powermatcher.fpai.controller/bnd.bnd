@@ -13,13 +13,13 @@ Bundle-Version: 1.0.0
 	net.powermatcher.core.configurable;version=latest,\
 	net.powermatcher.core.scheduler.service;version=latest,\
 	net.powermatcher.core.messaging.framework;version=latest,\
-	net.powermatcher.core.messaging.mqttv3;version=latest,\
 	net.powermatcher.core.messaging.protocol.adapter;version=latest,\
 	net.powermatcher.fpai.agent;version=latest,\
 	net.powermatcher.fpai.agent.buffer;version=latest,\
 	net.powermatcher.fpai.agent.storage;version=latest,\
 	net.powermatcher.fpai.agent.timeshifter;version=latest,\
-	net.powermatcher.fpai.agent.uncontrolled;version=latest
+	net.powermatcher.fpai.agent.uncontrolled;version=latest,\
+	net.powermatcher.core.messaging.mqttv3
 Include-Resource: res
 
 Service-Component: net.powermatcher.fpai.controller.*

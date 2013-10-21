@@ -404,7 +404,6 @@ public class BufferAgentTest extends TestCase {
         b.totalCapacity(Measure.valueOf(1, NonSI.KWH));
         b.chargeSpeed(ConstraintList.create(SI.WATT).addSingle(100).addSingle(chargeSpeedWatt).build());
         for (int minute = 0; minute < 120; minute++) {
-            System.out.println("minute " + minute);
             b.validFrom(timeService.getDate()).validThru(new Date(timeService.currentTimeMillis() + 10000));
             resourceManager.updateControlSpace(b.build(RESOURCE_ID));
             agent.updatePriceInfo(new PriceInfo(MARKET_BASIS, MAXIMUM_PRICE));

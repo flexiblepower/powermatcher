@@ -1,0 +1,26 @@
+Test-Cases: ${classes;CONCRETE;EXTENDS;junit.framework.TestCase}
+
+Private-Package: net.powermatcher.fpai.controller.test
+-buildpath: osgi.core;version='[4.2,5)',\
+	osgi.cmpn,\
+	junit.osgi,\
+	flexiblepower.api,\
+	flexiblepower.api.ext,\
+	net.powermatcher.core.adapter,\
+	net.powermatcher.core.adapter.service,\
+	net.powermatcher.core.agent,\
+	net.powermatcher.core.agent.auctioneer,\
+	net.powermatcher.core.agent.concentrator,\
+	net.powermatcher.core.agent.marketbasis.adapter,\
+	net.powermatcher.core.configurable,\
+	net.powermatcher.core.messaging.framework,\
+	net.powermatcher.core.messaging.mqttv3,\
+	net.powermatcher.core.messaging.protocol.adapter,\
+	net.powermatcher.core.scheduler.service,\
+	net.powermatcher.fpai.agent;version=latest,\
+	net.powermatcher.fpai.agent.buffer;version=latest,\
+	net.powermatcher.fpai.agent.storage;version=latest,\
+	net.powermatcher.fpai.agent.timeshifter;version=latest,\
+	net.powermatcher.fpai.agent.uncontrolled;version=latest,\
+	net.powermatcher.fpai.controller;version=latest,\
+	net.powermatcher.fpai.test;version=latest
