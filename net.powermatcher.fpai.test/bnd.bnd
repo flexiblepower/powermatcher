@@ -1,4 +1,7 @@
 Bundle-Version: 1.0.0
+
+Test-Cases: ${classes;CONCRETE;EXTENDS;junit.framework.TestCase}
+
 -buildpath: biz.aQute.bnd.annotation;version=latest,\
 	osgi.cmpn,\
 	osgi.core,\
@@ -26,9 +29,5 @@ Bundle-Version: 1.0.0
 	net.powermatcher.fpai.controller;version=latest
 Include-Resource: res
 
-Private-Package: net.powermatcher.fpai.agent.buffer.test,\
-	net.powermatcher.fpai.agent.storage.test,\
-	net.powermatcher.fpai.agent.timeshifter.test,\
-	net.powermatcher.fpai.agent.uncontrolled.test,\
-	net.powermatcher.fpai.controller.test,\
-	net.powermatcher.fpai.test
+
+Export-Package: net.powermatcher.fpai.test
