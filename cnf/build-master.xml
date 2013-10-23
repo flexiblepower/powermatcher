@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="fpai-powermatcher" default="build">
 
-	<property name="version" value="development" />
+	<property name="version" value="13.10-SNAPSHOT" />
 
 	<property name="releasedir" value="/var/www/html/releases/fpai-powermatcher" />
 
@@ -67,15 +67,30 @@
 			<fileset refId="build" />
 		</subant>
 	</target>
-
+	
 	<target name="publishrelease" depends="release">
 		<delete dir="${releasedir}/${version}/repo" />
 		<mkdir dir="${releasedir}/${version}/repo" />
 		<copy todir="${releasedir}/${version}/repo">
 			<fileset dir="release" />
 		</copy>
+		
+		<zip basedir=".." destfile="${releasedir}/${version}/fpai-powermatcher-sources-${version}.zip">
+			<include name="*/src/**"/>
+			<include name="*/test/**"/>
+			<include name="*/res/**"/>
+			<include name="*/*.bnd"/>
+			<include name="*/build*.xml"/>
+			<include name="cnf/**"/>
+			
+			<exclude name="cnf/cache/**"/>
+			<exclude name="cnf/tools/**"/>
+			<exclude name="cnf/release/**"/>
+		</zip>
+		
+		<zip basedir="release" destfile="${releasedir}/${version}/fpai-powermatcher-bundles-${version}.zip">
+			<include name="**" />
+		</zip>
 	</target>
-
-
 
 </project>

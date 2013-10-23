@@ -26,7 +26,8 @@ Test-Cases: ${classes;CONCRETE;EXTENDS;junit.framework.TestCase}
 	net.powermatcher.fpai.agent.storage;version=latest,\
 	net.powermatcher.fpai.agent.timeshifter;version=latest,\
 	net.powermatcher.fpai.agent.uncontrolled;version=latest,\
-	net.powermatcher.fpai.controller;version=latest
+	net.powermatcher.fpai.controller;version=latest,\
+	org.eclipse.paho.client.mqttv3
 Include-Resource: res
 
 
