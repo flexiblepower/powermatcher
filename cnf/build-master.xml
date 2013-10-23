@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="fpai-powermatcher" default="build">
 
-	<property name="version" value="13.10-SNAPSHOT" />
+	<property name="version" value="13.10" />
 
 	<property name="releasedir" value="/var/www/html/releases/fpai-powermatcher" />
 
