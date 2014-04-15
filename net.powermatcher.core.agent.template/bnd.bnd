@@ -1,0 +1,11 @@
+Bundle-Copyright: Copyright (c) 2012, 2013 Alliander.
+Bundle-Category: PowerMatcher Core
+Export-Package: net.powermatcher.core.agent.template,\
+	net.powermatcher.core.agent.template.config,\
+	net.powermatcher.core.agent.template.service
+Bundle-Version: 0.9.0
+-buildpath: net.powermatcher.core.configurable;version=latest,\
+	net.powermatcher.core.scheduler.service;version=latest,\
+	net.powermatcher.core.adapter.service;version=latest,\
+	net.powermatcher.core.adapter;version=latest,\
+	net.powermatcher.core.agent;version=latest

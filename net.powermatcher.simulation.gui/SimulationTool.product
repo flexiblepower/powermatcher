@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?pde version="3.5"?>
+
+<product name="PowerMatcher Simulation Tool" uid="net.powermatcher.simulation.gui.product" id="net.powermatcher.simulation.gui.product" application="net.powermatcher.simulation.gui.application" version="1.0.0.qualifier" useFeatures="false" includeLaunchers="true">
+
+
+   <configIni use="default">
+   </configIni>
+
+   <launcherArgs>
+      <programArgs>-consoleLog</programArgs>
+      <vmArgs>-Dosgi.requiredJavaVersion=1.5 -Xms40m -Xmx1024m -Dlogback.configurationFile=logback.xml -Dorg.osgi.service.http.port=8080</vmArgs>
+      <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgsMac>
+   </launcherArgs>
+
+   <windowImages i16="/net.powermatcher.simulation.gui/icons/PM16x16.png" i32="/net.powermatcher.simulation.gui/icons/PM32X32.png" i48="/net.powermatcher.simulation.gui/icons/PM48x48.png" i64="/net.powermatcher.simulation.gui/icons/PM64x64.png" i128="/net.powermatcher.simulation.gui/icons/PM128x128.png"/>
+
+   <splash
+      location="net.powermatcher.simulation.gui"
+      startupProgressRect="5,275,445,15" />
+   <launcher name="PowerMatcher">
+      <solaris/>
+      <win useIco="false">
+         <bmp/>
+      </win>
+   </launcher>
+
+
+   <vm>
+   </vm>
+
+   <plugins>
+      <plugin id="biz.aQute.bnd.annotation"/>
+      <plugin id="biz.aQute.bndlib"/>
+      <plugin id="biz.aQute.junit"/>
+      <plugin id="ch.qos.logback.classic"/>
+      <plugin id="ch.qos.logback.core"/>
+      <plugin id="com.ibm.icu"/>
+      <plugin id="flexiblepower.api"/>
+      <plugin id="javax.annotation"/>
+      <plugin id="javax.inject"/>
+      <plugin id="javax.servlet"/>
+      <plugin id="net.powermatcher.core.adapter"/>
+      <plugin id="net.powermatcher.core.adapter.component"/>
+      <plugin id="net.powermatcher.core.adapter.service"/>
+      <plugin id="net.powermatcher.core.agent"/>
+      <plugin id="net.powermatcher.core.agent.auctioneer"/>
+      <plugin id="net.powermatcher.core.agent.auctioneer.component"/>
+      <plugin id="net.powermatcher.core.agent.concentrator"/>
+      <plugin id="net.powermatcher.core.agent.concentrator.component"/>
+      <plugin id="net.powermatcher.core.configurable"/>
+      <plugin id="net.powermatcher.core.scheduler.service"/>
+      <plugin id="net.powermatcher.fpai.agent"/>
+      <plugin id="net.powermatcher.simulation.configuration"/>
+      <plugin id="net.powermatcher.simulation.engine"/>
+      <plugin id="net.powermatcher.simulation.engine.dependencyengine"/>
+      <plugin id="net.powermatcher.simulation.gui"/>
+      <plugin id="net.powermatcher.simulation.logging"/>
+      <plugin id="net.powermatcher.simulation.telemetry.metadata"/>
+      <plugin id="net.powermatcher.simulation.telemetry.metadata.component"/>
+      <plugin id="net.powermatcher.simulation.testagents"/>
+      <plugin id="net.powermatcher.telemetry.model"/>
+      <plugin id="net.powermatcher.telemetry.service"/>
+      <plugin id="org.apache.batik.css"/>
+      <plugin id="org.apache.batik.util"/>
+      <plugin id="org.apache.batik.util.gui"/>
+      <plugin id="org.apache.felix.configadmin"/>
+      <plugin id="org.apache.felix.metatype"/>
+      <plugin id="org.apache.felix.scr"/>
+      <plugin id="org.apache.felix.webconsole"/>
+      <plugin id="org.csstudio.swt.widgets"/>
+      <plugin id="org.csstudio.swt.xygraph"/>
+      <plugin id="org.eclipse.core.commands"/>
+      <plugin id="org.eclipse.core.contenttype"/>
+      <plugin id="org.eclipse.core.databinding"/>
+      <plugin id="org.eclipse.core.databinding.observable"/>
+      <plugin id="org.eclipse.core.databinding.property"/>
+      <plugin id="org.eclipse.core.expressions"/>
+      <plugin id="org.eclipse.core.filesystem"/>
+      <plugin id="org.eclipse.core.filesystem.win32.x86_64" fragment="true"/>
+      <plugin id="org.eclipse.core.jobs"/>
+      <plugin id="org.eclipse.core.resources"/>
+      <plugin id="org.eclipse.core.runtime"/>
+      <plugin id="org.eclipse.core.runtime.compatibility.registry" fragment="true"/>
+      <plugin id="org.eclipse.draw2d"/>
+      <plugin id="org.eclipse.e4.core.commands"/>
+      <plugin id="org.eclipse.e4.core.contexts"/>
+      <plugin id="org.eclipse.e4.core.di"/>
+      <plugin id="org.eclipse.e4.core.di.extensions"/>
+      <plugin id="org.eclipse.e4.core.services"/>
+      <plugin id="org.eclipse.e4.ui.bindings"/>
+      <plugin id="org.eclipse.e4.ui.css.core"/>
+      <plugin id="org.eclipse.e4.ui.css.swt"/>
+      <plugin id="org.eclipse.e4.ui.css.swt.theme"/>
+      <plugin id="org.eclipse.e4.ui.di"/>
+      <plugin id="org.eclipse.e4.ui.model.workbench"/>
+      <plugin id="org.eclipse.e4.ui.services"/>
+      <plugin id="org.eclipse.e4.ui.widgets"/>
+      <plugin id="org.eclipse.e4.ui.workbench"/>
+      <plugin id="org.eclipse.e4.ui.workbench.addons.swt"/>
+      <plugin id="org.eclipse.e4.ui.workbench.renderers.swt"/>
+      <plugin id="org.eclipse.e4.ui.workbench.swt"/>
+      <plugin id="org.eclipse.e4.ui.workbench3"/>
+      <plugin id="org.eclipse.emf.common"/>
+      <plugin id="org.eclipse.emf.ecore"/>
+      <plugin id="org.eclipse.emf.ecore.change"/>
+      <plugin id="org.eclipse.emf.ecore.xmi"/>
+      <plugin id="org.eclipse.equinox.app"/>
+      <plugin id="org.eclipse.equinox.common"/>
+      <plugin id="org.eclipse.equinox.ds"/>
+      <plugin id="org.eclipse.equinox.event"/>
+      <plugin id="org.eclipse.equinox.http.jetty"/>
+      <plugin id="org.eclipse.equinox.http.servlet"/>
+      <plugin id="org.eclipse.equinox.p2.core"/>
+      <plugin id="org.eclipse.equinox.p2.engine"/>
+      <plugin id="org.eclipse.equinox.p2.metadata"/>
+      <plugin id="org.eclipse.equinox.p2.metadata.repository"/>
+      <plugin id="org.eclipse.equinox.p2.repository"/>
+      <plugin id="org.eclipse.equinox.preferences"/>
+      <plugin id="org.eclipse.equinox.registry"/>
+      <plugin id="org.eclipse.equinox.security"/>
+      <plugin id="org.eclipse.equinox.security.win32.x86_64" fragment="true"/>
+      <plugin id="org.eclipse.equinox.util"/>
+      <plugin id="org.eclipse.help"/>
+      <plugin id="org.eclipse.jetty.continuation"/>
+      <plugin id="org.eclipse.jetty.http"/>
+      <plugin id="org.eclipse.jetty.io"/>
+      <plugin id="org.eclipse.jetty.security"/>
+      <plugin id="org.eclipse.jetty.server"/>
+      <plugin id="org.eclipse.jetty.servlet"/>
+      <plugin id="org.eclipse.jetty.util"/>
+      <plugin id="org.eclipse.jface"/>
+      <plugin id="org.eclipse.jface.databinding"/>
+      <plugin id="org.eclipse.jface.text"/>
+      <plugin id="org.eclipse.osgi"/>
+      <plugin id="org.eclipse.osgi.services"/>
+      <plugin id="org.eclipse.swt"/>
+      <plugin id="org.eclipse.swt.win32.win32.x86_64" fragment="true"/>
+      <plugin id="org.eclipse.text"/>
+      <plugin id="org.eclipse.ui"/>
+      <plugin id="org.eclipse.ui.ide"/>
+      <plugin id="org.eclipse.ui.win32" fragment="true"/>
+      <plugin id="org.eclipse.ui.workbench"/>
+      <plugin id="org.hamcrest.core"/>
+      <plugin id="org.junit"/>
+      <plugin id="org.w3c.css.sac"/>
+      <plugin id="org.w3c.dom.smil"/>
+      <plugin id="org.w3c.dom.svg"/>
+      <plugin id="slf4j.api"/>
+   </plugins>
+
+   <configurations>
+      <plugin id="net.powermatcher.core.agent.auctioneer.component" autoStart="true" startLevel="0" />
+      <plugin id="net.powermatcher.core.agent.concentrator.component" autoStart="true" startLevel="0" />
+      <plugin id="net.powermatcher.simulation.gui" autoStart="true" startLevel="0" />
+      <plugin id="net.powermatcher.simulation.telemetry.metadata.component" autoStart="true" startLevel="0" />
+      <plugin id="net.powermatcher.simulation.testagents" autoStart="true" startLevel="0" />
+      <plugin id="org.apache.felix.configadmin" autoStart="true" startLevel="0" />
+      <plugin id="org.apache.felix.metatype" autoStart="true" startLevel="0" />
+      <plugin id="org.apache.felix.webconsole" autoStart="true" startLevel="0" />
+      <plugin id="org.eclipse.core.runtime" autoStart="true" startLevel="0" />
+      <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
+      <plugin id="org.eclipse.equinox.ds" autoStart="true" startLevel="1" />
+      <plugin id="org.eclipse.equinox.http.jetty" autoStart="true" startLevel="0" />
+      <plugin id="org.eclipse.osgi" autoStart="true" startLevel="1" />
+   </configurations>
+
+</product>

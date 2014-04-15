@@ -1,0 +1,7 @@
+-nobundles: true
+-buildpath: net.powermatcher.agent.peakshavingconcentrator;version=latest,\
+	net.powermatcher.agent.peakshavingconcentrator.component;version=latest,\
+	net.powermatcher.agent.peakshavingconcentrator.test;version=latest,\
+	net.powermatcher.der.agent.miele.at.home;version=latest,\
+	net.powermatcher.der.agent.miele.at.home.component;version=latest,\
+	net.powermatcher.der.agent.miele.at.home.gateway;version=latest

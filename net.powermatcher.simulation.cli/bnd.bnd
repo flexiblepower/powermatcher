@@ -1,0 +1,8 @@
+-buildpath: net.powermatcher.simulation.configuration;version=latest,\
+	net.powermatcher.simulation.engine;version=latest,\
+	net.powermatcher.simulation.engine.dependencyengine;version=latest,\
+	ch.qos.logback.classic,\
+	ch.qos.logback.core,\
+	slf4j.api,\
+	net.powermatcher.simulation.testagents;version=latest
+Export-Package: net.powermatche.simulation.clii

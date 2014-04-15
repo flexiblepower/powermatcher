@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<telemetry xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" agentId="TempEquipmentId"
+	clusterId="Couperus" xmlns="http://www.powermatcher.net/TelemetrySchema">
+	 
+	<request timestamp="2012-06-14T10:16:16.3890344+02:00"
+		requestType="CompensationObjectiveRequest">
+		   
+		<property name="requestedCompensation" value="1.001" />
+		 
+	</request>
+</telemetry>

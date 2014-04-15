@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nodeconfig id="CAF-example-node" name="Example node"
+	
+	description="PowerMatcher Resilience Test Config CAF0 - Empty configuration" date="2012-12-07 20:00:00">
+	
+	<!--++++++++++++++++++++++++++-->
+	<!-- Root Configuration Group -->
+	<!--++++++++++++++++++++++++++-->
+
+	<!-- Empty configuration to load at start of a test -->
+	
+	<configuration type="group" id="root">
+
+		<!-- ExampleCluster Properties -->
+		
+		<property name="cluster.id" value="ExampleCluster" type="String"></property>
+		
+		<!-- PowerMatcher Global Configuration Templates (Intentionally empty) -->			
+		
+		<!-- ExampleCluster Adapter Factories  (Intentionally empty) -->
+
+		<!-- ExampleCluster Common Agents Group  (Intentionally empty) -->
+
+		
+	</configuration>
+	
+</nodeconfig>

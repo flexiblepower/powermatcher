@@ -1,0 +1,4 @@
+Bundle-Copyright: Copyright (c) 2012, 2013 Alliander.
+Bundle-Category: PowerMatcher Core
+-nobundles: true
+Bundle-Version: 0.9.0

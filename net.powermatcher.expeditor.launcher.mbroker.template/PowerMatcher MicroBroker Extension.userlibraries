@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?><eclipse-userlibraries version="2">
+    <library name="PowerMatcher MicroBroker Extension" systemlibrary="false">
+        <archive path="cnf/extrepo/net.powermatcher.expeditor.messaging.mqttv5/net.powermatcher.expeditor.messaging.mqttv5-0.9.0.jar"/>
+        <archive path="cnf/extrepo/net.powermatcher.expeditor.broker.manager/net.powermatcher.expeditor.broker.manager-0.9.0.jar"/>
+        <archive path="cnf/extrepo/net.powermatcher.expeditor.launcher.mbroker/net.powermatcher.expeditor.launcher.mbroker-0.9.0.jar"/>
+    </library>
+</eclipse-userlibraries>

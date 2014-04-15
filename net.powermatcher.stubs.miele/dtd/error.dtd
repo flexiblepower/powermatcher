@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!ELEMENT error (error-type, cu-type, cu-id, action-id?, message)>
+<!-- Type of the error: APPLIANCE_MISSING or ACTION_EXEC_ERROR -->
+<!ELEMENT error-type (#PCDATA)>
+<!-- Appliance type: DW_G1000, WM_W2889... -->
+<!ELEMENT cu-type (#PCDATA)>
+<!-- Appliance id -->
+<!ELEMENT cu-id (#PCDATA)>
+<!-- Action id -->
+<!ELEMENT action-id (#PCDATA)>
+<!-- Localized message -->
+<!ELEMENT message (#PCDATA)>
+<!-- Entity for missing appliance request. -->
+<!ENTITY APPLIANCE_MISSING "appliance_missing">
+<!-- Entity for missing action ID. -->
+<!ENTITY ACTION_MISSING "action_missing">
+<!-- Entity for incorrect action parameters. -->
+<!ENTITY ACTION_INCORRECT_PARAMS "action_incorrect_params">
+<!-- Entity for error while executing an action. -->
+<!ENTITY ACTION_EXECUTE "action_execute">

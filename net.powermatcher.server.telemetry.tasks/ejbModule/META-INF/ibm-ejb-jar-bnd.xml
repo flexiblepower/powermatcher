@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ejb-jar-bnd
+        xmlns="http://websphere.ibm.com/xml/ns/javaee"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://websphere.ibm.com/xml/ns/javaee http://websphere.ibm.com/xml/ns/javaee/ibm-ejb-jar-bnd_1_0.xsd"
+        version="1.0">
+
+	<message-driven name="EventDataProcessorBean">
+		<jca-adapter activation-spec-binding-name="jms/TelemetryAS" />
+	</message-driven>
+	<message-driven name="LegacyEventDataProcessorBean">
+		<jca-adapter activation-spec-binding-name="jms/CPSSAS" />
+	</message-driven>
+	<message-driven name="MonitoringDataProcessorBean">
+		<jca-adapter activation-spec-binding-name="jms/StatusAS" />
+	</message-driven>
+</ejb-jar-bnd>

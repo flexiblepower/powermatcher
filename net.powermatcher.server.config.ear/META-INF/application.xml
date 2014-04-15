@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application id="Application_ID" version="5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/application_5.xsd">
+ <display-name>net.powermatcher.server.config.ear</display-name>
+ <module id="Module_1348521858156">
+ 	<web>
+ 		<web-uri>net.powermatcher.server.config.web.war</web-uri>
+ 		<context-root>configservice</context-root>
+ 	</web>
+ </module>
+ <security-role>
+ 	<role-name>configmanageraccess</role-name>
+ </security-role> 
+ </application> 

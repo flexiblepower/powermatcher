@@ -1,0 +1,10 @@
+Bundle-Copyright: Copyright (c) 2012, 2013 Alliander.
+Bundle-Category: PowerMatcher Core
+Service-Component: *
+Private-Package: net.powermatcher.core.logging.bridge
+Bundle-Version: 0.9.0
+-buildpath: slf4j.api;version=latest,\
+	osgi.core;version=4.2,\
+	osgi.cmpn;version=4.2,\
+	biz.aQute.bnd.annotation,\
+	junit.osgi

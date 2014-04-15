@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="net.powermatcher.server.event.tasks.ear">
+        <wb-resource deploy-path="/" source-path="/" tag="defaultRootSource"/>
+        <dependent-module archiveName="net.powermatcher.server.event.tasks.jar" deploy-path="/" handle="module:/resource/net.powermatcher.server.event.tasks/net.powermatcher.server.event.tasks">
+            <dependent-object>Module_1354828998578</dependent-object>
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="net.powermatcher.server.event.database.jdbc.jar" deploy-path="/lib" handle="module:/resource/net.powermatcher.server.event.database.jdbc/net.powermatcher.server.event.database.jdbc">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="net.powermatcher.server.event.database.dao.jar" deploy-path="/lib" handle="module:/resource/net.powermatcher.server.event.database.dao/net.powermatcher.server.event.database.dao">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="net.powermatcher.core.agent.jar" deploy-path="/lib" handle="module:/classpath/lib/net.powermatcher.core.agent/generated/net.powermatcher.core.agent.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="net.powermatcher.core.messaging.protocol.adapter.jar" deploy-path="/lib" handle="module:/classpath/lib/net.powermatcher.core.messaging.protocol.adapter/generated/net.powermatcher.core.messaging.protocol.adapter.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+    </wb-module>
+</project-modules>

@@ -1,0 +1,15 @@
+Bundle-Copyright: Copyright (c) 2012, 2013 Alliander.
+Bundle-Category: PowerMatcher Extension
+Bundle-Version: 0.9.0
+-buildpath: net.powermatcher.core.configurable;version=latest,\
+	net.powermatcher.core.scheduler.service;version=latest,\
+	net.powermatcher.core.adapter;version=latest,\
+	net.powermatcher.core.adapter.service;version=latest,\
+	net.powermatcher.core.agent.logging;version=latest,\
+	net.powermatcher.telemetry.model;version=latest,\
+	net.powermatcher.telemetry.service;version=latest
+Export-Package: net.powermatcher.agent.telemetry.logging,\
+	net.powermatcher.agent.telemetry.logging.config,\
+	net.powermatcher.agent.telemetry.logging.task
+	net.powermatcher.agent.telemetry.logging.config,\
+	net.powermatcher.agent.telemetry.logging.task

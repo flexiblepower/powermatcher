@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<scenario id="Scenario-1">
+    <timing_descriptor xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="asFastAsPossibleSimulationClockDescriptor">
+        <start>1970-01-01T01:00:00+01:00</start>
+        <timestep_interval_millis>30000</timestep_interval_millis>
+    </timing_descriptor>
+    <market_basis>
+        <commodity>electricity</commodity>
+        <currency>EUR</currency>
+        <maximum_price>50.0</maximum_price>
+        <minimum_price>0.0</minimum_price>
+        <price_steps>50</price_steps>
+    </market_basis>
+    <data_sinks/>
+    <clusters>
+        <cluster id="cluster-1">
+            <root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="auctioneerNodeDescriptor">
+                <factoryPid>net.powermatcher.core.agent.auctioneer.Auctioneer</factoryPid>
+                <configuration>
+                    <property name="id">Auctioneer-0</property>
+                </configuration>
+                <concentrator>
+                    <factoryPid>net.powermatcher.core.agent.concentrator.Concentrator</factoryPid>
+                    <configuration>
+                        <property name="id">Concentrator-1</property>
+                    </configuration>
+                    <fpai_device_agent>
+                        <factoryPid>net.powermatcher.fpai.agent.storage.StorageAgent</factoryPid>
+                        <configuration>
+                            <property name="id">StorageAgent-2</property>
+                        </configuration>
+                        <resource_manager>
+                            <factoryPid>org.flexiblepower.battery.manager.BatteryManager</factoryPid>
+                            <configuration>
+<property name="id">BatteryManager-3</property>
+                            </configuration>
+                            <resource_driver>
+<factoryPid>org.flexiblepower.battery.simulation.BatterySimulation</factoryPid>
+<configuration>
+    <property name="id">BatterySimulation-3</property>
+    <property name="updateInterval">2</property>
+</configuration>
+                            </resource_driver>
+                        </resource_manager>
+                    </fpai_device_agent>
+                    <fpai_device_agent>
+                        <factoryPid>net.powermatcher.fpai.agent.uncontrolled.UncontrolledAgent</factoryPid>
+                        <configuration>
+                            <property name="id">UncontrolledAgent-1</property>
+                            <property name="update.interval">30</property>
+                        </configuration>
+                        <resource_manager>
+                            <factoryPid>org.flexiblepower.uncontrolled.manager.UncontrolledManager</factoryPid>
+                            <configuration>
+<property name="id">UncontrolledManager-3</property>
+                            </configuration>
+                            <resource_driver>
+<factoryPid>org.flexiblepower.smartmeter.simulation.SmartMeterSimulation</factoryPid>
+<configuration>
+    <property name="id">SmartMeterSimulation-3</property>
+    <property name="updateInterval">2</property>
+</configuration>
+                            </resource_driver>
+                        </resource_manager>
+                    </fpai_device_agent>
+                </concentrator>
+            </root>
+        </cluster>
+    </clusters>
+</scenario>

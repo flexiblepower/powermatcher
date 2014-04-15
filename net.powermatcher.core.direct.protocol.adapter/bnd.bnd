@@ -1,0 +1,7 @@
+Bundle-Copyright: Copyright (c) 2012, 2013 Alliander.
+Bundle-Category: PowerMatcher Core
+Export-Package: net.powermatcher.core.direct.protocol.adapter.config,\
+	net.powermatcher.core.direct.protocol.adapter
+Bundle-Version: 0.9.0
+-buildpath: net.powermatcher.core.configurable;version=latest,\
+	net.powermatcher.core.agent;version=latest

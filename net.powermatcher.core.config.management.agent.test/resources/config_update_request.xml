@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<telemetry clusterId="ExampleCluster" agentId="config_agent" xmlns="http://www.powermatcher.net/TelemetrySchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.powermatcher.net/TelemetrySchema.xsd">
+  <request requestType="ConfigurationUpdate" requestId="97"  timestamp="2001-12-31T12:00:00.000+01:00" />
+</telemetry>

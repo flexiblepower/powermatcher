@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!ELEMENT device (information, actions)>
+<!ELEMENT information (key+)>
+<!ELEMENT key EMPTY>
+<!ATTLIST key
+name CDATA #REQUIRED
+value CDATA #REQUIRED
+>
+<!ELEMENT action EMPTY>
+<!ATTLIST action
+name CDATA #REQUIRED
+URL CDATA #REQUIRED
+>
+<!ELEMENT actions (action)>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nodeconfig id="Development" name="Test" description="Test OSGi system configuration - Test configuration nr 3"> 
+	<configuration type="group" cluster="test" id="pwmaas">
+		<property name="commodity" value="electricity" type="String"/>
+		<property name="currency" value="EUR" type="String"/>
+		<property name="matcher" value="concentrator1" type="String"/>
+		<property name="update_interval" value="50" type="Integer"/>		
+		<configuration type="group" id="Test"> 
+		</configuration>
+	</configuration>
+</nodeconfig>

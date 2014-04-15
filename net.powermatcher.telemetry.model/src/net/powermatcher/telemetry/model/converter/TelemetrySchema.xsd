@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2012 Alliander.            -->
+<!-- All rights reserved.                     -->
+<!--                                          -->
+<!-- Contributors:                            -->
+<!--     IBM - initial API and implementation -->
+<schema targetNamespace="http://www.powermatcher.net/TelemetrySchema" elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.powermatcher.net/TelemetrySchema">
+    <element name="telemetry" type="tns:TelemetryType"></element>
+    
+    <complexType name="TelemetryType">
+    	<choice>
+    		<element name="measurement" type="tns:MeasurementType" maxOccurs="unbounded" minOccurs="1"></element>
+    		<element name="status" type="tns:StatusType" maxOccurs="unbounded" minOccurs="1"></element>
+    		<element name="alert" type="tns:AlertType" maxOccurs="unbounded" minOccurs="1"></element>
+    		<element name="control" type="tns:ControlType" maxOccurs="unbounded" minOccurs="1"></element>
+    		<element name="request" type="tns:RequestType" maxOccurs="unbounded" minOccurs="1"></element>
+    		<element name="response" type="tns:ResponseType" maxOccurs="unbounded" minOccurs="1"></element>
+    	</choice>
+    	<attribute name="clusterId" type="string" use="required"></attribute>
+    	<attribute name="agentId" type="string" use="required"></attribute>
+    </complexType>
+    <complexType name="MeasurementType">
+        <choice minOccurs="0" maxOccurs="unbounded">
+    		<element name="singleValue" type="tns:SingleDataValueType">
+    		</element>
+    	</choice>
+    	<attribute name="valueName" type="string" use="required"></attribute>
+    	<attribute name="units" type="string" use="required"></attribute>
+    </complexType>
+    <complexType name="StatusType">
+        <choice minOccurs="0" maxOccurs="unbounded">
+    		<element name="singleValue" type="tns:SingleStatusValueType"></element>
+    	</choice>
+    	<attribute name="valueName" type="string" use="required"></attribute>
+    </complexType>
+    <complexType name="AlertType">
+    	<attribute name="value" type="string" use="required"></attribute>
+    	<attribute name="timestamp" type="dateTime" use="required"></attribute>
+    </complexType>
+    <complexType name="ControlType">
+    	<attribute name="valueName" type="string" use="required"></attribute>
+    	<attribute name="value" type="string" use="required"></attribute>
+    	<attribute name="units" type="string" use="required"></attribute>
+    	<attribute name="timestamp" type="dateTime" use="required"></attribute>
+    </complexType>
+    <complexType name="RequestType">
+        <choice minOccurs="0" maxOccurs="unbounded">
+    		<element name="property" type="tns:PropertyType"></element>
+        </choice>
+    	<attribute name="requestType" type="string" use="required"></attribute>
+    	<attribute name="requestId" type="string" use="optional"></attribute>
+    	<attribute name="timestamp" type="dateTime" use="required"></attribute>
+    </complexType>
+    <complexType name="ResponseType">
+        <choice minOccurs="0" maxOccurs="unbounded">
+    		<element name="property" type="tns:PropertyType"></element>
+        </choice>
+    	<attribute name="requestType" type="string" use="required"></attribute>
+    	<attribute name="requestId" type="string" use="required"></attribute>
+    	<attribute name="timestamp" type="dateTime" use="required"></attribute>
+    </complexType>
+    
+    <complexType name="SingleDataValueType">
+    	<attribute name="value" type="float" use="required"></attribute>
+    	<attribute name="timestamp" type="dateTime" use="required"></attribute>
+    	<attribute name="period" type="int" use="optional"></attribute>
+    </complexType>
+    <complexType name="SingleStatusValueType">
+    	<attribute name="value" type="string" use="required"></attribute>
+    	<attribute name="timestamp" type="dateTime" use="required"></attribute>
+    </complexType>
+    <complexType name="PropertyType">
+		<attribute name="name" type="string" use="required"/>
+		<attribute name="value" type="string" use="required"/>
+		<attribute name="logging" type="boolean" default="true" use="optional"/>
+    </complexType>
+</schema>

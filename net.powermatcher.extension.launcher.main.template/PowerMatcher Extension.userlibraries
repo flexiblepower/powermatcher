@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?><eclipse-userlibraries version="2">
+    <library name="PowerMatcher Extension" systemlibrary="false">
+        <archive path="cnf/extrepo/net.powermatcher.telemetry.model/net.powermatcher.telemetry.model-0.9.0.jar"/>
+        <archive path="cnf/extrepo/net.powermatcher.telemetry.service/net.powermatcher.telemetry.service-0.9.0.jar"/>
+        <archive path="cnf/extrepo/net.powermatcher.agent.telemetry.logging/net.powermatcher.agent.telemetry.logging-0.9.0.jar"/>
+        <archive path="cnf/extrepo/net.powermatcher.telemetry.messaging.protocol.adapter/net.powermatcher.telemetry.messaging.protocol.adapter-0.9.0.jar"/>        
+        <archive path="cnf/extrepo/net.powermatcher.telemetry.direct.protocol.adapter/net.powermatcher.telemetry.direct.protocol.adapter-0.9.0.jar"/>        
+    </library>
+</eclipse-userlibraries>

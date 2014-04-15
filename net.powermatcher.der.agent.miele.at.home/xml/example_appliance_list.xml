@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DEVICES>
+	<device>
+		<class>22017</class>
+		<UID>DW_G1000.6</UID>
+		<type>DW_G1000</type>
+		<name>Geschirrspüler</name>
+		<state>3</state>
+		<additionalName>GA Küche</additionalName>
+		<room id="11" level="1">Küche</room>
+		<information>
+			<key name="Gerätestatus" value="Programm gewählt" />
+			<key name="Restzeit" value="15" />
+		</information>
+		<actions></actions>
+	</device>
+	<device>
+		<class>26113</class>
+		<UID>KFN_8767.-847008338</UID>
+		<type>KFN_8767</type>
+		<name>Kühlschrank</name>
+		<state>5</state>
+		<additionalName>GA Küche</additionalName>
+		<room id="11" level="1">Küche</room>
+		<information>
+			<key name="Gerätestatus" value="In Betrieb" />
+		</information>
+		<actions></actions>
+	</device>
+</DEVICES>

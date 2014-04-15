@@ -1,0 +1,15 @@
+-nobundles: true
+-buildpath: net.powermatcher.agent.telemetry.logging;version=latest,\
+	net.powermatcher.agent.telemetry.logging.component;version=latest,\
+	net.powermatcher.agent.template;version=latest,\
+	net.powermatcher.agent.template.component;version=latest,\
+	net.powermatcher.expeditor.broker.manager;version=latest,\
+	net.powermatcher.expeditor.launcher.mbroker;version=latest,\
+	net.powermatcher.expeditor.messaging.mqttv5;version=latest,\
+	net.powermatcher.expeditor.messaging.mqttv5.component;version=latest,\
+	net.powermatcher.telemetry.direct.protocol.adapter;version=latest,\
+	net.powermatcher.telemetry.direct.protocol.adapter.component;version=latest,\
+	net.powermatcher.telemetry.messaging.protocol.adapter;version=latest,\
+	net.powermatcher.telemetry.messaging.protocol.adapter.component;version=latest,\
+	net.powermatcher.telemetry.model;version=latest,\
+	net.powermatcher.telemetry.service;version=latest

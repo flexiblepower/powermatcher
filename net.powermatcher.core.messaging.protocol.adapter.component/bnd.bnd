@@ -1,0 +1,11 @@
+Bundle-Copyright: Copyright (c) 2012, 2013 Alliander.
+Bundle-Category: PowerMatcher Core
+Service-Component: *
+Private-Package: net.powermatcher.core.messaging.protocol.adapter.component
+Bundle-Version: 0.9.0
+-buildpath:	osgi.core;version=4.2,\
+	biz.aQute.bnd.annotation,\
+	net.powermatcher.core.adapter.component;version=latest,\
+	net.powermatcher.core.agent;version=latest,\
+	net.powermatcher.core.messaging.framework;version=latest,\
+	net.powermatcher.core.messaging.protocol.adapter;version=latest

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="net.powermatcher.server.config.ear">
+        <wb-resource deploy-path="/" source-path="/" tag="defaultRootSource"/>
+        <dependent-module archiveName="net.powermatcher.server.config.jpa.jar" deploy-path="/lib" handle="module:/resource/net.powermatcher.server.config.jpa/net.powermatcher.server.config.jpa">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="net.powermatcher.server.config.web.war" deploy-path="/" handle="module:/resource/net.powermatcher.server.config.web/net.powermatcher.server.config.web">
+            <dependent-object>Module_1348521858156</dependent-object>
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+    </wb-module>
+</project-modules>

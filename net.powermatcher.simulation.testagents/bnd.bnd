@@ -1,0 +1,12 @@
+-buildpackages:
+
+-buildpath: biz.aQute.bnd.annotation,\
+	osgi.cmpn,\
+	osgi.core,\
+	net.powermatcher.core.agent;version=latest,\
+	net.powermatcher.telemetry.service;version=latest,\
+	slf4j.api
+Service-Component: *
+Export-Package: net.powermatcher.simulation.testagents
+Include-Resource: META-INF/telemetry-metatype/net.powermatcher.simulation.testagents.RandomMustRunDeviceAgent.xml=META-INF/telemetry-metatype/net.powermatcher.simulation.testagents.RandomMustRunDeviceAgent.xml
+Bundle-Version: 1.0.0

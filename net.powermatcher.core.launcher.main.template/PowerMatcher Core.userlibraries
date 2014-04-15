@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?><eclipse-userlibraries version="2">
+    <library name="Slf4jwithLogback" systemlibrary="false">
+        <archive path="cnf/localrepo/slf4j.api/slf4j.api-1.7.2.jar"/>
+        <archive path="cnf/localrepo/ch.qos.logback.core/ch.qos.logback.core-1.0.9.jar"/>
+        <archive path="cnf/localrepo/ch.qos.logback.classic/ch.qos.logback.classic-1.0.9.jar"/>
+    </library>
+    <library name="PahoMqttv3" systemlibrary="false">
+        <archive path="cnf/localrepo/org.eclipse.paho.client.mqttv3/org.eclipse.paho.client.mqttv3-1.0.0.jar"/>
+    </library>
+    <library name="PowerMatcher Core" systemlibrary="false">
+        <archive path="cnf/corerepo/net.powermatcher.core.adapter.service/net.powermatcher.core.adapter.service-0.9.0.jar"/>
+        <archive path="cnf/corerepo/net.powermatcher.core.adapter/net.powermatcher.core.adapter-0.9.0.jar"/>
+        <archive path="cnf/corerepo/net.powermatcher.core.configurable/net.powermatcher.core.configurable-0.9.0.jar"/>
+        <archive path="cnf/corerepo/net.powermatcher.core.agent/net.powermatcher.core.agent-0.9.0.jar"/>
+        <archive path="cnf/corerepo/net.powermatcher.core.scheduler.service/net.powermatcher.core.scheduler.service-0.9.0.jar"/>
+        <archive path="cnf/corerepo/net.powermatcher.core.scheduler/net.powermatcher.core.scheduler-0.9.0.jar"/>
+        <archive path="cnf/corerepo/net.powermatcher.core.agent.auctioneer/net.powermatcher.core.agent.auctioneer-0.9.0.jar"/>
+        <archive path="cnf/corerepo/net.powermatcher.core.agent.concentrator/net.powermatcher.core.agent.concentrator-0.9.0.jar"/>
+        <archive path="cnf/corerepo/net.powermatcher.core.agent.logging/net.powermatcher.core.agent.logging-0.9.0.jar"/>
+        <archive path="cnf/corerepo/net.powermatcher.core.agent.marketbasis.adapter/net.powermatcher.core.agent.marketbasis.adapter-0.9.0.jar"/>
+        <archive path="cnf/corerepo/net.powermatcher.core.agent.objective/net.powermatcher.core.agent.objective-0.9.0.jar"/>
+        <archive path="cnf/corerepo/net.powermatcher.core.agent.test/net.powermatcher.core.agent.test-0.9.0.jar"/>
+        <archive path="cnf/corerepo/net.powermatcher.core.messaging.framework/net.powermatcher.core.messaging.framework-0.9.0.jar"/>
+        <archive path="cnf/corerepo/net.powermatcher.core.messaging.mqttv3/net.powermatcher.core.messaging.mqttv3-0.9.0.jar"/>
+        <archive path="cnf/corerepo/net.powermatcher.core.messaging.protocol.adapter/net.powermatcher.core.messaging.protocol.adapter-0.9.0.jar"/>
+        <archive path="cnf/corerepo/net.powermatcher.core.direct.protocol.adapter/net.powermatcher.core.direct.protocol.adapter-0.9.0.jar"/>
+        <archive path="cnf/corerepo/net.powermatcher.core.launcher.main/net.powermatcher.core.launcher.main-0.9.0.jar"/>
+    </library>
+</eclipse-userlibraries>

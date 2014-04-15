@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- For assistance related to logback-translator or configuration  -->
+<!-- files in general, please contact the logback user mailing list -->
+<!-- at http://www.qos.ch/mailman/listinfo/logback-user             -->
+<!--                                                                -->
+<!-- For professional support please see                            -->
+<!--    http://www.qos.ch/shop/products/professionalSupport         -->
+<!--                                                                -->
+<configuration>
+  <appender name="MIELEMSG" class="ch.qos.logback.core.FileAppender">
+    <File>mielemsg.log</File>
+    <Append>true</Append>
+    <encoder>
+      <pattern>%d{dd MMM yyyy HH:mm:ss,SSS} [%t] %-5p %c - %m%n</pattern>
+    </encoder>
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>WARN</level>
+    </filter>
+  </appender>
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss,SSS} %c{1} - %m%n</pattern>
+    </encoder>
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>INFO</level>
+    </filter>
+  </appender>
+  <appender name="LOGFILE" class="ch.qos.logback.core.FileAppender">
+    <File>demoapp.log</File>
+    <Append>true</Append>
+    <encoder>
+      <pattern>%d{dd MMM yyyy HH:mm:ss,SSS} [%t] %-5p %c - %m%n</pattern>
+    </encoder>
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>INFO</level>
+    </filter>
+  </appender>
+  <appender name="TESTLOG" class="ch.qos.logback.core.FileAppender">
+    <Append>true</Append>
+    <File>test.log</File>
+    <encoder>
+      <pattern>%d{yyyyMMdd-HH:mm:ss,SSS} %c{1} - %m%n</pattern>
+    </encoder>
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>INFO</level>
+    </filter>
+  </appender>
+  <logger name="net.powermatcher.der.agent.miele.at.home.xml" level="INFO">
+    <appender-ref ref="MIELEMSG"/>
+  </logger>
+  <root level="INFO">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="LOGFILE"/>
+    <appender-ref ref="TESTLOG"/>
+  </root>
+</configuration>

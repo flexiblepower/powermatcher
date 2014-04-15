@@ -1,0 +1,4 @@
+-buildpath: net.powermatcher.telemetry.service;version=latest,\
+	osgi.core
+Export-Package: net.powermatcher.simulation.telemetry.metadata
+Bundle-Version: 1.0.0

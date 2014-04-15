@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nodeconfig id="Development" name="Test" description="Test OSGi system configuration - Test configuration nr 2"> 
+	<configuration type="group" cluster="test" id="pwmaas">
+		<property name="commodity" value="electricity" type="String"/>
+		<property name="currency" value="EUR" type="String"/>
+		<property name="matcher" value="concentrator1" type="String"/>
+		<property name="update_interval" value="50" type="Integer"/>		
+		<configuration type="group" id="Test">			 	
+				<configuration type="factory" pid="PowerMatcherTestAgent" id="testagent1">
+					<property name="enabled" value="true" type="Boolean"/>
+					<property name="update.interval" value="39" type="Integer"/>
+					<property name="minimum.price" value="0" type="Integer"/>
+					<property name="maximum.price" value="120" type="Integer"/>
+					<property name="minimum.power" value="0" type="Double"/>					
+					<property name="maximum.power" value="2000" type="Double"/>
+					<property name="steps" value="12" type="Integer"/>
+				</configuration> 
+		</configuration>
+	</configuration>
+</nodeconfig>

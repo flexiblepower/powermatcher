@@ -1,0 +1,17 @@
+-buildpackages:
+-buildpath: net.powermatcher.core.agent;version=latest,\
+	net.powermatcher.core.agent.concentrator;version=latest,\
+	net.powermatcher.core.agent.auctioneer;version=latest,\
+	net.powermatcher.simulation.configuration;version=latest,\
+	slf4j.api,\
+	net.powermatcher.simulation.logging;version=latest,\
+	net.powermatcher.simulation.testagents;version=latest,\
+	net.powermatcher.simulation.engine;version=latest,\
+	osgi.cmpn,\
+	flexiblepower.api,\
+	net.powermatcher.fpai.agent,\
+	osgi.core,\
+	org.apache.felix.scr
+Export-Package: net.powermatcher.simulation.engine.dependencyengine
+Import-Package: *
+Bundle-Version: 1.0.0

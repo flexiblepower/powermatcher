@@ -1,0 +1,483 @@
+[Wed Nov 14 11:38:14 CET 2012] Starting BenchmarkTree with DependencyEngine
+
+Stages             = 1
+Core pool size     = 1
+Tasks in tree      = 1
+Tree iterations/sec= 182598
+Tasks/sec          = 182598
+Tasks/sec/core     = 182598
+Task cpu           = 5307 ns
+Avg task duration  = 5476 ns
+Efficiency         = 96 %
+
+Stages             = 1
+Core pool size     = 2
+Tasks in tree      = 1
+Tree iterations/sec= 122273
+Tasks/sec          = 122273
+Tasks/sec/core     = 61136
+Task cpu           = 5460 ns
+Avg task duration  = 16356 ns
+Efficiency         = 33 %
+
+Stages             = 1
+Core pool size     = 3
+Tasks in tree      = 1
+Tree iterations/sec= 113158
+Tasks/sec          = 113158
+Tasks/sec/core     = 37719
+Task cpu           = 5666 ns
+Avg task duration  = 26511 ns
+Efficiency         = 21 %
+
+Stages             = 1
+Core pool size     = 4
+Tasks in tree      = 1
+Tree iterations/sec= 113643
+Tasks/sec          = 113643
+Tasks/sec/core     = 28410
+Task cpu           = 5660 ns
+Avg task duration  = 35196 ns
+Efficiency         = 16 %
+
+Stages             = 1
+Core pool size     = 5
+Tasks in tree      = 1
+Tree iterations/sec= 113144
+Tasks/sec          = 113144
+Tasks/sec/core     = 22628
+Task cpu           = 5664 ns
+Avg task duration  = 44190 ns
+Efficiency         = 12 %
+
+Stages             = 1
+Core pool size     = 6
+Tasks in tree      = 1
+Tree iterations/sec= 112792
+Tasks/sec          = 112792
+Tasks/sec/core     = 18798
+Task cpu           = 5656 ns
+Avg task duration  = 53190 ns
+Efficiency         = 10 %
+
+Stages             = 1
+Core pool size     = 7
+Tasks in tree      = 1
+Tree iterations/sec= 113473
+Tasks/sec          = 113473
+Tasks/sec/core     = 16210
+Task cpu           = 5655 ns
+Avg task duration  = 61684 ns
+Efficiency         = 9 %
+
+Stages             = 1
+Core pool size     = 8
+Tasks in tree      = 1
+Tree iterations/sec= 112358
+Tasks/sec          = 112358
+Tasks/sec/core     = 14044
+Task cpu           = 5652 ns
+Avg task duration  = 71200 ns
+Efficiency         = 7 %
+
+Stages             = 2
+Core pool size     = 1
+Tasks in tree      = 9
+Tree iterations/sec= 20992
+Tasks/sec          = 188933
+Tasks/sec/core     = 188933
+Task cpu           = 5172 ns
+Avg task duration  = 5292 ns
+Efficiency         = 97 %
+
+Stages             = 2
+Core pool size     = 2
+Tasks in tree      = 9
+Tree iterations/sec= 27390
+Tasks/sec          = 246512
+Tasks/sec/core     = 123256
+Task cpu           = 5333 ns
+Avg task duration  = 8112 ns
+Efficiency         = 65 %
+
+Stages             = 2
+Core pool size     = 3
+Tasks in tree      = 9
+Tree iterations/sec= 32970
+Tasks/sec          = 296736
+Tasks/sec/core     = 98912
+Task cpu           = 5541 ns
+Avg task duration  = 10107 ns
+Efficiency         = 54 %
+
+Stages             = 2
+Core pool size     = 4
+Tasks in tree      = 9
+Tree iterations/sec= 37642
+Tasks/sec          = 338785
+Tasks/sec/core     = 84696
+Task cpu           = 5571 ns
+Avg task duration  = 11804 ns
+Efficiency         = 47 %
+
+Stages             = 2
+Core pool size     = 5
+Tasks in tree      = 9
+Tree iterations/sec= 33627
+Tasks/sec          = 302649
+Tasks/sec/core     = 60529
+Task cpu           = 6488 ns
+Avg task duration  = 16520 ns
+Efficiency         = 39 %
+
+Stages             = 2
+Core pool size     = 6
+Tasks in tree      = 9
+Tree iterations/sec= 32919
+Tasks/sec          = 296271
+Tasks/sec/core     = 49378
+Task cpu           = 6788 ns
+Avg task duration  = 20250 ns
+Efficiency         = 33 %
+
+Stages             = 2
+Core pool size     = 7
+Tasks in tree      = 9
+Tree iterations/sec= 32060
+Tasks/sec          = 288548
+Tasks/sec/core     = 41221
+Task cpu           = 6841 ns
+Avg task duration  = 24255 ns
+Efficiency         = 28 %
+
+Stages             = 2
+Core pool size     = 8
+Tasks in tree      = 9
+Tree iterations/sec= 31214
+Tasks/sec          = 280928
+Tasks/sec/core     = 35116
+Task cpu           = 7077 ns
+Avg task duration  = 28472 ns
+Efficiency         = 24 %
+
+Stages             = 3
+Core pool size     = 1
+Tasks in tree      = 73
+Tree iterations/sec= 2579
+Tasks/sec          = 188280
+Tasks/sec/core     = 188280
+Task cpu           = 5193 ns
+Avg task duration  = 5311 ns
+Efficiency         = 97 %
+
+Stages             = 3
+Core pool size     = 2
+Tasks in tree      = 73
+Tree iterations/sec= 4516
+Tasks/sec          = 329675
+Tasks/sec/core     = 164837
+Task cpu           = 5376 ns
+Avg task duration  = 6066 ns
+Efficiency         = 88 %
+
+Stages             = 3
+Core pool size     = 3
+Tasks in tree      = 73
+Tree iterations/sec= 6171
+Tasks/sec          = 450484
+Tasks/sec/core     = 150161
+Task cpu           = 5594 ns
+Avg task duration  = 6657 ns
+Efficiency         = 84 %
+
+Stages             = 3
+Core pool size     = 4
+Tasks in tree      = 73
+Tree iterations/sec= 7947
+Tasks/sec          = 580173
+Tasks/sec/core     = 145043
+Task cpu           = 5571 ns
+Avg task duration  = 6892 ns
+Efficiency         = 80 %
+
+Stages             = 3
+Core pool size     = 5
+Tasks in tree      = 73
+Tree iterations/sec= 7711
+Tasks/sec          = 562951
+Tasks/sec/core     = 112590
+Task cpu           = 6849 ns
+Avg task duration  = 8880 ns
+Efficiency         = 77 %
+
+Stages             = 3
+Core pool size     = 6
+Tasks in tree      = 73
+Tree iterations/sec= 7458
+Tasks/sec          = 544474
+Tasks/sec/core     = 90745
+Task cpu           = 8367 ns
+Avg task duration  = 11016 ns
+Efficiency         = 75 %
+
+Stages             = 3
+Core pool size     = 7
+Tasks in tree      = 73
+Tree iterations/sec= 7638
+Tasks/sec          = 557588
+Tasks/sec/core     = 79655
+Task cpu           = 9451 ns
+Avg task duration  = 12551 ns
+Efficiency         = 75 %
+
+Stages             = 3
+Core pool size     = 8
+Tasks in tree      = 73
+Tree iterations/sec= 7710
+Tasks/sec          = 562836
+Tasks/sec/core     = 70354
+Task cpu           = 10351 ns
+Avg task duration  = 14208 ns
+Efficiency         = 72 %
+
+Stages             = 4
+Core pool size     = 1
+Tasks in tree      = 585
+Tree iterations/sec= 319
+Tasks/sec          = 186697
+Tasks/sec/core     = 186697
+Task cpu           = 5227 ns
+Avg task duration  = 5356 ns
+Efficiency         = 97 %
+
+Stages             = 4
+Core pool size     = 2
+Tasks in tree      = 585
+Tree iterations/sec= 594
+Tasks/sec          = 347797
+Tasks/sec/core     = 173898
+Task cpu           = 5341 ns
+Avg task duration  = 5750 ns
+Efficiency         = 92 %
+
+Stages             = 4
+Core pool size     = 3
+Tasks in tree      = 585
+Tree iterations/sec= 840
+Tasks/sec          = 491692
+Tasks/sec/core     = 163897
+Task cpu           = 5588 ns
+Avg task duration  = 6099 ns
+Efficiency         = 91 %
+
+Stages             = 4
+Core pool size     = 4
+Tasks in tree      = 585
+Tree iterations/sec= 1102
+Tasks/sec          = 644880
+Tasks/sec/core     = 161220
+Task cpu           = 5609 ns
+Avg task duration  = 6200 ns
+Efficiency         = 90 %
+
+Stages             = 4
+Core pool size     = 5
+Tasks in tree      = 585
+Tree iterations/sec= 1100
+Tasks/sec          = 643676
+Tasks/sec/core     = 128735
+Task cpu           = 6998 ns
+Avg task duration  = 7765 ns
+Efficiency         = 90 %
+
+Stages             = 4
+Core pool size     = 6
+Tasks in tree      = 585
+Tree iterations/sec= 1060
+Tasks/sec          = 620673
+Tasks/sec/core     = 103445
+Task cpu           = 8682 ns
+Avg task duration  = 9666 ns
+Efficiency         = 89 %
+
+Stages             = 4
+Core pool size     = 7
+Tasks in tree      = 585
+Tree iterations/sec= 1084
+Tasks/sec          = 634325
+Tasks/sec/core     = 90617
+Task cpu           = 10013 ns
+Avg task duration  = 11032 ns
+Efficiency         = 90 %
+
+Stages             = 4
+Core pool size     = 8
+Tasks in tree      = 585
+Tree iterations/sec= 1107
+Tasks/sec          = 647711
+Tasks/sec/core     = 80963
+Task cpu           = 11109 ns
+Avg task duration  = 12344 ns
+Efficiency         = 89 %
+
+Stages             = 5
+Core pool size     = 1
+Tasks in tree      = 4681
+Tree iterations/sec= 39
+Tasks/sec          = 186038
+Tasks/sec/core     = 186038
+Task cpu           = 5221 ns
+Avg task duration  = 5375 ns
+Efficiency         = 97 %
+
+Stages             = 5
+Core pool size     = 2
+Tasks in tree      = 4681
+Tree iterations/sec= 74
+Tasks/sec          = 348879
+Tasks/sec/core     = 174439
+Task cpu           = 5366 ns
+Avg task duration  = 5732 ns
+Efficiency         = 93 %
+
+Stages             = 5
+Core pool size     = 3
+Tasks in tree      = 4681
+Tree iterations/sec= 102
+Tasks/sec          = 478025
+Tasks/sec/core     = 159341
+Task cpu           = 5835 ns
+Avg task duration  = 6273 ns
+Efficiency         = 93 %
+
+Stages             = 5
+Core pool size     = 4
+Tasks in tree      = 4681
+Tree iterations/sec= 135
+Tasks/sec          = 635487
+Tasks/sec/core     = 158871
+Task cpu           = 5792 ns
+Avg task duration  = 6292 ns
+Efficiency         = 92 %
+
+Stages             = 5
+Core pool size     = 5
+Tasks in tree      = 4681
+Tree iterations/sec= 138
+Tasks/sec          = 646974
+Tasks/sec/core     = 129394
+Task cpu           = 7156 ns
+Avg task duration  = 7725 ns
+Efficiency         = 92 %
+
+Stages             = 5
+Core pool size     = 6
+Tasks in tree      = 4681
+Tree iterations/sec= 134
+Tasks/sec          = 631376
+Tasks/sec/core     = 105229
+Task cpu           = 8810 ns
+Avg task duration  = 9498 ns
+Efficiency         = 92 %
+
+Stages             = 5
+Core pool size     = 7
+Tasks in tree      = 4681
+Tree iterations/sec= 137
+Tasks/sec          = 645686
+Tasks/sec/core     = 92240
+Task cpu           = 10076 ns
+Avg task duration  = 10836 ns
+Efficiency         = 92 %
+
+Stages             = 5
+Core pool size     = 8
+Tasks in tree      = 4681
+Tree iterations/sec= 141
+Tasks/sec          = 660573
+Tasks/sec/core     = 82571
+Task cpu           = 11200 ns
+Avg task duration  = 12104 ns
+Efficiency         = 92 %
+
+Stages             = 6
+Core pool size     = 1
+Tasks in tree      = 37449
+Tree iterations/sec= 4
+Tasks/sec          = 183346
+Tasks/sec/core     = 183346
+Task cpu           = 5233 ns
+Avg task duration  = 5454 ns
+Efficiency         = 95 %
+
+Stages             = 6
+Core pool size     = 2
+Tasks in tree      = 37449
+Tree iterations/sec= 9
+Tasks/sec          = 342451
+Tasks/sec/core     = 171225
+Task cpu           = 5441 ns
+Avg task duration  = 5840 ns
+Efficiency         = 93 %
+
+Stages             = 6
+Core pool size     = 3
+Tasks in tree      = 37449
+Tree iterations/sec= 12
+Tasks/sec          = 458925
+Tasks/sec/core     = 152975
+Task cpu           = 6010 ns
+Avg task duration  = 6537 ns
+Efficiency         = 91 %
+
+Stages             = 6
+Core pool size     = 4
+Tasks in tree      = 37449
+Tree iterations/sec= 16
+Tasks/sec          = 603072
+Tasks/sec/core     = 150768
+Task cpu           = 6070 ns
+Avg task duration  = 6632 ns
+Efficiency         = 91 %
+
+Stages             = 6
+Core pool size     = 5
+Tasks in tree      = 37449
+Tree iterations/sec= 16
+Tasks/sec          = 631768
+Tasks/sec/core     = 126353
+Task cpu           = 7206 ns
+Avg task duration  = 7910 ns
+Efficiency         = 91 %
+
+Stages             = 6
+Core pool size     = 6
+Tasks in tree      = 37449
+Tree iterations/sec= 16
+Tasks/sec          = 620549
+Tasks/sec/core     = 103424
+Task cpu           = 8872 ns
+Avg task duration  = 9666 ns
+Efficiency         = 91 %
+
+Stages             = 6
+Core pool size     = 7
+Tasks in tree      = 37449
+Tree iterations/sec= 17
+Tasks/sec          = 637127
+Tasks/sec/core     = 91018
+Task cpu           = 10048 ns
+Avg task duration  = 10983 ns
+Efficiency         = 91 %
+
+Stages             = 6
+Core pool size     = 8
+Tasks in tree      = 37449
+Tree iterations/sec= 17
+Tasks/sec          = 662181
+Tasks/sec/core     = 82772
+Task cpu           = 11172 ns
+Avg task duration  = 12080 ns
+Efficiency         = 92 %
+
+[Wed Nov 14 11:46:14 CET 2012] Ending BenchmarkTree with DependencyEngine

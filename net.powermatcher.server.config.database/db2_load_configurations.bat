@@ -1,0 +1,54 @@
+@ECHO OFF
+
+SET PROGRAM=%0
+SET CONFIGDBNAME=%1
+SET CONFIGDBUSER=%2
+SET CONFIGDBPWD=%3
+SET LOGFILE=%PROGRAM%.%CONFIGDBNAME%.log
+IF (%1)==() GOTO SYNTAX
+IF (%2)==() GOTO CONNECTCURRENTUSER
+IF (%3)==() GOTO SYNTAX
+GOTO CONNECT
+
+
+:CONNECTCURRENTUSER
+echo Connecting to ConfigManager database  %CONFIGDBNAME% with current user
+db2 CONNECT TO %CONFIGDBNAME%
+IF %ERRORLEVEL% NEQ 0 GOTO CONNECTFAILED
+GOTO EXECUTESCRIPTS
+
+:CONNECT
+echo Connecting to ConfigManager database  %CONFIGDBNAME% with user %CONFIGDBUSER%
+db2 CONNECT TO %CONFIGDBNAME% user %CONFIGDBUSER% using %CONFIGDBPWD%
+IF %ERRORLEVEL% NEQ 0 GOTO CONNECTFAILED
+GOTO EXECUTESCRIPTS
+
+:EXECUTESCRIPTS
+echo Loading ConfigManager database  %CONFIGDBNAME% 
+db2 -tvf CLEAN_ALL_PWM_TABLES.SQL > %LOGFILE%
+db2 -tvf POPULATE_ROOT_CONFIG.SQL >> %LOGFILE%
+db2 -tvf POPULATE_PWM_GLOBAL_CONFIG.SQL >> %LOGFILE%
+db2 -tvf POPULATE_PWM_TEMPLATE_MAIN.SQL >> %LOGFILE%
+db2 -tvf POPULATE_NODE_CONFIGURATION.SQL >> %LOGFILE%
+db2 -tvf POPULATE_NODE_AUTHORIZATION.SQL >> %LOGFILE%
+db2 connect reset
+echo Loading ConfigManager database completed
+GOTO RESULTS
+
+:RESULTS
+echo "Listing errors number of errors in log:"
+find /C "SQLSTATE" %LOGFILE%
+GOTO END
+
+:SYNTAX
+echo Syntax: %0 database 
+echo or:
+echo       %0 database userid password
+GOTO END
+
+:CONNECTFAILED
+echo Could not connect to %CONFIGDBNAME% 
+
+
+:END
+echo Program ended

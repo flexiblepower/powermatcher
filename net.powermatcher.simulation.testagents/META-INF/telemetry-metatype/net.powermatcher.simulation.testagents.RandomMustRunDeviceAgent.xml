@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<telemetry-provider xmlns="http://powermatcher.net/telemetry-metadata/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://powermatcher.net/telemetry-metadata/ telemetry.xsd" class="net.powermatcher.simulation.testagents.RandomMustRunDeviceAgent">
+	<measurement key="demand" description="Demand" unit="W" />
+</telemetry-provider>
