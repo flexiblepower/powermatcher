@@ -1,59 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="PowerMatcher Simulator Platform" sequenceNumber="80">
+<?pde version="3.6"?><target name="PowerMatcher Simulation Target Platform" sequenceNumber="3">
 <locations>
-<location path="${workspace_loc}\cnf\repo\slf4j.api" type="Directory"/>
-<location path="${workspace_loc}\net.powermatcher.simulation.engine.dependencyengine\generated" type="Directory"/>
-<location path="${workspace_loc}\net.powermatcher.simulation.logging\generated" type="Directory"/>
-<location path="${workspace_loc}\cnf\repo\org.csstudio.swt.xygraph" type="Directory"/>
-<location path="${workspace_loc}\cnf\repo\org.apache.felix.scr" type="Directory"/>
-<location path="${workspace_loc}\net.powermatcher.simulation.configuration\generated" type="Directory"/>
-<location path="${eclipse_home}" type="Profile"/>
-<location path="${workspace_loc}\net.powermatcher.simulation.engine\generated" type="Directory"/>
-<location path="${workspace_loc}\net.powermatcher.core.agent\generated" type="Directory"/>
-<location path="${workspace_loc}\net.powermatcher.core.agent.auctioneer\generated" type="Directory"/>
-<location path="${workspace_loc}\cnf\repo\biz.aQute.bnd.annotation" type="Directory"/>
-<location path="${workspace_loc}\net.powermatcher.core.scheduler.service\generated" type="Directory"/>
-<location path="${workspace_loc}\net.powermatcher.core.adapter\generated" type="Directory"/>
-<location path="${workspace_loc}\net.powermatcher.core.adapter.service\generated" type="Directory"/>
-<location path="${workspace_loc}\cnf\repo\biz.aQute.junit" type="Directory"/>
-<location path="${workspace_loc}\net.powermatcher.simulation.testagents\generated" type="Directory"/>
-<location path="${workspace_loc}\cnf\repo\biz.aQute.bndlib" type="Directory"/>
-<location path="${workspace_loc}\net.powermatcher.telemetry.model\generated" type="Directory"/>
-<location path="${workspace_loc}\net.powermatcher.telemetry.service\generated" type="Directory"/>
-<location path="${workspace_loc}\net.powermatcher.core.configurable\generated" type="Directory"/>
-<location path="${workspace_loc}\net.powermatcher.core.agent.concentrator\generated" type="Directory"/>
-<location path="${workspace_loc}\cnf\repo\org.csstudio.swt.widgets" type="Directory"/>
-<location path="${workspace_loc}\cnf\repo\org.apache.felix.webconsole" type="Directory"/>
-<location path="${workspace_loc}\cnf\repo\org.apache.felix.metatype" type="Directory"/>
-<location path="${workspace_loc}\net.powermatcher.core.agent.auctioneer.component\generated" type="Directory"/>
-<location path="${workspace_loc}\net.powermatcher.core.agent.concentrator.component\generated" type="Directory"/>
-<location path="${workspace_loc}\cnf\repo\org.apache.felix.configadmin" type="Directory"/>
-<location path="${workspace_loc}\cnf\repo\ch.qos.logback.classic" type="Directory"/>
-<location path="${workspace_loc}\cnf\repo\ch.qos.logback.core" type="Directory"/>
-<location path="${workspace_loc}\net.powermatcher.core.adapter.component\generated" type="Directory"/>
-<location path="${workspace_loc}\net.powermatcher.simulation.telemetry.metadata\generated" type="Directory"/>
-<location path="${workspace_loc}\net.powermatcher.simulation.telemetry.metadata.component\generated" type="Directory"/>
-<location path="${workspace_loc}\cnf\repo\net.powermatcher.fpai.agent" type="Directory"/>
-<location path="${workspace_loc}\cnf\repo\net.powermatcher.fpai.agent.buffer" type="Directory"/>
-<location path="${workspace_loc}\cnf\repo\net.powermatcher.fpai.agent.storage" type="Directory"/>
-<location path="${workspace_loc}\cnf\repo\net.powermatcher.fpai.agent.timeshifter" type="Directory"/>
-<location path="${workspace_loc}\cnf\repo\net.powermatcher.fpai.agent.uncontrolled" type="Directory"/>
-<location path="${workspace_loc}\cnf\repo\flexiblepower.api" type="Directory"/>
-<location path="${workspace_loc}\cnf\repo\joda-time" type="Directory"/>
-<location path="${workspace_loc}\cnf\repo\flexiblepower.uncontrolled.manager" type="Directory"/>
-<location path="${workspace_loc}\cnf\repo\flexiblepower.smartmeter.simulation" type="Directory"/>
-<location path="${workspace_loc}\cnf\repo\flexiblepower.battery.simulation" type="Directory"/>
-<location path="${workspace_loc}\cnf\repo\flexiblepower.battery.manager" type="Directory"/>
-<location path="${workspace_loc}\cnf\repo\flexiblepower.api.ext" type="Directory"/>
-<location id="org.eclipse.rcp" path="C:\Program Files\eclipse-3.8" type="Feature"/>
+<location path="${eclipse_home}" type="Directory"/>
+<location path="${workspace_loc}/cnf/releaserepo/net.powermatcher.core.adapter/" type="Directory"/>
+<location path="${workspace_loc}/net.powermatcher.simulation.gui/lib/" type="Directory"/>
+<location path="${workspace_loc}/net.powermatcher.simulation.engine/generated/" type="Directory"/>
 </locations>
-<environment>
-<os>win32</os>
-<ws>win32</ws>
-<arch>x86_64</arch>
-<nl>en_US</nl>
-</environment>
-<launcherArgs>
-<vmArgs>-Dosgi.requiredJavaVersion=1.5 -Dhelp.lucene.tokenizer=standard -Xms40m -Xmx1024m</vmArgs>
-</launcherArgs>
 </target>

@@ -1,23 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="/cnf/repo/flexiblepower.api.ext/flexiblepower.api.ext-1.0.0.jar"/>
-	<classpathentry kind="lib" path="/cnf/repo/flexiblepower.battery.manager/flexiblepower.battery.manager-1.0.0.jar"/>
-	<classpathentry kind="lib" path="/cnf/repo/flexiblepower.battery.simulation/flexiblepower.battery.simulation-1.0.0.jar"/>
-	<classpathentry kind="lib" path="/cnf/repo/flexiblepower.smartmeter.simulation/flexiblepower.smartmeter.simulation-1.0.0.jar"/>
-	<classpathentry kind="lib" path="/cnf/repo/flexiblepower.uncontrolled.manager/flexiblepower.uncontrolled.manager-1.0.0.jar"/>
-	<classpathentry kind="lib" path="/cnf/repo/net.powermatcher.fpai.agent.buffer/net.powermatcher.fpai.agent.buffer-13.1.1.jar"/>
-	<classpathentry kind="lib" path="/cnf/repo/net.powermatcher.fpai.agent.storage/net.powermatcher.fpai.agent.storage-13.1.1.jar"/>
-	<classpathentry kind="lib" path="/cnf/repo/net.powermatcher.fpai.agent.timeshifter/net.powermatcher.fpai.agent.timeshifter-13.1.1.jar"/>
-	<classpathentry kind="lib" path="/cnf/repo/net.powermatcher.fpai.agent.uncontrolled/net.powermatcher.fpai.agent.uncontrolled-13.1.1.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/net.powermatcher.simulation.configuration"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/net.powermatcher.simulation.engine"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/net.powermatcher.simulation.engine.dependencyengine"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/net.powermatcher.simulation.logging"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/net.powermatcher.simulation.telemetry.metadata"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/net.powermatcher.simulation.telemetry.metadata.component"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/net.powermatcher.simulation.testagents"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
