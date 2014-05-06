@@ -3,3 +3,4 @@ bin/
 .metadata/
 generated/
 .svn/
+cnf/cache/

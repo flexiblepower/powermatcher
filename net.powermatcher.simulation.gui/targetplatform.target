@@ -81,5 +81,30 @@
 <location path="${workspace_loc}/net.powermatcher.telemetry.messaging.protocol.adapter.component/generated" type="Directory"/>
 <location path="${workspace_loc}/net.powermatcher.telemetry.model/generated" type="Directory"/>
 <location path="${workspace_loc}/net.powermatcher.telemetry.service/generated" type="Directory"/>
+<location path="${workspace_loc}/cnf/fpairepo/flexiblepower.api" type="Directory"/>
+<location path="${workspace_loc}/cnf/fpairepo/flexiblepower.api.ext" type="Directory"/>
+<location path="${workspace_loc}/cnf/fpairepo/net.powermatcher.fpai.agent" type="Directory"/>
+<location path="${workspace_loc}/cnf/fpairepo/net.powermatcher.fpai.agent.buffer" type="Directory"/>
+<location path="${workspace_loc}/cnf/fpairepo/net.powermatcher.fpai.agent.storage" type="Directory"/>
+<location path="${workspace_loc}/cnf/fpairepo/net.powermatcher.fpai.agent.timeshifter" type="Directory"/>
+<location path="${workspace_loc}/cnf/fpairepo/net.powermatcher.fpai.agent.uncontrolled" type="Directory"/>
+<location path="${workspace_loc}/cnf/fpairepo/net.powermatcher.fpai.auctioneer" type="Directory"/>
+<location path="${workspace_loc}/cnf/fpairepo/net.powermatcher.fpai.controller" type="Directory"/>
+<location path="${workspace_loc}/cnf/buildrepo/biz.aQute.junit" type="Directory"/>
+<location path="${workspace_loc}/cnf/buildrepo/biz.aQute.launcher" type="Directory"/>
+<location path="${workspace_loc}/cnf/buildrepo/ee.foundation" type="Directory"/>
+<location path="${workspace_loc}/cnf/buildrepo/ee.minimum" type="Directory"/>
+<location path="${workspace_loc}/cnf/buildrepo/junit.osgi" type="Directory"/>
+<location path="${workspace_loc}/cnf/buildrepo/org.osgi.ee.foundation" type="Directory"/>
+<location path="${workspace_loc}/cnf/buildrepo/org.osgi.ee.minimum" type="Directory"/>
+<location path="${workspace_loc}/cnf/buildrepo/osgi.core" type="Directory"/>
+<location path="${workspace_loc}/cnf/cache/biz.aQute.junit" type="Directory"/>
+<location path="${workspace_loc}/cnf/cache/biz.aQute.launcher" type="Directory"/>
+<location path="${workspace_loc}/cnf/cache/https%3A%2F%2Fgithub.com%2Fbndtools%2Fbundle-hub%2Fraw%2Fmaster" type="Directory"/>
+<location path="${workspace_loc}/cnf/cache/https%3A%2F%2Fgithub.com%2Fbndtools%2Fbundle-hub%2Fraw%2Fmaster%2Fbiz.aQute.bnd.annotation" type="Directory"/>
+<location path="${workspace_loc}/cnf/cache/https%3A%2F%2Fgithub.com%2Fbndtools%2Fbundle-hub%2Fraw%2Fmaster%2Forg.apache.felix.scr" type="Directory"/>
+<location path="${workspace_loc}/cnf/cache/https%3A%2F%2Fgithub.com%2Fbndtools%2Fbundle-hub%2Fraw%2Fmaster%2Fosgi.cmpn" type="Directory"/>
+<location path="${workspace_loc}/cnf/cache/https%3A%2F%2Fgithub.com%2Fbndtools%2Fbundle-hub%2Fraw%2Fmaster%2Fosgi.core" type="Directory"/>
+<location path="${workspace_loc}/cnf/cache/https%3A%2F%2Fgithub.com%2Fbndtools%2Fbundle-hub%2Fraw%2Fmaster%2Fslf4j.api" type="Directory"/>
 </locations>
 </target>

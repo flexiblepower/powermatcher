@@ -1,13 +1,14 @@
-<?xml version="1.0" encoding="UTF-8"?><launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
 <booleanAttribute key="com.ibm.debug.breakpoints.java.appendFile" value="false"/>
 <stringAttribute key="com.ibm.debug.breakpoints.java.traceFilename" value="${workspace_loc}\${launch_config_name}_${launch_timestamp}.log"/>
 <booleanAttribute key="com.ibm.debug.breakpoints.java.traceToConsole" value="true"/>
 <booleanAttribute key="com.ibm.debug.breakpoints.java.traceToFile" value="false"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/cnf/extrepo/net.powermatcher.expeditor.broker.manager/net.powermatcher.expeditor.broker.manager-0.9.0.jar"/>
+<listEntry value="/net.powermatcher.expeditor.launcher.mbroker.template"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
-<listEntry value="1"/>
+<listEntry value="4"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="net.powermatcher.expeditor.broker.manager.BrokerManager"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-brokerConfig broker_config.properties"/>
