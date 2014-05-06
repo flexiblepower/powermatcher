@@ -6,5 +6,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/PahoMqttv3"/>
 	<classpathentry kind="src" path="/net.powermatcher.core.agent"/>
 	<classpathentry kind="src" path="/net.powermatcher.core.messaging.protocol.adapter"/>
+	<classpathentry kind="lib" path="/cnf/localrepo/org.eclipse.paho.client.mqttv3/org.eclipse.paho.client.mqttv3-1.0.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

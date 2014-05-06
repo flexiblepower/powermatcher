@@ -12,5 +12,6 @@
 	<classpathentry kind="lib" path="lib/jetty-server-7.2.2.v20101205.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-util-7.2.2.v20101205.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-continuation-7.2.2.v20101205.jar"/>
+	<classpathentry kind="lib" path="/cnf/localrepo/slf4j.api/slf4j.api-1.7.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
