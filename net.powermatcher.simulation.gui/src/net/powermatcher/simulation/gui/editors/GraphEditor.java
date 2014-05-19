@@ -110,5 +110,10 @@ public class GraphEditor extends EditorPart {
 		// TODO Auto-generated method stub
 
 	}
+	
+	@Override
+	public String getTitleToolTip() {
+		return "Graph";
+	}
 
 }

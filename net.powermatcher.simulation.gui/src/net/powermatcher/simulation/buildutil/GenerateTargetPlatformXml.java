@@ -31,6 +31,10 @@ public class GenerateTargetPlatformXml {
 			fos.write(("<location path=\"" + loc + "\" type=\"Directory\"/>\n").getBytes());
 		}
 
+		for (String loc : getChildDirs("cnf/localrepo")) {
+			fos.write(("<location path=\"" + loc + "\" type=\"Directory\"/>\n").getBytes());
+		}
+		
 		for (String loc : getChildDirs("cnf/buildrepo")) {
 			fos.write(("<location path=\"" + loc + "\" type=\"Directory\"/>\n").getBytes());
 		}

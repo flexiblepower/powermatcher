@@ -58,6 +58,6 @@ public class FigureEditorInput implements IEditorInput {
 
 	@Override
 	public String getToolTipText() {
-		return null;
+		return "Figure editor";
 	}
 }

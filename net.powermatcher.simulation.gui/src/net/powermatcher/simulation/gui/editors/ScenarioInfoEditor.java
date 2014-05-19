@@ -574,4 +574,9 @@ public class ScenarioInfoEditor extends EditorPart implements ModifyListener, Se
 	public void widgetSelected(SelectionEvent e) {
 		this.saveChange(e);
 	}
+	
+	@Override
+	public String getTitleToolTip() {
+		return "Scenario editor";
+	}
 }

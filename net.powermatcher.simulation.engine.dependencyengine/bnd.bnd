@@ -11,7 +11,9 @@
 	flexiblepower.api,\
 	net.powermatcher.fpai.agent,\
 	osgi.core,\
-	org.apache.felix.scr
+	org.apache.felix.scr,\
+	net.powermatcher.telemetry.service;version=latest,\
+	flexiblepower.api.ext
 Export-Package: net.powermatcher.simulation.engine.dependencyengine
 Import-Package: *
 Bundle-Version: 1.0.0

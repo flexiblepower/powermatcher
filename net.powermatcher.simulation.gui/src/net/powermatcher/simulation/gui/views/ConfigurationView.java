@@ -349,4 +349,9 @@ public class ConfigurationView extends ViewPart {
 			workbench.getOperationSupport().getOperationHistory().execute(operation, null, null);
 		}
 	}
+	
+	@Override
+	public String getTitleToolTip() {
+		return "Configuration";
+	}
 }

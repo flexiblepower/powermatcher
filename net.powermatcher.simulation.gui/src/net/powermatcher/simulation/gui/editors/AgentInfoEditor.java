@@ -599,5 +599,8 @@ public class AgentInfoEditor extends EditorPart {
 		}
 	}
 
-	
+	@Override
+	public String getTitleToolTip() {
+		return "Agent editor";
+	}
 }

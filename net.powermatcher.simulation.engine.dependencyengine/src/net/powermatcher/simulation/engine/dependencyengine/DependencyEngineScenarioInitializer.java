@@ -20,7 +20,6 @@ import net.powermatcher.simulation.engine.simulationclock.SimulationClock;
 import net.powermatcher.simulation.logging.Broker;
 import net.powermatcher.simulation.logging.sink.CsvDataSink;
 
-import org.flexiblepower.rai.values.Duration;
 import org.flexiblepower.time.TimeService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -113,16 +112,16 @@ public class DependencyEngineScenarioInitializer implements ScenarioInitializer 
 			this.engine = engine;
 		}
 
-		@Override
-		public Date getTimeOver(double value, org.flexiblepower.rai.unit.TimeUnit unit) {
-			return new Date((long) (getCurrentTimeMillis() + unit.convertTo(value,
-					org.flexiblepower.rai.unit.TimeUnit.MILLISECONDS)));
-		}
-
-		@Override
-		public Date getTimeOver(Duration duration) {
-			return new Date(getCurrentTimeMillis() + duration.getMilliseconds());
-		}
+//		@Override
+//		public Date getTimeOver(double value, org.flexiblepower.rai.unit.TimeUnit unit) {
+//			return new Date((long) (getCurrentTimeMillis() + unit.convertTo(value,
+//					org.flexiblepower.rai.unit.TimeUnit.MILLISECONDS)));
+//		}
+//
+//		@Override
+//		public Date getTimeOver(Duration duration) {
+//			return new Date(getCurrentTimeMillis() + duration.getMilliseconds());
+//		}
 
 		@Override
 		public Date getTime() {

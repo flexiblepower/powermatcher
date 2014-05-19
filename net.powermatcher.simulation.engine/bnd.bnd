@@ -4,5 +4,6 @@ Export-Package: net.powermatcher.simulation.engine,\
 -buildpath: net.powermatcher.simulation.configuration;version=latest,\
 	osgi.core,\
 	osgi.cmpn,\
-	slf4j.api
+	slf4j.api,\
+	net.powermatcher.telemetry.service;version=latest
 Bundle-Version: 1.0.0

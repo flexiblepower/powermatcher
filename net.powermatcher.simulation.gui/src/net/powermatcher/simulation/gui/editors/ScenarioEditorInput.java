@@ -50,8 +50,7 @@ public class ScenarioEditorInput implements IEditorInput {
 
 	@Override
 	public String getToolTipText() {
-		// TODO Auto-generated method stub
-		return null;
+		return "Scenario editor";
 	}
 
 }

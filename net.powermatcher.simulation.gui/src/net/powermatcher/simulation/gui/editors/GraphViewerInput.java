@@ -46,8 +46,7 @@ public class GraphViewerInput implements IEditorInput {
 
 	@Override
 	public String getToolTipText() {
-		// TODO Auto-generated method stub
-		return null;
+		return "Graph viewer";
 	}
 
 }

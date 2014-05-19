@@ -53,8 +53,7 @@ public class AgentEditorInput implements IEditorInput {
 
 	@Override
 	public String getToolTipText() {
-		// TODO Auto-generated method stub
-		return null;
+		return "Agent editor";
 	}
 
 	public ObjectClassDefinition getConfigurationDefinition() {
@@ -68,5 +67,6 @@ public class AgentEditorInput implements IEditorInput {
 	public NodeDescriptor getNodeDescriptor() {
 		return this.node;
 	}
+	
 
 }

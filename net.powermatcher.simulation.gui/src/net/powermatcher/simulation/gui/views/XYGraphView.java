@@ -26,5 +26,10 @@ public class XYGraphView extends ViewPart {
 	@Override
 	public void setFocus() {
 	}
+	
+	@Override
+	public String getTitleToolTip() {
+		return "Graph";
+	}
 
 }

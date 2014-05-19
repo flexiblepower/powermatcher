@@ -152,7 +152,7 @@ public class FPAIDeviceAgentComposer extends AgentComposer<Agent> {
 
 		FPAIAgent agent = (FPAIAgent) getNode();
 		agent.bind(this.resourceManager);
-		this.resourceManager.setDriver(this.resourceDriver);
+		this.resourceManager.registerDriver(this.resourceDriver);
 	}
 
 	@Override

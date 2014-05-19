@@ -523,16 +523,6 @@
             name="LoadScenario">
       </command>
       <command
-            defaultHandler="net.powermatcher.simulation.gui.handlers.AddConcentrator"
-            id="net.powermatcher.simulation.gui.command.addconcentrator"
-            name="AddConcentrator">
-      </command>
-      <command
-            defaultHandler="net.powermatcher.simulation.gui.handlers.AddAuctioneer"
-            id="net.powermatcher.simulation.gui.command.addauctioneer"
-            name="AddAuctioneer">
-      </command>
-      <command
             defaultHandler="net.powermatcher.simulation.gui.handlers.AddCluster"
             id="net.powermatcher.simulation.gui.command.addcluster"
             name="AddCluster">
@@ -571,11 +561,6 @@
             defaultHandler="net.powermatcher.simulation.gui.handlers.OpenEditor"
             id="net.powermatcher.simulation.gui.handlers.OpenEditor"
             name="Open Editor">
-      </command>
-      <command
-            defaultHandler="net.powermatcher.simulation.gui.handlers.NewScenarioWizard"
-            id="net.powermatcher.simulation.gui.command.newscenariowizard"
-            name="New Scenario Wizard">
       </command>
       <command
             id="net.powermatcher.simulation.gui.command.delete"

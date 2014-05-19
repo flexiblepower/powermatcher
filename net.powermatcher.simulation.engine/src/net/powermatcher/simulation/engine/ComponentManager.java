@@ -48,7 +48,7 @@ public class ComponentManager implements BundleListener {
 		metaTypeServiceTracker.open();
 
 		configurationAdminTracker = new ServiceTracker(bundleContext, ConfigurationAdmin.class.getName(), null);
-		configurationAdminTracker.open();
+		configurationAdminTracker.open(true);
 
 		this.removeStaleConfigurations();
 
