@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?><eclipse-userlibraries version="2">
-    <library name="PowerMatcher Agent" systemlibrary="false">
-        <archive path="cnf/agentrepo/net.powermatcher.agent.peakshavingconcentrator/net.powermatcher.agent.peakshavingconcentrator-0.9.0.jar"/>
-        <archive path="cnf/agentrepo/net.powermatcher.der.agent.miele.at.home/net.powermatcher.der.agent.miele.at.home-0.9.0.jar"/>
-        <archive path="cnf/agentrepo/net.powermatcher.der.agent.miele.at.home.gateway/net.powermatcher.der.agent.miele.at.home.gateway-0.9.0.jar"/>
-    </library>
-</eclipse-userlibraries>

@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- Root tag for OK response of action execution. -->
-<!ELEMENT ok (action, cu-type, cu-id)>
-<!-- This tag holds the name of the action, which was executed. -->
-<!ELEMENT action (#PCDATA)>
-<!-- The type of the control unit, on which the action was performed. -->
-<!ELEMENT cu-type (#PCDATA)>
-<!-- The ID of the control unit, on which the action was performed. -->
-<!ELEMENT cu-id (#PCDATA)>

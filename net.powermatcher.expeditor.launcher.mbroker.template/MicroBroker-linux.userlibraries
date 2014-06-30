@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?><eclipse-userlibraries version="2">
-    <library name="MicroBroker3" systemlibrary="false">
-        <archive path="/opt/ibm/lotus/Expeditor/rcp/eclipse/plugins/com.ibm.micro.admin_3.0.3.0-20110708.jar"/>
-        <archive path="/opt/ibm/lotus/Expeditor/rcp/eclipse/plugins/com.ibm.micro.client_3.0.3.0-20110708.jar"/>
-        <archive path="/opt/ibm/lotus/Expeditor/rcp/eclipse/plugins/com.ibm.micro.utils.extended_3.0.3.0-20110708.jar"/>
-        <archive path="/opt/ibm/lotus/Expeditor/rcp/eclipse/plugins/com.ibm.micro.utils_3.0.3.0-20110708.jar"/>
-        <archive path="/opt/ibm/lotus/Expeditor/rcp/eclipse/plugins/com.ibm.micro_3.0.3.0-20110708.jar"/>
-    </library>
-</eclipse-userlibraries>
