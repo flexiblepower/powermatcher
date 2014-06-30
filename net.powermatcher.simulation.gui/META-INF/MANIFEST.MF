@@ -24,3 +24,4 @@ Require-Bundle: org.eclipse.core.runtime,
  org.csstudio.swt.widgets;bundle-version="2.2.0",
  org.csstudio.swt.xygraph;bundle-version="2.2.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ClassPath: .

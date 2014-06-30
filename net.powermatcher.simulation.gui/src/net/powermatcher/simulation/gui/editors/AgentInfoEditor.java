@@ -62,7 +62,6 @@ public class AgentInfoEditor extends EditorPart {
 		
 		@Override
 		public void simulationStopped() {
-			// TODO Auto-generated method stub
 			optionsPart.simulationStopped();
 			loggingPart.simulationStopped();
 			optionsPart.getControl().setEnabled(true);
@@ -71,7 +70,6 @@ public class AgentInfoEditor extends EditorPart {
 
 		@Override
 		public void simulationStarted() {
-			// TODO Auto-generated method stub
 			optionsPart.simulationStarted();
 			loggingPart.simulationStarted();
 			optionsPart.getControl().setEnabled(false);
@@ -131,6 +129,13 @@ public class AgentInfoEditor extends EditorPart {
 		setPartName(input.getName());
 		ApplicationSimulationControl control = ((ApplicationSimulationControl) Application.getInstance().getSimulationControl());
 		control.addSimulationStateListener(listener);
+	}
+	
+	@Override
+	public void dispose() {
+		ApplicationSimulationControl control = ((ApplicationSimulationControl) Application.getInstance().getSimulationControl());
+		control.removeSimulationStateListener(listener);
+		super.dispose();
 	}
 
 	@Override

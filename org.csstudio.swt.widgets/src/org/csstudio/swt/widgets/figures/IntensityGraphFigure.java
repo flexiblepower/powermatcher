@@ -499,7 +499,7 @@ public class IntensityGraphFigure extends Figure implements Introspectable {
 					text = text + getPixelInfo(dataLocation.x + cropLeft, dataLocation.y + cropTop,
 							xCoordinate, yCoordinate, valueUnderMouse);							
 					Dimension size = FigureUtilities.getTextExtents(
-							text, Display.getDefault().getSystemFont());
+							text, Display.getCurrent().getSystemFont());
 					Image image = new Image(Display.getDefault(),
 							size.width + CURSOR_SIZE, size.height + CURSOR_SIZE);
 					

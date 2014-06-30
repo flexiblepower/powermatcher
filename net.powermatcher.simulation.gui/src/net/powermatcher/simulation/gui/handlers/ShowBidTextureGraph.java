@@ -53,7 +53,7 @@ public class ShowBidTextureGraph extends AbstractHandler {
 			}
 		}
 
-		BidTextureGraph graph = new BidTextureGraph(1000, 100);
+		BidTextureGraph graph = new BidTextureGraph(100, 100);
 		// TODO graph.setTitle("Bid at " + id);
 
 		Filter filter = new Filter(graph, new DataDescriptor(node.getId(), node.getClusterId(), DataType.BID));
