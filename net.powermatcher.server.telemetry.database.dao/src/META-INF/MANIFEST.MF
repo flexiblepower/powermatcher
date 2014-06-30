@@ -1,4 +1,0 @@
-Manifest-Version: 1.0
-Class-Path: net.powermatcher.server.telemetry.database.jdbc.jar 
- net.powermatcher.telemetry.model.jar 
-

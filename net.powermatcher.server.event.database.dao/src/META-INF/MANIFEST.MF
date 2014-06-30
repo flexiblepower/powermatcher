@@ -1,5 +1,0 @@
-Manifest-Version: 1.0
-Class-Path: net.powermatcher.server.event.database.jdbc.jar 
- net.powermatcher.core.agent.jar 
- net.powermatcher.core.messaging.protocol.adapter.jar 
-

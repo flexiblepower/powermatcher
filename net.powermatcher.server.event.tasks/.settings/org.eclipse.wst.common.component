@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
-    <wb-module deploy-name="net.powermatcher.server.event.tasks">
-        <wb-resource deploy-path="/" source-path="/ejbModule" tag="defaultRootSource"/>
-        <wb-resource deploy-path="/" source-path="/.apt_generated"/>
-        <property name="java-output-path" value="/net.powermatcher.server.event.tasks/ejbModule"/>
-        <property name="ClientProject" value="net.powermatcher.server.event.tasksClient"/>
-        <property name="ClientJARURI" value="net.powermatcher.server.event.tasksClient.jar"/>
-    </wb-module>
-</project-modules>

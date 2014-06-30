@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<connections:connections xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:connections="http://www.ibm.com/websphere/wdo/connections">
-  <connection id="CONFMGRDB">
-    <development xsi:type="connections:rsc-live-connection" id="CONFMGRDB_dev" name="CONFMGRDB"/>
-    <runtime xsi:type="connections:datasource-connection" auto-deploy="false" class-location="C:\Program Files\IBM\SDP70Shared\plugins\com.ibm.datatools.db2_2.1.102.v20100715_2051\driver\db2jcc4.jar;C:\Program Files\IBM\SDP70Shared\plugins\com.ibm.datatools.db2_2.1.102.v20100715_2051\driver\db2jcc4_license_cisuz.jar" id="CONFMGRDB_runtime" classname="com.ibm.db2.jcc.DB2ConnectionPoolDataSource" database-name="PWMDEV" jndi-name="jdbc/CONFMGRDB" port-number="50000" resource-reference-name="CONFMGRDB" server-name="cpssvn09.smarterplatform.loc" sql-vendor-type="55"/>
-  </connection>
-</connections:connections>
