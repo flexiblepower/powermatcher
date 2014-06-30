@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: SWT XYGraph Widgets
+Bundle-SymbolicName: org.csstudio.swt.widgets
+Bundle-Version: 2.2.0.qualifier
+Bundle-Vendor: Xihui Chen (ztyaner11@gmail.com)
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: org.eclipse.swt;bundle-version="3.7.1",
+ org.eclipse.draw2d,
+ org.csstudio.swt.xygraph;bundle-version="1.1.4"
+Export-Package: org.csstudio.swt.widgets.datadefinition,
+ org.csstudio.swt.widgets.figureparts,
+ org.csstudio.swt.widgets.figures,
+ org.csstudio.swt.widgets.introspection,
+ org.csstudio.swt.widgets.util

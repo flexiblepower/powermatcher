@@ -1,0 +1,23 @@
+This is the Pure Java version of SWT XYGraph, so it can be used for pure java applications. 
+
+It also requires these jars which can be copied from eclipse/plugins folder or org.csstudio.swt.xygraph.pureJavaTest/lib:
+
+org.eclipse.core.commands_3.6.0.I20110111-0800.jar
+org.eclipse.draw2d_3.7.2.v20111017-2020.jar
+org.eclipse.equinox.common_3.6.0.v20110523.jar
+org.eclipse.jface_3.7.0.I20110522-1430.jar
+lib/org.eclipse.osgi_3.7.1.R37x_v20110808-1106.jar
+lib/org.eclipse.swt_3.7.1.v3738a.jar
+org.eclipse.swt.gtk.linux.x86_64_3.7.1.v3738a.jar (Or the SWT library for your OS platform). 
+
+
+Following packages are exactly same as RCP/RAP version of SWT XYGraph:
+
+org.csstudio.swt.xygraph.dataprovider
+org.csstudio.swt.xygraph.figures
+org.csstudio.swt.xygraph.linearscale
+org.csstudio.swt.xygraph.toolbar
+org.csstudio.swt.xygraph.undo
+
+
+Developer should keep changes on these packages always same as RCP/RAP version.
