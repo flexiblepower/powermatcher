@@ -99,7 +99,7 @@ Service-Component: *
 	org.apache.felix.http.jetty;version='[2.2.0,2.2.1)',\
 	org.apache.felix.log;version='[1.0.1,1.0.2)',\
 	org.apache.felix.metatype;version='[1.0.4,1.0.5)',\
-	org.apache.felix.scr;version='[1.6.2,1.6.3)',\
+	org.apache.felix.scr;version=latest,\
 	org.apache.felix.webconsole;version='[3.1.8,3.1.9)',\
 	org.eclipse.paho.client.mqttv3;version='[1.0.0,1.0.1)',\
 	osgi.cmpn;version='[4.2.0,4.2.1)',\
