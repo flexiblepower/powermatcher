@@ -29,9 +29,9 @@
     <requirement namespace='osgi.wiring.package'>
       <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.agent.peakshavingconcentrator.config)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
     </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.adapter.component)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
-    </requirement>
+<!--     <requirement namespace='osgi.wiring.package'> -->
+<!--       <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.adapter.component)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/> -->
+<!--     </requirement> -->
     <requirement namespace='osgi.wiring.package'>
       <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.configurable)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
     </requirement>
@@ -238,9 +238,9 @@
     <requirement namespace='osgi.wiring.package'>
       <directive name='filter' value='(&amp;(osgi.wiring.package=aQute.bnd.annotation.metatype)(version&gt;=1.43.0)(!(version&gt;=2.0.0)))'/>
     </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.adapter.component)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
-    </requirement>
+<!--     <requirement namespace='osgi.wiring.package'> -->
+<!--       <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.adapter.component)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/> -->
+<!--     </requirement> -->
     <requirement namespace='osgi.wiring.package'>
       <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.configurable)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
     </requirement>

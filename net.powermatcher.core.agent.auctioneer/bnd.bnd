@@ -8,6 +8,6 @@ Export-Package: net.powermatcher.core.agent.auctioneer,\
 	net.powermatcher.core.agent.auctioneer.service
 -buildpath: osgi.core;version=4.2,\
 	biz.aQute.bnd.annotation,\
-	net.powermatcher.core.adapter.component;version=latest,\
+	net.powermatcher.core.adapter;version=latest,\
 	net.powermatcher.core.configurable;version=latest,\
 	net.powermatcher.core.agent;version=latest

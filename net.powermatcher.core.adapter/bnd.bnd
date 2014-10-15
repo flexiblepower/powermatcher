@@ -3,9 +3,12 @@ Bundle-Category: PowerMatcher Core
 Export-Package: net.powermatcher.core.adapter,\
 	net.powermatcher.core.adapter.config,\
 	net.powermatcher.core.object,\
-	net.powermatcher.core.object.config
+	net.powermatcher.core.object.config,\
+	net.powermatcher.core.adapter.component
 Bundle-Version: 0.9.0
--buildpath: slf4j.api;version=latest,\
+Service-Component: *
+-buildpath: osgi.core;version=4.2,\
+	slf4j.api;version=latest,\
 	net.powermatcher.core.configurable;version=latest,\
 	net.powermatcher.core.adapter.service;version=latest,\
 	net.powermatcher.core.scheduler.service;version=latest

@@ -8,7 +8,6 @@ Bundle-Version: 0.9.0
 	net.powermatcher.core.configurable;version=latest,\
 	net.powermatcher.core.scheduler.service;version=latest,\
 	net.powermatcher.core.adapter;version=latest,\
-	net.powermatcher.core.adapter.component;version=latest,\
 	net.powermatcher.core.adapter.service;version=latest,\
 	net.powermatcher.core.messaging.framework;version=latest,\
 	net.powermatcher.telemetry.messaging.protocol.adapter;version=latest

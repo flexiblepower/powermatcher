@@ -1,6 +1,5 @@
 -nobundles: true
 -buildpath: net.powermatcher.core.adapter;version=latest,\
-	net.powermatcher.core.adapter.component;version=latest,\
 	net.powermatcher.core.adapter.service;version=latest,\
 	net.powermatcher.core.agent;version=latest,\
 	net.powermatcher.core.agent.auctioneer;version=latest,\

@@ -36,7 +36,7 @@ Service-Component: *
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.config.management.agent)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.auctioneer)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.xml.standard.parser)',\
-	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.adapter.component)',\
+	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.adapter)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.configurable)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.messaging.framework)',\
@@ -61,7 +61,6 @@ Service-Component: *
 	ch.qos.logback.core;version='[1.0.9,1.0.10)',\
 	javax.servlet;version='[2.5.0,2.5.1)',\
 	net.powermatcher.core.adapter;version=latest,\
-	net.powermatcher.core.adapter.component;version=latest,\
 	net.powermatcher.core.adapter.service;version=latest,\
 	net.powermatcher.core.agent;version=latest,\
 	net.powermatcher.core.agent.auctioneer;version=latest,\
