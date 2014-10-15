@@ -19,7 +19,6 @@
 	net.powermatcher.core.launcher.main;version=latest,\
 	net.powermatcher.core.logging.bridge;version=latest,\
 	net.powermatcher.core.messaging.adapter.template;version=latest,\
-	net.powermatcher.core.messaging.adapter.template.component;version=latest,\
 	net.powermatcher.core.messaging.framework;version=latest,\
 	net.powermatcher.core.messaging.framework.test;version=latest,\
 	net.powermatcher.core.messaging.mqttv3;version=latest,\
