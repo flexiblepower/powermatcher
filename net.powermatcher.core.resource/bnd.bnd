@@ -21,7 +21,6 @@
 	net.powermatcher.core.config.management.agent.test;version=latest,\
 	net.powermatcher.core.configurable;version=latest,\
 	net.powermatcher.core.direct.protocol.adapter;version=latest,\
-	net.powermatcher.core.direct.protocol.adapter.component;version=latest,\
 	net.powermatcher.core.launcher.main;version=latest,\
 	net.powermatcher.core.logging.bridge;version=latest,\
 	net.powermatcher.core.messaging.adapter.template;version=latest,\

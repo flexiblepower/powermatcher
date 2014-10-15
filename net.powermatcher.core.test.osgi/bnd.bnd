@@ -40,7 +40,7 @@ Service-Component: *
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.configurable)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.messaging.framework)',\
-	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.direct.protocol.adapter.component)',\
+	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.direct.protocol.adapter)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.messaging.mqttv3.component)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.scheduler.component)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.concentrator.component)',\
@@ -77,7 +77,6 @@ Service-Component: *
 	net.powermatcher.core.config.management.agent;version=latest,\
 	net.powermatcher.core.configurable;version=latest,\
 	net.powermatcher.core.direct.protocol.adapter;version=latest,\
-	net.powermatcher.core.direct.protocol.adapter.component;version=latest,\
 	net.powermatcher.core.logging.bridge;version=latest,\
 	net.powermatcher.core.messaging.framework;version=latest,\
 	net.powermatcher.core.messaging.mqttv3;version=latest,\
