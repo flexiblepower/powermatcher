@@ -1,4 +1,9 @@
--buildpath: net.powermatcher.telemetry.service;version=latest,\
-	osgi.core
+Include-Resource: ./lib/kxml2-2.3.0.jar
+Bundle-ClassPath: ., kxml2-2.3.0.jar
+Private-Package: net.powermatcher.simulation.telemetry.metadata.component
+Bundle-Activator: net.powermatcher.simulation.telemetry.metadata.component.TelemetryMetaDataServiceImpl
 Export-Package: net.powermatcher.simulation.telemetry.metadata
 Bundle-Version: 1.0.0
+-buildpath: net.powermatcher.telemetry.service;version=latest,\
+	osgi.core,\
+	slf4j.api,\
