@@ -3,7 +3,11 @@ Bundle-Category: PowerMatcher Extension
 Export-Package: net.powermatcher.agent.template,\
 	net.powermatcher.agent.template.config
 Bundle-Version: 0.9.0
--buildpath: net.powermatcher.core.configurable;version=latest,\
+Service-Component: *
+Private-Package: net.powermatcher.agent.template.component
+-buildpath: osgi.core;version=4.2,\
+	biz.aQute.bnd.annotation,\
+	net.powermatcher.core.configurable;version=latest,\
 	net.powermatcher.core.scheduler.service;version=latest,\
 	net.powermatcher.core.adapter.service;version=latest,\
 	net.powermatcher.core.adapter;version=latest,\
