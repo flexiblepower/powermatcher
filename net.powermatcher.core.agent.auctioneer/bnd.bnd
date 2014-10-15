@@ -1,8 +1,13 @@
 Bundle-Copyright: Copyright (c) 2012, 2013 FlexiblePower Alliance Network (FAN).
 Bundle-Category: PowerMatcher Core
+Bundle-Version: 0.9.0
+Service-Component: *
+Private-Package: net.powermatcher.core.agent.auctioneer.component
 Export-Package: net.powermatcher.core.agent.auctioneer,\
 	net.powermatcher.core.agent.auctioneer.config,\
 	net.powermatcher.core.agent.auctioneer.service
-Bundle-Version: 0.9.0
--buildpath: net.powermatcher.core.configurable;version=latest,\
+-buildpath: osgi.core;version=4.2,\
+	biz.aQute.bnd.annotation,\
+	net.powermatcher.core.adapter.component;version=latest,\
+	net.powermatcher.core.configurable;version=latest,\
 	net.powermatcher.core.agent;version=latest

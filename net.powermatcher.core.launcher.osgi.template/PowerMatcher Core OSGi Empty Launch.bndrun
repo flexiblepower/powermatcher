@@ -17,7 +17,7 @@
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.messaging.protocol.adapter.component)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.messaging.mqttv3.component)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.scheduler.component)',\
-	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.auctioneer.component)',\
+	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.auctioneer)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.concentrator.component)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.logging.component)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.marketbasis.adapter.component)',\
@@ -39,7 +39,6 @@
 	net.powermatcher.core.adapter.service;version=latest,\
 	net.powermatcher.core.agent;version=latest,\
 	net.powermatcher.core.agent.auctioneer;version=latest,\
-	net.powermatcher.core.agent.auctioneer.component;version=latest,\
 	net.powermatcher.core.agent.concentrator;version=latest,\
 	net.powermatcher.core.agent.concentrator.component;version=latest,\
 	net.powermatcher.core.agent.logging;version=latest,\

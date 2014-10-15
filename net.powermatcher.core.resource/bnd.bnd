@@ -4,7 +4,6 @@
 	net.powermatcher.core.adapter.service;version=latest,\
 	net.powermatcher.core.agent;version=latest,\
 	net.powermatcher.core.agent.auctioneer;version=latest,\
-	net.powermatcher.core.agent.auctioneer.component;version=latest,\
 	net.powermatcher.core.agent.auctioneer.test;version=latest,\
 	net.powermatcher.core.agent.concentrator;version=latest,\
 	net.powermatcher.core.agent.concentrator.component;version=latest,\
