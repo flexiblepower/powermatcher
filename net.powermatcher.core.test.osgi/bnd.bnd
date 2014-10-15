@@ -47,7 +47,7 @@ Service-Component: *
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.messaging.protocol.adapter)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.logging)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.marketbasis.adapter)',\
-	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.objective.component)',\
+	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.objective)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.test.component)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.test.util)
 -runrepos: Workspace,\
@@ -68,7 +68,6 @@ Service-Component: *
 	net.powermatcher.core.agent.logging;version=latest,\
 	net.powermatcher.core.agent.marketbasis.adapter;version=latest,\
 	net.powermatcher.core.agent.objective;version=latest,\
-	net.powermatcher.core.agent.objective.component;version=latest,\
 	net.powermatcher.core.agent.test;version=latest,\
 	net.powermatcher.core.agent.test.component;version=latest,\
 	net.powermatcher.core.config.management.agent;version=latest,\

@@ -9,7 +9,6 @@
 	net.powermatcher.core.agent.logging;version=latest,\
 	net.powermatcher.core.agent.marketbasis.adapter;version=latest,\
 	net.powermatcher.core.agent.objective;version=latest,\
-	net.powermatcher.core.agent.objective.component;version=latest,\
 	net.powermatcher.core.agent.template;version=latest,\
 	net.powermatcher.core.agent.template.component;version=latest,\
 	net.powermatcher.core.agent.test;version=latest,\

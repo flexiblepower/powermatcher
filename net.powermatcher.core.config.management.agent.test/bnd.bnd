@@ -31,7 +31,7 @@ Bundle-Version: 0.9.0
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.auctioneer)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.concentrator)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.logging)',\
-	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.objective.component)',\
+	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.objective)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.test.component)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.config.management.agent)
 -runrepos: Workspace,\
@@ -51,7 +51,6 @@ Bundle-Version: 0.9.0
 	net.powermatcher.core.agent.concentrator;version=latest,\
 	net.powermatcher.core.agent.logging;version=latest,\
 	net.powermatcher.core.agent.objective;version=latest,\
-	net.powermatcher.core.agent.objective.component;version=latest,\
 	net.powermatcher.core.agent.test;version=latest,\
 	net.powermatcher.core.agent.test.component;version=latest,\
 	net.powermatcher.core.config.management.agent;version=latest,\
