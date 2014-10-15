@@ -28,7 +28,6 @@
 	net.powermatcher.core.messaging.framework;version=latest,\
 	net.powermatcher.core.messaging.framework.test;version=latest,\
 	net.powermatcher.core.messaging.mqttv3;version=latest,\
-	net.powermatcher.core.messaging.mqttv3.component;version=latest,\
 	net.powermatcher.core.messaging.protocol.adapter;version=latest,\
 	net.powermatcher.core.scheduler;version=latest,\
 	net.powermatcher.core.scheduler.component;version=latest,\
