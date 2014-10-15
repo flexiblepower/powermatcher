@@ -199,65 +199,65 @@
 			<directive name='filter' value='(osgi.wiring.package=org.junit)' />
 		</requirement>
 	</resource>
-	<resource>
-		<capability namespace='osgi.identity'>
-			<attribute name='osgi.identity'
-				value='net.powermatcher.core.agent.marketbasis.adapter.component' />
-			<attribute name='type' value='osgi.bundle' />
-			<attribute name='version' type='Version' value='0.9.0' />
-		</capability>
-		<capability namespace='osgi.content'>
-			<attribute name='osgi.content'
-				value='12b2c636f0876c4c64490e27d9a293c9bc3db7c296440df75ad4ce6186ebf4ef' />
-			<attribute name='url'
-				value='net.powermatcher.core.agent.marketbasis.adapter.component/net.powermatcher.core.agent.marketbasis.adapter.component-0.9.0.jar' />
-			<attribute name='size' type='Long' value='10537' />
-			<attribute name='mime' value='application/vnd.osgi.bundle' />
-		</capability>
-		<capability namespace='osgi.wiring.bundle'>
-			<attribute name='osgi.wiring.bundle'
-				value='net.powermatcher.core.agent.marketbasis.adapter.component' />
-			<attribute name='bundle-version' type='Version' value='0.9.0' />
-		</capability>
-		<capability namespace='osgi.wiring.host'>
-			<attribute name='osgi.wiring.host'
-				value='net.powermatcher.core.agent.marketbasis.adapter.component' />
-			<attribute name='bundle-version' type='Version' value='0.9.0' />
-		</capability>
-		<requirement namespace='osgi.wiring.package'>
-			<directive name='filter'
-				value='(&amp;(osgi.wiring.package=aQute.bnd.annotation.metatype)(version&gt;=1.43.0)(!(version&gt;=2.0.0)))' />
-		</requirement>
+<!-- 	<resource> -->
+<!-- 		<capability namespace='osgi.identity'> -->
+<!-- 			<attribute name='osgi.identity' -->
+<!-- 				value='net.powermatcher.core.agent.marketbasis.adapter.component' /> -->
+<!-- 			<attribute name='type' value='osgi.bundle' /> -->
+<!-- 			<attribute name='version' type='Version' value='0.9.0' /> -->
+<!-- 		</capability> -->
+<!-- 		<capability namespace='osgi.content'> -->
+<!-- 			<attribute name='osgi.content' -->
+<!-- 				value='12b2c636f0876c4c64490e27d9a293c9bc3db7c296440df75ad4ce6186ebf4ef' /> -->
+<!-- 			<attribute name='url' -->
+<!-- 				value='net.powermatcher.core.agent.marketbasis.adapter.component/net.powermatcher.core.agent.marketbasis.adapter.component-0.9.0.jar' /> -->
+<!-- 			<attribute name='size' type='Long' value='10537' /> -->
+<!-- 			<attribute name='mime' value='application/vnd.osgi.bundle' /> -->
+<!-- 		</capability> -->
+<!-- 		<capability namespace='osgi.wiring.bundle'> -->
+<!-- 			<attribute name='osgi.wiring.bundle' -->
+<!-- 				value='net.powermatcher.core.agent.marketbasis.adapter.component' /> -->
+<!-- 			<attribute name='bundle-version' type='Version' value='0.9.0' /> -->
+<!-- 		</capability> -->
+<!-- 		<capability namespace='osgi.wiring.host'> -->
+<!-- 			<attribute name='osgi.wiring.host' -->
+<!-- 				value='net.powermatcher.core.agent.marketbasis.adapter.component' /> -->
+<!-- 			<attribute name='bundle-version' type='Version' value='0.9.0' /> -->
+<!-- 		</capability> -->
+<!-- 		<requirement namespace='osgi.wiring.package'> -->
+<!-- 			<directive name='filter' -->
+<!-- 				value='(&amp;(osgi.wiring.package=aQute.bnd.annotation.metatype)(version&gt;=1.43.0)(!(version&gt;=2.0.0)))' /> -->
+<!-- 		</requirement> -->
 <!-- 		<requirement namespace='osgi.wiring.package'> -->
 <!-- 			<directive name='filter' -->
 <!-- 				value='(&amp;(osgi.wiring.package=net.powermatcher.core.adapter.component)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))' /> -->
 <!-- 		</requirement> -->
-		<requirement namespace='osgi.wiring.package'>
-			<directive name='filter'
-				value='(osgi.wiring.package=net.powermatcher.core.adapter.service)' />
-		</requirement>
-		<requirement namespace='osgi.wiring.package'>
-			<directive name='filter'
-				value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))' />
-		</requirement>
-		<requirement namespace='osgi.wiring.package'>
-			<directive name='filter'
-				value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.marketbasis.adapter)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))' />
-		</requirement>
-		<requirement namespace='osgi.wiring.package'>
-			<directive name='filter'
-				value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.marketbasis.adapter.config)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))' />
-		</requirement>
-		<requirement namespace='osgi.wiring.package'>
-			<directive name='filter'
-				value='(&amp;(osgi.wiring.package=org.osgi.framework)(version&gt;=1.5.0)(!(version&gt;=2.0.0)))' />
-		</requirement>
-		<requirement namespace='osgi.extender'>
-			<directive name='filter'
-				value='(&amp;(osgi.extender=osgi.ds)(version&gt;=1.1.0)(!(version&gt;=2.0.0)))' />
-			<directive name='effective' value='active' />
-		</requirement>
-	</resource>
+<!-- 		<requirement namespace='osgi.wiring.package'> -->
+<!-- 			<directive name='filter' -->
+<!-- 				value='(osgi.wiring.package=net.powermatcher.core.adapter.service)' /> -->
+<!-- 		</requirement> -->
+<!-- 		<requirement namespace='osgi.wiring.package'> -->
+<!-- 			<directive name='filter' -->
+<!-- 				value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))' /> -->
+<!-- 		</requirement> -->
+<!-- 		<requirement namespace='osgi.wiring.package'> -->
+<!-- 			<directive name='filter' -->
+<!-- 				value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.marketbasis.adapter)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))' /> -->
+<!-- 		</requirement> -->
+<!-- 		<requirement namespace='osgi.wiring.package'> -->
+<!-- 			<directive name='filter' -->
+<!-- 				value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.marketbasis.adapter.config)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))' /> -->
+<!-- 		</requirement> -->
+<!-- 		<requirement namespace='osgi.wiring.package'> -->
+<!-- 			<directive name='filter' -->
+<!-- 				value='(&amp;(osgi.wiring.package=org.osgi.framework)(version&gt;=1.5.0)(!(version&gt;=2.0.0)))' /> -->
+<!-- 		</requirement> -->
+<!-- 		<requirement namespace='osgi.extender'> -->
+<!-- 			<directive name='filter' -->
+<!-- 				value='(&amp;(osgi.extender=osgi.ds)(version&gt;=1.1.0)(!(version&gt;=2.0.0)))' /> -->
+<!-- 			<directive name='effective' value='active' /> -->
+<!-- 		</requirement> -->
+<!-- 	</resource> -->
 <!-- 	<resource> -->
 <!-- 		<capability namespace='osgi.identity'> -->
 <!-- 			<attribute name='osgi.identity' value='net.powermatcher.core.scheduler.component' /> -->
