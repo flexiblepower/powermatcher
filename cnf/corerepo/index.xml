@@ -1244,69 +1244,69 @@
 				value='(&amp;(osgi.wiring.package=net.powermatcher.core.adapter.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))' />
 		</requirement>
 	</resource>
-	<resource>
-		<capability namespace='osgi.identity'>
-			<attribute name='osgi.identity'
-				value='net.powermatcher.core.agent.logging.component' />
-			<attribute name='type' value='osgi.bundle' />
-			<attribute name='version' type='Version' value='0.9.0' />
-		</capability>
-		<capability namespace='osgi.content'>
-			<attribute name='osgi.content'
-				value='3c77bd0ace4cba5020c21bbf32588e449ea73e7af51899d0884f276402c189bc' />
-			<attribute name='url'
-				value='net.powermatcher.core.agent.logging.component/net.powermatcher.core.agent.logging.component-0.9.0.jar' />
-			<attribute name='size' type='Long' value='8401' />
-			<attribute name='mime' value='application/vnd.osgi.bundle' />
-		</capability>
-		<capability namespace='osgi.wiring.bundle'>
-			<attribute name='osgi.wiring.bundle'
-				value='net.powermatcher.core.agent.logging.component' />
-			<attribute name='bundle-version' type='Version' value='0.9.0' />
-		</capability>
-		<capability namespace='osgi.wiring.host'>
-			<attribute name='osgi.wiring.host'
-				value='net.powermatcher.core.agent.logging.component' />
-			<attribute name='bundle-version' type='Version' value='0.9.0' />
-		</capability>
-		<requirement namespace='osgi.wiring.package'>
-			<directive name='filter'
-				value='(&amp;(osgi.wiring.package=aQute.bnd.annotation.metatype)(version&gt;=1.43.0)(!(version&gt;=2.0.0)))' />
-		</requirement>
+<!-- 	<resource> -->
+<!-- 		<capability namespace='osgi.identity'> -->
+<!-- 			<attribute name='osgi.identity' -->
+<!-- 				value='net.powermatcher.core.agent.logging.component' /> -->
+<!-- 			<attribute name='type' value='osgi.bundle' /> -->
+<!-- 			<attribute name='version' type='Version' value='0.9.0' /> -->
+<!-- 		</capability> -->
+<!-- 		<capability namespace='osgi.content'> -->
+<!-- 			<attribute name='osgi.content' -->
+<!-- 				value='3c77bd0ace4cba5020c21bbf32588e449ea73e7af51899d0884f276402c189bc' /> -->
+<!-- 			<attribute name='url' -->
+<!-- 				value='net.powermatcher.core.agent.logging.component/net.powermatcher.core.agent.logging.component-0.9.0.jar' /> -->
+<!-- 			<attribute name='size' type='Long' value='8401' /> -->
+<!-- 			<attribute name='mime' value='application/vnd.osgi.bundle' /> -->
+<!-- 		</capability> -->
+<!-- 		<capability namespace='osgi.wiring.bundle'> -->
+<!-- 			<attribute name='osgi.wiring.bundle' -->
+<!-- 				value='net.powermatcher.core.agent.logging.component' /> -->
+<!-- 			<attribute name='bundle-version' type='Version' value='0.9.0' /> -->
+<!-- 		</capability> -->
+<!-- 		<capability namespace='osgi.wiring.host'> -->
+<!-- 			<attribute name='osgi.wiring.host' -->
+<!-- 				value='net.powermatcher.core.agent.logging.component' /> -->
+<!-- 			<attribute name='bundle-version' type='Version' value='0.9.0' /> -->
+<!-- 		</capability> -->
+<!-- 		<requirement namespace='osgi.wiring.package'> -->
+<!-- 			<directive name='filter' -->
+<!-- 				value='(&amp;(osgi.wiring.package=aQute.bnd.annotation.metatype)(version&gt;=1.43.0)(!(version&gt;=2.0.0)))' /> -->
+<!-- 		</requirement> -->
 <!-- 		<requirement namespace='osgi.wiring.package'> -->
 <!-- 			<directive name='filter' -->
 <!-- 				value='(&amp;(osgi.wiring.package=net.powermatcher.core.adapter.component)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))' /> -->
 <!-- 		</requirement> -->
-		<requirement namespace='osgi.wiring.package'>
-			<directive name='filter'
-				value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.logging)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))' />
-		</requirement>
-		<requirement namespace='osgi.wiring.package'>
-			<directive name='filter'
-				value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.logging.config)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))' />
-		</requirement>
-		<requirement namespace='osgi.wiring.package'>
-			<directive name='filter'
-				value='(osgi.wiring.package=net.powermatcher.core.configurable)' />
-		</requirement>
-		<requirement namespace='osgi.wiring.package'>
-			<directive name='filter'
-				value='(osgi.wiring.package=net.powermatcher.core.configurable.service)' />
-		</requirement>
-		<requirement namespace='osgi.wiring.package'>
-			<directive name='filter'
-				value='(osgi.wiring.package=net.powermatcher.core.object)' />
-		</requirement>
-		<requirement namespace='osgi.wiring.package'>
-			<directive name='filter'
-				value='(&amp;(osgi.wiring.package=org.osgi.framework)(version&gt;=1.5.0)(!(version&gt;=2.0.0)))' />
-		</requirement>
-		<requirement namespace='osgi.extender'>
-			<directive name='filter'
-				value='(&amp;(osgi.extender=osgi.ds)(version&gt;=1.1.0)(!(version&gt;=2.0.0)))' />
-			<directive name='effective' value='active' />
-		</requirement>
-	</resource>
+<!-- 		<requirement namespace='osgi.wiring.package'> -->
+<!-- 			<directive name='filter' -->
+<!-- 				value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.logging)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))' /> -->
+<!-- 		</requirement> -->
+<!-- 		<requirement namespace='osgi.wiring.package'> -->
+<!-- 			<directive name='filter' -->
+<!-- 				value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.logging.config)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))' /> -->
+<!-- 		</requirement> -->
+<!-- 		<requirement namespace='osgi.wiring.package'> -->
+<!-- 			<directive name='filter' -->
+<!-- 				value='(osgi.wiring.package=net.powermatcher.core.configurable)' /> -->
+<!-- 		</requirement> -->
+<!-- 		<requirement namespace='osgi.wiring.package'> -->
+<!-- 			<directive name='filter' -->
+<!-- 				value='(osgi.wiring.package=net.powermatcher.core.configurable.service)' /> -->
+<!-- 		</requirement> -->
+<!-- 		<requirement namespace='osgi.wiring.package'> -->
+<!-- 			<directive name='filter' -->
+<!-- 				value='(osgi.wiring.package=net.powermatcher.core.object)' /> -->
+<!-- 		</requirement> -->
+<!-- 		<requirement namespace='osgi.wiring.package'> -->
+<!-- 			<directive name='filter' -->
+<!-- 				value='(&amp;(osgi.wiring.package=org.osgi.framework)(version&gt;=1.5.0)(!(version&gt;=2.0.0)))' /> -->
+<!-- 		</requirement> -->
+<!-- 		<requirement namespace='osgi.extender'> -->
+<!-- 			<directive name='filter' -->
+<!-- 				value='(&amp;(osgi.extender=osgi.ds)(version&gt;=1.1.0)(!(version&gt;=2.0.0)))' /> -->
+<!-- 			<directive name='effective' value='active' /> -->
+<!-- 		</requirement> -->
+<!-- 	</resource> -->
 	<resource>
 		<capability namespace='osgi.identity'>
 			<attribute name='osgi.identity' value='net.powermatcher.core.agent' />

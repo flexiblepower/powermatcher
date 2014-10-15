@@ -21,7 +21,7 @@
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.scheduler)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.auctioneer)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.concentrator)',\
-	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.logging.component)',\
+	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.logging)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.marketbasis.adapter.component)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.objective.component)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.template.component)',\
@@ -42,7 +42,6 @@
 	net.powermatcher.core.agent.auctioneer;version=latest,\
 	net.powermatcher.core.agent.concentrator;version=latest,\
 	net.powermatcher.core.agent.logging;version=latest,\
-	net.powermatcher.core.agent.logging.component;version=latest,\
 	net.powermatcher.core.agent.marketbasis.adapter;version=latest,\
 	net.powermatcher.core.agent.marketbasis.adapter.component;version=latest,\
 	net.powermatcher.core.agent.objective;version=latest,\
