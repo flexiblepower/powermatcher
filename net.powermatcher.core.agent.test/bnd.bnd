@@ -3,4 +3,11 @@ Bundle-Category: PowerMatcher Core
 Export-Package: net.powermatcher.core.agent.test,\
 	net.powermatcher.core.agent.test.*
 Bundle-Version: 0.9.0
--buildpath: net.powermatcher.core.agent;version=latest
+Service-Component: *
+Private-Package: net.powermatcher.core.agent.test.component
+-buildpath:osgi.core;version=4.2,\
+	biz.aQute.bnd.annotation,\
+	net.powermatcher.core.adapter;version=latest,\
+	net.powermatcher.core.agent;version=latest,\
+	net.powermatcher.core.agent.test;version=latest
+	

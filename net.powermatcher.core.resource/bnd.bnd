@@ -11,7 +11,6 @@
 	net.powermatcher.core.agent.objective;version=latest,\
 	net.powermatcher.core.agent.template;version=latest,\
 	net.powermatcher.core.agent.test;version=latest,\
-	net.powermatcher.core.agent.test.component;version=latest,\
 	net.powermatcher.core.config.management.agent;version=latest,\
 	net.powermatcher.core.config.management.agent.test;version=latest,\
 	net.powermatcher.core.configurable;version=latest,\
