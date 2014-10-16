@@ -4,7 +4,8 @@ Service-Component: *
 Private-Package: net.powermatcher.core.agent.auctioneer.component,\
 net.powermatcher.core.agent.concentrator.component,\
 net.powermatcher.core.agent.logging.component,\
-net.powermatcher.core.agent.marketbasis.adapter.component
+net.powermatcher.core.agent.marketbasis.adapter.component,\
+net.powermatcher.core.agent.objective.component
 Export-Package: net.powermatcher.core.agent.framework,\
 	net.powermatcher.core.agent.framework.config,\
 	net.powermatcher.core.agent.framework.data,\
@@ -22,11 +23,13 @@ Export-Package: net.powermatcher.core.agent.framework,\
 	net.powermatcher.core.agent.logging.config,\
 	net.powermatcher.core.agent.logging.task,\
 	net.powermatcher.core.agent.marketbasis.adapter.config,\
-	net.powermatcher.core.agent.marketbasis.adapter
+	net.powermatcher.core.agent.marketbasis.adapter,\
+	net.powermatcher.core.agent.objective,\
+	net.powermatcher.core.agent.objective.config,\
+	net.powermatcher.core.agent.objective.service
 Bundle-Version: 0.9.0
 -buildpath: osgi.core;version=4.2,\
 	biz.aQute.bnd.annotation,\
 	net.powermatcher.core.configurable;version=latest,\
 	net.powermatcher.core.adapter.service;version=latest,\
 	net.powermatcher.core.adapter;version=latest,\
-	net.powermatcher.core.agent;version=latest
