@@ -3,7 +3,6 @@
 	net.powermatcher.core.adapter.service;version=latest,\
 	net.powermatcher.core.agent;version=latest,\
 	net.powermatcher.core.agent.auctioneer.test;version=latest,\
-	net.powermatcher.core.agent.concentrator;version=latest,\
 	net.powermatcher.core.agent.concentrator.test;version=latest,\
 	net.powermatcher.core.agent.logging;version=latest,\
 	net.powermatcher.core.agent.marketbasis.adapter;version=latest,\

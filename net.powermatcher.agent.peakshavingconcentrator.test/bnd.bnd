@@ -6,7 +6,6 @@ Bundle-Category: PowerMatcher Extension
 	net.powermatcher.core.adapter;version=latest,\
 	net.powermatcher.core.adapter.service;version=latest,\
 	net.powermatcher.core.agent;version=latest,\
-	net.powermatcher.core.agent.concentrator;version=latest,\
 	net.powermatcher.agent.peakshavingconcentrator;version=latest
 Private-Package: net.powermatcher.agent.peakshavingconcentrator.test
 Bundle-Version: 0.9.0

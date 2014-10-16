@@ -14,7 +14,6 @@
         <archive path="cnf/corerepo/net.powermatcher.core.agent/net.powermatcher.core.agent-0.9.0.jar"/>
         <archive path="cnf/corerepo/net.powermatcher.core.scheduler.service/net.powermatcher.core.scheduler.service-0.9.0.jar"/>
         <archive path="cnf/corerepo/net.powermatcher.core.scheduler/net.powermatcher.core.scheduler-0.9.0.jar"/>
-        <archive path="cnf/corerepo/net.powermatcher.core.agent.concentrator/net.powermatcher.core.agent.concentrator-0.9.0.jar"/>
         <archive path="cnf/corerepo/net.powermatcher.core.agent.logging/net.powermatcher.core.agent.logging-0.9.0.jar"/>
         <archive path="cnf/corerepo/net.powermatcher.core.agent.marketbasis.adapter/net.powermatcher.core.agent.marketbasis.adapter-0.9.0.jar"/>
         <archive path="cnf/corerepo/net.powermatcher.core.agent.objective/net.powermatcher.core.agent.objective-0.9.0.jar"/>

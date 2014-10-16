@@ -1,6 +1,5 @@
 -buildpackages:
 -buildpath: net.powermatcher.core.agent;version=latest,\
-	net.powermatcher.core.agent.concentrator;version=latest,\
 	net.powermatcher.core.agent;version=latest,\
 	net.powermatcher.simulation.configuration;version=latest,\
 	slf4j.api,\

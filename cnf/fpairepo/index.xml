@@ -514,7 +514,7 @@
       <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.adapter)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
     </requirement>
     <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.concentrator)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
+      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
     </requirement>
     <requirement namespace='osgi.wiring.package'>
       <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.concentrator.framework)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
