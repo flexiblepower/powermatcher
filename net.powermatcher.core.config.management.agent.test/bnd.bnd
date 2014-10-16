@@ -28,7 +28,7 @@ Bundle-Version: 0.9.0
 	osgi.identity;filter:='(osgi.identity=ch.qos.logback.classic)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.logging.bridge)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.xml.standard.parser)',\
-	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.auctioneer)',\
+	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.concentrator)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.logging)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.objective)',\
@@ -47,7 +47,6 @@ Bundle-Version: 0.9.0
 	net.powermatcher.core.adapter;version=latest,\
 	net.powermatcher.core.adapter.service;version=latest,\
 	net.powermatcher.core.agent;version=latest,\
-	net.powermatcher.core.agent.auctioneer;version=latest,\
 	net.powermatcher.core.agent.concentrator;version=latest,\
 	net.powermatcher.core.agent.logging;version=latest,\
 	net.powermatcher.core.agent.objective;version=latest,\

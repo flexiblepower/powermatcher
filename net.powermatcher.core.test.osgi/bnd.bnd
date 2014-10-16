@@ -34,7 +34,6 @@ Service-Component: *
 	osgi.identity;filter:='(osgi.identity=ch.qos.logback.classic)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.logging.bridge)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.config.management.agent)',\
-	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.agent.auctioneer)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.xml.standard.parser)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.adapter)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core.configurable)',\
@@ -63,7 +62,6 @@ Service-Component: *
 	net.powermatcher.core.adapter;version=latest,\
 	net.powermatcher.core.adapter.service;version=latest,\
 	net.powermatcher.core.agent;version=latest,\
-	net.powermatcher.core.agent.auctioneer;version=latest,\
 	net.powermatcher.core.agent.concentrator;version=latest,\
 	net.powermatcher.core.agent.logging;version=latest,\
 	net.powermatcher.core.agent.marketbasis.adapter;version=latest,\

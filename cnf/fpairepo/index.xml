@@ -693,8 +693,11 @@
     <requirement namespace='osgi.wiring.package'>
       <directive name='filter' value='(&amp;(osgi.wiring.package=aQute.bnd.annotation.metatype)(version&gt;=1.43.0)(!(version&gt;=2.0.0)))'/>
     </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.auctioneer)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
+<!--     <requirement namespace='osgi.wiring.package'> -->
+<!--       <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.auctioneer)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/> -->
+<!--     </requirement> -->
+        <requirement namespace='osgi.wiring.package'>
+      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
     </requirement>
     <requirement namespace='osgi.wiring.package'>
       <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework.log)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>

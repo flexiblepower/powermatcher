@@ -6,7 +6,6 @@ Export-Package: net.powermatcher.core.launcher.main
 	net.powermatcher.core.adapter.service;version=latest,\
 	net.powermatcher.core.adapter;version=latest,\
 	net.powermatcher.core.agent;version=latest,\
-	net.powermatcher.core.agent.auctioneer;version=latest,\
 	net.powermatcher.core.agent.marketbasis.adapter;version=latest,\
 	net.powermatcher.core.messaging.mqttv3;version=latest,\
 	net.powermatcher.core.messaging.protocol.adapter;version=latest,\
