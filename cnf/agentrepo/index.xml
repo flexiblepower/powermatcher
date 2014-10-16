@@ -74,24 +74,24 @@
       <attribute name='version' type='Version' value='2.0.0'/>
       <attribute name='bundle-symbolic-name' value='net.powermatcher.agent.peakshavingconcentrator'/>
       <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.agent.concentrator.framework,net.powermatcher.core.configurable.service,net.powermatcher.core.agent.concentrator.service,net.powermatcher.core.agent.framework.data'/>
+      <directive name='uses' value='net.powermatcher.core.agent,net.powermatcher.core.configurable.service,net.powermatcher.core.agent,net.powermatcher.core.agent.framework.data'/>
     </capability>
     <capability namespace='osgi.wiring.package'>
       <attribute name='osgi.wiring.package' value='net.powermatcher.agent.peakshavingconcentrator.config'/>
       <attribute name='version' type='Version' value='2.0.0'/>
       <attribute name='bundle-symbolic-name' value='net.powermatcher.agent.peakshavingconcentrator'/>
       <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.agent.concentrator.config'/>
+      <directive name='uses' value='net.powermatcher.core.agent'/>
     </capability>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.concentrator.config)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
-    </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.concentrator.framework)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
-    </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.concentrator.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
-    </requirement>
+<!--     <requirement namespace='osgi.wiring.package'> -->
+<!--       <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.concentrator.config)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/> -->
+<!--     </requirement> -->
+<!--     <requirement namespace='osgi.wiring.package'> -->
+<!--       <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.concentrator.framework)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/> -->
+<!--     </requirement> -->
+<!--     <requirement namespace='osgi.wiring.package'> -->
+<!--       <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.concentrator.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/> -->
+<!--     </requirement> -->
     <requirement namespace='osgi.wiring.package'>
       <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework.data)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
     </requirement>

@@ -123,13 +123,13 @@
       <attribute name='bundle-version' type='Version' value='0.9.0'/>
       <directive name='uses' value='net.powermatcher.core.agent.logging,net.powermatcher.telemetry.model.data,net.powermatcher.core.object,net.powermatcher.core.configurable.service,net.powermatcher.telemetry.service'/>
     </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.agent.telemetry.logging.config'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.agent.telemetry.logging'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.agent.logging.config'/>
-    </capability>
+<!--     <capability namespace='osgi.wiring.package'> -->
+<!--       <attribute name='osgi.wiring.package' value='net.powermatcher.agent.telemetry.logging.config'/> -->
+<!--       <attribute name='version' type='Version' value='2.0.0'/> -->
+<!--       <attribute name='bundle-symbolic-name' value='net.powermatcher.agent.telemetry.logging'/> -->
+<!--       <attribute name='bundle-version' type='Version' value='0.9.0'/> -->
+<!--       <directive name='uses' value='net.powermatcher.core.agent.logging.config'/> -->
+<!--     </capability> -->
     <capability namespace='osgi.wiring.package'>
       <attribute name='osgi.wiring.package' value='net.powermatcher.agent.telemetry.logging.task'/>
       <attribute name='version' type='Version' value='2.0.0'/>
@@ -137,11 +137,11 @@
       <attribute name='bundle-version' type='Version' value='0.9.0'/>
     </capability>
     <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.logging)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
+      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
     </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.logging.config)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
-    </requirement>
+<!--     <requirement namespace='osgi.wiring.package'> -->
+<!--       <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.logging.config)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/> -->
+<!--     </requirement> -->
     <requirement namespace='osgi.wiring.package'>
       <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.configurable.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
     </requirement>

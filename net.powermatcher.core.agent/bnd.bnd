@@ -2,7 +2,8 @@ Bundle-Copyright: Copyright (c) 2012, 2013 FlexiblePower Alliance Network (FAN).
 Bundle-Category: PowerMatcher Core
 Service-Component: *
 Private-Package: net.powermatcher.core.agent.auctioneer.component,\
-net.powermatcher.core.agent.concentrator.component
+net.powermatcher.core.agent.concentrator.component,\
+net.powermatcher.core.agent.logging.component
 Export-Package: net.powermatcher.core.agent.framework,\
 	net.powermatcher.core.agent.framework.config,\
 	net.powermatcher.core.agent.framework.data,\
@@ -15,7 +16,10 @@ Export-Package: net.powermatcher.core.agent.framework,\
 	net.powermatcher.core.agent.concentrator,\
 	net.powermatcher.core.agent.concentrator.config,\
 	net.powermatcher.core.agent.concentrator.framework,\
-	net.powermatcher.core.agent.concentrator.service
+	net.powermatcher.core.agent.concentrator.service,\
+	net.powermatcher.core.agent.logging,\
+	net.powermatcher.core.agent.logging.config,\
+	net.powermatcher.core.agent.logging.task
 Bundle-Version: 0.9.0
 -buildpath: osgi.core;version=4.2,\
 	biz.aQute.bnd.annotation,\
