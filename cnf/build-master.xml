@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="powermatcher" default="build">
+	<property name="project.title" value="PowerMatcher bundles" />
+	<property name="targetversion" value="0.1" />
+	<import file="../cnf/build-jenkins.xml" />
+</project>
