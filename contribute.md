@@ -9,6 +9,11 @@ If you wish to contribute content to this project, each Contribution You Submit 
 3. Whatever content You Contribute will be provided under the license(s) associated with the particular license for this project. You can see the license(s), or find links to the license(s) in the License.txt
 4. You understand and agree that your contributions are public, and that a record of the contribution (including all personal information You submit with it, including Your sign-off) is maintained indefinitely and may be redistributed consistent with the license(s) involved.
 
+# Code of conduct
+
+Please comply with the code of conduct.
+<https://github.com/flexiblepower/FAN-wiki/wiki/Code-of-conduct>
+
 # Learn & listen
 Best way to get started is to start with these:
 * Onboarding process: <https://github.com/flexiblepower/FAN-wiki/wiki/On-boarding-process>
