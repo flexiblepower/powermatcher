@@ -7,9 +7,9 @@ Include-Resource:  resources/
 Bundle-Version: 0.9.0
 -buildpath: osgi.core;version=4.2,\
 	osgi.cmpn;version=4.2,\
-	junit.osgi,\
 	org.apache.commons.codec,\
-	net.powermatcher.core.config.management.agent;version=latest
+	net.powermatcher.core.config.management.agent;version=latest,\
+	${junit}
 -runfw: org.apache.felix.framework;version='[4,5)'
 -runee: JavaSE-1.6
 -runvm: -ea -Dlogback.configurationFile=logback.xml

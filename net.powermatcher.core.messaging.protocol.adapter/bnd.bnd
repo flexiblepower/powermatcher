@@ -16,4 +16,6 @@ Export-Package: net.powermatcher.core.messaging.protocol.adapter.config,\
 	net.powermatcher.core.configurable;version=latest,\
 	net.powermatcher.core.messaging.framework;version=latest,\
 	net.powermatcher.core.agent;version=latest,\
-	net.powermatcher.core.adapter;version=latest
+	net.powermatcher.core.adapter;version=latest,\
+	net.powermatcher.core.adapter.service;version=latest,\
+	net.powermatcher.core.scheduler.service;version=latest

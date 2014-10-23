@@ -10,4 +10,6 @@ Service-Component: *
 	net.powermatcher.core.configurable;version=latest,\
 	net.powermatcher.core.adapter;version=latest,\
 	net.powermatcher.core.agent;version=latest,\
+	net.powermatcher.core.adapter.service;version=latest,\
+	net.powermatcher.core.scheduler.service;version=latest,\
 	

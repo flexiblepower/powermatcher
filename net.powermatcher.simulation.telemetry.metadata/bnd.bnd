@@ -7,3 +7,4 @@ Bundle-Version: 1.0.0
 -buildpath: net.powermatcher.telemetry.service;version=latest,\
 	osgi.core,\
 	slf4j.api,\
+	lib/kxml2-2.3.0.jar;version=file

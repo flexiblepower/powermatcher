@@ -8,4 +8,6 @@ Export-Package: net.powermatcher.core.launcher.main
 	net.powermatcher.core.agent;version=latest,\
 	net.powermatcher.core.messaging.mqttv3;version=latest,\
 	net.powermatcher.core.messaging.protocol.adapter;version=latest,\
-	net.powermatcher.core.direct.protocol.adapter;version=latest
+	net.powermatcher.core.direct.protocol.adapter;version=latest,\
+	net.powermatcher.core.configurable;version=latest
+	
