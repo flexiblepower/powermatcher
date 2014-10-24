@@ -13,5 +13,5 @@ Bundle-Version: 0.9.0
 	net.powermatcher.core.adapter.service;version=latest,\
 	net.powermatcher.core.adapter;version=latest,\
 	net.powermatcher.core.messaging.framework;version=latest,\
-	net.powermatcher.telemetry.service;version=latest
+	net.powermatcher.telemetry.service;version=latest,\
 	net.powermatcher.telemetry.model;version=latest

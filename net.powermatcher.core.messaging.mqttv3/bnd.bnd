@@ -10,4 +10,6 @@ Service-Component: *
 	org.eclipse.paho.client.mqttv3;version=latest,\
 	net.powermatcher.core.configurable;version=latest,\
 	net.powermatcher.core.messaging.framework;version=latest,\
-	net.powermatcher.core.adapter;version=latest
+	net.powermatcher.core.adapter;version=latest,\
+	net.powermatcher.core.adapter.service;version=latest,\
+	net.powermatcher.core.scheduler.service;version=latest

@@ -1,7 +1,13 @@
 -buildpath: net.powermatcher.telemetry.service;version=latest,\
 	slf4j.api,\
 	net.powermatcher.core.agent;version=latest,\
-	net.powermatcher.simulation.engine;version=latest
+	net.powermatcher.simulation.engine;version=latest,\
+	net.powermatcher.telemetry.model;version=latest,\
+	net.powermatcher.core.adapter;version=latest,\
+	net.powermatcher.simulation.configuration;version=latest,\
+	net.powermatcher.core.scheduler.service;version=latest,\
+	net.powermatcher.core.adapter.service;version=latest,\
+	net.powermatcher.core.configurable;version=latest
 Export-Package: net.powermatcher.simulation.logging,\
 	net.powermatcher.simulation.logging.sink
 Bundle-Version: 1.0.0

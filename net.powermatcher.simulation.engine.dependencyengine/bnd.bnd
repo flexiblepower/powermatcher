@@ -12,7 +12,11 @@
 	osgi.core,\
 	org.apache.felix.scr,\
 	net.powermatcher.telemetry.service;version=latest,\
-	flexiblepower.api.ext
+	flexiblepower.api.ext,\
+	net.powermatcher.core.adapter.service;version=latest,\
+	net.powermatcher.core.scheduler.service;version=latest,\
+	net.powermatcher.core.configurable;version=latest,\
+	net.powermatcher.core.adapter;version=latest
 Export-Package: net.powermatcher.simulation.engine.dependencyengine
 Import-Package: *
 Bundle-Version: 1.0.0

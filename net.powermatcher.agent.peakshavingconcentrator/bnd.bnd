@@ -11,5 +11,5 @@ Export-Package: net.powermatcher.agent.peakshavingconcentrator,\
 	net.powermatcher.core.scheduler.service;version=latest,\
 	net.powermatcher.core.adapter;version=latest,\
 	net.powermatcher.core.adapter.service;version=latest,\
-	net.powermatcher.core.agent;version=latest,\
+	net.powermatcher.core.agent;version=latest
 

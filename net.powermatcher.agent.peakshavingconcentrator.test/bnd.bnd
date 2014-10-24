@@ -6,6 +6,10 @@ Bundle-Category: PowerMatcher Extension
 	net.powermatcher.core.adapter;version=latest,\
 	net.powermatcher.core.adapter.service;version=latest,\
 	net.powermatcher.core.agent;version=latest,\
-	net.powermatcher.agent.peakshavingconcentrator;version=latest
+	net.powermatcher.agent.peakshavingconcentrator;version=latest,\
+	net.powermatcher.agent.peakshavingconcentrator;version=latest,\
+	${junit},\
+	lib/jfreechart-1.0.14.jar;version=file,\
+	lib/jcommon-1.0.17.jar;version=file
 Private-Package: net.powermatcher.agent.peakshavingconcentrator.test
 Bundle-Version: 0.9.0
