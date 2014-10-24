@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.configurable.service.Configurable;
 
 
 /**
@@ -41,11 +41,11 @@ import net.powermatcher.core.configurable.service.ConfigurationService;
  * 
  * </p>
  */
-public class BaseConfiguration implements ConfigurationService {
+public class BaseConfiguration implements Configurable {
 	/**
 	 * Define the parent (ConfigurationService) field.
 	 */
-	private ConfigurationService parent;
+	private Configurable parent;
 	/**
 	 * Define the properties (Map) field.
 	 */
@@ -61,7 +61,7 @@ public class BaseConfiguration implements ConfigurationService {
 	 *            The properties (<code>Map<String,Object></code>) parameter.
 	 * @see #BaseConfiguration(Map)
 	 */
-	public BaseConfiguration(final ConfigurationService parent, final Map<String, Object> properties) {
+	public BaseConfiguration(final Configurable parent, final Map<String, Object> properties) {
 		this.properties = properties;
 		this.parent = parent;
 	}
@@ -72,7 +72,7 @@ public class BaseConfiguration implements ConfigurationService {
 	 * 
 	 * @param properties
 	 *            The properties (<code>Map<String,Object></code>) parameter.
-	 * @see #BaseConfiguration(ConfigurationService,Map)
+	 * @see #BaseConfiguration(Configurable,Map)
 	 */
 	public BaseConfiguration(final Map<String, Object> properties) {
 		this(null, properties);
@@ -84,7 +84,7 @@ public class BaseConfiguration implements ConfigurationService {
 	 * 
 	 * @param properties
 	 *            The properties (<code>Properties</code>) parameter.
-	 * @see #BaseConfiguration(ConfigurationService,Map)
+	 * @see #BaseConfiguration(Configurable,Map)
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public BaseConfiguration(final Properties properties) {
@@ -285,7 +285,7 @@ public class BaseConfiguration implements ConfigurationService {
 	 * @return The parent (<code>ConfigurationService</code>) value.
 	 */
 	@Override
-	public ConfigurationService getParent() {
+	public Configurable getParent() {
 		return this.parent;
 	}
 

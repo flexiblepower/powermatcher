@@ -1,7 +1,7 @@
 package net.powermatcher.telemetry.framework;
 
 
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.configurable.service.Configurable;
 import net.powermatcher.telemetry.model.data.TelemetryData;
 import net.powermatcher.telemetry.service.TelemetryService;
 
@@ -27,7 +27,7 @@ public class TelemetryDataPublisher extends AbstractTelemetryDataPublisher {
 	 *            The telemetry data service (<code>TelemetryService</code>)
 	 *            parameter.
 	 */
-	public TelemetryDataPublisher(final ConfigurationService configurationService, final TelemetryService telemetryDataService) {
+	public TelemetryDataPublisher(final Configurable configurationService, final TelemetryService telemetryDataService) {
 		super(configurationService);
 		this.telemetryDataService = telemetryDataService;
 	}

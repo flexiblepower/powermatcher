@@ -20,7 +20,7 @@ import net.powermatcher.core.agent.framework.data.MarketBasis;
 import net.powermatcher.core.agent.framework.data.PriceInfo;
 import net.powermatcher.core.configurable.BaseConfiguration;
 import net.powermatcher.core.scheduler.SchedulerAdapterFactory;
-import net.powermatcher.core.scheduler.service.TimeService;
+import net.powermatcher.core.scheduler.service.TimeServicable;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -44,7 +44,7 @@ public class PeakShavingConcentratorImplUITest implements Runnable {
 	}
 
 	private ScheduledExecutorService scheduler;
-	private TimeService timeSource;
+	private TimeServicable timeSource;
 	private MockPeakShavingConcentratorImpl concentrator;
 
 	private XYSeries totalFlowSeries;

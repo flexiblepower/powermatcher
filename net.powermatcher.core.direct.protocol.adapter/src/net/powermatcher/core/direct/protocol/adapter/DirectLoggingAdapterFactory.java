@@ -5,10 +5,10 @@ import net.powermatcher.core.adapter.ConnectorReference;
 import net.powermatcher.core.adapter.service.ConnectorLocaterService;
 import net.powermatcher.core.adapter.service.DirectAdapterFactoryService;
 import net.powermatcher.core.agent.framework.config.AgentConfiguration;
-import net.powermatcher.core.agent.framework.log.LogListenerConnectorService;
-import net.powermatcher.core.agent.framework.log.LogListenerService;
-import net.powermatcher.core.agent.framework.log.LoggingConnectorService;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.agent.framework.log.LogListenable;
+import net.powermatcher.core.agent.framework.log.Logable;
+import net.powermatcher.core.agent.framework.log.LogPublishable;
+import net.powermatcher.core.configurable.service.Configurable;
 
 
 /**
@@ -17,23 +17,23 @@ import net.powermatcher.core.configurable.service.ConfigurationService;
  * @author IBM
  * @version 0.9.0
  * 
- * @see LoggingConnectorService
+ * @see LogPublishable
  * @see DirectLoggingAdapter
- * @see LogListenerService
+ * @see Logable
  */
-public class DirectLoggingAdapterFactory implements DirectAdapterFactoryService<LoggingConnectorService, LogListenerConnectorService> {
+public class DirectLoggingAdapterFactory implements DirectAdapterFactoryService<LogPublishable, LogListenable> {
 
 	public DirectLoggingAdapterFactory() {
 	}
 
 	@Override
-	public DirectLoggingAdapter createAdapter(ConfigurationService configuration, LoggingConnectorService connector,
+	public DirectLoggingAdapter createAdapter(Configurable configuration, LogPublishable connector,
 			ConnectorLocaterService connectorLocater, int adapterIndex) {
 		String loggingAgentId = getTargetConnectorIds(connector)[adapterIndex];
-		ConnectorReference<LogListenerConnectorService> logListenerRef = new ConnectorReference<LogListenerConnectorService>(
-				connectorLocater, connector.getConnectorId(), LogListenerConnectorService.class, connector.getClusterId(), loggingAgentId);
+		ConnectorReference<LogListenable> logListenerRef = new ConnectorReference<LogListenable>(
+				connectorLocater, connector.getConnectorId(), LogListenable.class, connector.getClusterId(), loggingAgentId);
 		DirectLoggingAdapter loggingAdapter = new DirectLoggingAdapter(configuration);
-		loggingAdapter.setLoggingConnector(connector);
+		loggingAdapter.setLogPublisher(connector);
 		loggingAdapter.setLogListenerRef(logListenerRef);
 		return loggingAdapter;
 	}
@@ -55,11 +55,11 @@ public class DirectLoggingAdapterFactory implements DirectAdapterFactoryService<
 	 *         value.
 	 */
 	@Override
-	public DirectLoggingAdapter createAdapter(final ConfigurationService configuration,
-			final LoggingConnectorService loggingConnector, final LogListenerConnectorService logListenerConnector) {
+	public DirectLoggingAdapter createAdapter(final Configurable configuration,
+			final LogPublishable loggingConnector, final LogListenable logListenerConnector) {
 		DirectLoggingAdapter loggingAdapter = new DirectLoggingAdapter(configuration);
-		loggingAdapter.setLoggingConnector(loggingConnector);
-		loggingAdapter.setLogListenerConnector(logListenerConnector);
+		loggingAdapter.setLogPublisher(loggingConnector);
+		loggingAdapter.setLogListener(logListenerConnector);
 		return loggingAdapter;
 	}
 
@@ -69,7 +69,7 @@ public class DirectLoggingAdapterFactory implements DirectAdapterFactoryService<
 	 * @return The logging agent id configured for the logger.
 	 */
 	@Override
-	public String[] getTargetConnectorIds(final LoggingConnectorService connector) {
+	public String[] getTargetConnectorIds(final LogPublishable connector) {
 		return connector.getConfiguration().getProperty(AgentConfiguration.LOG_LISTENER_ID_PROPERTY, AgentConfiguration.LOG_LISTENER_ID_DEFAULT );
 	}
 

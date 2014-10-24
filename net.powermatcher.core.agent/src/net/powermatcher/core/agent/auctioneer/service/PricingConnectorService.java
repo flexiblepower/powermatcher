@@ -1,13 +1,13 @@
 package net.powermatcher.core.agent.auctioneer.service;
 
 
-import net.powermatcher.core.adapter.service.ConnectorService;
+import net.powermatcher.core.adapter.service.Connectable;
 
 /**
  * @author IBM
  * @version 0.9.0
  */
-public interface PricingConnectorService extends ConnectorService {
+public interface PricingConnectorService extends Connectable {
 
 	/**
 	 * Each subtype of ConnectorService declares a final static String field

@@ -5,10 +5,10 @@ import java.util.Properties;
 import net.powermatcher.core.agent.framework.Agent;
 import net.powermatcher.core.agent.framework.data.BidInfo;
 import net.powermatcher.core.agent.framework.data.PriceInfo;
-import net.powermatcher.core.agent.framework.service.AgentService;
+import net.powermatcher.core.agent.framework.service.DownMessagable;
 import net.powermatcher.core.configurable.BaseConfiguration;
 
-public class MockAgent extends Agent implements AgentService  {
+public class MockAgent extends Agent implements DownMessagable  {
 
 	public PriceInfo lastPriceUpdate;
 	

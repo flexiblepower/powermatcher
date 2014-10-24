@@ -2,11 +2,11 @@ package net.powermatcher.core.scheduler;
 
 
 
-import net.powermatcher.core.adapter.service.AdapterService;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.adapter.service.Adaptable;
+import net.powermatcher.core.configurable.service.Configurable;
 import net.powermatcher.core.object.IdentifiableObject;
 import net.powermatcher.core.scheduler.service.TimeConnectorService;
-import net.powermatcher.core.scheduler.service.TimeService;
+import net.powermatcher.core.scheduler.service.TimeServicable;
 
 
 /**
@@ -17,7 +17,7 @@ import net.powermatcher.core.scheduler.service.TimeService;
  * 
  * @see TimeConnectorService
  */
-public class TimeAdapter extends IdentifiableObject implements AdapterService {
+public class TimeAdapter extends IdentifiableObject implements Adaptable {
 
 	/**
 	 * Define the time source connector (TimeConnectorService) field.
@@ -26,7 +26,7 @@ public class TimeAdapter extends IdentifiableObject implements AdapterService {
 	/**
 	 * Define the time source (TimeService) field.
 	 */
-	private TimeService timeSource;
+	private TimeServicable timeSource;
 
 	/**
 	 * Constructs an instance of this class from the specified configuration
@@ -36,7 +36,7 @@ public class TimeAdapter extends IdentifiableObject implements AdapterService {
 	 *            The configuration (<code>ConfigurationService</code>)
 	 *            parameter.
 	 */
-	public TimeAdapter(final ConfigurationService configuration, TimeService timeSource) {
+	public TimeAdapter(final Configurable configuration, TimeServicable timeSource) {
 		super(configuration);
 		this.timeSource = timeSource;
 	}
@@ -85,7 +85,7 @@ public class TimeAdapter extends IdentifiableObject implements AdapterService {
 	 *            parameter.
 	 */
 	@Override
-	public void setConfiguration(final ConfigurationService configuration) {
+	public void setConfiguration(final Configurable configuration) {
 		super.setConfiguration(configuration);
 		initialize();
 	}

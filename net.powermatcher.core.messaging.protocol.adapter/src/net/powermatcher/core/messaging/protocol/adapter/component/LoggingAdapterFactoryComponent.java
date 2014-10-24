@@ -6,9 +6,9 @@ import java.util.Map;
 import org.osgi.framework.BundleContext;
 
 import net.powermatcher.core.adapter.component.SourceAdapterFactoryComponent;
-import net.powermatcher.core.adapter.service.ConnectorService;
+import net.powermatcher.core.adapter.service.Connectable;
 import net.powermatcher.core.adapter.service.DirectAdapterFactoryService;
-import net.powermatcher.core.agent.framework.log.LoggingConnectorService;
+import net.powermatcher.core.agent.framework.log.LogPublishable;
 import net.powermatcher.core.messaging.protocol.adapter.LoggingAdapterFactory;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
@@ -32,7 +32,7 @@ import aQute.bnd.annotation.component.Reference;
  * @see LoggingAdapterFactoryComponentConfiguration
  */
 @Component(name = LoggingAdapterFactoryComponent.COMPONENT_NAME, designateFactory = LoggingAdapterFactoryComponentConfiguration.class)
-public class LoggingAdapterFactoryComponent extends SourceAdapterFactoryComponent<LoggingConnectorService> {
+public class LoggingAdapterFactoryComponent extends SourceAdapterFactoryComponent<LogPublishable> {
 	/**
 	 * Define the component name (String) constant.
 	 */
@@ -61,10 +61,10 @@ public class LoggingAdapterFactoryComponent extends SourceAdapterFactoryComponen
 	 * 
 	 * @param sourceConnector
 	 *            The source connector (<code>LoggingConnectorService</code>) parameter.
-	 * @see #removeLoggingConnector(LoggingConnectorService)
+	 * @see #removeLoggingConnector(LogPublishable)
 	 */
 	@Reference(type = '*')
-	protected void addLoggingConnector(final LoggingConnectorService sourceConnector) {
+	protected void addLoggingConnector(final LogPublishable sourceConnector) {
 		super.addSourceConnector(sourceConnector);
 	}
 
@@ -81,9 +81,9 @@ public class LoggingAdapterFactoryComponent extends SourceAdapterFactoryComponen
 	 * 
 	 * @param sourceConnector
 	 *            The source connector (<code>LoggingConnectorService</code>) parameter.
-	 * @see #addLoggingConnector(LoggingConnectorService)
+	 * @see #addLoggingConnector(LogPublishable)
 	 */
-	protected void removeLoggingConnector(final LoggingConnectorService sourceConnector) {
+	protected void removeLoggingConnector(final LogPublishable sourceConnector) {
 		super.removeSourceConnector(sourceConnector);
 	}
 
@@ -91,12 +91,12 @@ public class LoggingAdapterFactoryComponent extends SourceAdapterFactoryComponen
 	 * Get the Java type of the connector T.
 	 * Due to type erasure it is necessary to gave a method return the type explicitly for use
 	 * in the call to getTargetConnectorIds.
-	 * @see DirectAdapterFactoryService#getTargetConnectorIds(ConnectorService) 
+	 * @see DirectAdapterFactoryService#getTargetConnectorIds(Connectable) 
 	 * @return The Java type of the connector T.
 	 */
 	@Override
-	protected Class<LoggingConnectorService> getConnectorType() {
-		return LoggingConnectorService.class;
+	protected Class<LogPublishable> getConnectorType() {
+		return LogPublishable.class;
 	}
 
 }

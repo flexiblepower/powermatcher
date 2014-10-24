@@ -5,7 +5,7 @@ import net.powermatcher.core.agent.framework.MatcherAgent;
 import net.powermatcher.core.agent.framework.data.BidInfo;
 import net.powermatcher.core.agent.framework.data.MarketBasis;
 import net.powermatcher.core.agent.framework.data.PriceInfo;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.configurable.service.Configurable;
 
 
 /**
@@ -16,7 +16,7 @@ public abstract class AbstractConcentrator extends MatcherAgent {
 	/**
 	 * Constructs an instance of this class.
 	 * 
-	 * @see #AbstractConcentrator(ConfigurationService)
+	 * @see #AbstractConcentrator(Configurable)
 	 */
 	public AbstractConcentrator() {
 		super();
@@ -31,7 +31,7 @@ public abstract class AbstractConcentrator extends MatcherAgent {
 	 *            parameter.
 	 * @see #AbstractConcentrator()
 	 */
-	public AbstractConcentrator(final ConfigurationService configuration) {
+	public AbstractConcentrator(final Configurable configuration) {
 		super(configuration);
 	}
 

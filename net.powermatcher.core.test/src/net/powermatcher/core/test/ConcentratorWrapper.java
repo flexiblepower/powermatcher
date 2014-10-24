@@ -3,7 +3,7 @@ package net.powermatcher.core.test;
 import net.powermatcher.core.agent.concentrator.Concentrator;
 import net.powermatcher.core.agent.framework.data.BidInfo;
 import net.powermatcher.core.agent.framework.data.PriceInfo;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.configurable.service.Configurable;
 
 public class ConcentratorWrapper extends Concentrator {
 
@@ -11,7 +11,7 @@ public class ConcentratorWrapper extends Concentrator {
 	public BidInfo lastPublishedBidUpdate;
 	public BidInfo lastReceivedBidUpdate;
 	
-	public ConcentratorWrapper(final ConfigurationService configuration) {
+	public ConcentratorWrapper(final Configurable configuration) {
 		super(configuration);
 	}
 

@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import net.powermatcher.core.adapter.service.ConnectorKeyService;
-import net.powermatcher.core.adapter.service.ConnectorService;
+import net.powermatcher.core.adapter.service.Connectable;
 import net.powermatcher.core.object.ConnectorKey;
 
 
@@ -24,11 +24,11 @@ import net.powermatcher.core.object.ConnectorKey;
  * @version 0.9.0
  * 
  * @see DirectConnectorTrackerListener
- * @see ConnectorService
+ * @see Connectable
  * 
  * @param <T> Defines the generic ConnectorService type that ConnectorTracker will use.
  */
-public class DirectConnectorFactoryTracker<T extends ConnectorService, F extends ConnectorService> extends AbstractConnectorFactoryTracker<T> {
+public class DirectConnectorFactoryTracker<T extends Connectable, F extends Connectable> extends AbstractConnectorFactoryTracker<T> {
 
 	/**
 	 * Get key with the specified cluster ID and connector ID parameters and
@@ -78,7 +78,7 @@ public class DirectConnectorFactoryTracker<T extends ConnectorService, F extends
 	 * 
 	 * @param targetConnector
 	 *            The target connector (<code>T</code>) parameter.
-	 * @see #removeTargetConnector(ConnectorService)
+	 * @see #removeTargetConnector(Connectable)
 	 */
 	public synchronized void addTargetConnector(final F targetConnector) {
 		String targetConnectorId = targetConnector.getConnectorId();
@@ -107,7 +107,7 @@ public class DirectConnectorFactoryTracker<T extends ConnectorService, F extends
 	 * 
 	 * @param targetConnector
 	 *            The target connector (<code>T</code>) parameter.
-	 * @see #addTargetConnector(ConnectorService)
+	 * @see #addTargetConnector(Connectable)
 	 */
 	public synchronized void removeTargetConnector(final F targetConnector) {
 		String targetConnectorId = targetConnector.getConnectorId();
@@ -140,7 +140,7 @@ public class DirectConnectorFactoryTracker<T extends ConnectorService, F extends
 	 *            The list of adapter factory IDs (<code>String[]</code>) parameter.
 	 * @param targetConnectorIds
 	 *            The list of target connector IDs (<code>String[]</code>) parameter.
-	 * @see #removeSourceConnector(ConnectorService, String[], String[])
+	 * @see #removeSourceConnector(Connectable, String[], String[])
 	 */
 	public synchronized void addSourceConnector(final T sourceConnector, final String[] factoryIds, final String[] targetConnectorIds) {
 		ConnectorAndFactoryReference<T> connectorAndFactory = new ConnectorAndFactoryReference<T>(sourceConnector, factoryIds, targetConnectorIds);
@@ -199,7 +199,7 @@ public class DirectConnectorFactoryTracker<T extends ConnectorService, F extends
 	 *            The list of adapter factory IDs (<code>String[]</code>) parameter.
 	 * @param targetConnectorIds
 	 *            The list of target connector IDs (<code>String[]</code>) parameter.
-	 * @see #addSourceConnector(ConnectorService, String[], String[])
+	 * @see #addSourceConnector(Connectable, String[], String[])
 	 */
 	public synchronized void removeSourceConnector(final T sourceConnector, final String[] factoryIds, final String[] targetConnectorIds) {
 		ConnectorAndFactoryReference<T> connectorAndFactory = new ConnectorAndFactoryReference<T>(sourceConnector, factoryIds, targetConnectorIds); 

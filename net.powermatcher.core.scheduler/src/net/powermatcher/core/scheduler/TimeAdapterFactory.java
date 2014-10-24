@@ -3,7 +3,7 @@ package net.powermatcher.core.scheduler;
 
 import net.powermatcher.core.adapter.service.ConnectorLocaterService;
 import net.powermatcher.core.adapter.service.TargetAdapterFactoryService;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.configurable.service.Configurable;
 import net.powermatcher.core.object.IdentifiableObject;
 import net.powermatcher.core.scheduler.service.TimeConnectorService;
 
@@ -31,7 +31,7 @@ public class TimeAdapterFactory extends IdentifiableObject implements TargetAdap
 
 
 	@Override
-	public TimeAdapter createAdapter(ConfigurationService configuration, TimeConnectorService connector,
+	public TimeAdapter createAdapter(Configurable configuration, TimeConnectorService connector,
 			ConnectorLocaterService connectorLocater, int adapterIndex) {
 		return createAdapter(configuration, connector);
 	}
@@ -50,7 +50,7 @@ public class TimeAdapterFactory extends IdentifiableObject implements TargetAdap
 	 *         value.
 	 */
 	@Override
-	public TimeAdapter createAdapter(final ConfigurationService configuration,
+	public TimeAdapter createAdapter(final Configurable configuration,
 			final TimeConnectorService timeConnector) {
 		SchedulerAdapterFactory schedulerAdapterFactory = SchedulerAdapterFactory.getSchedulerAdapterFactory(this.clusterId);
 		TimeAdapter timeAdapter = new TimeAdapter(configuration, schedulerAdapterFactory.getTimeSource());

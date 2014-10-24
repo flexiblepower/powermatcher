@@ -7,7 +7,7 @@ import java.util.concurrent.RunnableScheduledFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import net.powermatcher.core.scheduler.service.TimeService;
+import net.powermatcher.core.scheduler.service.TimeServicable;
 
 /**
  * ThreadPoolExecutor that runs in virtual time accelerated by a factor or
@@ -16,7 +16,7 @@ import net.powermatcher.core.scheduler.service.TimeService;
  * @author IBM
  * @version 0.9.0
  */
-public interface ConditionalScheduledExecutorService extends ScheduledExecutorService, TimeService {
+public interface ConditionalScheduledExecutorService extends ScheduledExecutorService, TimeServicable {
 
 	/**
 	 * 

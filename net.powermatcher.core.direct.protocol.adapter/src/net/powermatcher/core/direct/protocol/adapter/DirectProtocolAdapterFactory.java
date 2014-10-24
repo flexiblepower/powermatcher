@@ -5,10 +5,10 @@ import net.powermatcher.core.adapter.ConnectorReference;
 import net.powermatcher.core.adapter.service.ConnectorLocaterService;
 import net.powermatcher.core.adapter.service.DirectAdapterFactoryService;
 import net.powermatcher.core.agent.framework.config.AgentConfiguration;
-import net.powermatcher.core.agent.framework.service.AgentConnectorService;
-import net.powermatcher.core.agent.framework.service.AgentService;
-import net.powermatcher.core.agent.framework.service.MatcherConnectorService;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.agent.framework.service.ChildConnectable;
+import net.powermatcher.core.agent.framework.service.DownMessagable;
+import net.powermatcher.core.agent.framework.service.ParentConnectable;
+import net.powermatcher.core.configurable.service.Configurable;
 
 
 /**
@@ -17,21 +17,21 @@ import net.powermatcher.core.configurable.service.ConfigurationService;
  * @author IBM
  * @version 0.9.0
  * 
- * @see AgentConnectorService
+ * @see ChildConnectable
  * @see DirectProtocolAdapter
- * @see AgentService
+ * @see DownMessagable
  */
-public class DirectProtocolAdapterFactory implements DirectAdapterFactoryService<AgentConnectorService, MatcherConnectorService> {
+public class DirectProtocolAdapterFactory implements DirectAdapterFactoryService<ChildConnectable, ParentConnectable> {
 
 	public DirectProtocolAdapterFactory() {
 	}
 
 	@Override
-	public DirectProtocolAdapter createAdapter(ConfigurationService configuration, AgentConnectorService connector,
+	public DirectProtocolAdapter createAdapter(Configurable configuration, ChildConnectable connector,
 			ConnectorLocaterService connectorLocater, int adapterIndex) {
 		String parentMatcherId = getTargetConnectorIds(connector)[adapterIndex];
-		ConnectorReference<MatcherConnectorService> matcherRef = new ConnectorReference<MatcherConnectorService>(
-				connectorLocater, connector.getConnectorId(), MatcherConnectorService.class, connector.getClusterId(), parentMatcherId);
+		ConnectorReference<ParentConnectable> matcherRef = new ConnectorReference<ParentConnectable>(
+				connectorLocater, connector.getConnectorId(), ParentConnectable.class, connector.getClusterId(), parentMatcherId);
 		DirectProtocolAdapter agentAdapter = new DirectProtocolAdapter(configuration);
 		agentAdapter.setAgentConnector(connector);
 		agentAdapter.setMatcherRef(matcherRef);
@@ -55,8 +55,8 @@ public class DirectProtocolAdapterFactory implements DirectAdapterFactoryService
 	 *         value.
 	 */
 	@Override
-	public DirectProtocolAdapter createAdapter(final ConfigurationService configuration,
-			final AgentConnectorService agentConnector, final MatcherConnectorService matcherConnector) {
+	public DirectProtocolAdapter createAdapter(final Configurable configuration,
+			final ChildConnectable agentConnector, final ParentConnectable matcherConnector) {
 		DirectProtocolAdapter agentAdapter = new DirectProtocolAdapter(configuration);
 		agentAdapter.setAgentConnector(agentConnector);
 		agentAdapter.setMatcherConnector(matcherConnector);
@@ -69,7 +69,7 @@ public class DirectProtocolAdapterFactory implements DirectAdapterFactoryService
 	 * @return The parent matcher id configured for the agent.
 	 */
 	@Override
-	public String[] getTargetConnectorIds(final AgentConnectorService connector) {
+	public String[] getTargetConnectorIds(final ChildConnectable connector) {
 		return connector.getConfiguration().getProperty(AgentConfiguration.PARENT_MATCHER_ID_PROPERTY, AgentConfiguration.PARENT_MATCHER_ID_DEFAULT);
 	}
 

@@ -7,7 +7,7 @@ import net.powermatcher.core.agent.concentrator.service.PeakShavingNotificationS
 import net.powermatcher.core.agent.concentrator.service.PeakShavingService;
 import net.powermatcher.core.agent.framework.data.BidInfo;
 import net.powermatcher.core.agent.framework.data.PriceInfo;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.configurable.service.Configurable;
 
 
 /**
@@ -74,7 +74,7 @@ public abstract class AbstractPeakShavingConcentrator extends AbstractConcentrat
 	/**
 	 * Constructs an instance of this class.
 	 * 
-	 * @see #AbstractPeakShavingConcentrator(ConfigurationService)
+	 * @see #AbstractPeakShavingConcentrator(Configurable)
 	 */
 	public AbstractPeakShavingConcentrator() {
 		super();
@@ -89,7 +89,7 @@ public abstract class AbstractPeakShavingConcentrator extends AbstractConcentrat
 	 *            parameter.
 	 * @see #AbstractPeakShavingConcentrator()
 	 */
-	public AbstractPeakShavingConcentrator(final ConfigurationService configuration) {
+	public AbstractPeakShavingConcentrator(final Configurable configuration) {
 		super(configuration);
 	}
 
@@ -191,7 +191,7 @@ public abstract class AbstractPeakShavingConcentrator extends AbstractConcentrat
 	 *            parameter.
 	 */
 	@Override
-	public void setConfiguration(final ConfigurationService configuration) {
+	public void setConfiguration(final Configurable configuration) {
 		super.setConfiguration(configuration);
 		initialize();
 	}

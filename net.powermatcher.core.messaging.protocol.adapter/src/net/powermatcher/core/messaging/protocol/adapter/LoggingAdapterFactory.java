@@ -4,9 +4,9 @@ package net.powermatcher.core.messaging.protocol.adapter;
 import net.powermatcher.core.adapter.service.ConnectorLocaterService;
 import net.powermatcher.core.adapter.service.SourceAdapterFactoryService;
 import net.powermatcher.core.agent.framework.config.AgentConfiguration;
-import net.powermatcher.core.agent.framework.log.LogListenerService;
-import net.powermatcher.core.agent.framework.log.LoggingConnectorService;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.agent.framework.log.Logable;
+import net.powermatcher.core.agent.framework.log.LogPublishable;
+import net.powermatcher.core.configurable.service.Configurable;
 
 
 /**
@@ -15,17 +15,17 @@ import net.powermatcher.core.configurable.service.ConfigurationService;
  * @author IBM
  * @version 0.9.0
  * 
- * @see LoggingConnectorService
+ * @see LogPublishable
  * @see LoggingAdapter
- * @see LogListenerService
+ * @see Logable
  */
-public class LoggingAdapterFactory implements SourceAdapterFactoryService<LoggingConnectorService> {
+public class LoggingAdapterFactory implements SourceAdapterFactoryService<LogPublishable> {
 
 	public LoggingAdapterFactory() {
 	}
 
 	@Override
-	public LoggingAdapter createAdapter(ConfigurationService configuration, LoggingConnectorService connector,
+	public LoggingAdapter createAdapter(Configurable configuration, LogPublishable connector,
 			ConnectorLocaterService connectorLocater, int adapterIndex) {
 		String loggingAgentId = getTargetConnectorIds(connector)[adapterIndex];
 		return createAdapter(configuration, connector, loggingAgentId);
@@ -45,8 +45,8 @@ public class LoggingAdapterFactory implements SourceAdapterFactoryService<Loggin
 	 *         value.
 	 */
 	@Override
-	public LoggingAdapter createAdapter(final ConfigurationService configuration,
-			final LoggingConnectorService loggingConnector, final String loggingAgentId) {
+	public LoggingAdapter createAdapter(final Configurable configuration,
+			final LogPublishable loggingConnector, final String loggingAgentId) {
 		LoggingAdapter loggingAdapter = new LoggingAdapter(configuration);
 		loggingAdapter.setLoggingConnector(loggingConnector);
 		loggingAdapter.setLoggingAgentId(loggingAgentId);
@@ -59,7 +59,7 @@ public class LoggingAdapterFactory implements SourceAdapterFactoryService<Loggin
 	 * @return The logging agent id configured for the logger.
 	 */
 	@Override
-	public String[] getTargetConnectorIds(final LoggingConnectorService connector) {
+	public String[] getTargetConnectorIds(final LogPublishable connector) {
 		return connector.getConfiguration().getProperty(AgentConfiguration.LOG_LISTENER_ID_PROPERTY, AgentConfiguration.LOG_LISTENER_ID_DEFAULT );
 	}
 

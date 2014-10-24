@@ -3,7 +3,7 @@ package net.powermatcher.core.object;
 
 import java.util.concurrent.ScheduledExecutorService;
 
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.configurable.service.Configurable;
 import net.powermatcher.core.object.config.ActiveObjectConfiguration;
 import net.powermatcher.core.scheduler.service.SchedulerConnectorService;
 
@@ -60,7 +60,7 @@ public abstract class ActiveObject extends ConnectableObject implements Schedule
 	 *            The configuration (<code>ConfigurationService</code>)
 	 *            parameter.
 	 */
-	protected ActiveObject(final ConfigurationService configuration) {
+	protected ActiveObject(final Configurable configuration) {
 		super(configuration);
 	}
 
@@ -119,7 +119,7 @@ public abstract class ActiveObject extends ConnectableObject implements Schedule
 	 * @see ActiveObjectConfiguration#UPDATE_INTERVAL_PROPERTY
 	 */
 	@Override
-	public void setConfiguration(final ConfigurationService configuration) {
+	public void setConfiguration(final Configurable configuration) {
 		super.setConfiguration(configuration);
 		initialize();
 	}

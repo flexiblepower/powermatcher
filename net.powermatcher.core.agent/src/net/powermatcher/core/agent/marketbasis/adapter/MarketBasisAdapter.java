@@ -3,9 +3,9 @@ package net.powermatcher.core.agent.marketbasis.adapter;
 
 import net.powermatcher.core.adapter.Adapter;
 import net.powermatcher.core.agent.framework.data.MarketBasis;
-import net.powermatcher.core.agent.framework.service.AgentConnectorService;
+import net.powermatcher.core.agent.framework.service.ChildConnectable;
 import net.powermatcher.core.agent.marketbasis.adapter.config.MarketBasisAdapterConfiguration;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.configurable.service.Configurable;
 
 
 /**
@@ -84,12 +84,12 @@ public class MarketBasisAdapter extends Adapter {
 	/**
 	 * Define the agent connector (AgentConnectorService) field.
 	 */
-	private AgentConnectorService agentConnector;
+	private ChildConnectable agentConnector;
 
 	/**
 	 * Constructs an instance of this class.
 	 * 
-	 * @see #MarketBasisAdapter(ConfigurationService)
+	 * @see #MarketBasisAdapter(Configurable)
 	 */
 	public MarketBasisAdapter() {
 		super();
@@ -104,7 +104,7 @@ public class MarketBasisAdapter extends Adapter {
 	 *            parameter.
 	 * @see #MarketBasisAdapter()
 	 */
-	public MarketBasisAdapter(final ConfigurationService configuration) {
+	public MarketBasisAdapter(final Configurable configuration) {
 		super(configuration);
 	}
 
@@ -116,7 +116,7 @@ public class MarketBasisAdapter extends Adapter {
 	 * 
 	 * @throws Exception
 	 * 
-	 * @see #setAgentConnector(AgentConnectorService)
+	 * @see #setAgentConnector(ChildConnectable)
 	 */
 	@Override
 	public void bind() throws Exception {
@@ -130,9 +130,9 @@ public class MarketBasisAdapter extends Adapter {
 	 * Get the agent connector that has been set.
 	 * 
 	 * @return The agent connector that has been set.
-	 * @see #setAgentConnector(AgentConnectorService)
+	 * @see #setAgentConnector(ChildConnectable)
 	 */
-	public AgentConnectorService getAgentConnector() {
+	public ChildConnectable getAgentConnector() {
 		return this.agentConnector;
 	}
 
@@ -237,7 +237,7 @@ public class MarketBasisAdapter extends Adapter {
 	 *            parameter.
 	 * @see #getAgentConnector()
 	 */
-	public void setAgentConnector(final AgentConnectorService agentConnector) {
+	public void setAgentConnector(final ChildConnectable agentConnector) {
 		this.agentConnector = agentConnector;
 	}
 
@@ -249,7 +249,7 @@ public class MarketBasisAdapter extends Adapter {
 	 *            parameter.
 	 */
 	@Override
-	public void setConfiguration(final ConfigurationService configuration) {
+	public void setConfiguration(final Configurable configuration) {
 		super.setConfiguration(configuration);
 		initialize();
 	}

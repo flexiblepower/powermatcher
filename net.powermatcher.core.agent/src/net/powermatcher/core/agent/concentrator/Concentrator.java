@@ -2,7 +2,7 @@ package net.powermatcher.core.agent.concentrator;
 
 
 import net.powermatcher.core.agent.concentrator.framework.AbstractConcentrator;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.configurable.service.Configurable;
 
 
 /**
@@ -13,7 +13,7 @@ public class Concentrator extends AbstractConcentrator {
 	/**
 	 * Constructs an instance of this class.
 	 * 
-	 * @see #Concentrator(ConfigurationService)
+	 * @see #Concentrator(Configurable)
 	 */
 	public Concentrator() {
 		super();
@@ -28,7 +28,7 @@ public class Concentrator extends AbstractConcentrator {
 	 *            parameter.
 	 * @see #Concentrator()
 	 */
-	public Concentrator(final ConfigurationService configuration) {
+	public Concentrator(final Configurable configuration) {
 		super(configuration);
 	}
 

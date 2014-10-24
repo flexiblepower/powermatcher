@@ -5,9 +5,9 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import net.powermatcher.core.agent.framework.Agent;
 import net.powermatcher.core.agent.framework.data.MarketBasis;
-import net.powermatcher.core.agent.framework.service.AgentService;
-import net.powermatcher.core.agent.framework.service.MatcherService;
-import net.powermatcher.core.scheduler.service.TimeService;
+import net.powermatcher.core.agent.framework.service.DownMessagable;
+import net.powermatcher.core.agent.framework.service.UpMessagable;
+import net.powermatcher.core.scheduler.service.TimeServicable;
 import net.powermatcher.fpai.agent.FPAIAgent;
 import net.powermatcher.simulation.configuration.NodeDescriptor;
 import net.powermatcher.simulation.configuration.ResourceDriverNodeDescriptor;
@@ -40,7 +40,7 @@ public class FPAIDeviceAgentComposer extends AgentComposer<Agent> {
 
 	@Override
 	public void attachIncommingLink(Link link, Class<?> iface) {
-		if (AgentService.class.equals(iface)) {
+		if (DownMessagable.class.equals(iface)) {
 			// no activity dependnet on this link
 		} else {
 			throw new IllegalArgumentException("unsupported interface");
@@ -49,7 +49,7 @@ public class FPAIDeviceAgentComposer extends AgentComposer<Agent> {
 
 	@Override
 	public void attachOutgoingLink(Link link, Class<?> iface) {
-		if (MatcherService.class.equals(iface)) {
+		if (UpMessagable.class.equals(iface)) {
 			link.setDependentOn(this.bidUpdateActivity);
 		} else {
 			throw new IllegalArgumentException("unsupported interface");
@@ -146,7 +146,7 @@ public class FPAIDeviceAgentComposer extends AgentComposer<Agent> {
 	}
 
 	@Override
-	public void initializeNode(ComponentManager componentManager, TimeService timeService, MarketBasis marketBasis,
+	public void initializeNode(ComponentManager componentManager, TimeServicable timeService, MarketBasis marketBasis,
 			Broker broker) {
 		super.initializeNode(componentManager, timeService, marketBasis, broker);
 

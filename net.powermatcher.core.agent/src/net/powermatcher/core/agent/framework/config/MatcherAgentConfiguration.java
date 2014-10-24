@@ -1,6 +1,6 @@
 package net.powermatcher.core.agent.framework.config;
 
-import net.powermatcher.core.agent.framework.service.MatcherConnectorService;
+import net.powermatcher.core.agent.framework.service.ParentConnectable;
 
 
 /**
@@ -25,7 +25,7 @@ public interface MatcherAgentConfiguration extends AgentConfiguration {
 	/**
 	 * Define the matcher adapter factory property (String) constant.
 	 */
-	public static final String MATCHER_ADAPTER_FACTORY_PROPERTY = MatcherConnectorService.ADAPTER_FACTORY_PROPERTY_NAME;
+	public static final String MATCHER_ADAPTER_FACTORY_PROPERTY = ParentConnectable.ADAPTER_FACTORY_PROPERTY_NAME;
 	/**
 	 * Define the matcher adapter factory description (String) constant.
 	 */

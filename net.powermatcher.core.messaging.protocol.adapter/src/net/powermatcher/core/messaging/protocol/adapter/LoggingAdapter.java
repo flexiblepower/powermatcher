@@ -2,10 +2,10 @@ package net.powermatcher.core.messaging.protocol.adapter;
 
 
 import net.powermatcher.core.agent.framework.log.BidLogInfo;
-import net.powermatcher.core.agent.framework.log.LogListenerService;
-import net.powermatcher.core.agent.framework.log.LoggingConnectorService;
+import net.powermatcher.core.agent.framework.log.Logable;
+import net.powermatcher.core.agent.framework.log.LogPublishable;
 import net.powermatcher.core.agent.framework.log.PriceLogInfo;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.configurable.service.Configurable;
 import net.powermatcher.core.messaging.framework.Topic;
 import net.powermatcher.core.messaging.protocol.adapter.constants.ProtocolAdapterConstants;
 import net.powermatcher.core.messaging.protocol.adapter.log.BidLogMessage;
@@ -28,8 +28,8 @@ import net.powermatcher.core.messaging.protocol.adapter.log.PriceLogMessage;
  * @author IBM
  * @version 0.9.0
  * 
- * @see LoggingConnectorService
- * @see LogListenerService
+ * @see LogPublishable
+ * @see Logable
  * @see PriceLogMessage
  * @see BidLogMessage
  * @see BaseAdapter
@@ -40,7 +40,7 @@ public class LoggingAdapter extends BaseAdapter {
 	 * @author IBM
 	 * @version 0.9.0
 	 */
-	private class LoggingPublisher implements LogListenerService {
+	private class LoggingPublisher implements Logable {
 		/**
 		 * Handle bid info logging event.
 		 * 
@@ -48,7 +48,7 @@ public class LoggingAdapter extends BaseAdapter {
 		 *            Bid log info to handle.
 		 */
 		@Override
-		public void handleBidLogInfo(BidLogInfo bidLogInfo) {
+		public void logBidLogInfo(BidLogInfo bidLogInfo) {
 			BidLogMessage msg = new BidLogMessage(bidLogInfo);
 			LoggingAdapter.this.publish(LoggingAdapter.this.getBidLogTopic(), msg.toBytes());
 		}
@@ -60,7 +60,7 @@ public class LoggingAdapter extends BaseAdapter {
 		 *            Price log info to handle.
 		 */
 		@Override
-		public void handlePriceLogInfo(PriceLogInfo priceLogInfo) {
+		public void logPriceLogInfo(PriceLogInfo priceLogInfo) {
 			PriceLogMessage msg = new PriceLogMessage(priceLogInfo);
 			LoggingAdapter.this.publish(LoggingAdapter.this.getPriceInfoLogTopic(), msg.toBytes());
 		}
@@ -84,17 +84,17 @@ public class LoggingAdapter extends BaseAdapter {
 	/**
 	 * Define the agent (LogListenerService) field.
 	 */
-	private LogListenerService logListener;
+	private Logable logListener;
 
 	/**
 	 * Define the agent connector (LoggingConnectorService) field.
 	 */
-	private LoggingConnectorService loggingConnector;
+	private LogPublishable loggingConnector;
 
 	/**
 	 * Constructs an instance of this class.
 	 * 
-	 * @see #LoggingAdapter(ConfigurationService)
+	 * @see #LoggingAdapter(Configurable)
 	 */
 	public LoggingAdapter() {
 		super();
@@ -109,7 +109,7 @@ public class LoggingAdapter extends BaseAdapter {
 	 *            parameter.
 	 * @see #LoggingAdapter()
 	 */
-	public LoggingAdapter(final ConfigurationService configuration) {
+	public LoggingAdapter(final Configurable configuration) {
 		super(configuration);
 	}
 
@@ -152,9 +152,9 @@ public class LoggingAdapter extends BaseAdapter {
 	 * Gets the agent connector (LoggingConnectorService) value.
 	 * 
 	 * @return The agent connector (LoggingConnectorService) value.
-	 * @see #setLoggingConnector(LoggingConnectorService)
+	 * @see #setLoggingConnector(LogPublishable)
 	 */
-	public LoggingConnectorService getLoggingConnector() {
+	public LogPublishable getLoggingConnector() {
 		return this.loggingConnector;
 	}
 
@@ -207,7 +207,7 @@ public class LoggingAdapter extends BaseAdapter {
 	 *            parameter.
 	 * @see #getLoggingConnector()
 	 */
-	public void setLoggingConnector(final LoggingConnectorService agentConnector) {
+	public void setLoggingConnector(final LogPublishable agentConnector) {
 		this.loggingConnector = agentConnector;
 		if (agentConnector == null) {
 			this.logListener = null;

@@ -1,7 +1,7 @@
 package net.powermatcher.core.agent.template.service;
 
 
-import net.powermatcher.core.adapter.service.ConnectorService;
+import net.powermatcher.core.adapter.service.Connectable;
 
 /**
  * This interface defines a custom connector service interface that can be used by
@@ -24,7 +24,7 @@ import net.powermatcher.core.adapter.service.ConnectorService;
  * @author IBM
  * @version 0.9.0
  */
-public interface ExampleConnectorService extends ConnectorService {
+public interface ExampleConnectorService extends Connectable {
 
 	/**
 	 * Each subtype of ConnectorService declares a final static String field

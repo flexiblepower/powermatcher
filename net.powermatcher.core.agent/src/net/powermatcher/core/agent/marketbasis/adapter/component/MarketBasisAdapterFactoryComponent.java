@@ -4,9 +4,9 @@ package net.powermatcher.core.agent.marketbasis.adapter.component;
 import java.util.Map;
 
 import net.powermatcher.core.adapter.component.TargetAdapterFactoryComponent;
-import net.powermatcher.core.adapter.service.ConnectorService;
+import net.powermatcher.core.adapter.service.Connectable;
 import net.powermatcher.core.adapter.service.DirectAdapterFactoryService;
-import net.powermatcher.core.agent.framework.service.AgentConnectorService;
+import net.powermatcher.core.agent.framework.service.ChildConnectable;
 import net.powermatcher.core.agent.marketbasis.adapter.MarketBasisAdapterFactory;
 
 import org.osgi.framework.BundleContext;
@@ -33,7 +33,7 @@ import aQute.bnd.annotation.component.Reference;
  * @see MarketBasisAdapterFactoryComponentConfiguration
  */
 @Component(name = MarketBasisAdapterFactoryComponent.COMPONENT_NAME, designateFactory = MarketBasisAdapterFactoryComponentConfiguration.class)
-public class MarketBasisAdapterFactoryComponent extends TargetAdapterFactoryComponent<AgentConnectorService> {
+public class MarketBasisAdapterFactoryComponent extends TargetAdapterFactoryComponent<ChildConnectable> {
 	/**
 	 * Define the component name (String) constant.
 	 */
@@ -63,10 +63,10 @@ public class MarketBasisAdapterFactoryComponent extends TargetAdapterFactoryComp
 	 * @param targetConnector
 	 *            The target connector (<code>AgentConnectorService</code>)
 	 *            parameter.
-	 * @see #removeMatcherConnector(AgentConnectorService)
+	 * @see #removeMatcherConnector(ChildConnectable)
 	 */
 	@Reference(type = '*')
-	protected void addMatcherConnector(final AgentConnectorService targetConnector) {
+	protected void addMatcherConnector(final ChildConnectable targetConnector) {
 		super.addTargetConnector(targetConnector);
 	}
 
@@ -84,9 +84,9 @@ public class MarketBasisAdapterFactoryComponent extends TargetAdapterFactoryComp
 	 * @param targetConnector
 	 *            The target connector (<code>AgentConnectorService</code>)
 	 *            parameter.
-	 * @see #addMatcherConnector(AgentConnectorService)
+	 * @see #addMatcherConnector(ChildConnectable)
 	 */
-	protected void removeMatcherConnector(final AgentConnectorService targetConnector) {
+	protected void removeMatcherConnector(final ChildConnectable targetConnector) {
 		super.removeTargetConnector(targetConnector);
 	}
 
@@ -94,12 +94,12 @@ public class MarketBasisAdapterFactoryComponent extends TargetAdapterFactoryComp
 	 * Get the Java type of the connector T.
 	 * Due to type erasure it is necessary to gave a method return the type explicitly for use
 	 * in the call to getTargetConnectorIds.
-	 * @see DirectAdapterFactoryService#getTargetConnectorIds(ConnectorService) 
+	 * @see DirectAdapterFactoryService#getTargetConnectorIds(Connectable) 
 	 * @return The Java type of the connector T.
 	 */
 	@Override
-	protected Class<AgentConnectorService> getConnectorType() {
-		return AgentConnectorService.class;
+	protected Class<ChildConnectable> getConnectorType() {
+		return ChildConnectable.class;
 	}
 
 }

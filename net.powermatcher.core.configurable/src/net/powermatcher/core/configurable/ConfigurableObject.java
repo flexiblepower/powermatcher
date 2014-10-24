@@ -2,7 +2,7 @@ package net.powermatcher.core.configurable;
 
 
 import net.powermatcher.core.configurable.service.ConfigurableService;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.configurable.service.Configurable;
 
 /**
  * @author IBM
@@ -21,18 +21,18 @@ import net.powermatcher.core.configurable.service.ConfigurationService;
  * to store a configuration and retrieve easily configuration properties.
  * </p>
  * @see ConfigurableService
- * @see ConfigurationService
+ * @see Configurable
  */
 public class ConfigurableObject implements ConfigurableService {
 	/**
 	 * Define the configuration (ConfigurationService) field.
 	 */
-	private ConfigurationService configuration;
+	private Configurable configuration;
 
 	/**
 	 * Constructs an instance of this class.
 	 * 
-	 * @see #ConfigurableObject(ConfigurationService)
+	 * @see #ConfigurableObject(Configurable)
 	 */
 	public ConfigurableObject() {
 		super();
@@ -47,7 +47,7 @@ public class ConfigurableObject implements ConfigurableService {
 	 *            parameter.
 	 * @see #ConfigurableObject()
 	 */
-	public ConfigurableObject(final ConfigurationService configuration) {
+	public ConfigurableObject(final Configurable configuration) {
 		setConfiguration(configuration);
 	}
 
@@ -79,10 +79,10 @@ public class ConfigurableObject implements ConfigurableService {
 	 * Gets the configuration (ConfigurationService) value.
 	 * 
 	 * @return The configuration (<code>ConfigurationService</code>) value.
-	 * @see #setConfiguration(ConfigurationService)
+	 * @see #setConfiguration(Configurable)
 	 */
 	@Override
-	public ConfigurationService getConfiguration() {
+	public Configurable getConfiguration() {
 		return this.configuration;
 	}
 
@@ -580,7 +580,7 @@ public class ConfigurableObject implements ConfigurableService {
 	 * @see #getConfiguration()
 	 */
 	@Override
-	public void setConfiguration(final ConfigurationService configuration) {
+	public void setConfiguration(final Configurable configuration) {
 		this.configuration = configuration;
 	}
 

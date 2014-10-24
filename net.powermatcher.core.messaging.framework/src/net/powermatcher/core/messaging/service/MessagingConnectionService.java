@@ -1,14 +1,14 @@
 package net.powermatcher.core.messaging.service;
 
 
-import net.powermatcher.core.adapter.service.AdapterService;
+import net.powermatcher.core.adapter.service.Adaptable;
 import net.powermatcher.core.messaging.framework.Topic;
 
 /**
  * @author IBM
  * @version 0.9.0
  */
-public interface MessagingConnectionService extends AdapterService {
+public interface MessagingConnectionService extends Adaptable {
 
 	/**
 	 * Add a client to a (shared) messaging connection.

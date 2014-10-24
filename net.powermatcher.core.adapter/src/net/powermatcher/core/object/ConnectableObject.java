@@ -5,11 +5,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.powermatcher.core.adapter.service.ConnectorKeyService;
-import net.powermatcher.core.adapter.service.ConnectorService;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.adapter.service.Connectable;
+import net.powermatcher.core.configurable.service.Configurable;
 import net.powermatcher.core.object.config.ConnectableObjectConfiguration;
 import net.powermatcher.core.scheduler.service.TimeConnectorService;
-import net.powermatcher.core.scheduler.service.TimeService;
+import net.powermatcher.core.scheduler.service.TimeServicable;
 
 /**
  * 
@@ -32,7 +32,7 @@ import net.powermatcher.core.scheduler.service.TimeService;
  * @author IBM
  * @version 0.9.0
  * 
- * @see ConfigurationService
+ * @see Configurable
  * @see ConnectableObjectConfiguration
  * @uml.annotations 
  *    uml_dependency="mmi:///#jsrctype^name=ConnectorService[jcu^name=ConnectorService.java[jpack^name=net.powermatcher.core.adapter.service[jsrcroot^srcfolder=src[project^id=net.powermatcher.core.adapter.service]]]]$uml.Interface"
@@ -43,7 +43,7 @@ public abstract class ConnectableObject extends IdentifiableObject implements Ti
 	 * Define a time source that always returns 0 for the time.
 	 * This time source is used as long as no time source has been bound yet.
 	 */
-	private static final TimeService unboundTimeSource = new TimeService() {
+	private static final TimeServicable unboundTimeSource = new TimeServicable() {
 
 		@Override
 		public long currentTimeMillis() {
@@ -64,7 +64,7 @@ public abstract class ConnectableObject extends IdentifiableObject implements Ti
 	 * Define the time source (TimeService) that is used for obtaining real or
 	 * simulated time.
 	 */
-	private TimeService timeSource = unboundTimeSource;
+	private TimeServicable timeSource = unboundTimeSource;
 
 	/**
 	 * Constructs an instance of this class.
@@ -82,7 +82,7 @@ public abstract class ConnectableObject extends IdentifiableObject implements Ti
 	 *            The configuration (<code>ConfigurationService</code>)
 	 *            parameter.
 	 */
-	protected ConnectableObject(final ConfigurationService configuration) {
+	protected ConnectableObject(final Configurable configuration) {
 		super(configuration);
 	}
 
@@ -91,10 +91,10 @@ public abstract class ConnectableObject extends IdentifiableObject implements Ti
 	 * 
 	 * @param timeSource
 	 *            The time source (<code>TimeService</code>) to bind.
-	 * @see #unbind(TimeService)
+	 * @see #unbind(TimeServicable)
 	 */
 	@Override
-	public void bind(final TimeService timeSource) {
+	public void bind(final TimeServicable timeSource) {
 		this.timeSource = timeSource;
 	}
 
@@ -110,16 +110,16 @@ public abstract class ConnectableObject extends IdentifiableObject implements Ti
 	 * @return The list of adapter factory ids (<code>String[]</code>), or null if not configured.
 	 */
 	@Override
-	public <T extends ConnectorService> String[] getAdapterFactory(final Class<T> connectorType) {
+	public <T extends Connectable> String[] getAdapterFactory(final Class<T> connectorType) {
 		if (!connectorType.isInterface()) {
 			throw new IllegalArgumentException("Connector types must be identified by their interface, not a class");
 		}
 		String ids[];
 		try {
-			String name = (String)connectorType.getDeclaredField(ConnectorService.ADAPTER_FACTORY_PROPERTY_NAME_FIELD_IDENTIFIER).get(connectorType);
-			ids = getProperty(name, ConnectorService.ADAPTER_FACTORY_PROPERTY_DEFAULT);
+			String name = (String)connectorType.getDeclaredField(Connectable.ADAPTER_FACTORY_PROPERTY_NAME_FIELD_IDENTIFIER).get(connectorType);
+			ids = getProperty(name, Connectable.ADAPTER_FACTORY_PROPERTY_DEFAULT);
 		} catch (Exception e) {
-			ids = getProperty(connectorType.getSimpleName(), ConnectorService.ADAPTER_FACTORY_PROPERTY_DEFAULT);
+			ids = getProperty(connectorType.getSimpleName(), Connectable.ADAPTER_FACTORY_PROPERTY_DEFAULT);
 		}
 		return ids;
 	}
@@ -145,7 +145,7 @@ public abstract class ConnectableObject extends IdentifiableObject implements Ti
 	 * @return The key for this connector ( <code>ConnectorKeyService</code>).
 	 */
 	@Override
-	public ConnectorKeyService getConnectorKey(final Class<? extends ConnectorService> connectorType) {
+	public ConnectorKeyService getConnectorKey(final Class<? extends Connectable> connectorType) {
 		return new ConnectorKey(connectorType, this);
 	}
 
@@ -156,14 +156,14 @@ public abstract class ConnectableObject extends IdentifiableObject implements Ti
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public Class<ConnectorService>[] getConnectorTypes() {
-		Set<Class<ConnectorService>> types = new HashSet<Class<ConnectorService>>();
+	public Class<Connectable>[] getConnectorTypes() {
+		Set<Class<Connectable>> types = new HashSet<Class<Connectable>>();
 		Class<?> cls = getClass();
 		while (cls != null) {
 			Class<?> interfaces[] = cls.getInterfaces();
 			for (int i = 0; i < interfaces.length; i++) {
-				if (ConnectorService.class.isAssignableFrom(interfaces[i])) {
-					types.add((Class<ConnectorService>) interfaces[i]);
+				if (Connectable.class.isAssignableFrom(interfaces[i])) {
+					types.add((Class<Connectable>) interfaces[i]);
 				}
 			}
 			cls = cls.getSuperclass();
@@ -180,7 +180,7 @@ public abstract class ConnectableObject extends IdentifiableObject implements Ti
 	 * @see System#currentTimeMillis()
 	 */
 	public long getCurrentTimeMillis() {
-		TimeService timeSource = getTimeSource();
+		TimeServicable timeSource = getTimeSource();
 		if (timeSource == null) {
 			return 0;
 		}
@@ -194,7 +194,7 @@ public abstract class ConnectableObject extends IdentifiableObject implements Ti
 	 * @return The time source to this object, or null if no time source is
 	 *         bound.
 	 */
-	public TimeService getTimeSource() {
+	public TimeServicable getTimeSource() {
 		return this.timeSource;
 	}
 
@@ -210,7 +210,7 @@ public abstract class ConnectableObject extends IdentifiableObject implements Ti
 	 * @see ConnectableObjectConfiguration
 	 */
 	@Override
-	public void setConfiguration(final ConfigurationService configuration) {
+	public void setConfiguration(final Configurable configuration) {
 		super.setConfiguration(configuration);
 		this.connectorId = getProperty(ConnectableObjectConfiguration.CONNECTOR_ID_PROPERTY, getId());
 	}
@@ -221,10 +221,10 @@ public abstract class ConnectableObject extends IdentifiableObject implements Ti
 	 * @param timeSource
 	 *            The time source (<code>TimeService</code>) to unbind.
 	 * 
-	 * @see #bind(TimeService)
+	 * @see #bind(TimeServicable)
 	 */
 	@Override
-	public void unbind(final TimeService timeSource) {
+	public void unbind(final TimeServicable timeSource) {
 		this.timeSource = unboundTimeSource;
 	}
 

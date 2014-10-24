@@ -6,7 +6,7 @@ import net.powermatcher.core.adapter.service.TargetAdapterFactoryService;
 import net.powermatcher.core.agent.template.service.ExampleConnectorService;
 import net.powermatcher.core.agent.template.service.ExampleControlService;
 import net.powermatcher.core.agent.template.service.ExampleNotificationService;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.configurable.service.Configurable;
 
 
 /**
@@ -26,7 +26,7 @@ public class ExampleAdapterFactory implements TargetAdapterFactoryService<Exampl
 	}
 
 	@Override
-	public ExampleAdapter createAdapter(ConfigurationService configuration, ExampleConnectorService connector,
+	public ExampleAdapter createAdapter(Configurable configuration, ExampleConnectorService connector,
 			ConnectorLocaterService connectorLocater, int adapterIndex) {
 		return createAdapter(configuration, connector);
 	}
@@ -46,7 +46,7 @@ public class ExampleAdapterFactory implements TargetAdapterFactoryService<Exampl
 	 *         adapter.
 	 */
 	@Override
-	public ExampleAdapter createAdapter(final ConfigurationService configuration,
+	public ExampleAdapter createAdapter(final Configurable configuration,
 			final ExampleConnectorService connectorService) {
 		ExampleAdapter agentAdapter = new ExampleAdapter(configuration);
 		agentAdapter.setConnector(connectorService);

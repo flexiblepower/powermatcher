@@ -7,10 +7,10 @@ import net.powermatcher.core.agent.framework.config.MatcherAgentConfiguration;
 import net.powermatcher.core.agent.framework.data.BidInfo;
 import net.powermatcher.core.agent.framework.data.MarketBasis;
 import net.powermatcher.core.agent.framework.data.PriceInfo;
-import net.powermatcher.core.agent.framework.service.AgentService;
-import net.powermatcher.core.agent.framework.service.MatcherConnectorService;
-import net.powermatcher.core.agent.framework.service.MatcherService;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.agent.framework.service.DownMessagable;
+import net.powermatcher.core.agent.framework.service.ParentConnectable;
+import net.powermatcher.core.agent.framework.service.UpMessagable;
+import net.powermatcher.core.configurable.service.Configurable;
 import net.powermatcher.core.messaging.framework.Topic;
 import net.powermatcher.core.messaging.protocol.adapter.config.MatcherProtocolAdapterConfiguration;
 import net.powermatcher.core.messaging.protocol.adapter.constants.ProtocolAdapterConstants;
@@ -53,7 +53,7 @@ public class MatcherProtocolAdapter extends ProtocolAdapter {
 	 * @author IBM
 	 * @version 0.9.0
 	 */
-	private class AgentPublisher implements AgentService {
+	private class AgentPublisher implements DownMessagable {
 		/**
 		 * Update market basis with the specified new market basis parameter.
 		 * 
@@ -89,7 +89,7 @@ public class MatcherProtocolAdapter extends ProtocolAdapter {
 	/**
 	 * Define the matcher (MatcherService) field.
 	 */
-	private MatcherService matcher;
+	private UpMessagable matcher;
 	/**
 	 * Define the matcher ID (String) field.
 	 */
@@ -105,11 +105,11 @@ public class MatcherProtocolAdapter extends ProtocolAdapter {
 	/**
 	 * Define the child agent (AgentService) field.
 	 */
-	private AgentService childAgentAdapter;
+	private DownMessagable childAgentAdapter;
 	/**
 	 * Define the matcher connector (MatcherConnectorService) field.
 	 */
-	private MatcherConnectorService matcherConnector;
+	private ParentConnectable matcherConnector;
 
 	/**
 	 * Constructs an instance of this class.
@@ -126,7 +126,7 @@ public class MatcherProtocolAdapter extends ProtocolAdapter {
 	 *            The configuration (<code>ConfigurationService</code>)
 	 *            parameter.
 	 */
-	public MatcherProtocolAdapter(final ConfigurationService configuration) {
+	public MatcherProtocolAdapter(final Configurable configuration) {
 		super(configuration);
 	}
 
@@ -188,7 +188,7 @@ public class MatcherProtocolAdapter extends ProtocolAdapter {
 	 * 
 	 * @return The matcher connector (MatcherConnectorService) value.
 	 */
-	public MatcherConnectorService getMatcherConnector() {
+	public ParentConnectable getMatcherConnector() {
 		return this.matcherConnector;
 	}
 
@@ -298,7 +298,7 @@ public class MatcherProtocolAdapter extends ProtocolAdapter {
 	 *            parameter.
 	 */
 	@Override
-	public void setConfiguration(final ConfigurationService configuration) {
+	public void setConfiguration(final Configurable configuration) {
 		super.setConfiguration(configuration);
 		initialize();
 	}
@@ -310,7 +310,7 @@ public class MatcherProtocolAdapter extends ProtocolAdapter {
 	 *            The matcher connector (<code>MatcherConnectorService</code>)
 	 *            parameter.
 	 */
-	public void setMatcherConnector(final MatcherConnectorService matcherConnector) {
+	public void setMatcherConnector(final ParentConnectable matcherConnector) {
 		this.matcherConnector = matcherConnector;
 		if (matcherConnector == null) {
 			this.matcher = null;

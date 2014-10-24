@@ -19,7 +19,7 @@ import net.powermatcher.core.config.parser.SystemConfigurationParser;
 import net.powermatcher.core.config.parser.SystemConfigurationParserException;
 import net.powermatcher.core.config.processor.ConfigurationProcessor;
 import net.powermatcher.core.configurable.ConfigurableObject;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.configurable.service.Configurable;
 
 import org.apache.commons.codec.binary.Base64;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -137,7 +137,7 @@ public class ConfigManager extends ConfigurableObject {
 	 *            parameter.
 	 */
 	public ConfigManager(final ConfigurationAdmin configurationAdmin, final SAXParserFactory factory, final File pidFile,
-			final ConfigurationService configuration) {
+			final Configurable configuration) {
 		super(configuration);
 		this.logger = LoggerFactory.getLogger(getClass().getName());
 		this.configurationAdmin = configurationAdmin;
@@ -203,7 +203,7 @@ public class ConfigManager extends ConfigurableObject {
 	 * @see #getConfiguration()
 	 */
 	@Override
-	public void setConfiguration(ConfigurationService configuration) {
+	public void setConfiguration(Configurable configuration) {
 		super.setConfiguration(configuration);
 		init();
 	}

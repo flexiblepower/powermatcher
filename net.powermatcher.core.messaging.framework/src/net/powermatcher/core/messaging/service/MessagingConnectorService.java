@@ -1,7 +1,7 @@
 package net.powermatcher.core.messaging.service;
 
-import net.powermatcher.core.adapter.service.ConnectorService;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.adapter.service.Connectable;
+import net.powermatcher.core.configurable.service.Configurable;
 import net.powermatcher.core.messaging.framework.Topic;
 
 /**
@@ -14,7 +14,7 @@ import net.powermatcher.core.messaging.framework.Topic;
  * @author IBM
  * @version 0.9.0
  */
-public interface MessagingConnectorService extends ConnectorService {
+public interface MessagingConnectorService extends Connectable {
 
 	/**
 	 * Each subtype of ConnectorService declares a final static String field
@@ -38,7 +38,7 @@ public interface MessagingConnectorService extends ConnectorService {
 	 * 
 	 * @return The configuration (<code>ConfigurationService</code>) value.
 	 */
-	public ConfigurationService getConfiguration();
+	public Configurable getConfiguration();
 
 	/**
 	 * Gets the subscriptions (Topic[]) value.

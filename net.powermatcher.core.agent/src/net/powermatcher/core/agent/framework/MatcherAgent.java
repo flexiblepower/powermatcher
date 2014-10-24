@@ -11,12 +11,12 @@ import net.powermatcher.core.agent.framework.data.BidInfo;
 import net.powermatcher.core.agent.framework.data.MarketBasis;
 import net.powermatcher.core.agent.framework.data.PriceInfo;
 import net.powermatcher.core.agent.framework.log.AbstractLogInfo;
-import net.powermatcher.core.agent.framework.log.LogListenerService;
-import net.powermatcher.core.agent.framework.service.AgentService;
-import net.powermatcher.core.agent.framework.service.MatcherConnectorService;
-import net.powermatcher.core.agent.framework.service.MatcherService;
-import net.powermatcher.core.configurable.service.ConfigurationService;
-import net.powermatcher.core.scheduler.service.TimeService;
+import net.powermatcher.core.agent.framework.log.Logable;
+import net.powermatcher.core.agent.framework.service.DownMessagable;
+import net.powermatcher.core.agent.framework.service.ParentConnectable;
+import net.powermatcher.core.agent.framework.service.UpMessagable;
+import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.scheduler.service.TimeServicable;
 
 /**
  * <p>
@@ -60,12 +60,12 @@ import net.powermatcher.core.scheduler.service.TimeService;
  * @author IBM
  * @version 0.9.0
  * 
- * @see MatcherService
- * @see AgentService
- * @see LogListenerService
+ * @see UpMessagable
+ * @see DownMessagable
+ * @see Logable
  * @see BidCache
  */
-public abstract class MatcherAgent extends Agent implements MatcherService, MatcherConnectorService {
+public abstract class MatcherAgent extends Agent implements UpMessagable, ParentConnectable {
 	/**
 	 * Define the agent bid log level (LoggingLevel) field.
 	 */
@@ -86,7 +86,7 @@ public abstract class MatcherAgent extends Agent implements MatcherService, Matc
 	/**
 	 * Define the child agent (AgentService) field.
 	 */
-	private List<AgentService> childAgentAdapters = new ArrayList<AgentService>();
+	private List<DownMessagable> childAgentAdapters = new ArrayList<DownMessagable>();
 	/**
 	 * Define the last published price info (PriceInfo) field.
 	 */
@@ -95,7 +95,7 @@ public abstract class MatcherAgent extends Agent implements MatcherService, Matc
 	/**
 	 * Constructs an instance of this class.
 	 * 
-	 * @see #MatcherAgent(ConfigurationService)
+	 * @see #MatcherAgent(Configurable)
 	 */
 	protected MatcherAgent() {
 		super();
@@ -110,7 +110,7 @@ public abstract class MatcherAgent extends Agent implements MatcherService, Matc
 	 *            parameter.
 	 * @see #MatcherAgent()
 	 */
-	protected MatcherAgent(final ConfigurationService configuration) {
+	protected MatcherAgent(final Configurable configuration) {
 		super(configuration);
 	}
 
@@ -146,7 +146,7 @@ public abstract class MatcherAgent extends Agent implements MatcherService, Matc
 	 *            The child agent adapter (<code>AgentService</code>) parameter.
 	 */
 	@Override
-	public void bind(final AgentService childAgentAdapter) {
+	public void bind(final DownMessagable childAgentAdapter) {
 		synchronized (getLock()) {
 			this.childAgentAdapters.add(childAgentAdapter);
 			MarketBasis marketBasis = getCurrentMarketBasis();
@@ -161,10 +161,10 @@ public abstract class MatcherAgent extends Agent implements MatcherService, Matc
 	 * 
 	 * @param timeSource
 	 *            The time source (<code>TimeService</code>) to bind.
-	 * @see #unbind(TimeService)
+	 * @see #unbind(TimeServicable)
 	 */
 	@Override
-	public void bind(final TimeService timeSource) {
+	public void bind(final TimeServicable timeSource) {
 		super.bind(timeSource);
 		this.bidCache.bind(timeSource);
 	}
@@ -211,7 +211,7 @@ public abstract class MatcherAgent extends Agent implements MatcherService, Matc
 	 * 
 	 * @return List of currently registered child agent adapters
 	 */
-	protected List<AgentService> getChildAgentAdapters() {
+	protected List<DownMessagable> getChildAgentAdapters() {
 		return this.childAgentAdapters;
 	}
 
@@ -231,7 +231,7 @@ public abstract class MatcherAgent extends Agent implements MatcherService, Matc
 	 * @return The matcher (<code>MatcherService</code>) value.
 	 */
 	@Override
-	public MatcherService getMatcher() {
+	public UpMessagable getMatcher() {
 		return this;
 	}
 
@@ -290,7 +290,7 @@ public abstract class MatcherAgent extends Agent implements MatcherService, Matc
 	public void publishMarketBasisUpdate(final MarketBasis newMarketBasis) {
 		synchronized (getLock()) {
 			if (newMarketBasis != null) {
-				for (AgentService childAgentAdapter : getChildAgentAdapters()) {
+				for (DownMessagable childAgentAdapter : getChildAgentAdapters()) {
 					childAgentAdapter.updateMarketBasis(newMarketBasis);
 				}
 			}
@@ -310,7 +310,7 @@ public abstract class MatcherAgent extends Agent implements MatcherService, Matc
 			setLastPublishedPriceInfo(newPriceInfo);
 			if (newPriceInfo != null) {
 				logPriceInfo(AbstractLogInfo.MATCHER_LOG_QUALIFIER, newPriceInfo, this.matcherPriceLogLevel);
-				for (AgentService childAgentAdapter : getChildAgentAdapters()) {
+				for (DownMessagable childAgentAdapter : getChildAgentAdapters()) {
 					childAgentAdapter.updatePriceInfo(newPriceInfo);
 				}
 			}
@@ -325,7 +325,7 @@ public abstract class MatcherAgent extends Agent implements MatcherService, Matc
 	 *            parameter.
 	 */
 	@Override
-	public void setConfiguration(final ConfigurationService configuration) {
+	public void setConfiguration(final Configurable configuration) {
 		super.setConfiguration(configuration);
 		initialize();
 	}
@@ -349,7 +349,7 @@ public abstract class MatcherAgent extends Agent implements MatcherService, Matc
 	 *            The child agent adapter (<code>AgentService</code>) parameter.
 	 */
 	@Override
-	public void unbind(final AgentService childAgentAdapter) {
+	public void unbind(final DownMessagable childAgentAdapter) {
 		synchronized (getLock()) {
 			assert this.childAgentAdapters.contains(childAgentAdapter);
 			this.childAgentAdapters.remove(childAgentAdapter);
@@ -362,10 +362,10 @@ public abstract class MatcherAgent extends Agent implements MatcherService, Matc
 	 * @param timeSource
 	 *            The time source (<code>TimeService</code>) to unbind.
 	 * 
-	 * @see #bind(TimeService)
+	 * @see #bind(TimeServicable)
 	 */
 	@Override
-	public void unbind(final TimeService timeSource) {
+	public void unbind(final TimeServicable timeSource) {
 		this.bidCache.unbind(timeSource);
 		super.unbind(timeSource);
 	}

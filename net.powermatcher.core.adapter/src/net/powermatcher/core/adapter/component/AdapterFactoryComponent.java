@@ -4,11 +4,11 @@ package net.powermatcher.core.adapter.component;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.powermatcher.core.adapter.service.AdapterService;
-import net.powermatcher.core.adapter.service.ConnectorService;
+import net.powermatcher.core.adapter.service.Adaptable;
+import net.powermatcher.core.adapter.service.Connectable;
 import net.powermatcher.core.adapter.service.DirectAdapterFactoryService;
 import net.powermatcher.core.configurable.BaseConfiguration;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.configurable.service.Configurable;
 import net.powermatcher.core.object.IdentifiableObject;
 import net.powermatcher.core.object.config.ConnectableObjectConfiguration;
 import net.powermatcher.core.object.config.IdentifiableObjectConfiguration;
@@ -20,7 +20,7 @@ import org.osgi.framework.BundleContext;
  * @author IBM
  * @version 0.9.0
  */
-public abstract class AdapterFactoryComponent<T extends ConnectorService> extends IdentifiableObject {
+public abstract class AdapterFactoryComponent<T extends Connectable> extends IdentifiableObject {
 
 	/**
 	 * 
@@ -30,13 +30,13 @@ public abstract class AdapterFactoryComponent<T extends ConnectorService> extend
 	/**
 	 * 
 	 */
-	private Map<T, ConnectableRegistration<AdapterService>> adapterByConnector = new HashMap<T, ConnectableRegistration<AdapterService>>();
+	private Map<T, ConnectableRegistration<Adaptable>> adapterByConnector = new HashMap<T, ConnectableRegistration<Adaptable>>();
 
 	
 	/**
 	 * 
 	 */
-	private Map<AdapterService, Integer> adapterReferences = new HashMap<AdapterService, Integer>();
+	private Map<Adaptable, Integer> adapterReferences = new HashMap<Adaptable, Integer>();
 
 	/**
 	 * 
@@ -60,7 +60,7 @@ public abstract class AdapterFactoryComponent<T extends ConnectorService> extend
 	 * @return The configuration for the adapter derived from the configuration of the connectable and the factory.
 	 * @throws Exception
 	 */
-	protected ConfigurationService createAdapterConfiguration(final T connector) throws Exception {
+	protected Configurable createAdapterConfiguration(final T connector) throws Exception {
 		Map<String, Object> adapterProperties = new HashMap<String, Object>(this.properties);
 		Map<String, Object> connectableConfiguration = connector.getConfiguration().getProperties();
 		adapterProperties.putAll(connectableConfiguration);
@@ -88,7 +88,7 @@ public abstract class AdapterFactoryComponent<T extends ConnectorService> extend
 	 * to gave a method return the type explicitly for use in the call to
 	 * getTargetConnectorIds.
 	 * 
-	 * @see DirectAdapterFactoryService#getTargetConnectorIds(ConnectorService)
+	 * @see DirectAdapterFactoryService#getTargetConnectorIds(Connectable)
 	 * @return The Java type of the connector T.
 	 */
 	protected abstract Class<T> getConnectorType();
@@ -100,7 +100,7 @@ public abstract class AdapterFactoryComponent<T extends ConnectorService> extend
 	protected void initialize(final BundleContext context, final Map<String, Object> properties) {
 		this.context = context;
 		this.properties = properties;
-		ConfigurationService configuration = new BaseConfiguration(properties);
+		Configurable configuration = new BaseConfiguration(properties);
 		setConfiguration(configuration);
 	}
 
@@ -109,8 +109,8 @@ public abstract class AdapterFactoryComponent<T extends ConnectorService> extend
 	 * @param connector
 	 * @param adapter
 	 */
-	protected void registerAdapter(final T connector, final AdapterService adapter) {
-		ConnectableRegistration<AdapterService> adapterRegistration = new ConnectableRegistration<AdapterService>(adapter);
+	protected void registerAdapter(final T connector, final Adaptable adapter) {
+		ConnectableRegistration<Adaptable> adapterRegistration = new ConnectableRegistration<Adaptable>(adapter);
 		adapterRegistration.register(this.context);
 		this.adapterByConnector.put(connector, adapterRegistration);
 	}
@@ -120,8 +120,8 @@ public abstract class AdapterFactoryComponent<T extends ConnectorService> extend
 	 * @param connector
 	 * @return The adapter created for a connector, or null if no adapter has been registered,
 	 */
-	protected AdapterService getAdapter(final T connector) {
-		ConnectableRegistration<AdapterService>  adapterRegistration = this.adapterByConnector.get(connector);
+	protected Adaptable getAdapter(final T connector) {
+		ConnectableRegistration<Adaptable>  adapterRegistration = this.adapterByConnector.get(connector);
 		if (adapterRegistration != null) {
 			return adapterRegistration.getConnectable();
 		}
@@ -133,7 +133,7 @@ public abstract class AdapterFactoryComponent<T extends ConnectorService> extend
 	 * @param connector
 	 */
 	protected void unregisterAdapter(final T connector) {
-		ConnectableRegistration<AdapterService>  adapterRegistration = this.adapterByConnector.remove(connector);
+		ConnectableRegistration<Adaptable>  adapterRegistration = this.adapterByConnector.remove(connector);
 		adapterRegistration.unregister();
 	}
 
@@ -142,7 +142,7 @@ public abstract class AdapterFactoryComponent<T extends ConnectorService> extend
 	 * @param adapter
 	 * @return True if this is the first reference, so the adapter must be initialized.
 	 */
-	protected boolean addAdapterReference(AdapterService adapter) {
+	protected boolean addAdapterReference(Adaptable adapter) {
 		Integer referenceCount = this.adapterReferences.get(adapter);
 		if (referenceCount == null) {
 			this.adapterReferences.put(adapter, Integer.valueOf(1));
@@ -157,7 +157,7 @@ public abstract class AdapterFactoryComponent<T extends ConnectorService> extend
 	 * @param adapter
 	 * @return True if this was the last reference, so the adapter can be cleaned up.
 	 */
-	protected boolean removeAdapterReference(AdapterService adapter) {
+	protected boolean removeAdapterReference(Adaptable adapter) {
 		Integer referenceCount = this.adapterReferences.remove(adapter);
 		if (referenceCount.intValue() == 1) {
 			return true;
