@@ -6,7 +6,7 @@ import java.util.Map;
 import net.powermatcher.core.adapter.component.ConnectableRegistration;
 import net.powermatcher.core.agent.logging.CSVLoggingAgent;
 import net.powermatcher.core.configurable.BaseConfiguration;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.configurable.service.Configurable;
 import net.powermatcher.core.object.ConnectableObject;
 
 import org.osgi.framework.BundleContext;
@@ -39,7 +39,7 @@ public class CSVLoggingAgentComponent extends CSVLoggingAgent {
 	 */
 	@Activate
 	void activate(final BundleContext context, final Map<String, Object> properties) {
-		ConfigurationService configuration = new BaseConfiguration(properties);
+		Configurable configuration = new BaseConfiguration(properties);
 		setConfiguration(configuration);
 		this.serviceRegistration.register(context);
 	}

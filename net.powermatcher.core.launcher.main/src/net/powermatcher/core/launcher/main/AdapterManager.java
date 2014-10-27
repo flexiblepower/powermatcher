@@ -3,7 +3,7 @@ package net.powermatcher.core.launcher.main;
 
 import java.util.Set;
 
-import net.powermatcher.core.adapter.service.AdapterService;
+import net.powermatcher.core.adapter.service.Adaptable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +20,7 @@ public class AdapterManager {
 	/**
 	 * Define the adapters (List<AbstractAgent>) field.
 	 */
-	private Set<AdapterService> adapters;
+	private Set<Adaptable> adapters;
 
 	/**
 	 * Constructs an instance of this class.
@@ -34,7 +34,7 @@ public class AdapterManager {
 	 * @param adapters
 	 *            The adapters (<code>AbstractAgent[]</code>) parameter.
 	 */
-	public void setAdapters(final Set<AdapterService> adapters) {
+	public void setAdapters(final Set<Adaptable> adapters) {
 		this.adapters = adapters;
 	}
 
@@ -45,7 +45,7 @@ public class AdapterManager {
 	 *             Exception.
 	 */
 	public void start() throws Exception {
-		for (AdapterService adapter : this.adapters) {
+		for (Adaptable adapter : this.adapters) {
 			if (adapter.isEnabled()) {
 				logger.info("Starting " + adapter.getName() + ": " + adapter.getId());
 				adapter.bind();
@@ -62,7 +62,7 @@ public class AdapterManager {
 	 *             Exception.
 	 */
 	public void stop() throws Exception {
-		for (AdapterService adapter : this.adapters) {
+		for (Adaptable adapter : this.adapters) {
 			if (adapter.isEnabled()) {
 				logger.info("Stopping " + adapter.getName() + ": " + adapter.getId());
 				adapter.unbind();

@@ -3,7 +3,7 @@ package net.powermatcher.core.scheduler.service;
 
 import java.util.concurrent.ScheduledExecutorService;
 
-import net.powermatcher.core.adapter.service.ConnectorService;
+import net.powermatcher.core.adapter.service.Connectable;
 
 
 /**
@@ -15,7 +15,7 @@ import net.powermatcher.core.adapter.service.ConnectorService;
  * @author IBM
  * @version 0.9.0
  */
-public interface SchedulerConnectorService extends ConnectorService {
+public interface SchedulerConnectorService extends Connectable {
 
 	/**
 	 * Each subtype of ConnectorService declares a final static String field

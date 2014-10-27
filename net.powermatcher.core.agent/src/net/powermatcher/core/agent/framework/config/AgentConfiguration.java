@@ -1,8 +1,8 @@
 package net.powermatcher.core.agent.framework.config;
 
 
-import net.powermatcher.core.agent.framework.log.LoggingConnectorService;
-import net.powermatcher.core.agent.framework.service.AgentConnectorService;
+import net.powermatcher.core.agent.framework.log.LogPublishable;
+import net.powermatcher.core.agent.framework.service.ChildConnectable;
 import net.powermatcher.core.object.config.ActiveObjectConfiguration;
 
 /**
@@ -51,7 +51,7 @@ public interface AgentConfiguration extends ActiveObjectConfiguration {
 	/**
 	 * Define the agent adapter factory property (String) constant.
 	 */
-	public static final String AGENT_ADAPTER_FACTORY_PROPERTY = AgentConnectorService.ADAPTER_FACTORY_PROPERTY_NAME;
+	public static final String AGENT_ADAPTER_FACTORY_PROPERTY = ChildConnectable.ADAPTER_FACTORY_PROPERTY_NAME;
 	/**
 	 * Define the agent adapter factory default (String) constant.
 	 */
@@ -81,7 +81,7 @@ public interface AgentConfiguration extends ActiveObjectConfiguration {
 	/**
 	 * Define the logging adapter factory property (String) constant.
 	 */
-	public static final String LOGGING_ADAPTER_FACTORY_PROPERTY = LoggingConnectorService.ADAPTER_FACTORY_PROPERTY_NAME;
+	public static final String LOGGING_ADAPTER_FACTORY_PROPERTY = LogPublishable.ADAPTER_FACTORY_PROPERTY_NAME;
 	/**
 	 * Define the logging adapter factory default (String) constant.
 	 */

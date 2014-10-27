@@ -7,8 +7,8 @@ import java.util.Properties;
 import net.powermatcher.core.agent.concentrator.Concentrator;
 import net.powermatcher.core.agent.framework.data.BidInfo;
 import net.powermatcher.core.agent.framework.data.MarketBasis;
-import net.powermatcher.core.agent.framework.service.AgentService;
-import net.powermatcher.core.agent.framework.service.MatcherService;
+import net.powermatcher.core.agent.framework.service.DownMessagable;
+import net.powermatcher.core.agent.framework.service.UpMessagable;
 import net.powermatcher.core.configurable.BaseConfiguration;
 import net.powermatcher.core.object.config.ActiveObjectConfiguration;
 
@@ -45,8 +45,8 @@ public class ConcentratorUnitTest {
 		this.matcher = new MockMatcherAgent("matcher");
 		this.matcher.updateMarketBasis(marketBasis);
 		
-		this.matcher.bind((AgentService) this.concentrator);
-		this.concentrator.bind((MatcherService) this.matcher);
+		this.matcher.bind((DownMessagable) this.concentrator);
+		this.concentrator.bind((UpMessagable) this.matcher);
 		
 		// Agents
 		agents = new MockAgent[NR_AGENTS];
@@ -59,8 +59,8 @@ public class ConcentratorUnitTest {
 
 	@After
 	public void tearDown() throws Exception {
-		this.matcher.unbind((AgentService) this.concentrator);
-		this.concentrator.unbind((MatcherService) this.matcher);
+		this.matcher.unbind((DownMessagable) this.concentrator);
+		this.concentrator.unbind((UpMessagable) this.matcher);
 	}
 	
 	private void bindAgents(int number) {

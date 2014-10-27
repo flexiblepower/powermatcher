@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-import net.powermatcher.core.scheduler.service.TimeService;
+import net.powermatcher.core.scheduler.service.TimeServicable;
 import net.powermatcher.simulation.engine.SimulationControl;
 import net.powermatcher.simulation.engine.SimulationCycleListener;
 import net.powermatcher.simulation.engine.simulationclock.SimulationClock;
@@ -23,7 +23,7 @@ import net.powermatcher.simulation.engine.simulationclock.SimulationClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DependencyEngine implements Runnable, TimeService, Activity.ReadyListener, SimulationControl {
+public class DependencyEngine implements Runnable, TimeServicable, Activity.ReadyListener, SimulationControl {
 	private static Logger logger = LoggerFactory.getLogger(DependencyEngine.class);
 
 	/** delay between cycles in milliseconds */

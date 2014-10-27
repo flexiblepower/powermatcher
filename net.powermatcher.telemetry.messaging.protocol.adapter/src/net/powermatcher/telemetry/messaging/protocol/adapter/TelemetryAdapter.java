@@ -1,7 +1,7 @@
 package net.powermatcher.telemetry.messaging.protocol.adapter;
 
 
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.configurable.service.Configurable;
 import net.powermatcher.core.messaging.framework.MessagingAdapter;
 import net.powermatcher.core.messaging.framework.Topic;
 import net.powermatcher.telemetry.messaging.protocol.adapter.constants.TelemetryConstants;
@@ -59,7 +59,7 @@ public class TelemetryAdapter extends MessagingAdapter implements TelemetryServi
 	/**
 	 * Constructs an instance of this class.
 	 * 
-	 * @see #TelemetryAdapter(ConfigurationService)
+	 * @see #TelemetryAdapter(Configurable)
 	 */
 	public TelemetryAdapter() {
 		super();
@@ -74,7 +74,7 @@ public class TelemetryAdapter extends MessagingAdapter implements TelemetryServi
 	 *            parameter.
 	 * @see #TelemetryAdapter()
 	 */
-	public TelemetryAdapter(final ConfigurationService configuration) {
+	public TelemetryAdapter(final Configurable configuration) {
 		super(configuration);
 	}
 

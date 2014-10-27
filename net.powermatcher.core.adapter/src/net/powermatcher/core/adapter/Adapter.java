@@ -1,8 +1,8 @@
 package net.powermatcher.core.adapter;
 
 
-import net.powermatcher.core.adapter.service.AdapterService;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.adapter.service.Adaptable;
+import net.powermatcher.core.configurable.service.Configurable;
 import net.powermatcher.core.object.ActiveObject;
 import net.powermatcher.core.object.ConnectableObject;
 
@@ -24,15 +24,15 @@ import net.powermatcher.core.object.ConnectableObject;
  * @version 0.9.0
  * 
  * @see ConnectableObject
- * @see AdapterService
+ * @see Adaptable
  * @uml.annotations 
  *    uml_dependency="mmi:///#jsrctype^name=ConnectorService[jcu^name=ConnectorService.java[jpack^name=net.powermatcher.core.adapter.service[jsrcroot^srcfolder=src[project^id=net.powermatcher.core.adapter]]]]$uml.Interface"
  */
-public abstract class Adapter extends ActiveObject implements AdapterService {
+public abstract class Adapter extends ActiveObject implements Adaptable {
 	/**
 	 * Constructs an instance of this class.
 	 * 
-	 * @see #Adapter(ConfigurationService)
+	 * @see #Adapter(Configurable)
 	 */
 	protected Adapter() {
 		super();
@@ -47,7 +47,7 @@ public abstract class Adapter extends ActiveObject implements AdapterService {
 	 *            parameter.
 	 * @see #Adapter()
 	 */
-	protected Adapter(final ConfigurationService configuration) {
+	protected Adapter(final Configurable configuration) {
 		super(configuration);
 	}
 

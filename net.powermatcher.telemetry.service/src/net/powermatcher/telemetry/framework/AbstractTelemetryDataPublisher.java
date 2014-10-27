@@ -4,7 +4,7 @@ package net.powermatcher.telemetry.framework;
 import java.util.Date;
 import java.util.Set;
 
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.configurable.service.Configurable;
 import net.powermatcher.core.object.config.ConnectableObjectConfiguration;
 import net.powermatcher.telemetry.model.data.AlertData;
 import net.powermatcher.telemetry.model.data.Data;
@@ -24,7 +24,7 @@ public abstract class AbstractTelemetryDataPublisher {
 	/**
 	 * Define the configuration service (ConfigurationService) field.
 	 */
-	private ConfigurationService configurationService;
+	private Configurable configurationService;
 	/**
 	 * Define the cluster ID (String) field.
 	 */
@@ -42,7 +42,7 @@ public abstract class AbstractTelemetryDataPublisher {
 	 *            The configuration service (<code>ConfigurationService</code>)
 	 *            parameter.
 	 */
-	public AbstractTelemetryDataPublisher(final ConfigurationService configurationService) {
+	public AbstractTelemetryDataPublisher(final Configurable configurationService) {
 		this.configurationService = configurationService;
 		getSettingsFromProperties();
 	}

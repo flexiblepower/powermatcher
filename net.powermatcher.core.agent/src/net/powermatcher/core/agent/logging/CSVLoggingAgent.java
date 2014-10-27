@@ -15,19 +15,19 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import net.powermatcher.core.agent.framework.log.BidLogInfo;
-import net.powermatcher.core.agent.framework.log.LogListenerConnectorService;
-import net.powermatcher.core.agent.framework.log.LogListenerService;
+import net.powermatcher.core.agent.framework.log.LogListenable;
+import net.powermatcher.core.agent.framework.log.Logable;
 import net.powermatcher.core.agent.framework.log.PriceLogInfo;
 import net.powermatcher.core.agent.logging.config.CSVLoggingAgentConfiguration;
 import net.powermatcher.core.agent.logging.task.FileUpdateTask;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.configurable.service.Configurable;
 import net.powermatcher.core.object.ActiveObject;
 
 /**
  * @author IBM
  * @version 0.9.0
  */
-public class CSVLoggingAgent extends ActiveObject implements LogListenerService, LogListenerConnectorService {
+public class CSVLoggingAgent extends ActiveObject implements Logable, LogListenable {
 	/**
 	 * Define the PowerMatcher bid log records (Map) field.
 	 */
@@ -61,7 +61,7 @@ public class CSVLoggingAgent extends ActiveObject implements LogListenerService,
 	/**
 	 * Constructs an instance of this class.
 	 * 
-	 * @see #CSVLoggingAgent(ConfigurationService)
+	 * @see #CSVLoggingAgent(Configurable)
 	 */
 	public CSVLoggingAgent() {
 		super();
@@ -76,7 +76,7 @@ public class CSVLoggingAgent extends ActiveObject implements LogListenerService,
 	 *            parameter.
 	 * @see #CSVLoggingAgent()
 	 */
-	public CSVLoggingAgent(final ConfigurationService configuration) {
+	public CSVLoggingAgent(final Configurable configuration) {
 		super(configuration);
 	}
 
@@ -147,7 +147,7 @@ public class CSVLoggingAgent extends ActiveObject implements LogListenerService,
 	 * @return The log listener (<code>LogListenerService</code>) value.
 	 */
 	@Override
-	public LogListenerService getLogListener() {
+	public Logable getLogListener() {
 		return this;
 	}
 
@@ -158,7 +158,7 @@ public class CSVLoggingAgent extends ActiveObject implements LogListenerService,
 	 *            The bid log info (<code>BidLogInfo</code>) parameter.
 	 */
 	@Override
-	public void handleBidLogInfo(final BidLogInfo bidLogInfo) {
+	public void logBidLogInfo(final BidLogInfo bidLogInfo) {
 		BidLogRecord logRecord = new BidLogRecord(bidLogInfo);
 		synchronized (this.pwmBidLogRecords) {
 			this.pwmBidLogRecords.put(bidLogInfo.getAgentId(), logRecord);
@@ -175,7 +175,7 @@ public class CSVLoggingAgent extends ActiveObject implements LogListenerService,
 	 *            The price log info (<code>PriceLogInfo</code>) parameter.
 	 */
 	@Override
-	public void handlePriceLogInfo(final PriceLogInfo priceLogInfo) {
+	public void logPriceLogInfo(final PriceLogInfo priceLogInfo) {
 		PriceLogRecord logRecord = new PriceLogRecord(priceLogInfo);
 		synchronized (this.pwmPriceLogRecords) {
 			this.pwmPriceLogRecords.put(priceLogInfo.getAgentId(), logRecord);
@@ -227,7 +227,7 @@ public class CSVLoggingAgent extends ActiveObject implements LogListenerService,
 	 *            parameter.
 	 */
 	@Override
-	public void setConfiguration(final ConfigurationService configuration) {
+	public void setConfiguration(final Configurable configuration) {
 		super.setConfiguration(configuration);
 		initialize();
 	}

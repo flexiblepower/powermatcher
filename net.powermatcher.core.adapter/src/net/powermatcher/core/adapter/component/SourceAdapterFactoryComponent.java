@@ -5,8 +5,8 @@ import java.util.Map;
 
 import net.powermatcher.core.adapter.SourceConnectorFactoryTracker;
 import net.powermatcher.core.adapter.SourceConnectorTrackerListener;
-import net.powermatcher.core.adapter.service.AdapterService;
-import net.powermatcher.core.adapter.service.ConnectorService;
+import net.powermatcher.core.adapter.service.Adaptable;
+import net.powermatcher.core.adapter.service.Connectable;
 import net.powermatcher.core.adapter.service.SourceAdapterFactoryService;
 
 import org.osgi.framework.BundleContext;
@@ -23,9 +23,9 @@ import org.osgi.framework.BundleContext;
  * 
  * @see SourceConnectorFactoryTracker
  * @see SourceConnectorTrackerListener
- * @see AdapterService
+ * @see Adaptable
  */
-public abstract class SourceAdapterFactoryComponent<T extends ConnectorService> extends AdapterFactoryComponent<T> {
+public abstract class SourceAdapterFactoryComponent<T extends Connectable> extends AdapterFactoryComponent<T> {
 
 	/**
 	 * Define the adapter factory (SourceAdapterFactoryService) field.
@@ -89,7 +89,7 @@ public abstract class SourceAdapterFactoryComponent<T extends ConnectorService> 
 	 * 
 	 * @param sourceConnector
 	 *            The source connector (<code>T</code>) parameter.
-	 * @see #removeSourceConnector(ConnectorService)
+	 * @see #removeSourceConnector(Connectable)
 	 */
 	protected void addSourceConnector(final T sourceConnector) {
 		this.connectorTracker.addConnector(sourceConnector, sourceConnector.getAdapterFactory(getConnectorType()), this.factory.getTargetConnectorIds(sourceConnector));
@@ -107,7 +107,7 @@ public abstract class SourceAdapterFactoryComponent<T extends ConnectorService> 
 		if (sourceConnector.isEnabled()) {
 			logStatus("Starting", sourceConnector, targetConnectorId);
 			try {
-				AdapterService adapter = factory.createAdapter(createAdapterConfiguration(sourceConnector), sourceConnector, targetConnectorId);
+				Adaptable adapter = factory.createAdapter(createAdapterConfiguration(sourceConnector), sourceConnector, targetConnectorId);
 				if (addAdapterReference(adapter)) {
 					adapter.bind();
 					registerAdapter(sourceConnector, adapter);
@@ -132,7 +132,7 @@ public abstract class SourceAdapterFactoryComponent<T extends ConnectorService> 
 	 * 
 	 * @param sourceConnector
 	 *            The source connector (<code>T</code>) parameter.
-	 * @see #addSourceConnector(ConnectorService)
+	 * @see #addSourceConnector(Connectable)
 	 */
 	protected void removeSourceConnector(final T sourceConnector) {
 		this.connectorTracker.removeConnector(sourceConnector, sourceConnector.getAdapterFactory(getConnectorType()), this.factory.getTargetConnectorIds(sourceConnector));
@@ -148,7 +148,7 @@ public abstract class SourceAdapterFactoryComponent<T extends ConnectorService> 
 	 */
 	private void unbind(final T sourceConnector, String targetConnectorId) {
 		logStatus("Stopping", sourceConnector, targetConnectorId);
-		AdapterService adapter = getAdapter(sourceConnector);
+		Adaptable adapter = getAdapter(sourceConnector);
 		if (adapter != null) {
 			if (removeAdapterReference(adapter)) {
 				unregisterAdapter(sourceConnector);

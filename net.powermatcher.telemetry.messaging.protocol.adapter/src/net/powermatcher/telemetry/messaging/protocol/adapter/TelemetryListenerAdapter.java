@@ -1,7 +1,7 @@
 package net.powermatcher.telemetry.messaging.protocol.adapter;
 
 
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.configurable.service.Configurable;
 import net.powermatcher.core.messaging.framework.MessagingAdapter;
 import net.powermatcher.core.messaging.framework.Topic;
 import net.powermatcher.telemetry.messaging.protocol.adapter.constants.TelemetryConstants;
@@ -61,7 +61,7 @@ public class TelemetryListenerAdapter extends MessagingAdapter implements Teleme
 	/**
 	 * Constructs an instance of this class.
 	 * 
-	 * @see #TelemetryListenerAdapter(ConfigurationService)
+	 * @see #TelemetryListenerAdapter(Configurable)
 	 */
 	public TelemetryListenerAdapter() {
 		super();
@@ -76,7 +76,7 @@ public class TelemetryListenerAdapter extends MessagingAdapter implements Teleme
 	 *            parameter.
 	 * @see #TelemetryListenerAdapter()
 	 */
-	public TelemetryListenerAdapter(final ConfigurationService configuration) {
+	public TelemetryListenerAdapter(final Configurable configuration) {
 		super(configuration);
 	}
 
@@ -184,7 +184,7 @@ public class TelemetryListenerAdapter extends MessagingAdapter implements Teleme
 	 *            parameter.
 	 */
 	@Override
-	public void setConfiguration(final ConfigurationService configuration) {
+	public void setConfiguration(final Configurable configuration) {
 		super.setConfiguration(configuration);
 		if (configuration != null) {
 			initialize();

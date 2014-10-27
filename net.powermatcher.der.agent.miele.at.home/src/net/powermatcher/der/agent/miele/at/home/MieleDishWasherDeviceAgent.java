@@ -7,7 +7,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 import net.powermatcher.core.agent.framework.data.PriceInfo;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.configurable.service.Configurable;
 import net.powermatcher.der.agent.miele.at.home.config.MieleApplianceConfiguration;
 import net.powermatcher.der.agent.miele.at.home.gateway.constants.MieleApplianceConstants;
 import net.powermatcher.der.agent.miele.at.home.gateway.utils.MieleApplianceUtil;
@@ -38,7 +38,7 @@ public class MieleDishWasherDeviceAgent extends AbstractMieleDeviceAgent {
 	 *            The configuration (<code>ConfigurationService</code>)
 	 *            parameter.
 	 */
-	public MieleDishWasherDeviceAgent(final ConfigurationService configuration) {
+	public MieleDishWasherDeviceAgent(final Configurable configuration) {
 		super(configuration);
 	}
 

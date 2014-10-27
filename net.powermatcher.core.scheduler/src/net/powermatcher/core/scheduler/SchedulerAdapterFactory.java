@@ -7,10 +7,10 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import net.powermatcher.core.adapter.service.ConnectorLocaterService;
 import net.powermatcher.core.adapter.service.TargetAdapterFactoryService;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.configurable.service.Configurable;
 import net.powermatcher.core.object.IdentifiableObject;
 import net.powermatcher.core.scheduler.service.SchedulerConnectorService;
-import net.powermatcher.core.scheduler.service.TimeService;
+import net.powermatcher.core.scheduler.service.TimeServicable;
 
 
 /**
@@ -68,7 +68,7 @@ public class SchedulerAdapterFactory extends IdentifiableObject implements Targe
 	}
 
 	@Override
-	public SchedulerAdapter createAdapter(ConfigurationService configuration, SchedulerConnectorService connector,
+	public SchedulerAdapter createAdapter(Configurable configuration, SchedulerConnectorService connector,
 			ConnectorLocaterService connectorLocater, int adapterIndex) {
 		return createAdapter(configuration, connector);
 	}
@@ -87,7 +87,7 @@ public class SchedulerAdapterFactory extends IdentifiableObject implements Targe
 	 *         value.
 	 */
 	@Override
-	public SchedulerAdapter createAdapter(final ConfigurationService configuration,
+	public SchedulerAdapter createAdapter(final Configurable configuration,
 			final SchedulerConnectorService schedulerConnector) {
 		SchedulerAdapter schedulerAdapter = new SchedulerAdapter(configuration, getScheduler());
 		schedulerAdapter.setSchedulerConnector(schedulerConnector);
@@ -99,8 +99,8 @@ public class SchedulerAdapterFactory extends IdentifiableObject implements Targe
 		return SchedulerAdapter.class.getSimpleName();
 	}
 
-	public TimeService getTimeSource() {
-		return new TimeService() {
+	public TimeServicable getTimeSource() {
+		return new TimeServicable() {
 			
 			@Override
 			public int getRate() {

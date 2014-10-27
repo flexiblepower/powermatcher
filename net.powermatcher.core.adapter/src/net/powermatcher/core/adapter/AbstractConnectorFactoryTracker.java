@@ -2,7 +2,7 @@ package net.powermatcher.core.adapter;
 
 
 import net.powermatcher.core.adapter.service.ConnectorKeyService;
-import net.powermatcher.core.adapter.service.ConnectorService;
+import net.powermatcher.core.adapter.service.Connectable;
 import net.powermatcher.core.object.ConnectorKey;
 
 /**
@@ -19,13 +19,13 @@ import net.powermatcher.core.object.ConnectorKey;
  * @author IBM
  * @version 0.9.0
  * 
- * @see ConnectorService
+ * @see Connectable
  * 
  * @param <T>
  *            Defines the generic ConnectorService type that ConnectorTracker
  *            will use.
  */
-public abstract class AbstractConnectorFactoryTracker<T extends ConnectorService> {
+public abstract class AbstractConnectorFactoryTracker<T extends Connectable> {
 	/**
 	 * The ConnectorAndFactoryReference is a wrapper for a connector and its
 	 * associated list factory references for the specific type T of connector.
@@ -35,7 +35,7 @@ public abstract class AbstractConnectorFactoryTracker<T extends ConnectorService
 	 * 
 	 * @param <T>
 	 */
-	protected static class ConnectorAndFactoryReference<T extends ConnectorService> {
+	protected static class ConnectorAndFactoryReference<T extends Connectable> {
 		/**
 		 * The connector being wrapped.
 		 */

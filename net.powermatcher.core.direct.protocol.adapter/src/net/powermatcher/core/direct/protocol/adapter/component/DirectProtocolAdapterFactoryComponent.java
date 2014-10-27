@@ -6,10 +6,10 @@ import java.util.Map;
 import net.powermatcher.core.adapter.DirectConnectorFactoryTracker;
 import net.powermatcher.core.adapter.DirectConnectorTrackerListener;
 import net.powermatcher.core.adapter.component.DirectAdapterFactoryComponent;
-import net.powermatcher.core.adapter.service.ConnectorService;
+import net.powermatcher.core.adapter.service.Connectable;
 import net.powermatcher.core.adapter.service.DirectAdapterFactoryService;
-import net.powermatcher.core.agent.framework.service.AgentConnectorService;
-import net.powermatcher.core.agent.framework.service.MatcherConnectorService;
+import net.powermatcher.core.agent.framework.service.ChildConnectable;
+import net.powermatcher.core.agent.framework.service.ParentConnectable;
 import net.powermatcher.core.direct.protocol.adapter.DirectProtocolAdapter;
 import net.powermatcher.core.direct.protocol.adapter.DirectProtocolAdapterFactory;
 
@@ -37,12 +37,12 @@ import aQute.bnd.annotation.component.Reference;
  * 
  * @see DirectConnectorFactoryTracker
  * @see DirectConnectorTrackerListener
- * @see AgentConnectorService
+ * @see ChildConnectable
  * @see DirectProtocolAdapterFactoryComponentConfiguration
  * @see DirectProtocolAdapter
  */
 @Component(name = DirectProtocolAdapterFactoryComponent.COMPONENT_NAME, designateFactory = DirectProtocolAdapterFactoryComponentConfiguration.class)
-public class DirectProtocolAdapterFactoryComponent extends DirectAdapterFactoryComponent<AgentConnectorService, MatcherConnectorService> {
+public class DirectProtocolAdapterFactoryComponent extends DirectAdapterFactoryComponent<ChildConnectable, ParentConnectable> {
 	/**
 	 * Define the component name (String) constant.
 	 */
@@ -72,10 +72,10 @@ public class DirectProtocolAdapterFactoryComponent extends DirectAdapterFactoryC
 	 * @param sourceConnector
 	 *            The source connector (<code>AgentConnectorService</code>)
 	 *            parameter.
-	 * @see #removeAgentConnector(AgentConnectorService)
+	 * @see #removeAgentConnector(ChildConnectable)
 	 */
 	@Reference(type = '*')
-	protected void addAgentConnector(final AgentConnectorService sourceConnector) {
+	protected void addAgentConnector(final ChildConnectable sourceConnector) {
 		super.addSourceConnector(sourceConnector);
 	}
 
@@ -85,10 +85,10 @@ public class DirectProtocolAdapterFactoryComponent extends DirectAdapterFactoryC
 	 * @param targetConnector
 	 *            The target connector (<code>MatcherConnectorService</code>)
 	 *            parameter.
-	 * @see #removeMatcherConnector(MatcherConnectorService)
+	 * @see #removeMatcherConnector(ParentConnectable)
 	 */
 	@Reference(type = '*')
-	protected void addMatcherConnector(final MatcherConnectorService targetConnector) {
+	protected void addMatcherConnector(final ParentConnectable targetConnector) {
 		super.addTargetConnector(targetConnector);
 	}
 
@@ -106,9 +106,9 @@ public class DirectProtocolAdapterFactoryComponent extends DirectAdapterFactoryC
 	 * @param sourceConnector
 	 *            The source connector (<code>AgentConnectorService</code>)
 	 *            parameter.
-	 * @see #addAgentConnector(AgentConnectorService)
+	 * @see #addAgentConnector(ChildConnectable)
 	 */
-	protected void removeAgentConnector(final AgentConnectorService sourceConnector) {
+	protected void removeAgentConnector(final ChildConnectable sourceConnector) {
 		super.removeSourceConnector(sourceConnector);
 	}
 
@@ -118,9 +118,9 @@ public class DirectProtocolAdapterFactoryComponent extends DirectAdapterFactoryC
 	 * @param targetConnector
 	 *            The target connector (<code>AgentConnectorService</code>)
 	 *            parameter.
-	 * @see #addMatcherConnector(MatcherConnectorService)
+	 * @see #addMatcherConnector(ParentConnectable)
 	 */
-	protected void removeMatcherConnector(final MatcherConnectorService targetConnector) {
+	protected void removeMatcherConnector(final ParentConnectable targetConnector) {
 		super.removeTargetConnector(targetConnector);
 	}
 
@@ -128,12 +128,12 @@ public class DirectProtocolAdapterFactoryComponent extends DirectAdapterFactoryC
 	 * Get the Java type of the connector T.
 	 * Due to type erasure it is necessary to gave a method return the type explicitly for use
 	 * in the call to getTargetConnectorIds.
-	 * @see DirectAdapterFactoryService#getTargetConnectorIds(ConnectorService) 
+	 * @see DirectAdapterFactoryService#getTargetConnectorIds(Connectable) 
 	 * @return The Java type of the connector T.
 	 */
 	@Override
-	protected Class<AgentConnectorService> getConnectorType() {
-		return AgentConnectorService.class;
+	protected Class<ChildConnectable> getConnectorType() {
+		return ChildConnectable.class;
 	}
 
 }

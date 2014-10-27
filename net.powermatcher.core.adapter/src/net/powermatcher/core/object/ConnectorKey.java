@@ -2,7 +2,7 @@ package net.powermatcher.core.object;
 
 
 import net.powermatcher.core.adapter.service.ConnectorKeyService;
-import net.powermatcher.core.adapter.service.ConnectorService;
+import net.powermatcher.core.adapter.service.Connectable;
 
 /**
  * 
@@ -11,7 +11,7 @@ import net.powermatcher.core.adapter.service.ConnectorService;
  */
 public class ConnectorKey implements ConnectorKeyService {
 
-	private Class<? extends ConnectorService> connectorType;
+	private Class<? extends Connectable> connectorType;
 	private String clusterId;
 	private String connectorId;
 
@@ -21,7 +21,7 @@ public class ConnectorKey implements ConnectorKeyService {
 	 *         <code>ConnectorService</code>).
 	 * @param connector The connector <code>ConnectorService</code>).
 	 */
-	public ConnectorKey(Class<? extends ConnectorService> connectorType, ConnectorService connector) {
+	public ConnectorKey(Class<? extends Connectable> connectorType, Connectable connector) {
 		this(connectorType, connector.getClusterId(), connector.getConnectorId());
 	}
 
@@ -32,7 +32,7 @@ public class ConnectorKey implements ConnectorKeyService {
 	 * @param clusterId The cluster id of the connector.
 	 * @param connectorId The connector id of the connector.
 	 */
-	public ConnectorKey(Class<? extends ConnectorService> connectorType, String clusterId, String connectorId) {
+	public ConnectorKey(Class<? extends Connectable> connectorType, String clusterId, String connectorId) {
 		if (!connectorType.isInterface()) {
 			throw new IllegalArgumentException("Connector types must be identified by their interface, not a class");
 		}

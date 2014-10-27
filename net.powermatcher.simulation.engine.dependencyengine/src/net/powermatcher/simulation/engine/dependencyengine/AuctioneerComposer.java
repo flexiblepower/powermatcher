@@ -3,8 +3,8 @@ package net.powermatcher.simulation.engine.dependencyengine;
 import java.util.concurrent.ScheduledExecutorService;
 
 import net.powermatcher.core.agent.auctioneer.Auctioneer;
-import net.powermatcher.core.agent.framework.service.AgentService;
-import net.powermatcher.core.agent.framework.service.MatcherService;
+import net.powermatcher.core.agent.framework.service.DownMessagable;
+import net.powermatcher.core.agent.framework.service.UpMessagable;
 import net.powermatcher.simulation.configuration.NodeDescriptor;
 import net.powermatcher.simulation.engine.ComponentCreationException;
 import net.powermatcher.simulation.engine.ComponentManager;
@@ -18,7 +18,7 @@ public class AuctioneerComposer extends AgentComposer<Auctioneer> {
 
 	@Override
 	public void attachIncommingLink(Link link, Class<?> iface) {
-		if (MatcherService.class.equals(iface)) {
+		if (UpMessagable.class.equals(iface)) {
 			this.priceUpdateActivity.setDependentOn(link);
 		} else {
 			throw new IllegalArgumentException("unsupported interface");
@@ -27,7 +27,7 @@ public class AuctioneerComposer extends AgentComposer<Auctioneer> {
 
 	@Override
 	public void attachOutgoingLink(Link link, Class<?> iface) {
-		if (AgentService.class.equals(iface)) {
+		if (DownMessagable.class.equals(iface)) {
 			link.setDependentOn(this.priceUpdateActivity);
 		} else {
 			throw new IllegalArgumentException("unsupported interface");

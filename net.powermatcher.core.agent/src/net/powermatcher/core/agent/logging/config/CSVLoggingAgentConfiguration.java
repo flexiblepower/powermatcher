@@ -1,7 +1,7 @@
 package net.powermatcher.core.agent.logging.config;
 
 
-import net.powermatcher.core.agent.framework.log.LogListenerConnectorService;
+import net.powermatcher.core.agent.framework.log.LogListenable;
 import net.powermatcher.core.object.config.ActiveObjectConfiguration;
 
 /**
@@ -12,7 +12,7 @@ public interface CSVLoggingAgentConfiguration extends ActiveObjectConfiguration 
 	/**
 	 * Define the log listener adapter factory property (String) constant.
 	 */
-	public static final String LOG_LISTENER_ADAPTER_FACTORY_PROPERTY = LogListenerConnectorService.ADAPTER_FACTORY_PROPERTY_NAME;
+	public static final String LOG_LISTENER_ADAPTER_FACTORY_PROPERTY = LogListenable.ADAPTER_FACTORY_PROPERTY_NAME;
 	/**
 	 * Define the log listener adapter factory description (String) constant.
 	 */

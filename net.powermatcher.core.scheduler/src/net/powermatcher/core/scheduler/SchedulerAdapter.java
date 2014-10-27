@@ -4,8 +4,8 @@ package net.powermatcher.core.scheduler;
 
 import java.util.concurrent.ScheduledExecutorService;
 
-import net.powermatcher.core.adapter.service.AdapterService;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.adapter.service.Adaptable;
+import net.powermatcher.core.configurable.service.Configurable;
 import net.powermatcher.core.object.IdentifiableObject;
 import net.powermatcher.core.scheduler.service.SchedulerConnectorService;
 
@@ -18,7 +18,7 @@ import net.powermatcher.core.scheduler.service.SchedulerConnectorService;
  * 
  * @see SchedulerConnectorService
  */
-public class SchedulerAdapter extends IdentifiableObject implements AdapterService {
+public class SchedulerAdapter extends IdentifiableObject implements Adaptable {
 
 	/**
 	 * Define the scheduler connector (SchedulerConnectorService) field.
@@ -35,7 +35,7 @@ public class SchedulerAdapter extends IdentifiableObject implements AdapterServi
 	 * @param configuration 
 	 * 
 	 */
-	public SchedulerAdapter(ConfigurationService configuration, ScheduledExecutorService scheduler) {
+	public SchedulerAdapter(Configurable configuration, ScheduledExecutorService scheduler) {
 		super(configuration);
 		this.scheduler = scheduler;
 	}
@@ -84,7 +84,7 @@ public class SchedulerAdapter extends IdentifiableObject implements AdapterServi
 	 *            parameter.
 	 */
 	@Override
-	public void setConfiguration(final ConfigurationService configuration) {
+	public void setConfiguration(final Configurable configuration) {
 		super.setConfiguration(configuration);
 		initialize();
 	}

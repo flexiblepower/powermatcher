@@ -7,8 +7,8 @@ import java.util.Properties;
 import java.util.zip.DataFormatException;
 
 import net.powermatcher.core.agent.framework.data.PriceInfo;
-import net.powermatcher.core.agent.framework.service.AgentService;
-import net.powermatcher.core.agent.framework.service.MatcherService;
+import net.powermatcher.core.agent.framework.service.DownMessagable;
+import net.powermatcher.core.agent.framework.service.UpMessagable;
 import net.powermatcher.core.configurable.BaseConfiguration;
 import net.powermatcher.core.object.config.ActiveObjectConfiguration;
 import net.powermatcher.core.test.ConcentratorWrapper;
@@ -45,15 +45,15 @@ public class ConcentratorResilienceTestICF extends ResilienceTest {
 		this.matchers.add(this.matcher);
 
 		
-		this.matcher.bind((AgentService) this.concentrator);
-		this.concentrator.bind((MatcherService) this.matcher);
+		this.matcher.bind((DownMessagable) this.concentrator);
+		this.concentrator.bind((UpMessagable) this.matcher);
 	}
 	
 
 	@After
 	public void tearDownConcentratorTest() throws Exception {
-		this.matcher.unbind((AgentService) this.concentrator);
-		this.concentrator.unbind((MatcherService) this.matcher);
+		this.matcher.unbind((DownMessagable) this.concentrator);
+		this.concentrator.unbind((UpMessagable) this.matcher);
 	}
 	
 	private void performAggregatedBidTest(String testID, String suffix) throws IOException, DataFormatException {

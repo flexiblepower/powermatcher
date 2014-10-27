@@ -13,14 +13,14 @@ import net.powermatcher.core.agent.framework.data.BidInfo;
 import net.powermatcher.core.agent.framework.data.MarketBasis;
 import net.powermatcher.core.agent.framework.data.PriceInfo;
 import net.powermatcher.core.agent.framework.log.BidLogInfo;
-import net.powermatcher.core.agent.framework.log.LogListenerService;
-import net.powermatcher.core.agent.framework.log.LoggingConnectorService;
+import net.powermatcher.core.agent.framework.log.Logable;
+import net.powermatcher.core.agent.framework.log.LogPublishable;
 import net.powermatcher.core.agent.framework.log.PriceLogInfo;
-import net.powermatcher.core.agent.framework.service.AgentConnectorService;
-import net.powermatcher.core.agent.framework.service.AgentService;
-import net.powermatcher.core.agent.framework.service.MatcherService;
+import net.powermatcher.core.agent.framework.service.ChildConnectable;
+import net.powermatcher.core.agent.framework.service.DownMessagable;
+import net.powermatcher.core.agent.framework.service.UpMessagable;
 import net.powermatcher.core.agent.framework.task.BidUpdateTask;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.configurable.service.Configurable;
 import net.powermatcher.core.object.ActiveObject;
 
 
@@ -62,15 +62,15 @@ import net.powermatcher.core.object.ActiveObject;
  * @author IBM
  * @version 0.9.0
  * 
- * @see AgentService
- * @see MatcherService
- * @see LogListenerService
- * @see ConfigurationService
+ * @see DownMessagable
+ * @see UpMessagable
+ * @see Logable
+ * @see Configurable
  * @see MarketBasis
  * @see PriceInfo
  * @see BidInfo
  */
-public abstract class Agent extends ActiveObject implements AgentService, AgentConnectorService, LoggingConnectorService {
+public abstract class Agent extends ActiveObject implements DownMessagable, ChildConnectable, LogPublishable {
 	/**
 	 * Define the agent bid log level (LoggingLevel) field.
 	 */
@@ -82,7 +82,7 @@ public abstract class Agent extends ActiveObject implements AgentService, AgentC
 	/**
 	 * Define the parent matcher adapters (MatcherService) field.
 	 */
-	private List<MatcherService> parentMatcherAdapters = new ArrayList<MatcherService>();
+	private List<UpMessagable> parentMatcherAdapters = new ArrayList<UpMessagable>();
 	/**
 	 * Define the last market basis (MarketBasis) field.
 	 */
@@ -102,7 +102,7 @@ public abstract class Agent extends ActiveObject implements AgentService, AgentC
 	/**
 	 * Define the logging adapter (LogListenerService) field.
 	 */
-	private LogListenerService loggingAdapter;
+	private Logable loggingAdapter;
 
 	/**
 	 * Define the object (Object) that can be used for internal critical
@@ -118,9 +118,9 @@ public abstract class Agent extends ActiveObject implements AgentService, AgentC
 	/**
 	 * Constructs an instance of this class.
 	 * 
-	 * @see #Agent(ConfigurationService)
+	 * @see #Agent(Configurable)
 	 * @see #getAgent()
-	 * @see #setChildAgent(AgentService)
+	 * @see #setChildAgent(DownMessagable)
 	 */
 	protected Agent() {
 		super();
@@ -135,9 +135,9 @@ public abstract class Agent extends ActiveObject implements AgentService, AgentC
 	 *            parameter.
 	 * @see #Agent()
 	 * @see #getAgent()
-	 * @see #setChildAgent(AgentService)
+	 * @see #setChildAgent(DownMessagable)
 	 */
-	protected Agent(final ConfigurationService configuration) {
+	protected Agent(final Configurable configuration) {
 		super(configuration);
 	}
 
@@ -147,10 +147,10 @@ public abstract class Agent extends ActiveObject implements AgentService, AgentC
 	 * @param loggingAdapter
 	 *            The  logging adapter (<code>LogListenerService</code>)
 	 *            parameter.
-	 * @see #bind(MatcherService)
+	 * @see #bind(UpMessagable)
 	 */
 	@Override
-	public void bind(final LogListenerService loggingAdapter) {
+	public void bind(final Logable loggingAdapter) {
 		assert this.loggingAdapter == null;
 		this.loggingAdapter = loggingAdapter;
 	}
@@ -166,7 +166,7 @@ public abstract class Agent extends ActiveObject implements AgentService, AgentC
 	 *            parameter.
 	 */
 	@Override
-	public void bind(final MatcherService parentMatcherAdapter) {
+	public void bind(final UpMessagable parentMatcherAdapter) {
 		synchronized (getLock()) {
 			this.parentMatcherAdapters.add(parentMatcherAdapter);
 		}
@@ -177,11 +177,11 @@ public abstract class Agent extends ActiveObject implements AgentService, AgentC
 	 * 
 	 * @return The agent (<code>AgentService</code>) value.
 	 * @see #Agent()
-	 * @see #Agent(ConfigurationService)
-	 * @see #setChildAgent(AgentService)
+	 * @see #Agent(Configurable)
+	 * @see #setChildAgent(DownMessagable)
 	 */
 	@Override
-	public AgentService getAgent() {
+	public DownMessagable getAgent() {
 		return this;
 	}
 
@@ -232,7 +232,7 @@ public abstract class Agent extends ActiveObject implements AgentService, AgentC
 	 * 
 	 * @return List of currently registered parent matcher adapters
 	 */
-	protected List<MatcherService> getParentMatcherAdapters() {
+	protected List<UpMessagable> getParentMatcherAdapters() {
 		return this.parentMatcherAdapters;
 	}
 
@@ -274,7 +274,7 @@ public abstract class Agent extends ActiveObject implements AgentService, AgentC
 			BidInfo loggedBidInfo = (level == LoggingLevel.FULL_LOGGING) ? bidInfo : null;
 			BidLogInfo bidLogInfo = new BidLogInfo(getClusterId(), agentId, qualifier, now, bidInfo.getMarketBasis(),
 					effectivePrice, effectiveDemand, minimumDemand, maximumDemand, loggedBidInfo);
-			this.loggingAdapter.handleBidLogInfo(bidLogInfo);
+			this.loggingAdapter.logBidLogInfo(bidLogInfo);
 		}
 	}
 
@@ -294,7 +294,7 @@ public abstract class Agent extends ActiveObject implements AgentService, AgentC
 		if (level != LoggingLevel.NO_LOGGING && this.loggingAdapter != null) {
 			Date now = new Date(getCurrentTimeMillis());
 			PriceLogInfo priceLogInfo = new PriceLogInfo(getClusterId(), getId(), qualifier, now, priceInfo);
-			this.loggingAdapter.handlePriceLogInfo(priceLogInfo);
+			this.loggingAdapter.logPriceLogInfo(priceLogInfo);
 		}
 	}
 
@@ -313,7 +313,7 @@ public abstract class Agent extends ActiveObject implements AgentService, AgentC
 			logBidInfo(getId(), BidLogInfo.AGENT_LOG_QUALIFIER, updatedBidInfo, getLastPriceInfo(), this.agentBidLogLevel);
 			synchronized (getLock()) {
 				setLastBid(updatedBidInfo);
-				for (MatcherService parentMatcherAdapter : getParentMatcherAdapters()) {
+				for (UpMessagable parentMatcherAdapter : getParentMatcherAdapters()) {
 					parentMatcherAdapter.updateBidInfo(getId(), updatedBidInfo);
 				}
 			}
@@ -328,7 +328,7 @@ public abstract class Agent extends ActiveObject implements AgentService, AgentC
 	 * @param childAgent
 	 *            The child agent (<code>AgentService</code>) parameter.
 	 */
-	protected void setChildAgent(final AgentService childAgent) {
+	protected void setChildAgent(final DownMessagable childAgent) {
 		/* do nothing */
 	}
 
@@ -340,7 +340,7 @@ public abstract class Agent extends ActiveObject implements AgentService, AgentC
 	 *            parameter.
 	 */
 	@Override
-	public void setConfiguration(final ConfigurationService configuration) {
+	public void setConfiguration(final Configurable configuration) {
 		super.setConfiguration(configuration);
 		initialize();
 	}
@@ -384,10 +384,10 @@ public abstract class Agent extends ActiveObject implements AgentService, AgentC
 	 * @param loggingAdapter
 	 *            The logging adapter (<code>LogListenerService</code>)
 	 *            parameter.
-	 * @see #unbind(MatcherService)
+	 * @see #unbind(UpMessagable)
 	 */
 	@Override
-	public void unbind(final LogListenerService loggingAdapter) {
+	public void unbind(final Logable loggingAdapter) {
 		this.loggingAdapter = null;
 	}
 
@@ -400,7 +400,7 @@ public abstract class Agent extends ActiveObject implements AgentService, AgentC
 	 *            parameter.
 	 */
 	@Override
-	public void unbind(final MatcherService parentMatcherAdapter) {
+	public void unbind(final UpMessagable parentMatcherAdapter) {
 		synchronized (getLock()) {
 			assert this.parentMatcherAdapters.contains(parentMatcherAdapter);
 			this.parentMatcherAdapters.remove(parentMatcherAdapter);

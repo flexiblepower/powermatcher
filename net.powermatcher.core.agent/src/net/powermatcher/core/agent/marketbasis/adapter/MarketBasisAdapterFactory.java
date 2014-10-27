@@ -3,9 +3,9 @@ package net.powermatcher.core.agent.marketbasis.adapter;
 
 import net.powermatcher.core.adapter.service.ConnectorLocaterService;
 import net.powermatcher.core.adapter.service.TargetAdapterFactoryService;
-import net.powermatcher.core.agent.framework.service.AgentConnectorService;
-import net.powermatcher.core.agent.framework.service.AgentService;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.agent.framework.service.ChildConnectable;
+import net.powermatcher.core.agent.framework.service.DownMessagable;
+import net.powermatcher.core.configurable.service.Configurable;
 
 
 /**
@@ -14,17 +14,17 @@ import net.powermatcher.core.configurable.service.ConfigurationService;
  * @author IBM
  * @version 0.9.0
  * 
- * @see AgentConnectorService
+ * @see ChildConnectable
  * @see MarketBasisAdapter
- * @see AgentService
+ * @see DownMessagable
  */
-public class MarketBasisAdapterFactory implements TargetAdapterFactoryService<AgentConnectorService> {
+public class MarketBasisAdapterFactory implements TargetAdapterFactoryService<ChildConnectable> {
 
 	public MarketBasisAdapterFactory() {
 	}
 
 	@Override
-	public MarketBasisAdapter createAdapter(ConfigurationService configuration, AgentConnectorService connector,
+	public MarketBasisAdapter createAdapter(Configurable configuration, ChildConnectable connector,
 			ConnectorLocaterService connectorLocater, int factoryIndex) {
 		return createAdapter(configuration, connector);
 	}
@@ -42,7 +42,7 @@ public class MarketBasisAdapterFactory implements TargetAdapterFactoryService<Ag
 	 * @return Results of the create adapter (<code>MarketBasisAdapter</code>) value.
 	 */
 	@Override
-	public MarketBasisAdapter createAdapter(final ConfigurationService configuration, final AgentConnectorService agentConnector) {
+	public MarketBasisAdapter createAdapter(final Configurable configuration, final ChildConnectable agentConnector) {
 		MarketBasisAdapter adapter = new MarketBasisAdapter(configuration);
 		adapter.setAgentConnector(agentConnector);
 		return adapter;

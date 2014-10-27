@@ -6,9 +6,9 @@ import java.util.Map;
 import org.osgi.framework.BundleContext;
 
 import net.powermatcher.core.adapter.component.TargetAdapterFactoryComponent;
-import net.powermatcher.core.adapter.service.ConnectorService;
+import net.powermatcher.core.adapter.service.Connectable;
 import net.powermatcher.core.adapter.service.DirectAdapterFactoryService;
-import net.powermatcher.core.agent.framework.service.MatcherConnectorService;
+import net.powermatcher.core.agent.framework.service.ParentConnectable;
 import net.powermatcher.core.messaging.protocol.adapter.MatcherProtocolAdapterFactory;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
@@ -32,7 +32,7 @@ import aQute.bnd.annotation.component.Reference;
  * @see MatcherProtocolAdapterFactoryComponentConfiguration
  */
 @Component(name = MatcherProtocolAdapterFactoryComponent.COMPONENT_NAME, designateFactory = MatcherProtocolAdapterFactoryComponentConfiguration.class)
-public class MatcherProtocolAdapterFactoryComponent extends TargetAdapterFactoryComponent<MatcherConnectorService> {
+public class MatcherProtocolAdapterFactoryComponent extends TargetAdapterFactoryComponent<ParentConnectable> {
 	/**
 	 * Define the component name (String) constant.
 	 */
@@ -62,10 +62,10 @@ public class MatcherProtocolAdapterFactoryComponent extends TargetAdapterFactory
 	 * @param targetConnector
 	 *            The target connector (<code>MatcherConnectorService</code>)
 	 *            parameter.
-	 * @see #removeMatcherConnector(MatcherConnectorService)
+	 * @see #removeMatcherConnector(ParentConnectable)
 	 */
 	@Reference(type = '*')
-	protected void addMatcherConnector(final MatcherConnectorService targetConnector) {
+	protected void addMatcherConnector(final ParentConnectable targetConnector) {
 		super.addTargetConnector(targetConnector);
 	}
 
@@ -83,9 +83,9 @@ public class MatcherProtocolAdapterFactoryComponent extends TargetAdapterFactory
 	 * @param targetConnector
 	 *            The target connector (<code>MatcherConnectorService</code>)
 	 *            parameter.
-	 * @see #addMatcherConnector(MatcherConnectorService)
+	 * @see #addMatcherConnector(ParentConnectable)
 	 */
-	protected void removeMatcherConnector(final MatcherConnectorService targetConnector) {
+	protected void removeMatcherConnector(final ParentConnectable targetConnector) {
 		super.removeTargetConnector(targetConnector);
 	}
 
@@ -93,12 +93,12 @@ public class MatcherProtocolAdapterFactoryComponent extends TargetAdapterFactory
 	 * Get the Java type of the connector T.
 	 * Due to type erasure it is necessary to gave a method return the type explicitly for use
 	 * in the call to getTargetConnectorIds.
-	 * @see DirectAdapterFactoryService#getTargetConnectorIds(ConnectorService) 
+	 * @see DirectAdapterFactoryService#getTargetConnectorIds(Connectable) 
 	 * @return The Java type of the connector T.
 	 */
 	@Override
-	protected Class<MatcherConnectorService> getConnectorType() {
-		return MatcherConnectorService.class;
+	protected Class<ParentConnectable> getConnectorType() {
+		return ParentConnectable.class;
 	}
 
 }

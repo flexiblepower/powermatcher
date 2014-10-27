@@ -2,7 +2,7 @@ package net.powermatcher.core.messaging.framework;
 
 
 import net.powermatcher.core.adapter.Adapter;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.configurable.service.Configurable;
 import net.powermatcher.core.messaging.service.MessagingConnectionService;
 import net.powermatcher.core.messaging.service.MessagingConnectorService;
 
@@ -43,7 +43,7 @@ public abstract class MessagingAdapter extends Adapter implements MessagingConne
 	 *            The configuration (<code>ConfigurationService</code>)
 	 *            parameter.
 	 */
-	protected MessagingAdapter(final ConfigurationService configuration) {
+	protected MessagingAdapter(final Configurable configuration) {
 		super(configuration);
 	}
 

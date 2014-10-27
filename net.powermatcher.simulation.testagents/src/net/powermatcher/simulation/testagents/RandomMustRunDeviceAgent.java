@@ -5,7 +5,7 @@ import java.util.Date;
 import net.powermatcher.core.agent.framework.Agent;
 import net.powermatcher.core.agent.framework.data.BidInfo;
 import net.powermatcher.core.agent.framework.data.PricePoint;
-import net.powermatcher.core.configurable.service.ConfigurationService;
+import net.powermatcher.core.configurable.service.Configurable;
 import net.powermatcher.telemetry.framework.TelemetryDataPublisher;
 import net.powermatcher.telemetry.service.TelemetryConnectorService;
 import net.powermatcher.telemetry.service.TelemetryService;
@@ -19,7 +19,7 @@ public class RandomMustRunDeviceAgent extends Agent implements TelemetryConnecto
 		super();
 	}
 
-	public RandomMustRunDeviceAgent(ConfigurationService configuration) {
+	public RandomMustRunDeviceAgent(Configurable configuration) {
 		super(configuration);
 	}
 
