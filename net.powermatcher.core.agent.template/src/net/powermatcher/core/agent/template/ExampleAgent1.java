@@ -7,7 +7,7 @@ import net.powermatcher.core.agent.framework.data.MarketBasis;
 import net.powermatcher.core.agent.framework.data.PriceInfo;
 import net.powermatcher.core.agent.framework.data.PricePoint;
 import net.powermatcher.core.agent.template.config.ExampleAgent1Configuration;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 
 /**
  * This class implements a PowerMatcher agent that publishes a step-shaped bid for a configurable demand and price value.
@@ -46,8 +46,8 @@ public class ExampleAgent1 extends Agent {
 	/**
 	 * Constructs an unconfigured instance of this class.
 	 * 
-	 * @see #ExampleAgent1(Configurable)
-	 * @see #setConfiguration(Configurable)
+	 * @see #ExampleAgent1(ConfigurationService)
+	 * @see #setConfiguration(ConfigurationService)
 	 */
 	public ExampleAgent1() {
 		super();
@@ -62,7 +62,7 @@ public class ExampleAgent1 extends Agent {
 	 *            parameter.
 	 * @see #ExampleAgent1()
 	 */
-	public ExampleAgent1(final Configurable configuration) {
+	public ExampleAgent1(final ConfigurationService configuration) {
 		super(configuration);
 	}
 
@@ -147,7 +147,7 @@ public class ExampleAgent1 extends Agent {
 	 *            parameter.
 	 */
 	@Override
-	public void setConfiguration(final Configurable configuration) {
+	public void setConfiguration(final ConfigurationService configuration) {
 		super.setConfiguration(configuration);
 		initialize();
 	}

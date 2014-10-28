@@ -3,7 +3,7 @@ package net.powermatcher.simulation.engine.dependencyengine;
 import net.powermatcher.core.agent.framework.Agent;
 import net.powermatcher.core.agent.framework.data.MarketBasis;
 import net.powermatcher.core.configurable.BaseConfiguration;
-import net.powermatcher.core.scheduler.service.TimeServicable;
+import net.powermatcher.core.scheduler.service.TimeService;
 import net.powermatcher.simulation.configuration.NodeDescriptor;
 import net.powermatcher.simulation.engine.ComponentManager;
 import net.powermatcher.simulation.logging.Broker;
@@ -14,7 +14,7 @@ public abstract class AgentComposer<Type extends Agent> extends Composer<Type> {
 		super(nodeDescriptor, startTime);
 	}
 
-	public void initializeNode(ComponentManager componentManager, TimeServicable timeService, MarketBasis marketBasis, Broker broker) {
+	public void initializeNode(ComponentManager componentManager, TimeService timeService, MarketBasis marketBasis, Broker broker) {
 		this.node.setConfiguration(new BaseConfiguration(getNodeDescriptor().getConfiguration()));
 		this.node.updateMarketBasis(marketBasis);
 		

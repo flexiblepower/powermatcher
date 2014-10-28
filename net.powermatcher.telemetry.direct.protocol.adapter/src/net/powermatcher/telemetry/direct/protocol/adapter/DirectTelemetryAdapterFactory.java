@@ -4,7 +4,7 @@ package net.powermatcher.telemetry.direct.protocol.adapter;
 import net.powermatcher.core.adapter.ConnectorReference;
 import net.powermatcher.core.adapter.service.ConnectorLocaterService;
 import net.powermatcher.core.adapter.service.DirectAdapterFactoryService;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 import net.powermatcher.telemetry.config.TelemetryConfiguration;
 import net.powermatcher.telemetry.service.TelemetryConnectorService;
 import net.powermatcher.telemetry.service.TelemetryListenerConnectorService;
@@ -28,7 +28,7 @@ public class DirectTelemetryAdapterFactory implements DirectAdapterFactoryServic
 	}
 
 	@Override
-	public DirectTelemetryAdapter createAdapter(Configurable configuration, TelemetryConnectorService connector,
+	public DirectTelemetryAdapter createAdapter(ConfigurationService configuration, TelemetryConnectorService connector,
 			ConnectorLocaterService connectorLocater, int adapterIndex) {
 		String telemetryAgentId = getTargetConnectorIds(connector)[adapterIndex];
 		ConnectorReference<TelemetryListenerConnectorService> telemetryListenerRef = new ConnectorReference<TelemetryListenerConnectorService>(
@@ -56,7 +56,7 @@ public class DirectTelemetryAdapterFactory implements DirectAdapterFactoryServic
 	 *         value.
 	 */
 	@Override
-	public DirectTelemetryAdapter createAdapter(final Configurable configuration,
+	public DirectTelemetryAdapter createAdapter(final ConfigurationService configuration,
 			final TelemetryConnectorService telemetryConnector, final TelemetryListenerConnectorService telemetryListenerConnector) {
 		DirectTelemetryAdapter telemetryAdapter = new DirectTelemetryAdapter(configuration);
 		telemetryAdapter.setTelemetryConnector(telemetryConnector);

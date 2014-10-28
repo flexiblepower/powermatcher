@@ -5,8 +5,8 @@ import java.util.Map;
 
 import net.powermatcher.core.adapter.TargetConnectorFactoryTracker;
 import net.powermatcher.core.adapter.TargetConnectorTrackerListener;
-import net.powermatcher.core.adapter.service.Adaptable;
-import net.powermatcher.core.adapter.service.Connectable;
+import net.powermatcher.core.adapter.service.AdapterService;
+import net.powermatcher.core.adapter.service.ConnectorService;
 import net.powermatcher.core.adapter.service.TargetAdapterFactoryService;
 
 import org.osgi.framework.BundleContext;
@@ -24,9 +24,9 @@ import org.osgi.framework.BundleContext;
  * @see TargetAdapterFactoryService
  * @see TargetConnectorFactoryTracker
  * @see TargetConnectorTrackerListener
- * @see Adaptable
+ * @see AdapterService
  */
-public abstract class TargetAdapterFactoryComponent<T extends Connectable> extends AdapterFactoryComponent<T> {
+public abstract class TargetAdapterFactoryComponent<T extends ConnectorService> extends AdapterFactoryComponent<T> {
 
 	/**
 	 * Define the adapter factory (TargetAdapterFactoryService) field.
@@ -93,7 +93,7 @@ public abstract class TargetAdapterFactoryComponent<T extends Connectable> exten
 	 * @param targetConnector
 	 *            The target connector (<code>T</code>)
 	 *            parameter.
-	 * @see #removeTargetConnector(Connectable)
+	 * @see #removeTargetConnector(ConnectorService)
 	 */
 	protected void addTargetConnector(final T targetConnector) {
 		this.connectorTracker.addConnector(targetConnector, targetConnector.getAdapterFactory(getConnectorType()));
@@ -110,7 +110,7 @@ public abstract class TargetAdapterFactoryComponent<T extends Connectable> exten
 		if (targetConnector.isEnabled()) {
 			logStatus("Starting", targetConnector);
 			try {
-				Adaptable adapter = factory.createAdapter(createAdapterConfiguration(targetConnector), targetConnector);
+				AdapterService adapter = factory.createAdapter(createAdapterConfiguration(targetConnector), targetConnector);
 				if (addAdapterReference(adapter)) {
 					adapter.bind();
 					registerAdapter(targetConnector, adapter);
@@ -136,7 +136,7 @@ public abstract class TargetAdapterFactoryComponent<T extends Connectable> exten
 	 * @param targetConnector
 	 *            The target connector (<code>T</code>)
 	 *            parameter.
-	 * @see #addTargetConnector(Connectable)
+	 * @see #addTargetConnector(ConnectorService)
 	 */
 	protected void removeTargetConnector(final T targetConnector) {
 		this.connectorTracker.removeConnector(targetConnector, targetConnector.getAdapterFactory(getConnectorType()));
@@ -151,7 +151,7 @@ public abstract class TargetAdapterFactoryComponent<T extends Connectable> exten
 	 */
 	private void unbind(final T targetConnector) {
 		logStatus("Stopping", targetConnector);
-		Adaptable adapter = getAdapter(targetConnector);
+		AdapterService adapter = getAdapter(targetConnector);
 		if (adapter != null) {
 			if (removeAdapterReference(adapter)) {
 				unregisterAdapter(targetConnector);

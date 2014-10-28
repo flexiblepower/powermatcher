@@ -4,10 +4,10 @@ package net.powermatcher.core.messaging.protocol.adapter;
 import java.io.InvalidObjectException;
 
 import net.powermatcher.core.agent.framework.log.BidLogInfo;
-import net.powermatcher.core.agent.framework.log.LogListenable;
-import net.powermatcher.core.agent.framework.log.Logable;
+import net.powermatcher.core.agent.framework.log.LogListenerConnectorService;
+import net.powermatcher.core.agent.framework.log.LogListenerService;
 import net.powermatcher.core.agent.framework.log.PriceLogInfo;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 import net.powermatcher.core.messaging.framework.Topic;
 import net.powermatcher.core.messaging.protocol.adapter.constants.ProtocolAdapterConstants;
 import net.powermatcher.core.messaging.protocol.adapter.log.BidLogMessage;
@@ -30,8 +30,8 @@ import net.powermatcher.core.messaging.protocol.adapter.log.PriceLogMessage;
  * @author IBM
  * @version 0.9.0
  * 
- * @see LogListenable
- * @see Logable
+ * @see LogListenerConnectorService
+ * @see LogListenerService
  * @see PriceLogMessage
  * @see BidLogMessage
  * @see BaseAdapter
@@ -49,17 +49,17 @@ public class LogListenerAdapter extends BaseAdapter {
 	/**
 	 * Define the agent (LogListenerService) field.
 	 */
-	private Logable logListener;
+	private LogListenerService logListener;
 
 	/**
 	 * Define the agent connector (LogListenerConnectorService) field.
 	 */
-	private LogListenable logListenerConnector;
+	private LogListenerConnectorService logListenerConnector;
 
 	/**
 	 * Constructs an instance of this class.
 	 * 
-	 * @see #LogListenerAdapter(Configurable)
+	 * @see #LogListenerAdapter(ConfigurationService)
 	 */
 	public LogListenerAdapter() {
 		super();
@@ -74,7 +74,7 @@ public class LogListenerAdapter extends BaseAdapter {
 	 *            parameter.
 	 * @see #LogListenerAdapter()
 	 */
-	public LogListenerAdapter(final Configurable configuration) {
+	public LogListenerAdapter(final ConfigurationService configuration) {
 		super(configuration);
 	}
 
@@ -113,9 +113,9 @@ public class LogListenerAdapter extends BaseAdapter {
 	 * Gets the agent connector (LogListenerConnectorService) value.
 	 * 
 	 * @return The agent connector (LogListenerConnectorService) value.
-	 * @see #setLogListenerConnector(LogListenable)
+	 * @see #setLogListenerConnector(LogListenerConnectorService)
 	 */
-	public LogListenable getLogListenerConnector() {
+	public LogListenerConnectorService getLogListenerConnector() {
 		return this.logListenerConnector;
 	}
 
@@ -151,7 +151,7 @@ public class LogListenerAdapter extends BaseAdapter {
 			BidLogMessage bidLogMessage = new BidLogMessage(data);
 			BidLogInfo bidLogInfo = bidLogMessage.getBidLogInfo();
 			if (this.logListener != null) {
-				this.logListener.logBidLogInfo(bidLogInfo);
+				this.logListener.handleBidLogInfo(bidLogInfo);
 			}
 		} catch (final InvalidObjectException e) {
 			logError("Error processing bid log event " + topic, e);
@@ -193,7 +193,7 @@ public class LogListenerAdapter extends BaseAdapter {
 			PriceLogMessage priceLogMessage = new PriceLogMessage(data);
 			PriceLogInfo priceLogInfo = priceLogMessage.getPriceLogInfo();
 			if (this.logListener != null) {
-				this.logListener.logPriceLogInfo(priceLogInfo);
+				this.logListener.handlePriceLogInfo(priceLogInfo);
 			}
 		} catch (final InvalidObjectException e) {
 			logError("Error processing price log event " + topic, e);
@@ -228,7 +228,7 @@ public class LogListenerAdapter extends BaseAdapter {
 	 *            parameter.
 	 */
 	@Override
-	public void setConfiguration(final Configurable configuration) {
+	public void setConfiguration(final ConfigurationService configuration) {
 		super.setConfiguration(configuration);
 		initialize();
 	}
@@ -241,7 +241,7 @@ public class LogListenerAdapter extends BaseAdapter {
 	 *            parameter.
 	 * @see #getLogListenerConnector()
 	 */
-	public void setLogListenerConnector(final LogListenable agentConnector) {
+	public void setLogListenerConnector(final LogListenerConnectorService agentConnector) {
 		this.logListenerConnector = agentConnector;
 		if (agentConnector == null) {
 			this.logListener = null;

@@ -2,7 +2,7 @@ package net.powermatcher.core.scheduler.service;
 
 
 
-import net.powermatcher.core.adapter.service.Connectable;
+import net.powermatcher.core.adapter.service.ConnectorService;
 
 
 /**
@@ -13,7 +13,7 @@ import net.powermatcher.core.adapter.service.Connectable;
  * @author IBM
  * @version 0.9.0
  */
-public interface TimeConnectorService extends Connectable {
+public interface TimeConnectorService extends ConnectorService {
 
 	/**
 	 * Each subtype of ConnectorService declares a final static String field
@@ -29,9 +29,9 @@ public interface TimeConnectorService extends Connectable {
 	 * @param timeSource
 	 *            The time source (<code>TimeService</code>)
 	 *            to bind.
-	 * @see #unbind(TimeServicable)
+	 * @see #unbind(TimeService)
 	 */
-	public void bind(final TimeServicable timeSource);
+	public void bind(final TimeService timeSource);
 
 	/**
 	 * Unbind the time source for obtaining the real or simulated time.
@@ -40,9 +40,9 @@ public interface TimeConnectorService extends Connectable {
 	 *            The time source (<code>TimeService</code>)
 	 *            to unbind.
 	 *            
-	 * @see #bind(TimeServicable)
+	 * @see #bind(TimeService)
 	 */
-	public void unbind(final TimeServicable timeSource);
+	public void unbind(final TimeService timeSource);
 
 
 }

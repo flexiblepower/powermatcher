@@ -3,9 +3,9 @@ package net.powermatcher.core.messaging.protocol.adapter;
 
 import net.powermatcher.core.adapter.service.ConnectorLocaterService;
 import net.powermatcher.core.adapter.service.TargetAdapterFactoryService;
-import net.powermatcher.core.agent.framework.log.LogListenable;
-import net.powermatcher.core.agent.framework.log.Logable;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.agent.framework.log.LogListenerConnectorService;
+import net.powermatcher.core.agent.framework.log.LogListenerService;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 
 
 /**
@@ -14,17 +14,17 @@ import net.powermatcher.core.configurable.service.Configurable;
  * @author IBM
  * @version 0.9.0
  * 
- * @see LogListenable
+ * @see LogListenerConnectorService
  * @see LogListenerAdapter
- * @see Logable
+ * @see LogListenerService
  */
-public class LogListenerAdapterFactory implements TargetAdapterFactoryService<LogListenable> {
+public class LogListenerAdapterFactory implements TargetAdapterFactoryService<LogListenerConnectorService> {
 
 	public LogListenerAdapterFactory() {
 	}
 
 	@Override
-	public LogListenerAdapter createAdapter(Configurable configuration, LogListenable connector,
+	public LogListenerAdapter createAdapter(ConfigurationService configuration, LogListenerConnectorService connector,
 			ConnectorLocaterService connectorLocater, int adapterIndex) {
 		return createAdapter(configuration, connector);
 	}
@@ -43,8 +43,8 @@ public class LogListenerAdapterFactory implements TargetAdapterFactoryService<Lo
 	 *         value.
 	 */
 	@Override
-	public LogListenerAdapter createAdapter(final Configurable configuration,
-			final LogListenable logListenerConnector) {
+	public LogListenerAdapter createAdapter(final ConfigurationService configuration,
+			final LogListenerConnectorService logListenerConnector) {
 		LogListenerAdapter loggingAdapter = new LogListenerAdapter(configuration);
 		loggingAdapter.setLogListenerConnector(logListenerConnector);
 		return loggingAdapter;

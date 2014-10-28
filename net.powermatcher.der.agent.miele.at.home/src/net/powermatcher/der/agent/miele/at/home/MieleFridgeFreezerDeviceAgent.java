@@ -4,8 +4,8 @@ package net.powermatcher.der.agent.miele.at.home;
 import java.util.Date;
 
 import net.powermatcher.core.agent.framework.data.PriceInfo;
-import net.powermatcher.core.agent.framework.service.UpMessagable;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.agent.framework.service.MatcherService;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 import net.powermatcher.der.agent.miele.at.home.config.MieleFridgeFreezerDeviceAgentConfiguration;
 import net.powermatcher.der.agent.miele.at.home.gateway.constants.MieleApplianceConstants;
 import net.powermatcher.der.agent.miele.at.home.gateway.constants.MieleFridgeFreezerConstants;
@@ -99,12 +99,12 @@ public class MieleFridgeFreezerDeviceAgent extends AbstractMieleDeviceAgent {
 	 *            The configuration (<code>ConfigurationService</code>)
 	 *            parameter.
 	 */
-	public MieleFridgeFreezerDeviceAgent(final Configurable configuration) {
+	public MieleFridgeFreezerDeviceAgent(final ConfigurationService configuration) {
 		super(configuration);
 	}
 
 	@Override
-	public void bind(final UpMessagable parentMatcherAdapter) {
+	public void bind(final MatcherService parentMatcherAdapter) {
 		logInfo("Initializing refrigerator-freezer agent.");
 
 		// Set target temperatures
@@ -676,7 +676,7 @@ public class MieleFridgeFreezerDeviceAgent extends AbstractMieleDeviceAgent {
 	}
 
 	@Override
-	public void setConfiguration(final Configurable configuration) {
+	public void setConfiguration(final ConfigurationService configuration) {
 		super.setConfiguration(configuration);
 	}
 

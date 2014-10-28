@@ -11,7 +11,7 @@ import net.powermatcher.core.agent.framework.data.MarketBasis;
 import net.powermatcher.core.agent.framework.data.PriceInfo;
 import net.powermatcher.core.configurable.BaseConfiguration;
 import net.powermatcher.core.scheduler.SchedulerAdapterFactory;
-import net.powermatcher.core.scheduler.service.TimeServicable;
+import net.powermatcher.core.scheduler.service.TimeService;
 
 import org.junit.After;
 import org.junit.Before;
@@ -24,7 +24,7 @@ public class PeakShavingConcentratorImplUnitTest {
 	private final MarketBasis marketBasis = new MarketBasis("electricity", "EUR", 8, 0, 7, 1, 0);
 
 	private ScheduledExecutorService scheduler;
-	private TimeServicable timeSource;
+	private TimeService timeSource;
 	private MockPeakShavingConcentratorImpl concentrator;
 
 	@Before

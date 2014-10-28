@@ -4,10 +4,10 @@ package net.powermatcher.core.scheduler.component;
 import java.util.Map;
 
 import net.powermatcher.core.adapter.component.TargetAdapterFactoryComponent;
-import net.powermatcher.core.adapter.service.Connectable;
+import net.powermatcher.core.adapter.service.ConnectorService;
 import net.powermatcher.core.adapter.service.DirectAdapterFactoryService;
 import net.powermatcher.core.configurable.BaseConfiguration;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 import net.powermatcher.core.object.config.IdentifiableObjectConfiguration;
 import net.powermatcher.core.scheduler.SchedulerAdapterFactory;
 import net.powermatcher.core.scheduler.service.SchedulerConnectorService;
@@ -47,7 +47,7 @@ public class SchedulerAdapterFactoryComponent extends TargetAdapterFactoryCompon
 	 */
 	@Activate
 	protected void activate(final BundleContext context, final Map<String, Object> properties) {
-		Configurable configuration = new BaseConfiguration(properties);
+		ConfigurationService configuration = new BaseConfiguration(properties);
 		String clusterId = configuration.getProperty(IdentifiableObjectConfiguration.CLUSTER_ID_PROPERTY, IdentifiableObjectConfiguration.CLUSTER_ID_DEFAULT);
 		this.schedulerAdapterFactory = SchedulerAdapterFactory.getSchedulerAdapterFactory(clusterId);
 		setFactory(this.schedulerAdapterFactory);
@@ -92,7 +92,7 @@ public class SchedulerAdapterFactoryComponent extends TargetAdapterFactoryCompon
 	 * Get the Java type of the connector T.
 	 * Due to type erasure it is necessary to gave a method return the type explicitly for use
 	 * in the call to getTargetConnectorIds.
-	 * @see DirectAdapterFactoryService#getTargetConnectorIds(Connectable) 
+	 * @see DirectAdapterFactoryService#getTargetConnectorIds(ConnectorService) 
 	 * @return The Java type of the connector T.
 	 */
 	@Override

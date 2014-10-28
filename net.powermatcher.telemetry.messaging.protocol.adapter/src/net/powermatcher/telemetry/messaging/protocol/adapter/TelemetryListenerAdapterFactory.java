@@ -1,10 +1,10 @@
 package net.powermatcher.telemetry.messaging.protocol.adapter;
 
 
-import net.powermatcher.core.adapter.service.Adaptable;
+import net.powermatcher.core.adapter.service.AdapterService;
 import net.powermatcher.core.adapter.service.ConnectorLocaterService;
 import net.powermatcher.core.adapter.service.TargetAdapterFactoryService;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 import net.powermatcher.telemetry.service.TelemetryListenerConnectorService;
 import net.powermatcher.telemetry.service.TelemetryService;
 
@@ -25,7 +25,7 @@ public class TelemetryListenerAdapterFactory implements TargetAdapterFactoryServ
 	}
 
 	@Override
-	public Adaptable createAdapter(Configurable configuration, TelemetryListenerConnectorService connector,
+	public AdapterService createAdapter(ConfigurationService configuration, TelemetryListenerConnectorService connector,
 			ConnectorLocaterService connectorLocater, int adapterIndex) {
 		return createAdapter(configuration, connector);
 	}
@@ -44,7 +44,7 @@ public class TelemetryListenerAdapterFactory implements TargetAdapterFactoryServ
 	 *         <code>TelemetryAdapter</code>) value.
 	 */
 	@Override
-	public TelemetryListenerAdapter createAdapter(final Configurable configuration,
+	public TelemetryListenerAdapter createAdapter(final ConfigurationService configuration,
 			final TelemetryListenerConnectorService telemetryListenerConnector) {
 		TelemetryListenerAdapter telemetryAdapter = new TelemetryListenerAdapter(configuration);
 		telemetryAdapter.setTelemetryListenerConnector(telemetryListenerConnector);

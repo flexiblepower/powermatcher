@@ -7,11 +7,11 @@ import net.powermatcher.core.adapter.Adapter;
 import net.powermatcher.core.adapter.ConnectorReference;
 import net.powermatcher.core.agent.framework.data.MarketBasis;
 import net.powermatcher.core.agent.framework.data.PriceInfo;
-import net.powermatcher.core.agent.framework.service.ChildConnectable;
-import net.powermatcher.core.agent.framework.service.DownMessagable;
-import net.powermatcher.core.agent.framework.service.ParentConnectable;
-import net.powermatcher.core.agent.framework.service.UpMessagable;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.agent.framework.service.AgentConnectorService;
+import net.powermatcher.core.agent.framework.service.AgentService;
+import net.powermatcher.core.agent.framework.service.MatcherConnectorService;
+import net.powermatcher.core.agent.framework.service.MatcherService;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 
 
 /**
@@ -35,8 +35,8 @@ import net.powermatcher.core.configurable.service.Configurable;
  * @author IBM
  * @version 0.9.0
  * 
- * @see UpMessagable
- * @see ChildConnectable
+ * @see MatcherService
+ * @see AgentConnectorService
  */
 public class DirectProtocolAdapter extends Adapter {
 
@@ -44,11 +44,11 @@ public class DirectProtocolAdapter extends Adapter {
 	 * @author IBM
 	 * @version 0.9.0
 	 */
-	private class AgentProxy implements DownMessagable {
+	private class AgentProxy implements AgentService {
 
-		private DownMessagable agent;
+		private AgentService agent;
 
-		public AgentProxy(DownMessagable agent) {
+		public AgentProxy(AgentService agent) {
 			this.agent = agent;
 		}
 
@@ -103,17 +103,17 @@ public class DirectProtocolAdapter extends Adapter {
 	/**
 	 * Define the agent connector (AgentConnectorService) field.
 	 */
-	private ChildConnectable agentConnector;
+	private AgentConnectorService agentConnector;
 
 	/**
 	 * Define the agent connector (AgentConnectorService) field.
 	 */
-	private ParentConnectable matcherConnector;
+	private MatcherConnectorService matcherConnector;
 
 	/**
 	 * Define the matcher reference (ConnectorReference) field.
 	 */
-	private ConnectorReference<ParentConnectable> matcherRef;
+	private ConnectorReference<MatcherConnectorService> matcherRef;
 
 	/**
 	 * Define the agent proxy (AgentProxy) field.
@@ -135,7 +135,7 @@ public class DirectProtocolAdapter extends Adapter {
 	 *            The configuration (<code>ConfigurationService</code>)
 	 *            parameter.
 	 */
-	public DirectProtocolAdapter(final Configurable configuration) {
+	public DirectProtocolAdapter(final ConfigurationService configuration) {
 		super(configuration);
 	}
 
@@ -159,7 +159,7 @@ public class DirectProtocolAdapter extends Adapter {
 	 * 
 	 * @return The agent connector (AgentConnectorService) value.
 	 */
-	public ChildConnectable getAgentConnector() {
+	public AgentConnectorService getAgentConnector() {
 		return this.agentConnector;
 	}
 
@@ -168,7 +168,7 @@ public class DirectProtocolAdapter extends Adapter {
 	 * 
 	 * @return The matcher connector (MatcherConnectorService) value.
 	 */
-	public ParentConnectable getMatcherConnector() {
+	public MatcherConnectorService getMatcherConnector() {
 		return this.matcherConnector;
 	}
 
@@ -195,7 +195,7 @@ public class DirectProtocolAdapter extends Adapter {
 	 *            The agent connector (<code>AgentConnectorService</code>)
 	 *            parameter.
 	 */
-	public void setAgentConnector(final ChildConnectable agentConnector) {
+	public void setAgentConnector(final AgentConnectorService agentConnector) {
 		this.agentConnector = agentConnector;
 		if (agentConnector == null) {
 			this.agentProxy = null;
@@ -211,11 +211,11 @@ public class DirectProtocolAdapter extends Adapter {
 	 *            The agent connector (<code>MatcherConnectorService</code>)
 	 *            parameter.
 	 */
-	public void setMatcherConnector(final ParentConnectable matcherConnector) {
+	public void setMatcherConnector(final MatcherConnectorService matcherConnector) {
 		this.matcherConnector = matcherConnector;
 	}
 
-	void setMatcherRef(ConnectorReference<ParentConnectable> matcherRef) {
+	void setMatcherRef(ConnectorReference<MatcherConnectorService> matcherRef) {
 		this.matcherRef = matcherRef;
 	}
 
@@ -227,7 +227,7 @@ public class DirectProtocolAdapter extends Adapter {
 	 *            parameter.
 	 */
 	@Override
-	public void setConfiguration(final Configurable configuration) {
+	public void setConfiguration(final ConfigurationService configuration) {
 		super.setConfiguration(configuration);
 		initialize();
 	}

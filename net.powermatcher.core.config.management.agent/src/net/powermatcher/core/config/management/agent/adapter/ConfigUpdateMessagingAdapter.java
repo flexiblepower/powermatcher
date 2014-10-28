@@ -3,7 +3,7 @@ package net.powermatcher.core.config.management.agent.adapter;
 
 import net.powermatcher.core.config.management.agent.ConfigManager;
 import net.powermatcher.core.config.management.agent.ConfigManagerConfiguration;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 import net.powermatcher.core.messaging.framework.MessagingAdapter;
 import net.powermatcher.core.messaging.framework.Topic;
 
@@ -29,7 +29,7 @@ public class ConfigUpdateMessagingAdapter extends MessagingAdapter {
 	/**
 	 * Constructs an instance of this class.
 	 * 
-	 * @see #ConfigUpdateMessagingAdapter(Configurable)
+	 * @see #ConfigUpdateMessagingAdapter(ConfigurationService)
 	 */
 	public ConfigUpdateMessagingAdapter() {
 		super();
@@ -44,7 +44,7 @@ public class ConfigUpdateMessagingAdapter extends MessagingAdapter {
 	 *            parameter.
 	 * @see #ConfigUpdateMessagingAdapter()
 	 */
-	public ConfigUpdateMessagingAdapter(final Configurable configuration) {
+	public ConfigUpdateMessagingAdapter(final ConfigurationService configuration) {
 		super(configuration);
 	}
 
@@ -126,7 +126,7 @@ public class ConfigUpdateMessagingAdapter extends MessagingAdapter {
 	 *            parameter.
 	 */
 	@Override
-	public void setConfiguration(final Configurable configuration) {
+	public void setConfiguration(final ConfigurationService configuration) {
 		super.setConfiguration(configuration);
 		initialize();
 	}

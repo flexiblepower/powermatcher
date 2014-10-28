@@ -8,7 +8,7 @@ import net.powermatcher.core.agent.framework.MatcherAgent;
 import net.powermatcher.core.agent.framework.data.BidInfo;
 import net.powermatcher.core.agent.framework.data.MarketBasis;
 import net.powermatcher.core.agent.framework.data.PriceInfo;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 
 
 /**
@@ -22,7 +22,7 @@ public class Auctioneer extends MatcherAgent implements PricingConnectorService 
 	/**
 	 * Constructs an instance of this class.
 	 * 
-	 * @see #Auctioneer(Configurable)
+	 * @see #Auctioneer(ConfigurationService)
 	 */
 	public Auctioneer() {
 		super();
@@ -37,7 +37,7 @@ public class Auctioneer extends MatcherAgent implements PricingConnectorService 
 	 *            parameter.
 	 * @see #Auctioneer()
 	 */
-	public Auctioneer(final Configurable configuration) {
+	public Auctioneer(final ConfigurationService configuration) {
 		super(configuration);
 	}
 

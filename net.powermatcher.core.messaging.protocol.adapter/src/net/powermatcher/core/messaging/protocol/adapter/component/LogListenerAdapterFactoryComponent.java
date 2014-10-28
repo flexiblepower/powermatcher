@@ -6,9 +6,9 @@ import java.util.Map;
 import org.osgi.framework.BundleContext;
 
 import net.powermatcher.core.adapter.component.TargetAdapterFactoryComponent;
-import net.powermatcher.core.adapter.service.Connectable;
+import net.powermatcher.core.adapter.service.ConnectorService;
 import net.powermatcher.core.adapter.service.DirectAdapterFactoryService;
-import net.powermatcher.core.agent.framework.log.LogListenable;
+import net.powermatcher.core.agent.framework.log.LogListenerConnectorService;
 import net.powermatcher.core.messaging.protocol.adapter.LogListenerAdapterFactory;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
@@ -34,7 +34,7 @@ import aQute.bnd.annotation.component.Reference;
  * @see LogListenerAdapterFactoryComponentConfiguration
  */
 @Component(name = LogListenerAdapterFactoryComponent.COMPONENT_NAME, designateFactory = LogListenerAdapterFactoryComponentConfiguration.class)
-public class LogListenerAdapterFactoryComponent extends TargetAdapterFactoryComponent<LogListenable> {
+public class LogListenerAdapterFactoryComponent extends TargetAdapterFactoryComponent<LogListenerConnectorService> {
 	/**
 	 * Define the component name (String) constant.
 	 */
@@ -64,10 +64,10 @@ public class LogListenerAdapterFactoryComponent extends TargetAdapterFactoryComp
 	 * @param targetConnector
 	 *            The target connector (<code>LogListenerConnectorService</code>)
 	 *            parameter.
-	 * @see #removeLogListenerConnector(LogListenable)
+	 * @see #removeLogListenerConnector(LogListenerConnectorService)
 	 */
 	@Reference(type = '*')
-	protected void addLogListenerConnector(final LogListenable targetConnector) {
+	protected void addLogListenerConnector(final LogListenerConnectorService targetConnector) {
 		super.addTargetConnector(targetConnector);
 	}
 
@@ -85,9 +85,9 @@ public class LogListenerAdapterFactoryComponent extends TargetAdapterFactoryComp
 	 * @param targetConnector
 	 *            The target connector (<code>LogListenerConnectorService</code>)
 	 *            parameter.
-	 * @see #addLogListenerConnector(LogListenable)
+	 * @see #addLogListenerConnector(LogListenerConnectorService)
 	 */
-	protected void removeLogListenerConnector(final LogListenable targetConnector) {
+	protected void removeLogListenerConnector(final LogListenerConnectorService targetConnector) {
 		super.removeTargetConnector(targetConnector);
 	}
 
@@ -95,12 +95,12 @@ public class LogListenerAdapterFactoryComponent extends TargetAdapterFactoryComp
 	 * Get the Java type of the connector T.
 	 * Due to type erasure it is necessary to gave a method return the type explicitly for use
 	 * in the call to getTargetConnectorIds.
-	 * @see DirectAdapterFactoryService#getTargetConnectorIds(Connectable) 
+	 * @see DirectAdapterFactoryService#getTargetConnectorIds(ConnectorService) 
 	 * @return The Java type of the connector T.
 	 */
 	@Override
-	protected Class<LogListenable> getConnectorType() {
-		return LogListenable.class;
+	protected Class<LogListenerConnectorService> getConnectorType() {
+		return LogListenerConnectorService.class;
 	}
 
 }

@@ -6,8 +6,8 @@ import java.util.Set;
 import net.powermatcher.core.agent.framework.Agent;
 import net.powermatcher.core.agent.framework.MatcherAgent;
 import net.powermatcher.core.agent.framework.data.MarketBasis;
-import net.powermatcher.core.agent.framework.service.DownMessagable;
-import net.powermatcher.core.agent.framework.service.UpMessagable;
+import net.powermatcher.core.agent.framework.service.AgentService;
+import net.powermatcher.core.agent.framework.service.MatcherService;
 import net.powermatcher.simulation.configuration.AuctioneerNodeDescriptor;
 import net.powermatcher.simulation.configuration.ClusterDescriptor;
 import net.powermatcher.simulation.configuration.ConcentratorNodeDescriptor;
@@ -116,15 +116,15 @@ public class ActivityLinkFactory {
 	}
 
 	private void bindAgentToMatcher(Composer<? extends Agent> agent, Composer<? extends MatcherAgent> matcher) {
-		Link downstream = Link.create(agent.getNode(), DownMessagable.class);
-		Link upstream = Link.create(matcher.getNode(), UpMessagable.class);
+		Link downstream = Link.create(agent.getNode(), AgentService.class);
+		Link upstream = Link.create(matcher.getNode(), MatcherService.class);
 
-		agent.getNode().bind((UpMessagable) upstream.getProxy());
-		agent.attachOutgoingLink(upstream, UpMessagable.class);
-		matcher.attachIncommingLink(upstream, UpMessagable.class);
+		agent.getNode().bind((MatcherService) upstream.getProxy());
+		agent.attachOutgoingLink(upstream, MatcherService.class);
+		matcher.attachIncommingLink(upstream, MatcherService.class);
 
-		matcher.getNode().bind((DownMessagable) downstream.getProxy());
-		matcher.attachOutgoingLink(downstream, DownMessagable.class);
-		agent.attachIncommingLink(downstream, DownMessagable.class);
+		matcher.getNode().bind((AgentService) downstream.getProxy());
+		matcher.attachOutgoingLink(downstream, AgentService.class);
+		agent.attachIncommingLink(downstream, AgentService.class);
 	}
 }

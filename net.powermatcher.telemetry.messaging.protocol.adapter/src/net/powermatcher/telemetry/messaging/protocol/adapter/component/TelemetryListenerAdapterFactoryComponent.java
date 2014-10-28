@@ -6,7 +6,7 @@ import java.util.Map;
 import org.osgi.framework.BundleContext;
 
 import net.powermatcher.core.adapter.component.TargetAdapterFactoryComponent;
-import net.powermatcher.core.adapter.service.Connectable;
+import net.powermatcher.core.adapter.service.ConnectorService;
 import net.powermatcher.core.adapter.service.DirectAdapterFactoryService;
 import net.powermatcher.telemetry.messaging.protocol.adapter.TelemetryListenerAdapterFactory;
 import net.powermatcher.telemetry.service.TelemetryListenerConnectorService;
@@ -96,7 +96,7 @@ public class TelemetryListenerAdapterFactoryComponent extends TargetAdapterFacto
 	 * Get the Java type of the connector T.
 	 * Due to type erasure it is necessary to gave a method return the type explicitly for use
 	 * in the call to getTargetConnectorIds.
-	 * @see DirectAdapterFactoryService#getTargetConnectorIds(Connectable) 
+	 * @see DirectAdapterFactoryService#getTargetConnectorIds(ConnectorService) 
 	 * @return The Java type of the connector T.
 	 */
 	@Override

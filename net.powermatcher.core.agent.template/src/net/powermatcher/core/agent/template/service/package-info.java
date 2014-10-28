@@ -6,7 +6,7 @@
  * agent and adapter. 
  * </p>
  *
- * @see net.powermatcher.core.adapter.service.Connectable
+ * @see net.powermatcher.core.adapter.service.ConnectorService
  * 
  * @since 0.7
  */

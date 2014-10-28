@@ -1,7 +1,7 @@
 package net.powermatcher.core.adapter.service;
 
 
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 
 /**
  * 
@@ -11,7 +11,7 @@ import net.powermatcher.core.configurable.service.Configurable;
  *  @author IBM
  * @version 0.9.0
  */
-public interface DirectAdapterFactoryService<T extends Connectable, F extends Connectable> extends AdapterFactoryService<T> {
+public interface DirectAdapterFactoryService<T extends ConnectorService, F extends ConnectorService> extends AdapterFactoryService<T> {
 
 	/**
 	 * Create adapter with the specified configuration and agent connector
@@ -29,7 +29,7 @@ public interface DirectAdapterFactoryService<T extends Connectable, F extends Co
 	 * @return Results of the create adapter (<code>AdapterService</code>)
 	 *         value.
 	 */
-	public Adaptable createAdapter(final Configurable configuration,
+	public AdapterService createAdapter(final ConfigurationService configuration,
 			final T sourceConnector, final F targetConnector);
 
 	/**

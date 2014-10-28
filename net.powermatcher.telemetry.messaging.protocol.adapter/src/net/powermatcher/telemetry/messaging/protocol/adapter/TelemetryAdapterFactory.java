@@ -3,7 +3,7 @@ package net.powermatcher.telemetry.messaging.protocol.adapter;
 
 import net.powermatcher.core.adapter.service.ConnectorLocaterService;
 import net.powermatcher.core.adapter.service.SourceAdapterFactoryService;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 import net.powermatcher.telemetry.config.TelemetryConfiguration;
 import net.powermatcher.telemetry.service.TelemetryConnectorService;
 import net.powermatcher.telemetry.service.TelemetryService;
@@ -25,7 +25,7 @@ public class TelemetryAdapterFactory implements SourceAdapterFactoryService<Tele
 	}
 
 	@Override
-	public TelemetryAdapter createAdapter(Configurable configuration, TelemetryConnectorService connector,
+	public TelemetryAdapter createAdapter(ConfigurationService configuration, TelemetryConnectorService connector,
 			ConnectorLocaterService connectorLocater, int adapterIndex) {
 		String telemetryAgentId = getTargetConnectorIds(connector)[adapterIndex];
 		return createAdapter(configuration, connector, telemetryAgentId);
@@ -45,7 +45,7 @@ public class TelemetryAdapterFactory implements SourceAdapterFactoryService<Tele
 	 *         <code>TelemetryAdapter</code>) value.
 	 */
 	@Override
-	public TelemetryAdapter createAdapter(final Configurable configuration,
+	public TelemetryAdapter createAdapter(final ConfigurationService configuration,
 			final TelemetryConnectorService telemetryConnector, final String telemetryAgentId) {
 		TelemetryAdapter telemetryAdapter = new TelemetryAdapter(configuration);
 		telemetryAdapter.setTelemetryConnector(telemetryConnector);

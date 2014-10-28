@@ -3,10 +3,10 @@ package net.powermatcher.core.direct.protocol.adapter;
 
 import net.powermatcher.core.adapter.Adapter;
 import net.powermatcher.core.adapter.ConnectorReference;
-import net.powermatcher.core.agent.framework.log.LogListenable;
-import net.powermatcher.core.agent.framework.log.Logable;
-import net.powermatcher.core.agent.framework.log.LogPublishable;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.agent.framework.log.LogListenerConnectorService;
+import net.powermatcher.core.agent.framework.log.LogListenerService;
+import net.powermatcher.core.agent.framework.log.LoggingConnectorService;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 
 
 /**
@@ -25,25 +25,25 @@ import net.powermatcher.core.configurable.service.Configurable;
  * @author IBM
  * @version 0.9.0
  * 
- * @see Logable
- * @see LogPublishable
+ * @see LogListenerService
+ * @see LoggingConnectorService
  */
 public class DirectLoggingAdapter extends Adapter {
 
 	/**
 	 * Define the logging connector (LoggingConnectorService) field.
 	 */
-	private LogPublishable logPublisher;
+	private LoggingConnectorService loggingConnector;
 
 	/**
 	 * Define the log listener connector (LogListenerConnectorService) field.
 	 */
-	private LogListenable logListener;
+	private LogListenerConnectorService logListenerConnector;
 
 	/**
 	 * Define the log listener reference (ConnectorReference) field.
 	 */
-	private ConnectorReference<LogListenable> logListenerRef;
+	private ConnectorReference<LogListenerConnectorService> logListenerRef;
 
 	/**
 	 * Constructs an instance of this class.
@@ -60,7 +60,7 @@ public class DirectLoggingAdapter extends Adapter {
 	 *            The configuration (<code>ConfigurationService</code>)
 	 *            parameter.
 	 */
-	public DirectLoggingAdapter(final Configurable configuration) {
+	public DirectLoggingAdapter(final ConfigurationService configuration) {
 		super(configuration);
 	}
 
@@ -73,10 +73,10 @@ public class DirectLoggingAdapter extends Adapter {
 	public void bind() throws Exception {
 		super.bind();
 		if (this.logListenerRef != null) {
-			this.logListener = this.logListenerRef.getConnector();
+			this.logListenerConnector = this.logListenerRef.getConnector();
 		}
-		this.logListener.bind();
-		this.logPublisher.bind(this.logListener.getLogListener());
+		this.logListenerConnector.bind();
+		this.loggingConnector.bind(this.logListenerConnector.getLogListener());
 	}
 
 	/**
@@ -84,8 +84,8 @@ public class DirectLoggingAdapter extends Adapter {
 	 * 
 	 * @return The logging connector (LoggingConnectorService) value.
 	 */
-	public LogPublishable getLogPublisher() {
-		return this.logPublisher;
+	public LoggingConnectorService getLoggingConnector() {
+		return this.loggingConnector;
 	}
 
 	/**
@@ -93,8 +93,8 @@ public class DirectLoggingAdapter extends Adapter {
 	 * 
 	 * @return The log listener  connector (LogListenerConnectorService) value.
 	 */
-	public LogListenable getLogListener() {
-		return this.logListener;
+	public LogListenerConnectorService getLogListenerConnector() {
+		return this.logListenerConnector;
 	}
 
 	/**
@@ -110,32 +110,32 @@ public class DirectLoggingAdapter extends Adapter {
 	 */
 	@Override
 	public boolean isEnabled() {
-		return super.isEnabled() && this.logPublisher.isEnabled();
+		return super.isEnabled() && this.loggingConnector.isEnabled();
 	}
 
 	/**
 	 * Sets the logging connector value.
 	 * 
-	 * @param logPublisher
+	 * @param loggingConnector
 	 *            The logging connector (<code>LoggingConnectorService</code>)
 	 *            parameter.
 	 */
-	public void setLogPublisher(final LogPublishable logPublisher) {
-		this.logPublisher = logPublisher;
+	public void setLoggingConnector(final LoggingConnectorService loggingConnector) {
+		this.loggingConnector = loggingConnector;
 	}
 
 	/**
 	 * Sets the log listener connector value.
 	 * 
-	 * @param logListener
+	 * @param logListenerConnector
 	 *            The log listener connector (<code>LogListenerConnectorService</code>)
 	 *            parameter.
 	 */
-	public void setLogListener(final LogListenable logListener) {
-		this.logListener = logListener;
+	public void setLogListenerConnector(final LogListenerConnectorService logListenerConnector) {
+		this.logListenerConnector = logListenerConnector;
 	}
 
-	void setLogListenerRef(ConnectorReference<LogListenable> logListenerRef) {
+	void setLogListenerRef(ConnectorReference<LogListenerConnectorService> logListenerRef) {
 		this.logListenerRef = logListenerRef;
 	}
 
@@ -147,7 +147,7 @@ public class DirectLoggingAdapter extends Adapter {
 	 *            parameter.
 	 */
 	@Override
-	public void setConfiguration(final Configurable configuration) {
+	public void setConfiguration(final ConfigurationService configuration) {
 		super.setConfiguration(configuration);
 		initialize();
 	}
@@ -157,8 +157,8 @@ public class DirectLoggingAdapter extends Adapter {
 	 */
 	@Override
 	public void unbind() {
-		this.logPublisher.unbind(this.logListener.getLogListener());
-		this.logListener.unbind();
+		this.loggingConnector.unbind(this.logListenerConnector.getLogListener());
+		this.logListenerConnector.unbind();
 	}
 
 }

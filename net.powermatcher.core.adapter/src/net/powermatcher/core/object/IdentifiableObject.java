@@ -2,7 +2,7 @@ package net.powermatcher.core.object;
 
 
 import net.powermatcher.core.configurable.ConfigurableObject;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 import net.powermatcher.core.object.config.IdentifiableObjectConfiguration;
 
 import org.slf4j.Logger;
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author IBM
  * @version 0.9.0
  * s
- * @see Configurable
+ * @see ConfigurationService
  * @see IdentifiableObjectConfiguration
  */
 public abstract class IdentifiableObject extends ConfigurableObject {
@@ -71,7 +71,7 @@ public abstract class IdentifiableObject extends ConfigurableObject {
 	 *            The configuration (<code>ConfigurationService</code>)
 	 *            parameter.
 	 */
-	protected IdentifiableObject(final Configurable configuration) {
+	protected IdentifiableObject(final ConfigurationService configuration) {
 		super(configuration);
 	}
 
@@ -238,7 +238,7 @@ public abstract class IdentifiableObject extends ConfigurableObject {
 	 * @see IdentifiableObjectConfiguration
 	 */
 	@Override
-	public void setConfiguration(final Configurable configuration) {
+	public void setConfiguration(final ConfigurationService configuration) {
 		super.setConfiguration(configuration);
 		this.clusterId = getProperty(IdentifiableObjectConfiguration.CLUSTER_ID_PROPERTY, IdentifiableObjectConfiguration.CLUSTER_ID_DEFAULT);
 		this.id = getStringProperty(IdentifiableObjectConfiguration.ID_PROPERTY);

@@ -5,10 +5,10 @@ import java.util.Properties;
 import net.powermatcher.core.agent.framework.MatcherAgent;
 import net.powermatcher.core.agent.framework.data.BidInfo;
 import net.powermatcher.core.agent.framework.data.PriceInfo;
-import net.powermatcher.core.agent.framework.service.UpMessagable;
+import net.powermatcher.core.agent.framework.service.MatcherService;
 import net.powermatcher.core.configurable.BaseConfiguration;
 
-public class MockMatcherAgent extends MatcherAgent implements UpMessagable {
+public class MockMatcherAgent extends MatcherAgent implements MatcherService {
 
 	public BidInfo lastReceivedBid;
 	

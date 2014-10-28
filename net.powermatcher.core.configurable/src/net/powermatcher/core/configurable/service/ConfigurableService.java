@@ -16,9 +16,9 @@ public interface ConfigurableService {
 	 * Gets the configuration (ConfigurationService) value.
 	 * 
 	 * @return The configuration (<code>ConfigurationService</code>) value.
-	 * @see #setConfiguration(Configurable)
+	 * @see #setConfiguration(ConfigurationService)
 	 */
-	public Configurable getConfiguration();
+	public ConfigurationService getConfiguration();
 
 	/**
 	 * Sets the configuration value.
@@ -28,6 +28,6 @@ public interface ConfigurableService {
 	 *            parameter.
 	 * @see #getConfiguration()
 	 */
-	public void setConfiguration(final Configurable configuration);
+	public void setConfiguration(final ConfigurationService configuration);
 
 }

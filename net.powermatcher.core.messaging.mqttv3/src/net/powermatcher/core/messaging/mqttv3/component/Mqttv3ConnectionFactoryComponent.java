@@ -4,7 +4,7 @@ package net.powermatcher.core.messaging.mqttv3.component;
 import java.util.Map;
 
 import net.powermatcher.core.adapter.component.TargetAdapterFactoryComponent;
-import net.powermatcher.core.adapter.service.Connectable;
+import net.powermatcher.core.adapter.service.ConnectorService;
 import net.powermatcher.core.adapter.service.DirectAdapterFactoryService;
 import net.powermatcher.core.messaging.mqttv3.Mqttv3ConnectionFactory;
 import net.powermatcher.core.messaging.service.MessagingConnectorService;
@@ -97,7 +97,7 @@ public class Mqttv3ConnectionFactoryComponent extends TargetAdapterFactoryCompon
 	 * Get the Java type of the connector T.
 	 * Due to type erasure it is necessary to gave a method return the type explicitly for use
 	 * in the call to getTargetConnectorIds.
-	 * @see DirectAdapterFactoryService#getTargetConnectorIds(Connectable) 
+	 * @see DirectAdapterFactoryService#getTargetConnectorIds(ConnectorService) 
 	 * @return The Java type of the connector T.
 	 */
 	@Override
