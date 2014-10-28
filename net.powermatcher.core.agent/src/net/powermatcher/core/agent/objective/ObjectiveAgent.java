@@ -10,7 +10,7 @@ import net.powermatcher.core.agent.objective.config.ObjectiveAgentConfiguration;
 import net.powermatcher.core.agent.objective.service.ObjectiveConnectorService;
 import net.powermatcher.core.agent.objective.service.ObjectiveControlService;
 import net.powermatcher.core.agent.objective.service.ObjectiveNotificationService;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 
 
 /**
@@ -43,7 +43,7 @@ public class ObjectiveAgent extends MatcherAgent implements ObjectiveConnectorSe
 	/**
 	 * Constructs an instance of this class.
 	 * 
-	 * @see #ObjectiveAgent(Configurable)
+	 * @see #ObjectiveAgent(ConfigurationService)
 	 */
 	public ObjectiveAgent() {
 		super();
@@ -58,7 +58,7 @@ public class ObjectiveAgent extends MatcherAgent implements ObjectiveConnectorSe
 	 *            parameter.
 	 * @see #ObjectiveAgent()
 	 */
-	public ObjectiveAgent(final Configurable configuration) {
+	public ObjectiveAgent(final ConfigurationService configuration) {
 		super(configuration);
 	}
 
@@ -200,7 +200,7 @@ public class ObjectiveAgent extends MatcherAgent implements ObjectiveConnectorSe
 	 *            parameter.
 	 */
 	@Override
-	public void setConfiguration(final Configurable configuration) {
+	public void setConfiguration(final ConfigurationService configuration) {
 		super.setConfiguration(configuration);
 		initialize();
 	}

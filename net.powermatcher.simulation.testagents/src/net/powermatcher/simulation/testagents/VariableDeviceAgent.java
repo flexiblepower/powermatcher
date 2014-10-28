@@ -4,7 +4,7 @@ import net.powermatcher.core.agent.framework.Agent;
 import net.powermatcher.core.agent.framework.data.BidInfo;
 import net.powermatcher.core.agent.framework.data.MarketBasis;
 import net.powermatcher.core.agent.framework.data.PricePoint;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 
 public class VariableDeviceAgent extends Agent {
 	private static final int maxGeneration = -1000;
@@ -14,7 +14,7 @@ public class VariableDeviceAgent extends Agent {
 		super();
 	}
 
-	public VariableDeviceAgent(Configurable configuration) {
+	public VariableDeviceAgent(ConfigurationService configuration) {
 		super(configuration);
 	}
 

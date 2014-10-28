@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.powermatcher.core.configurable.BaseConfiguration;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 import net.powermatcher.core.messaging.mqttv3.config.Mqttv3ConnectionConfiguration;
 import net.powermatcher.core.messaging.service.MessagingConnectionDefinition;
 import net.powermatcher.core.messaging.service.MessagingConnectionService;
@@ -27,7 +27,7 @@ public class Mqttv3ConnectionDefinition extends IdentifiableObject implements Me
 	/**
 	 * Constructs an instance of this class.
 	 * 
-	 * @see #Mqttv3ConnectionDefinition(Configurable)
+	 * @see #Mqttv3ConnectionDefinition(ConfigurationService)
 	 */
 	public Mqttv3ConnectionDefinition() {
 		super();
@@ -42,7 +42,7 @@ public class Mqttv3ConnectionDefinition extends IdentifiableObject implements Me
 	 *            parameter.
 	 * @see #Mqttv3ConnectionDefinition()
 	 */
-	public Mqttv3ConnectionDefinition(final Configurable configuration) {
+	public Mqttv3ConnectionDefinition(final ConfigurationService configuration) {
 		super(configuration);
 	}
 
@@ -233,7 +233,7 @@ public class Mqttv3ConnectionDefinition extends IdentifiableObject implements Me
 	 *            parameter.
 	 */
 	@Override
-	public void setConfiguration(final Configurable configuration) {
+	public void setConfiguration(final ConfigurationService configuration) {
 		String hostname;
 		try {
 			hostname = InetAddress.getLocalHost().getHostName();
@@ -245,7 +245,7 @@ public class Mqttv3ConnectionDefinition extends IdentifiableObject implements Me
 				configuration.getProperty(Mqttv3ConnectionConfiguration.NOTIFICATION_HOST_NAME_PROPERTY, hostname));
 		defaultProperties.put(Mqttv3ConnectionConfiguration.NOTIFICATION_COMPONENT_NAME_PROPERTY,
 				configuration.getProperty(Mqttv3ConnectionConfiguration.NOTIFICATION_COMPONENT_NAME_PROPERTY, Mqttv3ConnectionConfiguration.NOTIFICATION_COMPONENT_NAME_DEFAULT));
-		Configurable augmentedConfiguration = new BaseConfiguration(configuration, defaultProperties);
+		ConfigurationService augmentedConfiguration = new BaseConfiguration(configuration, defaultProperties);
 		super.setConfiguration(augmentedConfiguration);
 		this.brokerURI = getProperty(Mqttv3ConnectionConfiguration.BROKER_URI_PROPERTY,
 				Mqttv3ConnectionConfiguration.BROKER_DEFAULT_URI);

@@ -5,7 +5,7 @@ import net.powermatcher.core.agent.template.config.ExampleAgent2Configuration;
 import net.powermatcher.core.agent.template.service.ExampleConnectorService;
 import net.powermatcher.core.agent.template.service.ExampleControlService;
 import net.powermatcher.core.agent.template.service.ExampleNotificationService;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 import net.powermatcher.core.messaging.adapter.template.config.ExampleAdapterConfiguration;
 import net.powermatcher.core.messaging.adapter.template.constants.ExampleAdapterConstants;
 import net.powermatcher.core.messaging.framework.MessagingAdapter;
@@ -109,7 +109,7 @@ public class ExampleAdapter extends MessagingAdapter {
 	 *            The configuration (<code>ConfigurationService</code>)
 	 *            parameter.
 	 */
-	public ExampleAdapter(final Configurable configuration) {
+	public ExampleAdapter(final ConfigurationService configuration) {
 		super(configuration);
 	}
 
@@ -304,7 +304,7 @@ public class ExampleAdapter extends MessagingAdapter {
 	 *            parameter.
 	 */
 	@Override
-	public void setConfiguration(final Configurable configuration) {
+	public void setConfiguration(final ConfigurationService configuration) {
 		super.setConfiguration(configuration);
 		initialize();
 	}

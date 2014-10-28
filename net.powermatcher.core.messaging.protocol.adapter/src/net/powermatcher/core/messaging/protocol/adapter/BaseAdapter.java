@@ -1,7 +1,7 @@
 package net.powermatcher.core.messaging.protocol.adapter;
 
 
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 import net.powermatcher.core.messaging.framework.MessagingAdapter;
 import net.powermatcher.core.messaging.protocol.adapter.config.BaseAdapterConfiguration;
 
@@ -35,7 +35,7 @@ public abstract class BaseAdapter extends MessagingAdapter {
 	/**
 	 * Constructs an instance of this class.
 	 * 
-	 * @see #BaseAdapter(Configurable)
+	 * @see #BaseAdapter(ConfigurationService)
 	 */
 	protected BaseAdapter() {
 		super();
@@ -50,7 +50,7 @@ public abstract class BaseAdapter extends MessagingAdapter {
 	 *            parameter.
 	 * @see #BaseAdapter()
 	 */
-	protected BaseAdapter(final Configurable configuration) {
+	protected BaseAdapter(final ConfigurationService configuration) {
 		super(configuration);
 	}
 
@@ -122,7 +122,7 @@ public abstract class BaseAdapter extends MessagingAdapter {
 	 *            parameter.
 	 */
 	@Override
-	public void setConfiguration(final Configurable configuration) {
+	public void setConfiguration(final ConfigurationService configuration) {
 		super.setConfiguration(configuration);
 		initialize();
 	}

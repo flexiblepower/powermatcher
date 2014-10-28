@@ -8,8 +8,8 @@ import java.util.zip.DataFormatException;
 
 import net.powermatcher.core.agent.concentrator.test.MockAgent;
 import net.powermatcher.core.agent.framework.data.PriceInfo;
-import net.powermatcher.core.agent.framework.service.DownMessagable;
-import net.powermatcher.core.agent.framework.service.UpMessagable;
+import net.powermatcher.core.agent.framework.service.AgentService;
+import net.powermatcher.core.agent.framework.service.MatcherService;
 import net.powermatcher.core.configurable.BaseConfiguration;
 import net.powermatcher.core.object.config.ActiveObjectConfiguration;
 
@@ -54,8 +54,8 @@ public class SendReceivePriceTestCPQ1 extends ResilienceTest {
 		this.matchers.add(this.concentrator);
 		
 		// Bind auctioneer and concentrator
-		this.auctioneer.bind((DownMessagable) this.concentrator);
-		this.concentrator.bind((UpMessagable) this.auctioneer);
+		this.auctioneer.bind((AgentService) this.concentrator);
+		this.concentrator.bind((MatcherService) this.auctioneer);
 		
 		// Set the matcher agent for the agents
 		this.matcherAgent = this.concentrator;
@@ -294,8 +294,8 @@ public class SendReceivePriceTestCPQ1 extends ResilienceTest {
 	
 	@After
 	public void tearDownSendReceive() throws Exception {
-		this.auctioneer.unbind((DownMessagable) this.concentrator);
-		this.concentrator.unbind((UpMessagable) this.auctioneer);
+		this.auctioneer.unbind((AgentService) this.concentrator);
+		this.concentrator.unbind((MatcherService) this.auctioneer);
 	}
 	
 }

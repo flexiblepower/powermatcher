@@ -6,10 +6,10 @@ import java.io.InvalidObjectException;
 import net.powermatcher.core.agent.framework.data.BidInfo;
 import net.powermatcher.core.agent.framework.data.MarketBasis;
 import net.powermatcher.core.agent.framework.data.PriceInfo;
-import net.powermatcher.core.agent.framework.service.ChildConnectable;
-import net.powermatcher.core.agent.framework.service.DownMessagable;
-import net.powermatcher.core.agent.framework.service.UpMessagable;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.agent.framework.service.AgentConnectorService;
+import net.powermatcher.core.agent.framework.service.AgentService;
+import net.powermatcher.core.agent.framework.service.MatcherService;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 import net.powermatcher.core.messaging.framework.Topic;
 import net.powermatcher.core.messaging.protocol.adapter.config.AgentProtocolAdapterConfiguration;
 import net.powermatcher.core.messaging.protocol.adapter.constants.ProtocolAdapterConstants;
@@ -30,15 +30,15 @@ import net.powermatcher.core.messaging.protocol.adapter.msg.BidMessage;
  * @author IBM
  * @version 0.9.0
  * 
- * @see UpMessagable
- * @see ChildConnectable
+ * @see MatcherService
+ * @see AgentConnectorService
  */
 public class AgentProtocolAdapter extends ProtocolAdapter {
 	/**
 	 * @author IBM
 	 * @version 0.9.0
 	 */
-	private class MatcherPublisher implements UpMessagable {
+	private class MatcherPublisher implements MatcherService {
 		/**
 		 * Update bid info with the specified agent ID and new bid parameters.
 		 * 
@@ -70,16 +70,16 @@ public class AgentProtocolAdapter extends ProtocolAdapter {
 	/**
 	 * Define the agent (AgentService) field.
 	 */
-	private DownMessagable agent;
+	private AgentService agent;
 	/**
 	 * Define the parent matcher (MatcherService) field.
 	 */
-	private UpMessagable parentMatcherAdapter;
+	private MatcherService parentMatcherAdapter;
 
 	/**
 	 * Define the agent connector (AgentConnectorService) field.
 	 */
-	private ChildConnectable agentConnector;
+	private AgentConnectorService agentConnector;
 
 	/**
 	 * Constructs an instance of this class.
@@ -96,7 +96,7 @@ public class AgentProtocolAdapter extends ProtocolAdapter {
 	 *            The configuration (<code>ConfigurationService</code>)
 	 *            parameter.
 	 */
-	public AgentProtocolAdapter(final Configurable configuration) {
+	public AgentProtocolAdapter(final ConfigurationService configuration) {
 		super(configuration);
 	}
 
@@ -127,7 +127,7 @@ public class AgentProtocolAdapter extends ProtocolAdapter {
 	 * 
 	 * @return The agent connector (AgentConnectorService) value.
 	 */
-	public ChildConnectable getAgentConnector() {
+	public AgentConnectorService getAgentConnector() {
 		return this.agentConnector;
 	}
 
@@ -244,7 +244,7 @@ public class AgentProtocolAdapter extends ProtocolAdapter {
 	 *            The agent connector (<code>AgentConnectorService</code>)
 	 *            parameter.
 	 */
-	public void setAgentConnector(final ChildConnectable agentConnector) {
+	public void setAgentConnector(final AgentConnectorService agentConnector) {
 		this.agentConnector = agentConnector;
 		if (agentConnector == null) {
 			this.agent = null;

@@ -3,7 +3,7 @@ package net.powermatcher.core.adapter.component;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import net.powermatcher.core.adapter.service.Connectable;
+import net.powermatcher.core.adapter.service.ConnectorService;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -40,9 +40,9 @@ public class ConnectableRegistration<T> {
 	 * @param context
 	 */
 	public void register(BundleContext context) {
-		if (connectable instanceof Connectable) {
-			Connectable connectorService = (Connectable) connectable;
-			Class<Connectable>[] connectorTypes = connectorService.getConnectorTypes();
+		if (connectable instanceof ConnectorService) {
+			ConnectorService connectorService = (ConnectorService) connectable;
+			Class<ConnectorService>[] connectorTypes = connectorService.getConnectorTypes();
 			if (connectorTypes.length > 0) {
 				String[] serviceNames = new String[connectorTypes.length];
 				for (int i = 0; i < serviceNames.length; i++) {

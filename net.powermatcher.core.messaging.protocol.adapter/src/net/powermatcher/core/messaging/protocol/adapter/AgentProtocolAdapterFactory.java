@@ -4,9 +4,9 @@ package net.powermatcher.core.messaging.protocol.adapter;
 import net.powermatcher.core.adapter.service.ConnectorLocaterService;
 import net.powermatcher.core.adapter.service.SourceAdapterFactoryService;
 import net.powermatcher.core.agent.framework.config.AgentConfiguration;
-import net.powermatcher.core.agent.framework.service.ChildConnectable;
-import net.powermatcher.core.agent.framework.service.DownMessagable;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.agent.framework.service.AgentConnectorService;
+import net.powermatcher.core.agent.framework.service.AgentService;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 
 
 /**
@@ -15,17 +15,17 @@ import net.powermatcher.core.configurable.service.Configurable;
  * @author IBM
  * @version 0.9.0
  * 
- * @see ChildConnectable
+ * @see AgentConnectorService
  * @see AgentProtocolAdapter
- * @see DownMessagable
+ * @see AgentService
  */
-public class AgentProtocolAdapterFactory implements SourceAdapterFactoryService<ChildConnectable> {
+public class AgentProtocolAdapterFactory implements SourceAdapterFactoryService<AgentConnectorService> {
 
 	public AgentProtocolAdapterFactory() {
 	}
 
 	@Override
-	public AgentProtocolAdapter createAdapter(Configurable configuration, ChildConnectable connector,
+	public AgentProtocolAdapter createAdapter(ConfigurationService configuration, AgentConnectorService connector,
 			ConnectorLocaterService connectorLocater, int adapterIndex) {
 		String parentMatcherId = getTargetConnectorIds(connector)[adapterIndex];
 		return createAdapter(configuration, connector, parentMatcherId);
@@ -45,8 +45,8 @@ public class AgentProtocolAdapterFactory implements SourceAdapterFactoryService<
 	 *         value.
 	 */
 	@Override
-	public AgentProtocolAdapter createAdapter(final Configurable configuration,
-			final ChildConnectable agentConnector, final String parentMatcherId) {
+	public AgentProtocolAdapter createAdapter(final ConfigurationService configuration,
+			final AgentConnectorService agentConnector, final String parentMatcherId) {
 		AgentProtocolAdapter agentAdapter = new AgentProtocolAdapter(configuration);
 		agentAdapter.setAgentConnector(agentConnector);
 		agentAdapter.setParentMatcherId(parentMatcherId);
@@ -59,7 +59,7 @@ public class AgentProtocolAdapterFactory implements SourceAdapterFactoryService<
 	 * @return The parent matcher id configured for the agent.
 	 */
 	@Override
-	public String[] getTargetConnectorIds(final ChildConnectable connector) {
+	public String[] getTargetConnectorIds(final AgentConnectorService connector) {
 		return connector.getConfiguration().getProperty(AgentConfiguration.PARENT_MATCHER_ID_PROPERTY, AgentConfiguration.PARENT_MATCHER_ID_DEFAULT);
 	}
 

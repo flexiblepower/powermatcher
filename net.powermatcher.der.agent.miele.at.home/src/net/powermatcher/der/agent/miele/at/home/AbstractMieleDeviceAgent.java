@@ -8,7 +8,7 @@ import net.powermatcher.core.agent.framework.data.BidInfo;
 import net.powermatcher.core.agent.framework.data.MarketBasis;
 import net.powermatcher.core.agent.framework.data.PriceInfo;
 import net.powermatcher.core.agent.framework.data.PricePoint;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 import net.powermatcher.der.agent.miele.at.home.config.MieleApplianceConfiguration;
 import net.powermatcher.der.agent.miele.at.home.gateway.constants.MieleApplianceConstants;
 import net.powermatcher.der.agent.miele.at.home.gateway.constants.MieleGatewayConstants;
@@ -119,7 +119,7 @@ public abstract class AbstractMieleDeviceAgent extends Agent implements Telemetr
 	 *            The configuration (<code>ConfigurationService</code>)
 	 *            parameter.
 	 */
-	public AbstractMieleDeviceAgent(final Configurable configuration) {
+	public AbstractMieleDeviceAgent(final ConfigurationService configuration) {
 		super(configuration);
 	}
 
@@ -450,7 +450,7 @@ public abstract class AbstractMieleDeviceAgent extends Agent implements Telemetr
 	}
 
 	@Override
-	public void setConfiguration(final Configurable configuration) {
+	public void setConfiguration(final ConfigurationService configuration) {
 		super.setConfiguration(configuration);
 		initialize();
 	}

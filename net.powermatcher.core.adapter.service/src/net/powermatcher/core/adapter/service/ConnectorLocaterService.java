@@ -21,6 +21,6 @@ public interface ConnectorLocaterService {
 	 * @return The connector.
 	 * @throws Exception if the required connector was not found in the registry.
 	 */
-	public <T extends Connectable> T locateConnector(Class<T> connectorClass, String clusterId, String connectorId) throws Exception;
+	public <T extends ConnectorService> T locateConnector(Class<T> connectorClass, String clusterId, String connectorId) throws Exception;
 
 }

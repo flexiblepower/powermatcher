@@ -7,7 +7,7 @@ import net.powermatcher.core.agent.concentrator.service.PeakShavingNotificationS
 import net.powermatcher.core.agent.framework.data.BidInfo;
 import net.powermatcher.core.agent.framework.data.MarketBasis;
 import net.powermatcher.core.agent.framework.data.PriceInfo;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 
 
 /**
@@ -34,7 +34,7 @@ public class ClippingConcentrator extends AbstractPeakShavingConcentrator {
 	/**
 	 * Constructs an instance of this class.
 	 * 
-	 * @see #ClippingConcentrator(Configurable)
+	 * @see #ClippingConcentrator(ConfigurationService)
 	 */
 	public ClippingConcentrator() {
 		super();
@@ -49,7 +49,7 @@ public class ClippingConcentrator extends AbstractPeakShavingConcentrator {
 	 *            parameter.
 	 * @see #ClippingConcentrator()
 	 */
-	public ClippingConcentrator(final Configurable configuration) {
+	public ClippingConcentrator(final ConfigurationService configuration) {
 		super(configuration);
 	}
 
@@ -71,7 +71,7 @@ public class ClippingConcentrator extends AbstractPeakShavingConcentrator {
 	 *            parameter.
 	 */
 	@Override
-	public void setConfiguration(final Configurable configuration) {
+	public void setConfiguration(final ConfigurationService configuration) {
 		super.setConfiguration(configuration);
 		initialize();
 	}

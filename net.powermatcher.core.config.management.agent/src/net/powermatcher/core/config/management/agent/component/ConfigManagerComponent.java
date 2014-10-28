@@ -12,7 +12,7 @@ import net.powermatcher.core.config.management.agent.ConfigManagerConfiguration;
 import net.powermatcher.core.config.management.agent.adapter.ConfigUpdateMessagingAdapter;
 import net.powermatcher.core.configurable.BaseConfiguration;
 import net.powermatcher.core.configurable.PrefixedConfiguration;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 import net.powermatcher.core.messaging.service.MessagingConnectorService;
 
 import org.osgi.framework.BundleContext;
@@ -66,7 +66,7 @@ public class ConfigManagerComponent extends ConfigUpdateMessagingAdapter impleme
 	@Activate
 	void activate(final Map<String, Object> properties, final ComponentContext context) {
 		logInfo("Starting Configuration Manager");
-		Configurable configuration = createConfiguration(properties);
+		ConfigurationService configuration = createConfiguration(properties);
 		setConfiguration(configuration);
 		File pidFile = getPidFile(context, PID_PERSISTENCY_FILE);
 		this.configManager = new ConfigManager(this.configurationAdmin, this.factory, pidFile, configuration);
@@ -85,8 +85,8 @@ public class ConfigManagerComponent extends ConfigUpdateMessagingAdapter impleme
 	 * @param properties The component properties.
 	 * @return The combination of the component properties.
 	 */
-	private Configurable createConfiguration(final Map<String, Object> properties) {
-		Configurable contextConfiguration = new PrefixedConfiguration(System.getProperties(),
+	private ConfigurationService createConfiguration(final Map<String, Object> properties) {
+		ConfigurationService contextConfiguration = new PrefixedConfiguration(System.getProperties(),
 				ConfigManagerConfiguration.PROPERTY_PREFIX);
 		return new BaseConfiguration(contextConfiguration, properties);
 	}
@@ -100,7 +100,7 @@ public class ConfigManagerComponent extends ConfigUpdateMessagingAdapter impleme
 	@Modified
 	void modified(final ComponentContext context, final Map<String, Object> properties) {
 		logInfo("Updating Configuration Manager");
-		Configurable configuration = createConfiguration(properties);
+		ConfigurationService configuration = createConfiguration(properties);
 		if (isEnabled()) {
 			unbind();
 		}
@@ -162,7 +162,7 @@ public class ConfigManagerComponent extends ConfigUpdateMessagingAdapter impleme
 	 *            parameter.
 	 */
 	@Override
-	public void setConfiguration(final Configurable configuration) {
+	public void setConfiguration(final ConfigurationService configuration) {
 		String id = configuration.getProperty(net.powermatcher.core.object.config.ConnectableObjectConfiguration.ID_PROPERTY, (String) null);
 		if (id == null) {
 			String nodeId = configuration.getProperty(ConfigManagerConfiguration.CONFIGURATION_NODE_ID_PROPERTY,

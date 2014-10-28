@@ -3,9 +3,9 @@ package net.powermatcher.core.messaging.protocol.adapter;
 
 import net.powermatcher.core.adapter.service.ConnectorLocaterService;
 import net.powermatcher.core.adapter.service.TargetAdapterFactoryService;
-import net.powermatcher.core.agent.framework.service.ParentConnectable;
-import net.powermatcher.core.agent.framework.service.UpMessagable;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.agent.framework.service.MatcherConnectorService;
+import net.powermatcher.core.agent.framework.service.MatcherService;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 
 
 /**
@@ -14,17 +14,17 @@ import net.powermatcher.core.configurable.service.Configurable;
  * @author IBM
  * @version 0.9.0
  * 
- * @see ParentConnectable
+ * @see MatcherConnectorService
  * @see MatcherProtocolAdapter
- * @see UpMessagable
+ * @see MatcherService
  */
-public class MatcherProtocolAdapterFactory implements TargetAdapterFactoryService<ParentConnectable> {
+public class MatcherProtocolAdapterFactory implements TargetAdapterFactoryService<MatcherConnectorService> {
 
 	public MatcherProtocolAdapterFactory() {
 	}
 
 	@Override
-	public MatcherProtocolAdapter createAdapter(Configurable configuration, ParentConnectable connector,
+	public MatcherProtocolAdapter createAdapter(ConfigurationService configuration, MatcherConnectorService connector,
 			ConnectorLocaterService connectorLocater, int adapterIndex) {
 		return createAdapter(configuration, connector);
 	}
@@ -43,8 +43,8 @@ public class MatcherProtocolAdapterFactory implements TargetAdapterFactoryServic
 	 *         <code>MatcherProtocolAdapter</code>) value.
 	 */
 	@Override
-	public MatcherProtocolAdapter createAdapter(final Configurable configuration,
-			final ParentConnectable matcherConnector) {
+	public MatcherProtocolAdapter createAdapter(final ConfigurationService configuration,
+			final MatcherConnectorService matcherConnector) {
 		MatcherProtocolAdapter matcherAdapter = new MatcherProtocolAdapter(configuration);
 		matcherAdapter.setMatcherConnector(matcherConnector);
 		return matcherAdapter;

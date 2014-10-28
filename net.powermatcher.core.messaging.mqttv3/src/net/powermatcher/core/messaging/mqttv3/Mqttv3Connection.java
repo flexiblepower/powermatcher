@@ -9,7 +9,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import net.powermatcher.core.adapter.Adapter;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 import net.powermatcher.core.messaging.framework.Topic;
 import net.powermatcher.core.messaging.service.MessagingConnectionService;
 import net.powermatcher.core.messaging.service.MessagingConnectorService;
@@ -177,7 +177,7 @@ public class Mqttv3Connection extends Adapter implements MessagingConnectionServ
 	 *            The configuration (<code>ConfigurationService</code>)
 	 *            parameter.
 	 */
-	public Mqttv3Connection(final Configurable configuration) {
+	public Mqttv3Connection(final ConfigurationService configuration) {
 		super(configuration);
 	}
 
@@ -496,7 +496,7 @@ public class Mqttv3Connection extends Adapter implements MessagingConnectionServ
 	 * @param connectionDefinition
 	 *            The configuration (<code>Mqttv3ConnectionDefinition</code>)
 	 *            parameter.
-	 * @see #setConfiguration(Configurable)
+	 * @see #setConfiguration(ConfigurationService)
 	 */
 	public void setConnectionDefinition(Mqttv3ConnectionDefinition connectionDefinition) {
 		this.connectionDefinition = connectionDefinition;

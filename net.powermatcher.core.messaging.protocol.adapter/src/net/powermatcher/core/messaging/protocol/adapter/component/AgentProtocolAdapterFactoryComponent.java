@@ -6,9 +6,9 @@ import java.util.Map;
 import org.osgi.framework.BundleContext;
 
 import net.powermatcher.core.adapter.component.SourceAdapterFactoryComponent;
-import net.powermatcher.core.adapter.service.Connectable;
+import net.powermatcher.core.adapter.service.ConnectorService;
 import net.powermatcher.core.adapter.service.DirectAdapterFactoryService;
-import net.powermatcher.core.agent.framework.service.ChildConnectable;
+import net.powermatcher.core.agent.framework.service.AgentConnectorService;
 import net.powermatcher.core.messaging.protocol.adapter.AgentProtocolAdapterFactory;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
@@ -32,7 +32,7 @@ import aQute.bnd.annotation.component.Reference;
  * @see AgentProtocolAdapterFactoryComponentConfiguration
  */
 @Component(name = AgentProtocolAdapterFactoryComponent.COMPONENT_NAME, designateFactory = AgentProtocolAdapterFactoryComponentConfiguration.class)
-public class AgentProtocolAdapterFactoryComponent extends SourceAdapterFactoryComponent<ChildConnectable> {
+public class AgentProtocolAdapterFactoryComponent extends SourceAdapterFactoryComponent<AgentConnectorService> {
 	/**
 	 * Define the component name (String) constant.
 	 */
@@ -61,10 +61,10 @@ public class AgentProtocolAdapterFactoryComponent extends SourceAdapterFactoryCo
 	 * 
 	 * @param sourceConnector
 	 *            The source connector (<code>AgentConnectorService</code>) parameter.
-	 * @see #removeAgentConnector(ChildConnectable)
+	 * @see #removeAgentConnector(AgentConnectorService)
 	 */
 	@Reference(type = '*')
-	protected void addAgentConnector(final ChildConnectable sourceConnector) {
+	protected void addAgentConnector(final AgentConnectorService sourceConnector) {
 		super.addSourceConnector(sourceConnector);
 	}
 
@@ -81,9 +81,9 @@ public class AgentProtocolAdapterFactoryComponent extends SourceAdapterFactoryCo
 	 * 
 	 * @param sourceConnector
 	 *            The source connector (<code>AgentConnectorService</code>) parameter.
-	 * @see #addAgentConnector(ChildConnectable)
+	 * @see #addAgentConnector(AgentConnectorService)
 	 */
-	protected void removeAgentConnector(final ChildConnectable sourceConnector) {
+	protected void removeAgentConnector(final AgentConnectorService sourceConnector) {
 		super.removeSourceConnector(sourceConnector);
 	}
 
@@ -91,12 +91,12 @@ public class AgentProtocolAdapterFactoryComponent extends SourceAdapterFactoryCo
 	 * Get the Java type of the connector T.
 	 * Due to type erasure it is necessary to gave a method return the type explicitly for use
 	 * in the call to getTargetConnectorIds.
-	 * @see DirectAdapterFactoryService#getTargetConnectorIds(Connectable) 
+	 * @see DirectAdapterFactoryService#getTargetConnectorIds(ConnectorService) 
 	 * @return The Java type of the connector T.
 	 */
 	@Override
-	protected Class<ChildConnectable> getConnectorType() {
-		return ChildConnectable.class;
+	protected Class<AgentConnectorService> getConnectorType() {
+		return AgentConnectorService.class;
 	}
 
 }

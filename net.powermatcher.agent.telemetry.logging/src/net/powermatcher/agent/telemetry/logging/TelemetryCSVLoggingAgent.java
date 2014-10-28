@@ -18,7 +18,7 @@ import net.powermatcher.agent.telemetry.logging.config.TelemetryCSVLoggingAgentC
 import net.powermatcher.agent.telemetry.logging.task.FileUpdateTask;
 import net.powermatcher.core.agent.logging.LogRecord;
 import net.powermatcher.core.agent.logging.config.CSVLoggingAgentConfiguration;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 import net.powermatcher.core.object.ActiveObject;
 import net.powermatcher.telemetry.model.data.MeasurementData;
 import net.powermatcher.telemetry.model.data.MeasurementSingleValue;
@@ -66,7 +66,7 @@ public class TelemetryCSVLoggingAgent extends ActiveObject implements TelemetryS
 	/**
 	 * Constructs an instance of this class.
 	 * 
-	 * @see #TelemetryCSVLoggingAgent(Configurable)
+	 * @see #TelemetryCSVLoggingAgent(ConfigurationService)
 	 */
 	public TelemetryCSVLoggingAgent() {
 		super();
@@ -81,7 +81,7 @@ public class TelemetryCSVLoggingAgent extends ActiveObject implements TelemetryS
 	 *            parameter.
 	 * @see #TelemetryCSVLoggingAgent()
 	 */
-	public TelemetryCSVLoggingAgent(final Configurable configuration) {
+	public TelemetryCSVLoggingAgent(final ConfigurationService configuration) {
 		super(configuration);
 	}
 
@@ -261,7 +261,7 @@ public class TelemetryCSVLoggingAgent extends ActiveObject implements TelemetryS
 	 *            parameter.
 	 */
 	@Override
-	public void setConfiguration(final Configurable configuration) {
+	public void setConfiguration(final ConfigurationService configuration) {
 		super.setConfiguration(configuration);
 		initialize();
 	}

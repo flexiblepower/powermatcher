@@ -10,7 +10,7 @@ import java.util.Set;
 import net.powermatcher.core.agent.framework.config.MatcherAgentConfiguration;
 import net.powermatcher.core.agent.framework.data.BidInfo;
 import net.powermatcher.core.agent.framework.data.MarketBasis;
-import net.powermatcher.core.scheduler.service.TimeServicable;
+import net.powermatcher.core.scheduler.service.TimeService;
 
 /**
  * The bid cache maintains an aggregated bid, where bids can be added and
@@ -35,7 +35,7 @@ public class BidCache {
 	 * Define the time source (TimeService) that is used for obtaining real or
 	 * simulated time.
 	 */
-	private TimeServicable timeSource;
+	private TimeService timeSource;
 	/**
 	 * Define the bid cache (Map<String,HanBidCacheElement>) field.
 	 */
@@ -80,9 +80,9 @@ public class BidCache {
 	 * 
 	 * @param timeSource
 	 *            The time source (<code>TimeService</code>) to bind.
-	 * @see #unbind(TimeServicable)
+	 * @see #unbind(TimeService)
 	 */
-	public void bind(final TimeServicable timeSource) {
+	public void bind(final TimeService timeSource) {
 		this.timeSource = timeSource;
 	}
 
@@ -94,7 +94,7 @@ public class BidCache {
 	 */
 	public synchronized Set<String> cleanup() {
 		Set<String> removedAgents = new HashSet<String>();
-		TimeServicable timeSource = this.timeSource;
+		TimeService timeSource = this.timeSource;
 		if (timeSource == null) {
 			/*
 			 * If a time source has not been set yet, always discard the
@@ -204,9 +204,9 @@ public class BidCache {
 	 * @param timeSource
 	 *            The time source (<code>TimeService</code>) to unbind.
 	 * 
-	 * @see #bind(TimeServicable)
+	 * @see #bind(TimeService)
 	 */
-	public void unbind(final TimeServicable timeSource) {
+	public void unbind(final TimeService timeSource) {
 		this.timeSource = null;
 	}
 
@@ -225,7 +225,7 @@ public class BidCache {
 	 */
 	public synchronized BidInfo updateBid(final String agentId, final BidInfo newBidInfo) {
 		assert newBidInfo != null;
-		TimeServicable timeSource = this.timeSource;
+		TimeService timeSource = this.timeSource;
 		long currentTime = (timeSource == null) ? 0 : timeSource.currentTimeMillis();
 		BidCacheElement element = new BidCacheElement(newBidInfo, currentTime);
 		BidCacheElement oldElement = this.bidCache.put(agentId, element);

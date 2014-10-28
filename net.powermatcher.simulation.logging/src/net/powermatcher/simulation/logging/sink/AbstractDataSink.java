@@ -22,7 +22,7 @@ public abstract class AbstractDataSink implements DataSink {
 	}
 
 	@Override
-	public void logBidLogInfo(BidLogInfo bid) {
+	public void handleBidLogInfo(BidLogInfo bid) {
 		for (DataDescriptor descriptor : this.dataDescriptors) {
 			if (descriptor.describes(bid)) {
 				this.processFilteredBidData(descriptor, bid);
@@ -31,7 +31,7 @@ public abstract class AbstractDataSink implements DataSink {
 	}
 
 	@Override
-	public void logPriceLogInfo(PriceLogInfo price) {
+	public void handlePriceLogInfo(PriceLogInfo price) {
 		for (DataDescriptor descriptor : this.dataDescriptors) {
 			if (descriptor.describes(price)) {
 				this.processFilteredPriceData(descriptor, price);

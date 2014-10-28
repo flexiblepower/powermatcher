@@ -1,13 +1,13 @@
 package net.powermatcher.core.agent.objective.service;
 
 
-import net.powermatcher.core.adapter.service.Connectable;
+import net.powermatcher.core.adapter.service.ConnectorService;
 
 /**
  * @author IBM
  * @version 0.9.0
  */
-public interface ObjectiveConnectorService extends Connectable {
+public interface ObjectiveConnectorService extends ConnectorService {
 
 	/**
 	 * Each subtype of ConnectorService declares a final static String field

@@ -24,12 +24,12 @@ public class Filter extends AbstractDataSink implements DataSink {
 
 	@Override
 	protected void processFilteredBidData(DataDescriptor descriptor, BidLogInfo bid) {
-		sink.logBidLogInfo(bid);
+		sink.handleBidLogInfo(bid);
 	}
 
 	@Override
 	protected void processFilteredPriceData(DataDescriptor descriptor, PriceLogInfo price) {
-		sink.logPriceLogInfo(price);
+		sink.handlePriceLogInfo(price);
 	}
 
 	@Override

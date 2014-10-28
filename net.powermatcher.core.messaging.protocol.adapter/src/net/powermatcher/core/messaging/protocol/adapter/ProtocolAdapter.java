@@ -5,7 +5,7 @@ import net.powermatcher.core.agent.framework.config.AgentConfiguration.LoggingLe
 import net.powermatcher.core.agent.framework.data.BidInfo;
 import net.powermatcher.core.agent.framework.data.MarketBasis;
 import net.powermatcher.core.agent.framework.data.PriceInfo;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 import net.powermatcher.core.messaging.protocol.adapter.config.ProtocolAdapterConfiguration;
 import net.powermatcher.core.messaging.protocol.adapter.config.ProtocolAdapterConfiguration.Protocol;
 import net.powermatcher.core.messaging.protocol.adapter.constants.ProtocolAdapterConstants;
@@ -56,7 +56,7 @@ public abstract class ProtocolAdapter extends BaseAdapter implements ProtocolAda
 	/**
 	 * Constructs an instance of this class.
 	 * 
-	 * @see #ProtocolAdapter(Configurable)
+	 * @see #ProtocolAdapter(ConfigurationService)
 	 */
 	protected ProtocolAdapter() {
 		super();
@@ -71,7 +71,7 @@ public abstract class ProtocolAdapter extends BaseAdapter implements ProtocolAda
 	 *            parameter.
 	 * @see #ProtocolAdapter()
 	 */
-	protected ProtocolAdapter(final Configurable configuration) {
+	protected ProtocolAdapter(final ConfigurationService configuration) {
 		super(configuration);
 	}
 
@@ -168,7 +168,7 @@ public abstract class ProtocolAdapter extends BaseAdapter implements ProtocolAda
 	 *            parameter.
 	 */
 	@Override
-	public void setConfiguration(final Configurable configuration) {
+	public void setConfiguration(final ConfigurationService configuration) {
 		super.setConfiguration(configuration);
 		initialize();
 	}

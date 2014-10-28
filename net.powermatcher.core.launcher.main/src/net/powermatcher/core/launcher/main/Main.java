@@ -10,13 +10,13 @@ import java.util.Properties;
 import java.util.Set;
 
 import net.powermatcher.core.adapter.service.AdapterFactoryService;
-import net.powermatcher.core.adapter.service.Adaptable;
-import net.powermatcher.core.adapter.service.Connectable;
+import net.powermatcher.core.adapter.service.AdapterService;
+import net.powermatcher.core.adapter.service.ConnectorService;
 import net.powermatcher.core.configurable.BaseConfiguration;
 import net.powermatcher.core.configurable.ConfigurableObject;
 import net.powermatcher.core.configurable.PrefixedConfiguration;
 import net.powermatcher.core.configurable.service.ConfigurableService;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 import net.powermatcher.core.object.config.ConnectableObjectConfiguration;
 import net.powermatcher.core.object.config.IdentifiableObjectConfiguration;
 
@@ -38,10 +38,10 @@ import org.slf4j.LoggerFactory;
  */
 public class Main {
 
-	public static final String ID_PROPERTY_SUFFIX = Configurable.SEPARATOR + "id";
-	public static final String CLASS_PROPERTY_SUFFIX = Configurable.SEPARATOR + "class";
-	public static final String AGENT_PROPERTY_PREFIX = "agent" + Configurable.SEPARATOR;
-	public static final String ADAPTER_FACTORY_PROPERTY_PREFIX = "adapter.factory" + Configurable.SEPARATOR;
+	public static final String ID_PROPERTY_SUFFIX = ConfigurationService.SEPARATOR + "id";
+	public static final String CLASS_PROPERTY_SUFFIX = ConfigurationService.SEPARATOR + "class";
+	public static final String AGENT_PROPERTY_PREFIX = "agent" + ConfigurationService.SEPARATOR;
+	public static final String ADAPTER_FACTORY_PROPERTY_PREFIX = "adapter.factory" + ConfigurationService.SEPARATOR;
 
 	/**
 	 * Define the logger (Logger) field.
@@ -76,7 +76,7 @@ public class Main {
 	 */
 	private AdapterManager adapterManager = null;
 
-	private Map<String, AdapterFactoryService<Connectable>> adapterFactories;
+	private Map<String, AdapterFactoryService<ConnectorService>> adapterFactories;
 
 	private ConnectorRegistry connectorRegistry;
 
@@ -100,12 +100,12 @@ public class Main {
 	 * @throws InstantiationException 
 	 * @throws Exception 
 	 */
-	protected void configureAgent(final Set<Adaptable> adapters, final String id, final ConfigurableService configurable) throws Exception {
-		Configurable configuration = createAgentConfiguration(id);
+	protected void configureAgent(final Set<AdapterService> adapters, final String id, final ConfigurableService configurable) throws Exception {
+		ConfigurationService configuration = createAgentConfiguration(id);
 		configurable.setConfiguration(configuration);
 
-		if (configurable instanceof Connectable) {
-			createAdapters(adapters, configuration, (Connectable)configurable);
+		if (configurable instanceof ConnectorService) {
+			createAdapters(adapters, configuration, (ConnectorService)configurable);
 		}
 
 	}
@@ -117,23 +117,23 @@ public class Main {
 	 * @param connector
 	 * @throws Exception
 	 */
-	private void createAdapters(final Set<Adaptable> adapters, Configurable configuration,
-			Connectable connector) throws Exception {
-		Class<? extends Connectable> connectorTypes[] = connector.getConnectorTypes();
+	private void createAdapters(final Set<AdapterService> adapters, ConfigurationService configuration,
+			ConnectorService connector) throws Exception {
+		Class<? extends ConnectorService> connectorTypes[] = connector.getConnectorTypes();
 		for (int i = 0; i < connectorTypes.length; i++) {
 			String[] adapterFactoryIds = connector.getAdapterFactory(connectorTypes[i]);
 			for (int adapterIndex = 0; adapterIndex < adapterFactoryIds.length; adapterIndex++) {
 				String adapterFactoryId = adapterFactoryIds[adapterIndex];
 				if (adapterFactoryId.length() > 0) {
-					AdapterFactoryService<Connectable> adapterFactory = this.adapterFactories.get(adapterFactoryId);
+					AdapterFactoryService<ConnectorService> adapterFactory = this.adapterFactories.get(adapterFactoryId);
 					if (adapterFactory == null) {
 						throw new Exception("Undefined adapter factory '" + adapterFactoryId + "' for " + connectorTypes[i].getSimpleName() + " of " + connector.getConnectorId());
 					}
-					Configurable factoryConfiguration = createAdapterConfiguration(adapterFactoryId, configuration);
-					Adaptable adapter = adapterFactory.createAdapter(factoryConfiguration, connector, this.connectorRegistry, adapterIndex);
+					ConfigurationService factoryConfiguration = createAdapterConfiguration(adapterFactoryId, configuration);
+					AdapterService adapter = adapterFactory.createAdapter(factoryConfiguration, connector, this.connectorRegistry, adapterIndex);
 					adapters.add(adapter);
-					if (adapter instanceof Connectable) {
-						createAdapters(adapters, factoryConfiguration, (Connectable)adapter);
+					if (adapter instanceof ConnectorService) {
+						createAdapters(adapters, factoryConfiguration, (ConnectorService)adapter);
 					}
 				}
 			}
@@ -149,7 +149,7 @@ public class Main {
 	 * @return Results of the create configuration (
 	 *         <code>ConfigurationService</code>) value.
 	 */
-	protected Configurable createAgentConfiguration(final String id) {
+	protected ConfigurationService createAgentConfiguration(final String id) {
 		String prefix = AGENT_PROPERTY_PREFIX + id;
 		return new PrefixedConfiguration(this.agentProperties, prefix);
 	}
@@ -168,9 +168,9 @@ public class Main {
 	 * @return Results of the create configuration (
 	 *         <code>ConfigurationService</code>) value.
 	 */
-	protected Configurable createAdapterConfiguration(final String adapterFactoryId, final Configurable connectableConfiguration) {
+	protected ConfigurationService createAdapterConfiguration(final String adapterFactoryId, final ConfigurationService connectableConfiguration) {
 		String prefix = ADAPTER_FACTORY_PROPERTY_PREFIX + adapterFactoryId;
-		Configurable adapterConfiguration = new PrefixedConfiguration(connectableConfiguration, this.agentProperties, prefix);
+		ConfigurationService adapterConfiguration = new PrefixedConfiguration(connectableConfiguration, this.agentProperties, prefix);
 		/*
 		 * If the connectable object explicitly specifies connector.id, the adapter must be
 		 * create with id = connector.id of connectable. This allows shared adapters (like for
@@ -193,17 +193,17 @@ public class Main {
 	 * @return The adapters (<code>Set<AdapterService></code>) value.
 	 * @throws Exception
 	 */
-	protected Set<Adaptable> getAdapters() throws Exception {
-		Set<Adaptable> adapters = new HashSet<Adaptable>();
+	protected Set<AdapterService> getAdapters() throws Exception {
+		Set<AdapterService> adapters = new HashSet<AdapterService>();
 		for (String propertyName : this.agentProperties.stringPropertyNames()) {
 			if (propertyName.startsWith(AGENT_PROPERTY_PREFIX) && propertyName.endsWith(CLASS_PROPERTY_SUFFIX)) {
-				String idPropertyName = propertyName.substring(0, propertyName.lastIndexOf(Configurable.SEPARATOR)) + ID_PROPERTY_SUFFIX;
+				String idPropertyName = propertyName.substring(0, propertyName.lastIndexOf(ConfigurationService.SEPARATOR)) + ID_PROPERTY_SUFFIX;
 				String id = this.agentProperties.getProperty(idPropertyName);
 				Class<?> cls = Class.forName(this.agentProperties.getProperty(propertyName));
 				ConfigurableObject configurable = (ConfigurableObject) cls.newInstance();
 				configureAgent(adapters, id, configurable);
-				if (configurable instanceof Connectable) {
-					this.connectorRegistry.add((Connectable)configurable);
+				if (configurable instanceof ConnectorService) {
+					this.connectorRegistry.add((ConnectorService)configurable);
 				}
 			}
 		}
@@ -216,8 +216,8 @@ public class Main {
 	 * @return The adapter factories (<code>Map<String, AdapterFactoryService<ConnectorService></code>) value.
 	 * @throws Exception
 	 */
-	protected Map<String, AdapterFactoryService<Connectable>> getAdapterFactories() throws Exception {
-		Map<String, AdapterFactoryService<Connectable>> adapterFactories = new HashMap<String, AdapterFactoryService<Connectable>>();
+	protected Map<String, AdapterFactoryService<ConnectorService>> getAdapterFactories() throws Exception {
+		Map<String, AdapterFactoryService<ConnectorService>> adapterFactories = new HashMap<String, AdapterFactoryService<ConnectorService>>();
 		for (String propertyName : this.agentProperties.stringPropertyNames()) {
 			if (propertyName.startsWith(ADAPTER_FACTORY_PROPERTY_PREFIX) && propertyName.endsWith(CLASS_PROPERTY_SUFFIX)) {
 				String factoryId = propertyName.substring(ADAPTER_FACTORY_PROPERTY_PREFIX.length(), propertyName.length() - CLASS_PROPERTY_SUFFIX.length());
@@ -226,7 +226,7 @@ public class Main {
 					try {
 						Class<?> cls = Class.forName(adapterFactoryClass);
 						@SuppressWarnings("unchecked")
-						AdapterFactoryService<Connectable> factory = (AdapterFactoryService<Connectable>) cls.newInstance();
+						AdapterFactoryService<ConnectorService> factory = (AdapterFactoryService<ConnectorService>) cls.newInstance();
 						adapterFactories.put(factoryId, factory);
 					} catch (Exception e) {
 						throw new Exception("Could not create factory for " + propertyName + "=" + adapterFactoryClass, e);
@@ -316,7 +316,7 @@ public class Main {
 			this.adapterManager = new AdapterManager();
 			this.connectorRegistry = new ConnectorRegistry();
 			this.adapterFactories = getAdapterFactories();
-			Set<Adaptable> adapters = getAdapters();
+			Set<AdapterService> adapters = getAdapters();
 			this.adapterManager.setAdapters(adapters);
 		} catch (final Exception e) {
 			logger.error("Could not create the adapters", e);

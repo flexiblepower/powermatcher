@@ -3,7 +3,7 @@ package net.powermatcher.telemetry.direct.protocol.adapter;
 
 import net.powermatcher.core.adapter.Adapter;
 import net.powermatcher.core.adapter.ConnectorReference;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 import net.powermatcher.telemetry.service.TelemetryConnectorService;
 import net.powermatcher.telemetry.service.TelemetryListenerConnectorService;
 import net.powermatcher.telemetry.service.TelemetryService;
@@ -61,7 +61,7 @@ public class DirectTelemetryAdapter extends Adapter {
 	 *            The configuration (<code>ConfigurationService</code>)
 	 *            parameter.
 	 */
-	public DirectTelemetryAdapter(final Configurable configuration) {
+	public DirectTelemetryAdapter(final ConfigurationService configuration) {
 		super(configuration);
 	}
 

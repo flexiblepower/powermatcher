@@ -2,7 +2,7 @@ package net.powermatcher.core.configurable;
 
 
 import net.powermatcher.core.configurable.service.ConfigurableService;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 
 /**
  * @author IBM
@@ -21,18 +21,18 @@ import net.powermatcher.core.configurable.service.Configurable;
  * to store a configuration and retrieve easily configuration properties.
  * </p>
  * @see ConfigurableService
- * @see Configurable
+ * @see ConfigurationService
  */
 public class ConfigurableObject implements ConfigurableService {
 	/**
 	 * Define the configuration (ConfigurationService) field.
 	 */
-	private Configurable configuration;
+	private ConfigurationService configuration;
 
 	/**
 	 * Constructs an instance of this class.
 	 * 
-	 * @see #ConfigurableObject(Configurable)
+	 * @see #ConfigurableObject(ConfigurationService)
 	 */
 	public ConfigurableObject() {
 		super();
@@ -47,7 +47,7 @@ public class ConfigurableObject implements ConfigurableService {
 	 *            parameter.
 	 * @see #ConfigurableObject()
 	 */
-	public ConfigurableObject(final Configurable configuration) {
+	public ConfigurableObject(final ConfigurationService configuration) {
 		setConfiguration(configuration);
 	}
 
@@ -79,10 +79,10 @@ public class ConfigurableObject implements ConfigurableService {
 	 * Gets the configuration (ConfigurationService) value.
 	 * 
 	 * @return The configuration (<code>ConfigurationService</code>) value.
-	 * @see #setConfiguration(Configurable)
+	 * @see #setConfiguration(ConfigurationService)
 	 */
 	@Override
-	public Configurable getConfiguration() {
+	public ConfigurationService getConfiguration() {
 		return this.configuration;
 	}
 
@@ -580,7 +580,7 @@ public class ConfigurableObject implements ConfigurableService {
 	 * @see #getConfiguration()
 	 */
 	@Override
-	public void setConfiguration(final Configurable configuration) {
+	public void setConfiguration(final ConfigurationService configuration) {
 		this.configuration = configuration;
 	}
 

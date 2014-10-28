@@ -6,7 +6,7 @@ import java.util.Map;
 import net.powermatcher.core.adapter.DirectConnectorFactoryTracker;
 import net.powermatcher.core.adapter.DirectConnectorTrackerListener;
 import net.powermatcher.core.adapter.component.DirectAdapterFactoryComponent;
-import net.powermatcher.core.adapter.service.Connectable;
+import net.powermatcher.core.adapter.service.ConnectorService;
 import net.powermatcher.core.adapter.service.DirectAdapterFactoryService;
 import net.powermatcher.telemetry.direct.protocol.adapter.DirectTelemetryAdapter;
 import net.powermatcher.telemetry.direct.protocol.adapter.DirectTelemetryAdapterFactory;
@@ -128,7 +128,7 @@ public class DirectTelemetryAdapterFactoryComponent extends DirectAdapterFactory
 	 * Get the Java type of the connector T.
 	 * Due to type erasure it is necessary to gave a method return the type explicitly for use
 	 * in the call to getTargetConnectorIds.
-	 * @see DirectAdapterFactoryService#getTargetConnectorIds(Connectable) 
+	 * @see DirectAdapterFactoryService#getTargetConnectorIds(ConnectorService) 
 	 * @return The Java type of the connector T.
 	 */
 	@Override

@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 
 
 /**
@@ -41,11 +41,11 @@ import net.powermatcher.core.configurable.service.Configurable;
  * 
  * </p>
  */
-public class BaseConfiguration implements Configurable {
+public class BaseConfiguration implements ConfigurationService {
 	/**
 	 * Define the parent (ConfigurationService) field.
 	 */
-	private Configurable parent;
+	private ConfigurationService parent;
 	/**
 	 * Define the properties (Map) field.
 	 */
@@ -61,7 +61,7 @@ public class BaseConfiguration implements Configurable {
 	 *            The properties (<code>Map<String,Object></code>) parameter.
 	 * @see #BaseConfiguration(Map)
 	 */
-	public BaseConfiguration(final Configurable parent, final Map<String, Object> properties) {
+	public BaseConfiguration(final ConfigurationService parent, final Map<String, Object> properties) {
 		this.properties = properties;
 		this.parent = parent;
 	}
@@ -72,7 +72,7 @@ public class BaseConfiguration implements Configurable {
 	 * 
 	 * @param properties
 	 *            The properties (<code>Map<String,Object></code>) parameter.
-	 * @see #BaseConfiguration(Configurable,Map)
+	 * @see #BaseConfiguration(ConfigurationService,Map)
 	 */
 	public BaseConfiguration(final Map<String, Object> properties) {
 		this(null, properties);
@@ -84,7 +84,7 @@ public class BaseConfiguration implements Configurable {
 	 * 
 	 * @param properties
 	 *            The properties (<code>Properties</code>) parameter.
-	 * @see #BaseConfiguration(Configurable,Map)
+	 * @see #BaseConfiguration(ConfigurationService,Map)
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public BaseConfiguration(final Properties properties) {
@@ -285,7 +285,7 @@ public class BaseConfiguration implements Configurable {
 	 * @return The parent (<code>ConfigurationService</code>) value.
 	 */
 	@Override
-	public Configurable getParent() {
+	public ConfigurationService getParent() {
 		return this.parent;
 	}
 

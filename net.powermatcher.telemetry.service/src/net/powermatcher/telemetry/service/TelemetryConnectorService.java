@@ -1,6 +1,6 @@
 package net.powermatcher.telemetry.service;
 
-import net.powermatcher.core.adapter.service.Connectable;
+import net.powermatcher.core.adapter.service.ConnectorService;
 
 
 /**
@@ -12,7 +12,7 @@ import net.powermatcher.core.adapter.service.Connectable;
  * @author IBM
  * @version 0.9.0
  */
-public interface TelemetryConnectorService extends Connectable {
+public interface TelemetryConnectorService extends ConnectorService {
 
 	/**
 	 * Each subtype of ConnectorService declares a final static String field

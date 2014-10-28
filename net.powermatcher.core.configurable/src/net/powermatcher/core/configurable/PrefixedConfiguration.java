@@ -4,7 +4,7 @@ package net.powermatcher.core.configurable;
 import java.util.Map;
 import java.util.Properties;
 
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 
 
 /**
@@ -48,9 +48,9 @@ public class PrefixedConfiguration extends BaseConfiguration {
 	 *            The properties (<code>Map<String, Object></code>) parameter.
 	 * @param propertyPrefix
 	 *            The property prefix (<code>String</code>) parameter.
-	 * @see BaseConfiguration#BaseConfiguration(Configurable, Map)
+	 * @see BaseConfiguration#BaseConfiguration(ConfigurationService, Map)
 	 */
-	public PrefixedConfiguration(final Configurable parent, final Map<String, Object> properties,
+	public PrefixedConfiguration(final ConfigurationService parent, final Map<String, Object> properties,
 			final String propertyPrefix) {
 		super(parent, properties);
 		this.propertyPrefix = propertyPrefix;
@@ -64,7 +64,7 @@ public class PrefixedConfiguration extends BaseConfiguration {
 	 *            The properties (<code>Map<String, Object></code>) parameter.
 	 * @param propertyPrefix
 	 *            The property prefix (<code>String</code>) parameter.
-	 * @see #PrefixedConfiguration(Configurable,Map,String)
+	 * @see #PrefixedConfiguration(ConfigurationService,Map,String)
 	 */
 	public PrefixedConfiguration(final Map<String, Object> properties, final String propertyPrefix) {
 		this(null, properties, propertyPrefix);
@@ -78,7 +78,7 @@ public class PrefixedConfiguration extends BaseConfiguration {
 	 *            The properties (<code>Properties</code>) parameter.
 	 * @param propertyPrefix
 	 *            The property prefix (<code>String</code>) parameter.
-	 * @see #PrefixedConfiguration(Configurable, Properties, String)
+	 * @see #PrefixedConfiguration(ConfigurationService, Properties, String)
 	 */
 	public PrefixedConfiguration(final Properties properties, final String propertyPrefix) {
 		this(null, properties, propertyPrefix);
@@ -94,10 +94,10 @@ public class PrefixedConfiguration extends BaseConfiguration {
 	 *            The properties (<code>Properties</code>) parameter.
 	 * @param propertyPrefix
 	 *            The property prefix (<code>String</code>) parameter.
-	 * @see #PrefixedConfiguration(Configurable, Map, String)
+	 * @see #PrefixedConfiguration(ConfigurationService, Map, String)
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public PrefixedConfiguration(final Configurable parent, final Properties properties, final String propertyPrefix) {
+	public PrefixedConfiguration(final ConfigurationService parent, final Properties properties, final String propertyPrefix) {
 		this(parent, (Map) properties, propertyPrefix);
 	}
 

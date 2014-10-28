@@ -6,7 +6,7 @@ import java.util.WeakHashMap;
 
 import net.powermatcher.core.adapter.service.ConnectorLocaterService;
 import net.powermatcher.core.adapter.service.TargetAdapterFactoryService;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 import net.powermatcher.core.messaging.service.MessagingConnectionDefinition;
 import net.powermatcher.core.messaging.service.MessagingConnectionService;
 import net.powermatcher.core.messaging.service.MessagingConnectorService;
@@ -33,7 +33,7 @@ public class Mqttv3ConnectionFactory implements TargetAdapterFactoryService<Mess
 	}
 
 	@Override
-	public MessagingConnectionService createAdapter(Configurable configuration, MessagingConnectorService connector,
+	public MessagingConnectionService createAdapter(ConfigurationService configuration, MessagingConnectorService connector,
 			ConnectorLocaterService connectorLocater, int adapterIndex) {
 		return createAdapter(configuration, connector);
 	}
@@ -52,7 +52,7 @@ public class Mqttv3ConnectionFactory implements TargetAdapterFactoryService<Mess
 	 *         <code>MessagingConnection</code>) value.
 	 */
 	@Override
-	public MessagingConnectionService createAdapter(final Configurable configuration,
+	public MessagingConnectionService createAdapter(final ConfigurationService configuration,
 			final MessagingConnectorService messagingConnector) {
 		MessagingConnectionDefinition connectionDefinition = new Mqttv3ConnectionDefinition(configuration);
 		synchronized (connectionCache) {

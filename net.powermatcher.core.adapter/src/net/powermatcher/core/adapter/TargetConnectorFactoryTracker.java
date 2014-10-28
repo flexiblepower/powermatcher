@@ -4,7 +4,7 @@ package net.powermatcher.core.adapter;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.powermatcher.core.adapter.service.Connectable;
+import net.powermatcher.core.adapter.service.ConnectorService;
 
 /**
  * A TargetConnectorFactoryTracker is used to bind an adapter created by an adapter
@@ -21,13 +21,13 @@ import net.powermatcher.core.adapter.service.Connectable;
  * @version 0.9.0
  * 
  * @see TargetConnectorTrackerListener
- * @see Connectable
+ * @see ConnectorService
  * 
  * @param <T>
  *            Defines the generic ConnectorService type that ConnectorTracker
  *            will use.
  */
-public class TargetConnectorFactoryTracker<T extends Connectable> extends AbstractConnectorFactoryTracker<T> {
+public class TargetConnectorFactoryTracker<T extends ConnectorService> extends AbstractConnectorFactoryTracker<T> {
 	/**
 	 * Define the connectors (Set<T>) field.
 	 */
@@ -79,7 +79,7 @@ public class TargetConnectorFactoryTracker<T extends Connectable> extends Abstra
 	 *            The connector (<code>T</code>) parameter.
 	 * @param factoryIds
 	 *            The list of adapter factory IDs (<code>String[]</code>) parameter.
-	 * @see #removeConnector(Connectable, String[])
+	 * @see #removeConnector(ConnectorService, String[])
 	 */
 	public synchronized void addConnector(final T connector, final String[] factoryIds) {
 		ConnectorAndFactoryReference<T> connectorAndFactory = new ConnectorAndFactoryReference<T>(connector, factoryIds);
@@ -119,7 +119,7 @@ public class TargetConnectorFactoryTracker<T extends Connectable> extends Abstra
 	 *            The connector (<code>T</code>) parameter.
 	 * @param factoryIds
 	 *            The list of adapter factory IDs (<code>String[]</code>) parameter.
-	 * @see #addConnector(Connectable, String[])
+	 * @see #addConnector(ConnectorService, String[])
 	 */
 	public synchronized void removeConnector(final T connector, final String[] factoryIds) {
 		ConnectorAndFactoryReference<T> connectorAndFactory = new ConnectorAndFactoryReference<T>(connector, factoryIds);

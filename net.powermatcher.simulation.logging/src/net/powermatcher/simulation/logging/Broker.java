@@ -18,14 +18,14 @@ public class Broker implements DataSink {
 	@Override
 	public void handleBidLogInfo(BidLogInfo bidLogInfo) {
 		for (DataSink sink : this.dataSinks) {
-			sink.logBidLogInfo(bidLogInfo);
+			sink.handleBidLogInfo(bidLogInfo);
 		}
 	}
 
 	@Override
 	public void handlePriceLogInfo(PriceLogInfo priceLogInfo) {
 		for (DataSink sink : this.dataSinks) {
-			sink.logPriceLogInfo(priceLogInfo);
+			sink.handlePriceLogInfo(priceLogInfo);
 		}
 	}
 

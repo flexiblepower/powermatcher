@@ -2,7 +2,7 @@ package net.powermatcher.core.adapter;
 
 
 import net.powermatcher.core.adapter.service.ConnectorLocaterService;
-import net.powermatcher.core.adapter.service.Connectable;
+import net.powermatcher.core.adapter.service.ConnectorService;
 
 /**
  * 
@@ -10,7 +10,7 @@ import net.powermatcher.core.adapter.service.Connectable;
  * @version 0.9.0
  * 
  */
-public class ConnectorReference<T extends Connectable> {
+public class ConnectorReference<T extends ConnectorService> {
 
 	private ConnectorLocaterService connectorLocator;
 	private String sourceConnectorId;

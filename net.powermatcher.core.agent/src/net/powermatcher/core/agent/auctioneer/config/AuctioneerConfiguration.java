@@ -2,7 +2,7 @@ package net.powermatcher.core.agent.auctioneer.config;
 
 
 import net.powermatcher.core.agent.framework.config.MatcherAgentConfiguration;
-import net.powermatcher.core.agent.framework.service.ChildConnectable;
+import net.powermatcher.core.agent.framework.service.AgentConnectorService;
 
 /**
  * @author IBM
@@ -22,7 +22,7 @@ public interface AuctioneerConfiguration extends MatcherAgentConfiguration {
 	/**
 	 * Define the pricing adapter factory property (String) constant.
 	 */
-	public static final String PRICING_ADAPTER_FACTORY_PROPERTY = ChildConnectable.ADAPTER_FACTORY_PROPERTY_NAME;
+	public static final String PRICING_ADAPTER_FACTORY_PROPERTY = AgentConnectorService.ADAPTER_FACTORY_PROPERTY_NAME;
 	/**
 	 * Define the pricing adapter factory description (String) constant.
 	 */

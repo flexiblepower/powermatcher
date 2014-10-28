@@ -4,7 +4,7 @@ package net.powermatcher.core.adapter;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.powermatcher.core.adapter.service.Connectable;
+import net.powermatcher.core.adapter.service.ConnectorService;
 
 /**
  * A TargetConnectorFactoryTracker is used to bind an adapter created by an adapter
@@ -21,13 +21,13 @@ import net.powermatcher.core.adapter.service.Connectable;
  * @version 0.9.0
  * 
  * @see SourceConnectorTrackerListener
- * @see Connectable
+ * @see ConnectorService
  * 
  * @param <T>
  *            Defines the generic ConnectorService type that ConnectorTracker
  *            will use.
  */
-public class SourceConnectorFactoryTracker<T extends Connectable> extends AbstractConnectorFactoryTracker<T> {
+public class SourceConnectorFactoryTracker<T extends ConnectorService> extends AbstractConnectorFactoryTracker<T> {
 	/**
 	 * Define the connectors (Set<T>) field.
 	 */
@@ -81,7 +81,7 @@ public class SourceConnectorFactoryTracker<T extends Connectable> extends Abstra
 	 *            The list of adapter factory IDs (<code>String[]</code>) parameter.
 	 * @param targetConnectorIds
 	 *            The list of target connector IDs (<code>String[]</code>) parameter.
-	 * @see #removeConnector(Connectable, String[], String[])
+	 * @see #removeConnector(ConnectorService, String[], String[])
 	 */
 	public synchronized void addConnector(final T connector, final String[] factoryIds, final String[] targetConnectorIds) {
 		ConnectorAndFactoryReference<T> connectorAndFactory = new ConnectorAndFactoryReference<T>(connector, factoryIds, targetConnectorIds);
@@ -123,7 +123,7 @@ public class SourceConnectorFactoryTracker<T extends Connectable> extends Abstra
 	 *            The list of adapter factory IDs (<code>String[]</code>) parameter.
 	 * @param targetConnectorIds
 	 *            The list of target connector IDs (<code>String[]</code>) parameter.
-	 * @see #addConnector(Connectable, String[], String[])
+	 * @see #addConnector(ConnectorService, String[], String[])
 	 */
 	public synchronized void removeConnector(final T connector, final String[] factoryIds, final String[] targetConnectorIds) {
 		ConnectorAndFactoryReference<T> connectorAndFactory = new ConnectorAndFactoryReference<T>(connector, factoryIds, targetConnectorIds);

@@ -1,6 +1,6 @@
 package net.powermatcher.core.adapter.service;
 
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 
 
 /**
@@ -11,7 +11,7 @@ import net.powermatcher.core.configurable.service.Configurable;
  *  @author IBM
  * @version 0.9.0
  */
-public interface AdapterFactoryService<T extends Connectable> {
+public interface AdapterFactoryService<T extends ConnectorService> {
 
 	/**
 	 * Create a new adapter instance for a connector and optional auxiliary adapters.
@@ -21,7 +21,7 @@ public interface AdapterFactoryService<T extends Connectable> {
 	 * @param connectorLocater The locater for optional auxiliary adapters.
 	 * @return The new adapter instance.
 	 */
-	public Adaptable createAdapter(final Configurable configuration,
+	public AdapterService createAdapter(final ConfigurationService configuration,
 			final T connector, final ConnectorLocaterService connectorLocater, final int factoryIndex);
 
 	public String getAdapterName();

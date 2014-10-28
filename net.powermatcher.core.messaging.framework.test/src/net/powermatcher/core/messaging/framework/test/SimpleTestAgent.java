@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 import net.powermatcher.core.configurable.BaseConfiguration;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 import net.powermatcher.core.messaging.framework.MessagingAdapter;
 import net.powermatcher.core.messaging.framework.Topic;
 import net.powermatcher.core.messaging.mqttv3.Mqttv3ConnectionFactory;
@@ -76,7 +76,7 @@ public class SimpleTestAgent extends MessagingAdapter {
 	 *            The configuration (<code>ConfigurationService</code>)
 	 *            parameter.
 	 */
-	public SimpleTestAgent(final Configurable configuration) {
+	public SimpleTestAgent(final ConfigurationService configuration) {
 		super(configuration);
 	}
 
@@ -189,7 +189,7 @@ public class SimpleTestAgent extends MessagingAdapter {
 		if (success) {
 			try {
 				Properties agentProperties = loadProperties(this.agentConfigFile);
-				Configurable configuration = new BaseConfiguration(agentProperties);
+				ConfigurationService configuration = new BaseConfiguration(agentProperties);
 				setConfiguration(configuration);
 				Mqttv3ConnectionFactory connectionFactory = new Mqttv3ConnectionFactory(); 
 				MessagingConnectionService agentConnection = connectionFactory.createAdapter(configuration, this);
@@ -210,7 +210,7 @@ public class SimpleTestAgent extends MessagingAdapter {
 	}
 
 	@Override
-	public void setConfiguration(final Configurable configuration) {
+	public void setConfiguration(final ConfigurationService configuration) {
 		super.setConfiguration(configuration);
 		initialize();
 	}

@@ -7,7 +7,7 @@ import net.powermatcher.core.agent.framework.data.MarketBasis;
 import net.powermatcher.core.agent.framework.data.PriceInfo;
 import net.powermatcher.core.agent.framework.data.PricePoint;
 import net.powermatcher.core.agent.test.config.TestAgentConfiguration;
-import net.powermatcher.core.configurable.service.Configurable;
+import net.powermatcher.core.configurable.service.ConfigurationService;
 
 
 /**
@@ -43,7 +43,7 @@ public class TestAgent extends Agent {
 	/**
 	 * Constructs an instance of this class.
 	 * 
-	 * @see #TestAgent(Configurable)
+	 * @see #TestAgent(ConfigurationService)
 	 */
 	public TestAgent() {
 		super();
@@ -58,7 +58,7 @@ public class TestAgent extends Agent {
 	 *            parameter.
 	 * @see #TestAgent()
 	 */
-	public TestAgent(final Configurable configuration) {
+	public TestAgent(final ConfigurationService configuration) {
 		super(configuration);
 	}
 
@@ -105,7 +105,7 @@ public class TestAgent extends Agent {
 	 *            parameter.
 	 */
 	@Override
-	public void setConfiguration(final Configurable configuration) {
+	public void setConfiguration(final ConfigurationService configuration) {
 		super.setConfiguration(configuration);
 		initialize();
 	}

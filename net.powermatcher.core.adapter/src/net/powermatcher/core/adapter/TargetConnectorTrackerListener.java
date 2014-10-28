@@ -1,7 +1,7 @@
 package net.powermatcher.core.adapter;
 
 
-import net.powermatcher.core.adapter.service.Connectable;
+import net.powermatcher.core.adapter.service.ConnectorService;
 
 /** 
  * 
@@ -20,7 +20,7 @@ import net.powermatcher.core.adapter.service.Connectable;
  * @param <T> Defines the generic ConnectorService type that ConnectorTrackerListener will use.
  * 
  */
-public interface TargetConnectorTrackerListener<T extends Connectable> {
+public interface TargetConnectorTrackerListener<T extends ConnectorService> {
 	/**
 	 * Bind with the specified connector parameter.
 	 * 
