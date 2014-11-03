@@ -1,4 +1,2 @@
 Bundle-Version: 1.0.0.${tstamp}
-Export-Package:  \
-	net.powermatcher.api,\
-	net.powermatcher.api.data
+Export-Package:  net.powermatcher.api*
