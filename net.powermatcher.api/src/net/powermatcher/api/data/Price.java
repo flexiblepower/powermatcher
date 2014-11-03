@@ -128,8 +128,8 @@ public class Price {
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder();
-		b.append("PriceInfo{currentPrice=").append(MarketBasis.PRICE_FORMAT.format(this.currentPrice));
-		b.append(", ").append(this.marketBasis);
+		b.append("Price{currentPrice=").append(MarketBasis.PRICE_FORMAT.format(this.currentPrice));
+//		b.append(", ").append(this.marketBasis);
 		b.append('}');
 		return b.toString();
 	}

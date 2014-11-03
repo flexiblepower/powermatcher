@@ -5,7 +5,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.powermatcher.api.AgentRole;
 import net.powermatcher.api.MatcherRole;
@@ -17,20 +21,44 @@ import net.powermatcher.api.data.Price;
 import net.powermatcher.core.BidCache;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
+import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
+import aQute.bnd.annotation.metatype.Configurable;
+import aQute.bnd.annotation.metatype.Meta;
 
-@Component
+@Component(designateFactory = Auctioneer.Config.class, immediate = true)
 public class Auctioneer implements MatcherRole {
+	private static final Logger logger = LoggerFactory.getLogger(Auctioneer.class);
+	
+	@Meta.OCD
+	public static interface Config {
+		@Meta.AD(deflt="electricity", description = "Commodity of the market basis")
+		String commodity();
+
+		@Meta.AD(deflt="EUR", description = "Currency of the market basis")
+		String currency();
+
+		@Meta.AD(deflt="100", description = "Number of price steps in the market basis")
+		int priceSteps();
+
+		@Meta.AD(deflt="0", description = "Minimum price of the market basis")
+		double minimumPrice();
+
+		@Meta.AD(deflt="1", description = "Maximum price of the market basis")
+		double maximumPrice();
+
+		@Meta.AD(deflt = "600", description = "Nr of seconds before a bid becomes invalidated")
+		int bidTimeout();
+
+		@Meta.AD(deflt = "60", description = "Number of seconds between price updates")
+		long priceUpdateRate();
+	}
 
 	private MarketBasis marketBasis;
 	
 	private BidCache aggregatedBids;
 	
 	private Set<Session> sessions = new HashSet<Session>();
-	
-	private TimeService timeService;
-	
-	private ScheduledExecutorService executorService;	
 	
 	@Override
 	public Session connect(AgentRole agentRole) {
@@ -70,41 +98,56 @@ public class Auctioneer implements MatcherRole {
 		this.aggregatedBids.updateBid(session.getSessionId(), newBid);
 	}
 
+	private TimeService timeService;
+
 	@Reference
 	public void setTimeService(TimeService timeService) {
 		this.timeService = timeService;
 	}
+
+	private ScheduledExecutorService executorService;
 
 	@Reference
 	public void setExecutorService(ScheduledExecutorService executorService) {
 		this.executorService = executorService;
 	}
 	
+	private ScheduledFuture<?> scheduledFuture;
+
 	@Activate
 	void activate(final Map<String, Object> properties) {
-		// TODO make configurable
+		Config config = Configurable.createConfigurable(Config.class, properties);
+		
 		// TODO remove marketref
 		// TODO remove significance
-		// TODO expirationTime
-		// TODO fixed rate configurable
-		this.marketBasis = new MarketBasis("ELECTRICITY", "EUR", 10, 0, 100, 2, 0);
-		this.aggregatedBids = new BidCache(this.timeService, 176);
+		this.marketBasis = new MarketBasis(config.commodity(), config.currency(), config.priceSteps(), config.minimumPrice(), config.maximumPrice(), 2, 0);
+		this.aggregatedBids = new BidCache(this.timeService, config.bidTimeout());
 		
-		this.executorService.scheduleAtFixedRate(new Runnable() {
+		scheduledFuture = this.executorService.scheduleAtFixedRate(new Runnable() {
 			@Override
 			public void run() {
 				publishNewPrice();
 			}
-		}, 5, 5, TimeUnit.SECONDS);
+		}, config.priceUpdateRate(), config.priceUpdateRate(), TimeUnit.SECONDS);
 	}
 	
-	protected void publishNewPrice() {
+	@Deactivate
+	public void deactivate() {
+		// TODO how to close all the sessions?
+		
+		scheduledFuture.cancel(false);
+	}
+	
+	void publishNewPrice() {
 		Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis);
-
-		Price newPrice = aggregatedBid.calculateIntersection(0);
-
+		Price newPrice = determinePrice(aggregatedBid);
+		logger.debug("New price: {}", newPrice);
 		for (Session session : this.sessions) {
 			session.getAgentRole().updatePrice(newPrice);
 		}
+	}
+
+	protected Price determinePrice(Bid aggregatedBid) {
+		return aggregatedBid.calculateIntersection(0);
 	}
 }
