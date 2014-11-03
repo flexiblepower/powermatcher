@@ -32,6 +32,9 @@ public class Auctioneer implements MatcherRole {
 	
 	@Meta.OCD
 	public static interface Config {
+		@Meta.AD(deflt = "auctioneer")
+		String matcherId();
+		
 		@Meta.AD(deflt="electricity", description = "Commodity of the market basis")
 		String commodity();
 
