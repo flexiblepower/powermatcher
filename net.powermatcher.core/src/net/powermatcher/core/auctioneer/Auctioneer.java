@@ -54,50 +54,6 @@ public class Auctioneer implements MatcherRole {
 		long priceUpdateRate();
 	}
 
-	private MarketBasis marketBasis;
-	
-	private BidCache aggregatedBids;
-	
-	private Set<Session> sessions = new HashSet<Session>();
-	
-	@Override
-	public Session connect(AgentRole agentRole) {
-		// Create Session
-		Session session = new Session(this.marketBasis, UUID.randomUUID().toString(), agentRole, this);
-		this.sessions.add(session);
-
-		this.aggregatedBids.updateBid(session.getSessionId(), new Bid(this.marketBasis));
-		
-		return session;
-	}
-
-	@Override
-	public void disconnect(Session session) {
-		// Find session
-		if (!sessions.remove(session)) {
-			return;
-		}
-		
-		this.aggregatedBids.removeAgent(session.getSessionId());
-	}
-
-	@Override
-	public void updateBid(Session session, Bid newBid) {
-		// TODO Auto-generated method stub
-		if (!sessions.contains(session)) {
-			// TODO throw exception
-			return;
-		}
-		
-		if (!newBid.getMarketBasis().equals(this.marketBasis)) {
-			// TODO throw exception
-			return;
-		}
-		
-		// Update agent in aggregatedBids
-		this.aggregatedBids.updateBid(session.getSessionId(), newBid);
-	}
-
 	private TimeService timeService;
 
 	@Reference
@@ -113,6 +69,12 @@ public class Auctioneer implements MatcherRole {
 	}
 	
 	private ScheduledFuture<?> scheduledFuture;
+
+	private BidCache aggregatedBids;
+
+	private MarketBasis marketBasis;
+
+	private Set<Session> sessions = new HashSet<Session>();
 
 	@Activate
 	void activate(final Map<String, Object> properties) {
@@ -134,11 +96,56 @@ public class Auctioneer implements MatcherRole {
 	@Deactivate
 	public void deactivate() {
 		// TODO how to close all the sessions?
+		for (Session session : sessions.toArray(new Session[sessions.size()])) {
+			session.disconnect();
+		}
+		
+		if(!sessions.isEmpty()) {
+			logger.warn("Could not disconnect all sessions. Left: {}", sessions);
+		}
 		
 		scheduledFuture.cancel(false);
 	}
 	
-	void publishNewPrice() {
+	@Override
+	public synchronized Session connect(AgentRole agentRole) {
+		// Create Session
+		Session session = new Session(this.marketBasis, UUID.randomUUID().toString(), agentRole, this);
+		this.sessions.add(session);
+	
+		this.aggregatedBids.updateBid(session.getSessionId(), new Bid(this.marketBasis));
+		
+		return session;
+	}
+
+	@Override
+	public synchronized void disconnect(Session session) {
+		// Find session
+		if (!sessions.remove(session)) {
+			return;
+		}
+		
+		this.aggregatedBids.removeAgent(session.getSessionId());
+	}
+
+	@Override
+	public synchronized void updateBid(Session session, Bid newBid) {
+		// TODO Auto-generated method stub
+		if (!sessions.contains(session)) {
+			// TODO throw exception
+			return;
+		}
+		
+		if (!newBid.getMarketBasis().equals(this.marketBasis)) {
+			// TODO throw exception
+			return;
+		}
+		
+		// Update agent in aggregatedBids
+		this.aggregatedBids.updateBid(session.getSessionId(), newBid);
+	}
+
+	synchronized void publishNewPrice() {
 		Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis);
 		Price newPrice = determinePrice(aggregatedBid);
 		logger.debug("New price: {}", newPrice);
