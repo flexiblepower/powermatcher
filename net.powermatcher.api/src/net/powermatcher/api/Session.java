@@ -3,15 +3,14 @@ package net.powermatcher.api;
 import net.powermatcher.api.data.MarketBasis;
 
 public class Session {
-	private MarketBasis marketBasis;
-	private String sessionId;
+	private final MarketBasis marketBasis;
+	private final String sessionId;
 	
-	private AgentRole agentRole;
-	private MatcherRole matcherRole;
+	private final AgentRole agentRole;
+	private final MatcherRole matcherRole;
 	
 	public Session(MarketBasis marketBasis, String sessionId,
 			AgentRole agentRole, MatcherRole matcherRole) {
-		super();
 		this.marketBasis = marketBasis;
 		this.sessionId = sessionId;
 		this.agentRole = agentRole;
@@ -32,5 +31,10 @@ public class Session {
 
 	public MatcherRole getMatcherRole() {
 		return matcherRole;
+	}
+	
+	public void disconnect() {
+		matcherRole.disconnect(this);
+		agentRole.disconnect(this);
 	}
 }
