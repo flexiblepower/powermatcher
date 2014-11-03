@@ -1,0 +1,6 @@
+Bundle-Version: 1.0.0.${tstamp}
+Service-Component:  \
+	*
+-buildpath:  \
+	net.powermatcher.api;version=latest,\
+	biz.aQute.bnd.annotation
