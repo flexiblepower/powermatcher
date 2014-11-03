@@ -1,9 +1,10 @@
-package net.powermatcher.core.auctioneer;
+package net.powermatcher.core.concentrator;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -15,6 +16,11 @@ import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
+import net.powermatcher.api.monitoring.IncomingBidUpdateEvent;
+import net.powermatcher.api.monitoring.Observable;
+import net.powermatcher.api.monitoring.Observer;
+import net.powermatcher.api.monitoring.OutgoingBidUpdateEvent;
+import net.powermatcher.api.monitoring.UpdateEvent;
 import net.powermatcher.core.BidCache;
 
 import org.slf4j.Logger;
@@ -27,35 +33,26 @@ import aQute.bnd.annotation.component.Reference;
 import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
-@Component(designateFactory = Auctioneer.Config.class, immediate = true)
-public class Auctioneer implements MatcherRole {
-	private static final Logger logger = LoggerFactory.getLogger(Auctioneer.class);
+@Component(designateFactory = Concentrator.Config.class, immediate = true)
+public class Concentrator implements MatcherRole, AgentRole, Observable {
+	private static final Logger logger = LoggerFactory.getLogger(Concentrator.class);
 	
 	@Meta.OCD
 	public static interface Config {
-		@Meta.AD(deflt = "auctioneer")
+		@Meta.AD(deflt = "concentrator")
 		String matcherId();
-		
-		@Meta.AD(deflt="electricity", description = "Commodity of the market basis")
-		String commodity();
-
-		@Meta.AD(deflt="EUR", description = "Currency of the market basis")
-		String currency();
-
-		@Meta.AD(deflt="100", description = "Number of price steps in the market basis")
-		int priceSteps();
-
-		@Meta.AD(deflt="0", description = "Minimum price of the market basis")
-		double minimumPrice();
-
-		@Meta.AD(deflt="1", description = "Maximum price of the market basis")
-		double maximumPrice();
 
 		@Meta.AD(deflt = "600", description = "Nr of seconds before a bid becomes invalidated")
 		int bidTimeout();
 
-		@Meta.AD(deflt = "30", description = "Number of seconds between price updates")
-		long priceUpdateRate();
+		@Meta.AD(deflt = "60", description = "Number of seconds between bid updates")
+		long bidUpdateRate();
+
+		@Meta.AD(deflt = "(matcherId=auctioneer)")
+		String matcherRole_target();
+
+		@Meta.AD(deflt = "concentrator")
+		String agentId();
 	}
 
 	private TimeService timeService;
@@ -74,27 +71,45 @@ public class Auctioneer implements MatcherRole {
 	
 	private ScheduledFuture<?> scheduledFuture;
 
+	private MatcherRole matcherRole;
+
+	@Reference
+	public void setMatcherRole(MatcherRole matcherRole) {
+		this.matcherRole = matcherRole;
+	}
+
+	private Session session;
+
 	private BidCache aggregatedBids;
 
 	private MarketBasis marketBasis;
 
 	private Set<Session> sessions = new HashSet<Session>();
 
+	private Config config;
+	
 	@Activate
 	void activate(final Map<String, Object> properties) {
-		Config config = Configurable.createConfigurable(Config.class, properties);
+		config = Configurable.createConfigurable(Config.class, properties);
 		
 		// TODO remove marketref
 		// TODO remove significance
-		this.marketBasis = new MarketBasis(config.commodity(), config.currency(), config.priceSteps(), config.minimumPrice(), config.maximumPrice(), 2, 0);
 		this.aggregatedBids = new BidCache(this.timeService, config.bidTimeout());
+
+		// Connect to matcher
+		this.session = matcherRole.connect(this);
 		
+		// Store marketbasis for cache validation
+		this.marketBasis = session.getMarketBasis();
+
 		scheduledFuture = this.scheduler.scheduleAtFixedRate(new Runnable() {
 			@Override
 			public void run() {
-				publishNewPrice();
+				doBidUpdate();
 			}
-		}, 0, config.priceUpdateRate(), TimeUnit.SECONDS);
+		}, 0, config.bidUpdateRate(), TimeUnit.SECONDS);
+
+		logger.info("Agent [{}], activated and connected to [{}]", config.agentId(), config.matcherRole_target());
 	}
 	
 	@Deactivate
@@ -109,6 +124,8 @@ public class Auctioneer implements MatcherRole {
 		}
 		
 		scheduledFuture.cancel(false);
+
+		logger.info("Agent [{}], deactivated", config.agentId());
 	}
 	
 	@Override
@@ -118,7 +135,7 @@ public class Auctioneer implements MatcherRole {
 		this.sessions.add(session);
 	
 		this.aggregatedBids.updateBid(session.getSessionId(), new Bid(this.marketBasis));
-		
+
 		logger.info("Agent connected with session [{}]", session.getSessionId());
 
 		return session;
@@ -148,24 +165,52 @@ public class Auctioneer implements MatcherRole {
 			// TODO throw exception
 			return;
 		}
-		
+
+		// TODO Agent ID is unknown
+		this.publishEvent(new IncomingBidUpdateEvent(config.agentId(), session.getSessionId(), timeService.currentDate(), "agentId", newBid));
+
 		// Update agent in aggregatedBids
 		this.aggregatedBids.updateBid(session.getSessionId(), newBid);
-		
-		logger.debug("Received bid update [{}] from session [{}]", newBid, session.getSessionId());
+
+		logger.info("Received bid update [{}] from session [{}]", newBid, session.getSessionId());
 	}
 
-	synchronized void publishNewPrice() {
-		Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis);
-		Price newPrice = determinePrice(aggregatedBid);
+	@Override
+	public void updatePrice(Price newPrice) {
+		logger.debug("Received price update [{}]", newPrice);
+
+		// Publish new price to connected agents
 		for (Session session : this.sessions) {
 			session.getAgentRole().updatePrice(newPrice);
-
-			logger.debug("New price: {}, session {}", newPrice, session.getSessionId());
 		}
 	}
 
-	protected Price determinePrice(Bid aggregatedBid) {
-		return aggregatedBid.calculateIntersection(0);
+	protected void doBidUpdate() {
+		if (session != null) {
+			Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis);
+			this.session.getMatcherRole().updateBid(this.session, aggregatedBid);
+			publishEvent(new OutgoingBidUpdateEvent(config.agentId(), session.getSessionId(), timeService.currentDate(), aggregatedBid));
+			
+			logger.debug("Updating aggregated bid [{}]", aggregatedBid);
+		}
+	}
+
+	// TODO refactor to separate (base)object
+	private final Set<Observer> observers = new CopyOnWriteArraySet<Observer>();
+
+	@Override
+	public void addObserver(Observer observer) {
+		observers.add(observer);
+	}
+
+	@Override
+	public void removeObserver(Observer observer) {
+		observers.remove(observer);
+	}
+
+	void publishEvent(UpdateEvent event) {
+		for (Observer observer : observers) {
+			observer.update(event);
+		}
 	}
 }
