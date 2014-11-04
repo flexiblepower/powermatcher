@@ -7,9 +7,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import net.powermatcher.api.AgentRole;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
@@ -37,9 +34,6 @@ public class PVPanelAgent implements AgentRole, Observable {
 	private static final Logger logger = LoggerFactory.getLogger(PVPanelAgent.class);
 	
 	public static interface Config {
-		@Meta.AD(deflt = "(matcherId=concentrator)")
-		String matcherRole_target();
-
 		@Meta.AD(deflt = "pvpanel")
 		String agentId();
 		
@@ -75,7 +69,7 @@ public class PVPanelAgent implements AgentRole, Observable {
 			}
 		}, 0, config.bidUpdateRate(), TimeUnit.SECONDS);
 
-		logger.info("Agent [{}], activated and connected to [{}]", config.agentId(), config.matcherRole_target());
+		logger.info("Agent [{}], activated", config.agentId());
 	}
 
 	protected void doBidUpdate() {
@@ -103,12 +97,12 @@ public class PVPanelAgent implements AgentRole, Observable {
 	private Session session;
 
 	@Override
-	public void connect(Session session) {
+	public void connectToMatcher(Session session) {
 		this.session = session;
 	}
 	
 	@Override
-	public void disconnect(Session session) {
+	public void disconnectFromMatcher(Session session) {
 		this.session = null;
 	}
 

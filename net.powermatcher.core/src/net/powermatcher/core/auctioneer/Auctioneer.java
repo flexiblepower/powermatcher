@@ -113,16 +113,17 @@ public class Auctioneer implements MatcherRole {
 	}
 	
 	@Override
-	public synchronized void connect(Session session) {
+	public synchronized boolean connectToAgent(Session session) {
 		session.setMarketBasis(marketBasis);
 		session.setClusterId(matcherId);
 		this.sessions.add(session);
 		this.aggregatedBids.updateBid(session.getSessionId(), new Bid(this.marketBasis));
 		logger.info("Agent connected with session [{}]", session.getSessionId());
+		return true;
 	}
 
 	@Override
-	public synchronized void disconnect(Session session) {
+	public synchronized void disconnectFromAgent(Session session) {
 		// Find session
 		if (!sessions.remove(session)) {
 			return;

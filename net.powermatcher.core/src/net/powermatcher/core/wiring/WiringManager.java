@@ -20,45 +20,47 @@ import aQute.bnd.annotation.component.Reference;
 import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
-
-@Component(immediate=true, designate = WiringManager.Config.class)
+@Component(immediate = true, designate = WiringManager.Config.class)
 public class WiringManager {
-	private static final Logger logger = LoggerFactory.getLogger(WiringManager.class);
-	
+	private static final Logger logger = LoggerFactory
+			.getLogger(WiringManager.class);
+
 	private static final String KEY_AGENT_ID = "agentId";
 	private static final String KEY_MATCHER_ID = "matcherId";
-	
+
 	public static interface Config {
 		@Meta.AD
 		List<String> activeConnections();
 	}
 
 	private Map<String, AgentRole> agentRoles = new ConcurrentHashMap<String, AgentRole>();
-	
-	@Reference(dynamic=true, multiple=true, optional=true)
+
+	@Reference(dynamic = true, multiple = true, optional = true)
 	public void addAgentRole(AgentRole agentRole, Map<String, Object> properties) {
 		String agentId = getAgentId(properties);
-		if(agentId == null) {
+		if (agentId == null) {
 			logger.warn("Registered an agent with no agentId: " + agentRole);
-		} else if(agentRoles.putIfAbsent(agentId, agentRole) != null) {
-			logger.warn("An agent with the id " + agentId + " was already registered");
+		} else if (agentRoles.putIfAbsent(agentId, agentRole) != null) {
+			logger.warn("An agent with the id " + agentId
+					+ " was already registered");
 		} else {
-			updateConnections();
+			updateConnections(true);
 		}
 	}
-	
-	public void removeAgentRole(AgentRole agentRole, Map<String, Object> properties) {
+
+	public void removeAgentRole(AgentRole agentRole,
+			Map<String, Object> properties) {
 		String agentId = getAgentId(properties);
-		if(agentId != null) {
-			if(agentRoles.get(agentId) == agentRole) {
+		if (agentId != null) {
+			if (agentRoles.get(agentId) == agentRole) {
 				// TODO: close session of agent
 				agentRoles.remove(agentId);
 			}
 		}
 	}
-	
+
 	private String getAgentId(Map<String, Object> properties) {
-		if(!properties.containsKey(KEY_AGENT_ID)) {
+		if (!properties.containsKey(KEY_AGENT_ID)) {
 			return null;
 		}
 		return properties.get(KEY_AGENT_ID).toString();
@@ -66,83 +68,101 @@ public class WiringManager {
 
 	private Map<String, MatcherRole> matcherRoles = new ConcurrentHashMap<String, MatcherRole>();
 
-	@Reference(dynamic=true, multiple=true, optional=true)
-	public void addMatcherRole(MatcherRole matcherRole, Map<String, Object> properties) {
+	@Reference(dynamic = true, multiple = true, optional = true)
+	public void addMatcherRole(MatcherRole matcherRole,
+			Map<String, Object> properties) {
 		String matcherId = getMatcherId(properties);
-		if(matcherId == null) {
-			logger.warn("Registered an matcher with no matcherId: " + matcherRole);
-		} else if(matcherRoles.putIfAbsent(matcherId, matcherRole) != null) {
-			logger.warn("An matcher with the id " + matcherId + " was already registered");
+		if (matcherId == null) {
+			logger.warn("Registered an matcher with no matcherId: "
+					+ matcherRole);
+		} else if (matcherRoles.putIfAbsent(matcherId, matcherRole) != null) {
+			logger.warn("An matcher with the id " + matcherId
+					+ " was already registered");
 		}
 	}
-	
-	public void removeMatcherRole(MatcherRole matcherRole, Map<String, Object> properties) {
+
+	public void removeMatcherRole(MatcherRole matcherRole,
+			Map<String, Object> properties) {
 		String matcherId = getMatcherId(properties);
-		if(matcherId != null) {
-			if(matcherRoles.get(matcherId) == matcherRole) {
+		if (matcherId != null) {
+			if (matcherRoles.get(matcherId) == matcherRole) {
 				// TODO close sessions
 				matcherRoles.remove(matcherId);
 			}
 		}
 	}
-	
+
 	private String getMatcherId(Map<String, Object> properties) {
-		if(!properties.containsKey(KEY_MATCHER_ID)) {
+		if (!properties.containsKey(KEY_MATCHER_ID)) {
 			return null;
 		}
 		return properties.get(KEY_MATCHER_ID).toString();
 	}
-	
+
 	private Set<String> wantedSessions;
 	private Map<String, Session> activeSessions = new ConcurrentHashMap<String, Session>();
 
 	@Activate
 	public synchronized void activate(Map<String, Object> properties) {
-		Config config = Configurable.createConfigurable(Config.class, properties);
+		Config config = Configurable.createConfigurable(Config.class,
+				properties);
 		wantedSessions = new HashSet<String>(config.activeConnections());
-		updateConnections();
+		updateConnections(true);
 	}
-	
+
 	@Modified
 	public synchronized void modified(Map<String, Object> properties) {
-		Config config = Configurable.createConfigurable(Config.class, properties);
+		Config config = Configurable.createConfigurable(Config.class,
+				properties);
 		wantedSessions = new HashSet<String>(config.activeConnections());
-		updateConnections();
+		updateConnections(true);
 	}
-	
-	private synchronized void updateConnections() {
-		if(wantedSessions != null) {
-			HashSet<String> sessionsToRemove = new HashSet<String>(activeSessions.keySet());
+
+	private synchronized void updateConnections(boolean firstTry) {
+		if (wantedSessions != null) {
+			HashSet<String> sessionsToRemove = new HashSet<String>(
+					activeSessions.keySet());
 			sessionsToRemove.removeAll(wantedSessions);
-			
-			HashSet<String> sessionsToCreate = new HashSet<String>(wantedSessions);
+
+			HashSet<String> sessionsToCreate = new HashSet<String>(
+					wantedSessions);
 			sessionsToCreate.removeAll(activeSessions.keySet());
-			
+
 			for (String sessionId : sessionsToRemove) {
 				logger.info("Disconnecting session: {}", sessionId);
 				Session session = activeSessions.remove(sessionId);
 				session.disconnect();
 			}
-			
+
+			boolean retry = false;
 			for (String sessionId : sessionsToCreate) {
 				String[] split = sessionId.split("::");
-				if(split.length != 2) {
-					logger.warn("Illegal configuration for connection: " + sessionId);
+				if (split.length != 2) {
+					logger.warn("Illegal configuration for connection: "
+							+ sessionId);
 				} else {
 					String agentId = split[0];
 					String matcherId = split[1];
-					
+
 					AgentRole agentRole = agentRoles.get(agentId);
 					MatcherRole matcherRole = matcherRoles.get(matcherId);
-					
-					if(agentRole != null && matcherRole != null) {
+
+					if (agentRole != null && matcherRole != null) {
 						logger.info("Connecting session: {}", sessionId);
-						Session session = new SessionImpl(this, agentRole, agentId, matcherRole, matcherId, sessionId);
-						matcherRole.connect(session);
-						agentRole.connect(session);
-						activeSessions.put(sessionId, session);
+						Session session = new SessionImpl(this, agentRole,
+								agentId, matcherRole, matcherId, sessionId);
+						if (matcherRole.connectToAgent(session)) {
+							agentRole.connectToMatcher(session);
+							activeSessions.put(sessionId, session);
+						} else {
+							retry = true; // TODO: better check?
+						}
 					}
 				}
+			}
+			
+			if(firstTry && retry) {
+				updateConnections(false);
 			}
 		}
 	}

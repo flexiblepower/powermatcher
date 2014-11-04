@@ -3,9 +3,9 @@ package net.powermatcher.api;
 import net.powermatcher.api.data.Bid;
 
 public interface MatcherRole {
-	void connect(Session session);
+	boolean connectToAgent(Session session);
 
-	void disconnect(Session session);
+	void disconnectFromAgent(Session session);
 	
 	void updateBid(Session session, Bid newBid);
 }

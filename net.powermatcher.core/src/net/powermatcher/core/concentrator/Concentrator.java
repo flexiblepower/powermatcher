@@ -3,7 +3,6 @@ package net.powermatcher.core.concentrator;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -14,7 +13,6 @@ import net.powermatcher.api.MatcherRole;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
-import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.monitoring.IncomingBidUpdateEvent;
 import net.powermatcher.api.monitoring.Observable;
@@ -48,9 +46,6 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 		@Meta.AD(deflt = "60", description = "Number of seconds between bid updates")
 		long bidUpdateRate();
 
-		@Meta.AD(deflt = "(matcherId=auctioneer)")
-		String matcherRole_target();
-
 		@Meta.AD(deflt = "concentrator")
 		String agentId();
 	}
@@ -71,20 +66,11 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 	
 	private ScheduledFuture<?> scheduledFuture;
 
-	private MatcherRole matcherRole;
-
-	@Reference
-	public void setMatcherRole(MatcherRole matcherRole) {
-		this.matcherRole = matcherRole;
-	}
-
-	private Session session;
+	private Session sessionToMatcher;
 
 	private BidCache aggregatedBids;
 
-	private MarketBasis marketBasis;
-
-	private Set<Session> sessions = new HashSet<Session>();
+	private Set<Session> sessionToAgents = new HashSet<Session>();
 
 	private Config config;
 	
@@ -96,12 +82,6 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 		// TODO remove significance
 		this.aggregatedBids = new BidCache(this.timeService, config.bidTimeout());
 
-		// Connect to matcher
-		this.session = matcherRole.connect(this);
-		
-		// Store marketbasis for cache validation
-		this.marketBasis = session.getMarketBasis();
-
 		scheduledFuture = this.scheduler.scheduleAtFixedRate(new Runnable() {
 			@Override
 			public void run() {
@@ -109,18 +89,18 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 			}
 		}, 0, config.bidUpdateRate(), TimeUnit.SECONDS);
 
-		logger.info("Agent [{}], activated and connected to [{}]", config.agentId(), config.matcherRole_target());
+		logger.info("Agent [{}], activated", config.agentId());
 	}
 	
 	@Deactivate
 	public void deactivate() {
 		// TODO how to close all the sessions?
-		for (Session session : sessions.toArray(new Session[sessions.size()])) {
+		for (Session session : sessionToAgents.toArray(new Session[sessionToAgents.size()])) {
 			session.disconnect();
 		}
 		
-		if(!sessions.isEmpty()) {
-			logger.warn("Could not disconnect all sessions. Left: {}", sessions);
+		if(!sessionToAgents.isEmpty()) {
+			logger.warn("Could not disconnect all sessions. Left: {}", sessionToAgents);
 		}
 		
 		scheduledFuture.cancel(false);
@@ -129,22 +109,37 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 	}
 	
 	@Override
-	public synchronized Session connect(AgentRole agentRole) {
-		// Create Session
-		Session session = new Session(this.marketBasis, UUID.randomUUID().toString(), agentRole, this);
-		this.sessions.add(session);
+	public synchronized void connectToMatcher(Session session) {
+		this.sessionToMatcher = session;
+	}
 	
-		this.aggregatedBids.updateBid(session.getSessionId(), new Bid(this.marketBasis));
-
-		logger.info("Agent connected with session [{}]", session.getSessionId());
-
-		return session;
+	@Override
+	public synchronized void disconnectFromMatcher(Session session) {
+		for(Session agentSession : sessionToAgents) {
+			agentSession.disconnect();
+		}
+		this.sessionToMatcher = null;
 	}
 
 	@Override
-	public synchronized void disconnect(Session session) {
+	public synchronized boolean connectToAgent(Session session) {
+		if(this.sessionToMatcher == null) {
+			return false;
+		}
+		
+		this.sessionToAgents.add(session);
+		session.setMarketBasis(this.sessionToMatcher.getMarketBasis());
+		session.setClusterId(this.sessionToMatcher.getClusterId());
+		
+		this.aggregatedBids.updateBid(session.getSessionId(), new Bid(this.sessionToMatcher.getMarketBasis()));
+		logger.info("Agent connected with session [{}]", session.getSessionId());
+		return true;
+	}
+
+	@Override
+	public synchronized void disconnectFromAgent(Session session) {
 		// Find session
-		if (!sessions.remove(session)) {
+		if (!sessionToAgents.remove(session)) {
 			return;
 		}
 		
@@ -156,12 +151,12 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 	@Override
 	public synchronized void updateBid(Session session, Bid newBid) {
 		// TODO Auto-generated method stub
-		if (!sessions.contains(session)) {
+		if (!sessionToAgents.contains(session)) {
 			// TODO throw exception
 			return;
 		}
 		
-		if (!newBid.getMarketBasis().equals(this.marketBasis)) {
+		if (!newBid.getMarketBasis().equals(this.sessionToMatcher.getMarketBasis())) {
 			// TODO throw exception
 			return;
 		}
@@ -180,16 +175,16 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 		logger.debug("Received price update [{}]", newPrice);
 
 		// Publish new price to connected agents
-		for (Session session : this.sessions) {
-			session.getAgentRole().updatePrice(newPrice);
+		for (Session session : this.sessionToAgents) {
+			session.updatePrice(newPrice);
 		}
 	}
 
 	protected void doBidUpdate() {
-		if (session != null) {
-			Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis);
-			this.session.getMatcherRole().updateBid(this.session, aggregatedBid);
-			publishEvent(new OutgoingBidUpdateEvent(config.agentId(), session.getSessionId(), timeService.currentDate(), aggregatedBid));
+		if (sessionToMatcher != null) {
+			Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.sessionToMatcher.getMarketBasis());
+			this.sessionToMatcher.updateBid(aggregatedBid);
+			publishEvent(new OutgoingBidUpdateEvent(config.agentId(), sessionToMatcher.getSessionId(), timeService.currentDate(), aggregatedBid));
 			
 			logger.debug("Updating aggregated bid [{}]", aggregatedBid);
 		}
