@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import net.powermatcher.api.AgentRole;
 import net.powermatcher.api.MatcherRole;
@@ -33,7 +34,7 @@ public class WiringManager {
 		List<String> activeConnections();
 	}
 
-	private Map<String, AgentRole> agentRoles = new ConcurrentHashMap<String, AgentRole>();
+	private ConcurrentMap<String, AgentRole> agentRoles = new ConcurrentHashMap<String, AgentRole>();
 
 	@Reference(dynamic = true, multiple = true, optional = true)
 	public void addAgentRole(AgentRole agentRole, Map<String, Object> properties) {
@@ -66,7 +67,7 @@ public class WiringManager {
 		return properties.get(KEY_AGENT_ID).toString();
 	}
 
-	private Map<String, MatcherRole> matcherRoles = new ConcurrentHashMap<String, MatcherRole>();
+	private ConcurrentMap<String, MatcherRole> matcherRoles = new ConcurrentHashMap<String, MatcherRole>();
 
 	@Reference(dynamic = true, multiple = true, optional = true)
 	public void addMatcherRole(MatcherRole matcherRole,
