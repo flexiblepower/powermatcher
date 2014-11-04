@@ -5,8 +5,10 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.powermatcher.api.AgentRole;
-import net.powermatcher.api.MatcherRole;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
@@ -25,11 +27,9 @@ import aQute.bnd.annotation.metatype.Meta;
 
 @Component(designateFactory = PVPanelAgent.Config.class, immediate = true)
 public class PVPanelAgent implements AgentRole, Observable {
+	private static final Logger logger = LoggerFactory.getLogger(PVPanelAgent.class);
 	
 	public static interface Config {
-		@Meta.AD(deflt = "(matcherId=auctioneer)")
-		String matcherRole_target();
-
 		@Meta.AD(deflt = "pvpanel")
 		String agentId();
 	}
@@ -48,18 +48,9 @@ public class PVPanelAgent implements AgentRole, Observable {
 		this.timeService = timeService;
 	}
 
-	private MatcherRole matcherRole;
-
-	@Reference
-	public void setMatcherRole(MatcherRole matcherRole) {
-		this.matcherRole = matcherRole;
-	}
-
-	private Session session;
 
 	@Activate
 	public void activate() {
-		session = matcherRole.connect(this);
 		scheduler.scheduleAtFixedRate(new Runnable() {
 			@Override
 			public void run() {
@@ -72,7 +63,8 @@ public class PVPanelAgent implements AgentRole, Observable {
 		if (session != null) {
 			Bid newBid = new Bid(session.getMarketBasis(), new PricePoint(0,
 					-700));
-			this.session.getMatcherRole().updateBid(this.session, newBid);
+			logger.debug("updateBid({})", newBid);
+			session.updateBid(newBid);
 			publishEvent(new OutgoingBidUpdateEvent("agentId",
 					session.getSessionId(), timeService.currentDate(), newBid));
 		}
@@ -80,16 +72,26 @@ public class PVPanelAgent implements AgentRole, Observable {
 
 	@Deactivate
 	public void deactivate() {
-		session.disconnect();
+		if(session != null) {
+			session.disconnect();
+		}
 	}
 
+	private Session session;
+
+	@Override
+	public void connect(Session session) {
+		this.session = session;
+	}
+	
 	@Override
 	public void disconnect(Session session) {
-		session = null;
+		this.session = null;
 	}
 
 	@Override
 	public void updatePrice(Price newPrice) {
+		logger.debug("updatePrice({})", newPrice);
 		// TODO real arguments
 		publishEvent(new IncomingPriceUpdateEvent("agentId",
 				session.getSessionId(), timeService.currentDate(), newPrice));

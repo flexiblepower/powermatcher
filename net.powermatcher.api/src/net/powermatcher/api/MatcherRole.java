@@ -3,7 +3,7 @@ package net.powermatcher.api;
 import net.powermatcher.api.data.Bid;
 
 public interface MatcherRole {
-	Session connect(AgentRole agentRole);
+	void connect(Session session);
 
 	void disconnect(Session session);
 	

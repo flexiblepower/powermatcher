@@ -1,40 +1,28 @@
 package net.powermatcher.api;
 
+import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
+import net.powermatcher.api.data.Price;
 
-public class Session {
-	private final MarketBasis marketBasis;
-	private final String sessionId;
+
+public interface Session {
+	String getAgentId();
 	
-	private final AgentRole agentRole;
-	private final MatcherRole matcherRole;
+	String getMatcherId();
 	
-	public Session(MarketBasis marketBasis, String sessionId,
-			AgentRole agentRole, MatcherRole matcherRole) {
-		this.marketBasis = marketBasis;
-		this.sessionId = sessionId;
-		this.agentRole = agentRole;
-		this.matcherRole = matcherRole;
-	}
-
-	public MarketBasis getMarketBasis() {
-		return marketBasis;
-	}
-
-	public String getSessionId() {
-		return sessionId;
-	}
-
-	public AgentRole getAgentRole() {
-		return agentRole;
-	}
-
-	public MatcherRole getMatcherRole() {
-		return matcherRole;
-	}
+	String getClusterId();
 	
-	public void disconnect() {
-		matcherRole.disconnect(this);
-		agentRole.disconnect(this);
-	}
+	String getSessionId();
+	
+	MarketBasis getMarketBasis();
+	
+	void setClusterId(String clusterId);
+	
+	void setMarketBasis(MarketBasis marketBasis);
+	
+	void updatePrice(Price newPrice);
+	
+	void updateBid(Bid newBid);
+	
+	void disconnect();
 }

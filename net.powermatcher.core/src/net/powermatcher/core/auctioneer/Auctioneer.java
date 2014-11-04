@@ -3,15 +3,10 @@ package net.powermatcher.core.auctioneer;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import net.powermatcher.api.AgentRole;
 import net.powermatcher.api.MatcherRole;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
@@ -19,6 +14,10 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.core.BidCache;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
@@ -79,6 +78,8 @@ public class Auctioneer implements MatcherRole {
 
 	private Set<Session> sessions = new HashSet<Session>();
 
+	private String matcherId;
+	
 	@Activate
 	void activate(final Map<String, Object> properties) {
 		Config config = Configurable.createConfigurable(Config.class, properties);
@@ -87,6 +88,7 @@ public class Auctioneer implements MatcherRole {
 		// TODO remove significance
 		this.marketBasis = new MarketBasis(config.commodity(), config.currency(), config.priceSteps(), config.minimumPrice(), config.maximumPrice(), 2, 0);
 		this.aggregatedBids = new BidCache(this.timeService, config.bidTimeout());
+		this.matcherId = config.matcherId();
 		
 		scheduledFuture = this.executorService.scheduleAtFixedRate(new Runnable() {
 			@Override
@@ -111,14 +113,11 @@ public class Auctioneer implements MatcherRole {
 	}
 	
 	@Override
-	public synchronized Session connect(AgentRole agentRole) {
-		// Create Session
-		Session session = new Session(this.marketBasis, UUID.randomUUID().toString(), agentRole, this);
+	public synchronized void connect(Session session) {
+		session.setMarketBasis(marketBasis);
+		session.setClusterId(matcherId);
 		this.sessions.add(session);
-	
 		this.aggregatedBids.updateBid(session.getSessionId(), new Bid(this.marketBasis));
-		
-		return session;
 	}
 
 	@Override
@@ -153,7 +152,7 @@ public class Auctioneer implements MatcherRole {
 		Price newPrice = determinePrice(aggregatedBid);
 		logger.debug("New price: {}", newPrice);
 		for (Session session : this.sessions) {
-			session.getAgentRole().updatePrice(newPrice);
+			session.updatePrice(newPrice);
 		}
 	}
 
