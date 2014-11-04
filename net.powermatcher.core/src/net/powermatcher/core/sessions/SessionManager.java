@@ -1,4 +1,4 @@
-package net.powermatcher.core.wiring;
+package net.powermatcher.core.sessions;
 
 import java.util.HashSet;
 import java.util.List;
@@ -21,10 +21,10 @@ import aQute.bnd.annotation.component.Reference;
 import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
-@Component(immediate = true, designate = WiringManager.Config.class)
-public class WiringManager {
+@Component(immediate = true, designate = SessionManager.Config.class)
+public class SessionManager {
 	private static final Logger logger = LoggerFactory
-			.getLogger(WiringManager.class);
+			.getLogger(SessionManager.class);
 
 	private static final String KEY_AGENT_ID = "agentId";
 	private static final String KEY_MATCHER_ID = "matcherId";
