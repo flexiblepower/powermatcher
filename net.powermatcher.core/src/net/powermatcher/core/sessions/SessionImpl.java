@@ -7,20 +7,48 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 
+/**
+ * <p>
+ * This class represents an implementation of the Session object.
+ * </p>
+ * 
+ * <p>
+ * It is responsible to hold serveral properties like sessionId, agentId,
+ * matcherId. There are two important methods. UpdateBid() and updatePrice().
+ * UpdateBid() is called by concentrators and agents. UpdatePrice() is called by
+ * the auctioneer and concentrators.
+ * 
+ * @author FAN
+ * @version 1.0
+ * 
+ */
 class SessionImpl implements Session {
+
+	/**
+	 * The sessionmanager collects the connections in the cluster.
+	 */
 	private final SessionManager sessionManager;
+
+	/**
+	 * Id's of agent, matcher and session.
+	 */
 	private final String agentId, matcherId, sessionId;
+
 	private final AgentRole agentRole;
+
 	private final MatcherRole matcherRole;
-	
+
 	private String clusterId = null;
+
 	private MarketBasis marketBasis = null;
-	
-	public SessionImpl(SessionManager sessionManager, AgentRole agentRole, String agentId, MatcherRole matcherRole, String matcherId, String sessionId) {
+
+	public SessionImpl(SessionManager sessionManager, AgentRole agentRole,
+			String agentId, MatcherRole matcherRole, String matcherId,
+			String sessionId) {
 		this.sessionManager = sessionManager;
 		this.agentId = agentId;
 		this.matcherId = matcherId;
-		this.agentRole =agentRole;
+		this.agentRole = agentRole;
 		this.matcherRole = matcherRole;
 		this.sessionId = sessionId;
 	}
@@ -34,7 +62,7 @@ class SessionImpl implements Session {
 	public String getMatcherId() {
 		return matcherId;
 	}
-	
+
 	@Override
 	public String getSessionId() {
 		return sessionId;
@@ -42,7 +70,7 @@ class SessionImpl implements Session {
 
 	@Override
 	public String getClusterId() {
-		if(clusterId == null) {
+		if (clusterId == null) {
 			throw new IllegalStateException("No clusterId has been defined");
 		}
 		return clusterId;
@@ -50,7 +78,7 @@ class SessionImpl implements Session {
 
 	@Override
 	public MarketBasis getMarketBasis() {
-		if(marketBasis == null) {
+		if (marketBasis == null) {
 			throw new IllegalStateException("No marketBasis has been defined");
 		}
 		return marketBasis;
@@ -58,7 +86,7 @@ class SessionImpl implements Session {
 
 	@Override
 	public void setClusterId(String clusterId) {
-		if(this.clusterId != null) {
+		if (this.clusterId != null) {
 			throw new IllegalStateException("clusterId can only be set once");
 		}
 		this.clusterId = clusterId;
@@ -66,7 +94,7 @@ class SessionImpl implements Session {
 
 	@Override
 	public void setMarketBasis(MarketBasis marketBasis) {
-		if(this.marketBasis != null) {
+		if (this.marketBasis != null) {
 			throw new IllegalStateException("marketBasis can only be set once");
 		}
 		this.marketBasis = marketBasis;

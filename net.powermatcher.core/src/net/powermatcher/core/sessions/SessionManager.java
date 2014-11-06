@@ -21,20 +21,63 @@ import aQute.bnd.annotation.component.Reference;
 import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
+/**
+ * <p>
+ * This class represents a sessionmanager component which will store the active
+ * sessions between an auctioneer, concentrators and agents.
+ * </p>
+ * 
+ * <p>
+ * It is responsible for connecting and disconnecting an auctioneer,
+ * concentrators and agents. In <code>activeSessions</code> the sessions will be
+ * stored. The sessionmanager will connect a matcherrole to an agent and an
+ * agentrole with a matcher.
+ * 
+ * @author FAN
+ * @version 1.0
+ * 
+ */
 @Component(immediate = true, designate = SessionManager.Config.class)
 public class SessionManager {
-	private static final Logger logger = LoggerFactory
-			.getLogger(SessionManager.class);
-
-	private static final String KEY_AGENT_ID = "agentId";
-	private static final String KEY_MATCHER_ID = "matcherId";
-
 	public static interface Config {
 		@Meta.AD
 		List<String> activeConnections();
 	}
 
+	private static final Logger logger = LoggerFactory
+			.getLogger(SessionManager.class);
+
+	private static final String KEY_AGENT_ID = "agentId";
+
+	private static final String KEY_MATCHER_ID = "matcherId";
+
+	/**
+	 * Holds the agentRoles
+	 */
 	private ConcurrentMap<String, AgentRole> agentRoles = new ConcurrentHashMap<String, AgentRole>();
+
+	/**
+	 * Holds the matcherRoles
+	 */
+	private ConcurrentMap<String, MatcherRole> matcherRoles = new ConcurrentHashMap<String, MatcherRole>();
+
+	/**
+	 * Holds the wantedSessions
+	 */
+	private Set<String> wantedSessions;
+
+	/**
+	 * Holds the activeSessions
+	 */
+	private Map<String, Session> activeSessions = new ConcurrentHashMap<String, Session>();
+
+	@Activate
+	public synchronized void activate(Map<String, Object> properties) {
+		Config config = Configurable.createConfigurable(Config.class,
+				properties);
+		wantedSessions = new HashSet<String>(config.activeConnections());
+		updateConnections(true);
+	}
 
 	@Reference(dynamic = true, multiple = true, optional = true)
 	public void addAgentRole(AgentRole agentRole, Map<String, Object> properties) {
@@ -43,6 +86,21 @@ public class SessionManager {
 			logger.warn("Registered an agent with no agentId: " + agentRole);
 		} else if (agentRoles.putIfAbsent(agentId, agentRole) != null) {
 			logger.warn("An agent with the id " + agentId
+					+ " was already registered");
+		} else {
+			updateConnections(true);
+		}
+	}
+
+	@Reference(dynamic = true, multiple = true, optional = true)
+	public void addMatcherRole(MatcherRole matcherRole,
+			Map<String, Object> properties) {
+		String matcherId = getMatcherId(properties);
+		if (matcherId == null) {
+			logger.warn("Registered an matcher with no matcherId: "
+					+ matcherRole);
+		} else if (matcherRoles.putIfAbsent(matcherId, matcherRole) != null) {
+			logger.warn("An matcher with the id " + matcherId
 					+ " was already registered");
 		} else {
 			updateConnections(true);
@@ -67,19 +125,11 @@ public class SessionManager {
 		return properties.get(KEY_AGENT_ID).toString();
 	}
 
-	private ConcurrentMap<String, MatcherRole> matcherRoles = new ConcurrentHashMap<String, MatcherRole>();
-
-	@Reference(dynamic = true, multiple = true, optional = true)
-	public void addMatcherRole(MatcherRole matcherRole,
-			Map<String, Object> properties) {
-		String matcherId = getMatcherId(properties);
-		if (matcherId == null) {
-			logger.warn("Registered an matcher with no matcherId: "
-					+ matcherRole);
-		} else if (matcherRoles.putIfAbsent(matcherId, matcherRole) != null) {
-			logger.warn("An matcher with the id " + matcherId
-					+ " was already registered");
+	private String getMatcherId(Map<String, Object> properties) {
+		if (!properties.containsKey(KEY_MATCHER_ID)) {
+			return null;
 		}
+		return properties.get(KEY_MATCHER_ID).toString();
 	}
 
 	public void removeMatcherRole(MatcherRole matcherRole,
@@ -91,24 +141,6 @@ public class SessionManager {
 				matcherRoles.remove(matcherId);
 			}
 		}
-	}
-
-	private String getMatcherId(Map<String, Object> properties) {
-		if (!properties.containsKey(KEY_MATCHER_ID)) {
-			return null;
-		}
-		return properties.get(KEY_MATCHER_ID).toString();
-	}
-
-	private Set<String> wantedSessions;
-	private Map<String, Session> activeSessions = new ConcurrentHashMap<String, Session>();
-
-	@Activate
-	public synchronized void activate(Map<String, Object> properties) {
-		Config config = Configurable.createConfigurable(Config.class,
-				properties);
-		wantedSessions = new HashSet<String>(config.activeConnections());
-		updateConnections(true);
 	}
 
 	@Modified
@@ -161,8 +193,8 @@ public class SessionManager {
 					}
 				}
 			}
-			
-			if(firstTry && retry) {
+
+			if (firstTry && retry) {
 				updateConnections(false);
 			}
 		}
