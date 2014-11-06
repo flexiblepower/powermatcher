@@ -98,7 +98,7 @@ public class Auctioneer implements MatcherRole {
 	private BidCache aggregatedBids;
 	
 	/**
-	 * The marketBasis specifies The PowerMatcher market basis for bids and prices.
+	 * The marketBasis for bids and prices.
 	 */
 	private MarketBasis marketBasis;
 	

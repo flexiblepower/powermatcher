@@ -35,7 +35,11 @@ public class SessionManager {
 	}
 
 	private ConcurrentMap<String, AgentRole> agentRoles = new ConcurrentHashMap<String, AgentRole>();
+	private Set<String> wantedSessions;
+	private Map<String, Session> activeSessions = new ConcurrentHashMap<String, Session>();
+	private ConcurrentMap<String, MatcherRole> matcherRoles = new ConcurrentHashMap<String, MatcherRole>();
 
+	
 	@Reference(dynamic = true, multiple = true, optional = true)
 	public void addAgentRole(AgentRole agentRole, Map<String, Object> properties) {
 		String agentId = getAgentId(properties);
@@ -49,6 +53,21 @@ public class SessionManager {
 		}
 	}
 
+	@Reference(dynamic = true, multiple = true, optional = true)
+	public void addMatcherRole(MatcherRole matcherRole,
+			Map<String, Object> properties) {
+		String matcherId = getMatcherId(properties);
+		if (matcherId == null) {
+			logger.warn("Registered an matcher with no matcherId: "
+					+ matcherRole);
+		} else if (matcherRoles.putIfAbsent(matcherId, matcherRole) != null) {
+			logger.warn("An matcher with the id " + matcherId
+					+ " was already registered");
+		}  else {
+			updateConnections(true);
+		}
+	}
+	
 	public void removeAgentRole(AgentRole agentRole,
 			Map<String, Object> properties) {
 		String agentId = getAgentId(properties);
@@ -66,19 +85,11 @@ public class SessionManager {
 		return properties.get(KEY_AGENT_ID).toString();
 	}
 
-	private ConcurrentMap<String, MatcherRole> matcherRoles = new ConcurrentHashMap<String, MatcherRole>();
-
-	@Reference(dynamic = true, multiple = true, optional = true)
-	public void addMatcherRole(MatcherRole matcherRole,
-			Map<String, Object> properties) {
-		String matcherId = getMatcherId(properties);
-		if (matcherId == null) {
-			logger.warn("Registered an matcher with no matcherId: "
-					+ matcherRole);
-		} else if (matcherRoles.putIfAbsent(matcherId, matcherRole) != null) {
-			logger.warn("An matcher with the id " + matcherId
-					+ " was already registered");
+	private String getMatcherId(Map<String, Object> properties) {
+		if (!properties.containsKey(KEY_MATCHER_ID)) {
+			return null;
 		}
+		return properties.get(KEY_MATCHER_ID).toString();
 	}
 
 	public void removeMatcherRole(MatcherRole matcherRole,
@@ -90,16 +101,6 @@ public class SessionManager {
 			}
 		}
 	}
-
-	private String getMatcherId(Map<String, Object> properties) {
-		if (!properties.containsKey(KEY_MATCHER_ID)) {
-			return null;
-		}
-		return properties.get(KEY_MATCHER_ID).toString();
-	}
-
-	private Set<String> wantedSessions;
-	private Map<String, Session> activeSessions = new ConcurrentHashMap<String, Session>();
 
 	@Activate
 	public synchronized void activate(Map<String, Object> properties) {
