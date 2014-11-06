@@ -28,18 +28,21 @@ import aQute.bnd.annotation.metatype.Meta;
 
 /**
  * <p>
- * This class represents an auctioneer component which will receive all bids of other agents
- * as a single bid or as an aggregate bid via one or more concentrators.
+ * This class represents an auctioneer component which will receive all bids of
+ * other agents as a single bid or as an aggregate bid via one or more
+ * concentrators.
  * </p>
  * 
  * <p>
+ * It is responsible for defining and sending the market basis and calculating
+ * the equilibrium based on the bids from the different agents in the topology.
+ * This equilibrium is communicated to the agents down the hierarchy in the form
+ * of price update messages.
  * 
- * It is responsible for defining and sending the market basis and calculating the equilibrium based on the bids 
- * from the different agents in the topology.
- * This equilibrium is communicated to the agents down the hierarchy in the form of price update messages.
- * 
- * The price that is communicated contains a price and a market basis which enables the conversion to a normalized price 
- * or to any other market basis for other financial calculation purposes.
+ * The price that is communicated contains a price and a market basis which
+ * enables the conversion to a normalized price or to any other market basis for
+ * other financial calculation purposes.
+ * </p>
  * 
  * @author FAN
  * @version 1.0
@@ -47,26 +50,27 @@ import aQute.bnd.annotation.metatype.Meta;
  */
 @Component(designateFactory = Auctioneer.Config.class, immediate = true)
 public class Auctioneer implements MatcherRole {
-	private static final Logger logger = LoggerFactory.getLogger(Auctioneer.class);
-	
+	private static final Logger logger = LoggerFactory
+			.getLogger(Auctioneer.class);
+
 	@Meta.OCD
 	public static interface Config {
 		@Meta.AD(deflt = "auctioneer")
 		String matcherId();
-		
-		@Meta.AD(deflt="electricity", description = "Commodity of the market basis")
+
+		@Meta.AD(deflt = "electricity", description = "Commodity of the market basis")
 		String commodity();
 
-		@Meta.AD(deflt="EUR", description = "Currency of the market basis")
+		@Meta.AD(deflt = "EUR", description = "Currency of the market basis")
 		String currency();
 
-		@Meta.AD(deflt="100", description = "Number of price steps in the market basis")
+		@Meta.AD(deflt = "100", description = "Number of price steps in the market basis")
 		int priceSteps();
 
-		@Meta.AD(deflt="0", description = "Minimum price of the market basis")
+		@Meta.AD(deflt = "0", description = "Minimum price of the market basis")
 		double minimumPrice();
 
-		@Meta.AD(deflt="1", description = "Maximum price of the market basis")
+		@Meta.AD(deflt = "1", description = "Maximum price of the market basis")
 		double maximumPrice();
 
 		@Meta.AD(deflt = "600", description = "Nr of seconds before a bid becomes invalidated")
@@ -77,15 +81,16 @@ public class Auctioneer implements MatcherRole {
 	}
 
 	/**
-     * TimeService that is used for obtaining real or simulated time.
-     */
+	 * TimeService that is used for obtaining real or simulated time.
+	 */
 	private TimeService timeService;
 
 	/**
-	 * Scheduler that can schedule commands to run after a given delay, or to execute periodically.
+	 * Scheduler that can schedule commands to run after a given delay, or to
+	 * execute periodically.
 	 */
 	private ScheduledExecutorService scheduler;
-	
+
 	/**
 	 * A delayed result-bearing action that can be cancelled.
 	 */
@@ -93,25 +98,25 @@ public class Auctioneer implements MatcherRole {
 
 	/**
 	 * The bid cache maintains an aggregated bid, where bids can be added and
-     * removed explicitly.
+	 * removed explicitly.
 	 */
 	private BidCache aggregatedBids;
-	
+
 	/**
 	 * The marketBasis for bids and prices.
 	 */
 	private MarketBasis marketBasis;
-	
+
 	/**
 	 * Holds the sessions from the agents.
 	 */
 	private Set<Session> sessions = new HashSet<Session>();
-	
+
 	/**
-	 * Name/Id of the Auctioneer.
+	 * Id of the Auctioneer.
 	 */
 	private String matcherId;
-	
+
 	@Reference
 	public void setTimeService(TimeService timeService) {
 		this.timeService = timeService;
@@ -121,15 +126,19 @@ public class Auctioneer implements MatcherRole {
 	public void setExecutorService(ScheduledExecutorService scheduler) {
 		this.scheduler = scheduler;
 	}
-	
+
 	@Activate
 	void activate(final Map<String, Object> properties) {
-		Config config = Configurable.createConfigurable(Config.class, properties);
-		
-		this.marketBasis = new MarketBasis(config.commodity(), config.currency(), config.priceSteps(), config.minimumPrice(), config.maximumPrice());
-		this.aggregatedBids = new BidCache(this.timeService, config.bidTimeout());
+		Config config = Configurable.createConfigurable(Config.class,
+				properties);
+
+		this.marketBasis = new MarketBasis(config.commodity(),
+				config.currency(), config.priceSteps(), config.minimumPrice(),
+				config.maximumPrice());
+		this.aggregatedBids = new BidCache(this.timeService,
+				config.bidTimeout());
 		this.matcherId = config.matcherId();
-		
+
 		scheduledFuture = this.scheduler.scheduleAtFixedRate(new Runnable() {
 			@Override
 			public void run() {
@@ -137,28 +146,29 @@ public class Auctioneer implements MatcherRole {
 			}
 		}, 0, config.priceUpdateRate(), TimeUnit.SECONDS);
 	}
-	
+
 	@Deactivate
 	public void deactivate() {
-		// TODO how to close all the sessions?		
+		// TODO how to close all the sessions?
 		for (Session session : sessions.toArray(new Session[sessions.size()])) {
 			session.disconnect();
 			logger.info("Session {} closed", session);
 		}
-		
-		if(!sessions.isEmpty()) {
+
+		if (!sessions.isEmpty()) {
 			logger.warn("Could not disconnect all sessions. Left: {}", sessions);
 		}
-		
+
 		scheduledFuture.cancel(false);
 	}
-	
+
 	@Override
 	public synchronized boolean connectToAgent(Session session) {
 		session.setMarketBasis(marketBasis);
 		session.setClusterId(matcherId);
 		this.sessions.add(session);
-		this.aggregatedBids.updateBid(session.getSessionId(), new Bid(this.marketBasis));
+		this.aggregatedBids.updateBid(session.getSessionId(), new Bid(
+				this.marketBasis));
 		logger.info("Agent connected with session [{}]", session.getSessionId());
 		return true;
 	}
@@ -169,10 +179,11 @@ public class Auctioneer implements MatcherRole {
 		if (!sessions.remove(session)) {
 			return;
 		}
-		
+
 		this.aggregatedBids.removeAgent(session.getSessionId());
 
-		logger.info("Agent disconnected with session [{}]", session.getSessionId());
+		logger.info("Agent disconnected with session [{}]",
+				session.getSessionId());
 	}
 
 	@Override
@@ -180,23 +191,27 @@ public class Auctioneer implements MatcherRole {
 		if (!sessions.contains(session)) {
 			throw new IllegalStateException("No session found");
 		}
-		
+
 		if (!newBid.getMarketBasis().equals(this.marketBasis)) {
-			throw new InvalidParameterException("Marketbasis new bid differs from marketbasis auctioneer");
+			throw new InvalidParameterException(
+					"Marketbasis new bid differs from marketbasis auctioneer");
 		}
-		
+
 		// Update agent in aggregatedBids
 		this.aggregatedBids.updateBid(session.getSessionId(), newBid);
-		
-		logger.debug("Received bid update [{}] from session [{}]", newBid, session.getSessionId());
+
+		logger.debug("Received bid update [{}] from session [{}]", newBid,
+				session.getSessionId());
 	}
 
 	synchronized void publishNewPrice() {
-		Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis);
+		Bid aggregatedBid = this.aggregatedBids
+				.getAggregatedBid(this.marketBasis);
 		Price newPrice = determinePrice(aggregatedBid);
 		for (Session session : this.sessions) {
 			session.updatePrice(newPrice);
-			logger.debug("New price: {}, session {}", newPrice, session.getSessionId());
+			logger.debug("New price: {}, session {}", newPrice,
+					session.getSessionId());
 		}
 	}
 

@@ -33,13 +33,15 @@ import aQute.bnd.annotation.metatype.Meta;
 
 /**
  * <p>
- * This class represents a concentrator component where several instances can be created.
+ * This class represents a concentrator component where several instances can be
+ * created.
  * </p>
  * 
  * <p>
- * The concentrator receives bids from the agents and forwards this in an aggregate bid up 
- * in the hierarchy to a concentrator or to the auctioneer.
- * It will receive price updates from the auctioneer and forward them to its connected agents.
+ * The concentrator receives bids from the agents and forwards this in an
+ * aggregate bid up in the hierarchy to a concentrator or to the auctioneer. It
+ * will receive price updates from the auctioneer and forward them to its
+ * connected agents.
  * 
  * @author FAN
  * @version 1.0
@@ -47,8 +49,9 @@ import aQute.bnd.annotation.metatype.Meta;
  */
 @Component(designateFactory = Concentrator.Config.class, immediate = true)
 public class Concentrator implements MatcherRole, AgentRole, Observable {
-	private static final Logger logger = LoggerFactory.getLogger(Concentrator.class);
-	
+	private static final Logger logger = LoggerFactory
+			.getLogger(Concentrator.class);
+
 	@Meta.OCD
 	public static interface Config {
 		@Meta.AD(deflt = "concentrator")
@@ -63,17 +66,18 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 		@Meta.AD(deflt = "concentrator")
 		String agentId();
 	}
-	
+
 	/**
-     * TimeService that is used for obtaining real or simulated time.
-     */
+	 * TimeService that is used for obtaining real or simulated time.
+	 */
 	private TimeService timeService;
 
 	/**
-	 * Scheduler that can schedule commands to run after a given delay, or to execute periodically.
+	 * Scheduler that can schedule commands to run after a given delay, or to
+	 * execute periodically.
 	 */
 	private ScheduledExecutorService scheduler;
-	
+
 	/**
 	 * A delayed result-bearing action that can be cancelled.
 	 */
@@ -86,13 +90,13 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 
 	/**
 	 * The bid cache maintains an aggregated bid, where bids can be added and
-     * removed explicitly.
+	 * removed explicitly.
 	 */
 	private BidCache aggregatedBids;
 
 	/**
-     * Holds the sessions from the agents.
-     */
+	 * Holds the sessions from the agents.
+	 */
 	private Set<Session> sessionToAgents = new HashSet<Session>();
 
 	// TODO refactor to separate (base)object
@@ -102,7 +106,7 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 	 * OSGI configuration meta type with info about the concentrator.
 	 */
 	private Config config;
-	
+
 	@Reference
 	public void setTimeService(TimeService timeService) {
 		this.timeService = timeService;
@@ -112,12 +116,13 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 	public void setExecutorService(ScheduledExecutorService scheduler) {
 		this.scheduler = scheduler;
 	}
-	
+
 	@Activate
 	void activate(final Map<String, Object> properties) {
 		config = Configurable.createConfigurable(Config.class, properties);
-		
-		this.aggregatedBids = new BidCache(this.timeService, config.bidTimeout());
+
+		this.aggregatedBids = new BidCache(this.timeService,
+				config.bidTimeout());
 
 		scheduledFuture = this.scheduler.scheduleAtFixedRate(new Runnable() {
 			@Override
@@ -128,32 +133,34 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 
 		logger.info("Agent [{}], activated", config.agentId());
 	}
-	
+
 	@Deactivate
 	public void deactivate() {
-		for (Session session : sessionToAgents.toArray(new Session[sessionToAgents.size()])) {
+		for (Session session : sessionToAgents
+				.toArray(new Session[sessionToAgents.size()])) {
 			session.disconnect();
 		}
-		
+
 		sessionToMatcher.disconnect();
 
-		if(!sessionToAgents.isEmpty()) {
-			logger.warn("Could not disconnect all sessions. Left: {}", sessionToAgents);
+		if (!sessionToAgents.isEmpty()) {
+			logger.warn("Could not disconnect all sessions. Left: {}",
+					sessionToAgents);
 		}
-		
+
 		scheduledFuture.cancel(false);
 
 		logger.info("Agent [{}], deactivated", config.agentId());
 	}
-	
+
 	@Override
 	public synchronized void connectToMatcher(Session session) {
 		this.sessionToMatcher = session;
 	}
-	
+
 	@Override
 	public synchronized void disconnectFromMatcher(Session session) {
-		for(Session agentSession : sessionToAgents) {
+		for (Session agentSession : sessionToAgents) {
 			agentSession.disconnect();
 		}
 		this.sessionToMatcher = null;
@@ -161,15 +168,16 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 
 	@Override
 	public synchronized boolean connectToAgent(Session session) {
-		if(this.sessionToMatcher == null) {
+		if (this.sessionToMatcher == null) {
 			return false;
 		}
-		
+
 		this.sessionToAgents.add(session);
 		session.setMarketBasis(this.sessionToMatcher.getMarketBasis());
 		session.setClusterId(this.sessionToMatcher.getClusterId());
-		
-		this.aggregatedBids.updateBid(session.getSessionId(), new Bid(this.sessionToMatcher.getMarketBasis()));
+
+		this.aggregatedBids.updateBid(session.getSessionId(), new Bid(
+				this.sessionToMatcher.getMarketBasis()));
 		logger.info("Agent connected with session [{}]", session.getSessionId());
 		return true;
 	}
@@ -180,28 +188,33 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 		if (!sessionToAgents.remove(session)) {
 			return;
 		}
-		
+
 		this.aggregatedBids.removeAgent(session.getSessionId());
 
-		logger.info("Agent disconnected with session [{}]", session.getSessionId());
+		logger.info("Agent disconnected with session [{}]",
+				session.getSessionId());
 	}
 
 	@Override
 	public synchronized void updateBid(Session session, Bid newBid) {
 
 		if (!sessionToAgents.contains(session)) {
-				throw new IllegalStateException("No session found");
+			throw new IllegalStateException("No session found");
 		}
-		if (!newBid.getMarketBasis().equals(this.sessionToMatcher.getMarketBasis())) {
-			throw new IllegalArgumentException("Marketbasis new bid differs from marketbasis auctioneer");
+		if (!newBid.getMarketBasis().equals(
+				this.sessionToMatcher.getMarketBasis())) {
+			throw new IllegalArgumentException(
+					"Marketbasis new bid differs from marketbasis auctioneer");
 		}
-		
-		this.publishEvent(new IncomingBidUpdateEvent(config.agentId(), session.getSessionId(), timeService.currentDate(), "agentId", newBid));
+
+		this.publishEvent(new IncomingBidUpdateEvent(config.agentId(), session
+				.getSessionId(), timeService.currentDate(), "agentId", newBid));
 
 		// Update agent in aggregatedBids
 		this.aggregatedBids.updateBid(session.getSessionId(), newBid);
 
-		logger.info("Received bid update [{}] from session [{}]", newBid, session.getSessionId());
+		logger.info("Received bid update [{}] from session [{}]", newBid,
+				session.getSessionId());
 	}
 
 	@Override
@@ -216,10 +229,13 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 
 	protected void doBidUpdate() {
 		if (sessionToMatcher != null) {
-			Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.sessionToMatcher.getMarketBasis());
+			Bid aggregatedBid = this.aggregatedBids
+					.getAggregatedBid(this.sessionToMatcher.getMarketBasis());
 			this.sessionToMatcher.updateBid(aggregatedBid);
-			publishEvent(new OutgoingBidUpdateEvent(config.agentId(), sessionToMatcher.getSessionId(), timeService.currentDate(), aggregatedBid));
-			
+			publishEvent(new OutgoingBidUpdateEvent(config.agentId(),
+					sessionToMatcher.getSessionId(), timeService.currentDate(),
+					aggregatedBid));
+
 			logger.debug("Updating aggregated bid [{}]", aggregatedBid);
 		}
 	}

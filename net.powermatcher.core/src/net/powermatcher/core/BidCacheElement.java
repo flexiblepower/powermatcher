@@ -3,12 +3,13 @@ package net.powermatcher.core;
 import net.powermatcher.api.data.Bid;
 
 /**
- * A BidCacheElement instance consists of a bid object
- * associated with a time stamp to record the age of the bid
- * object.
+ * <p>
+ * A BidCacheElement instance consists of a bid object associated with a time
+ * stamp to record the age of the bid object.
+ * </p>
  * 
- * @author IBM
- * @version 0.9.0
+ * @author FAN
+ * @version 1.0
  */
 public class BidCacheElement {
 	/**
@@ -30,7 +31,6 @@ public class BidCacheElement {
 	 *            The time stamp (<code>long</code>) parameter.
 	 */
 	public BidCacheElement(final Bid bid, final long timestamp) {
-		super();
 		this.bid = bid;
 		this.timestamp = timestamp;
 	}
