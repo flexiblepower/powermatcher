@@ -6,17 +6,19 @@ import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
+import net.powermatcher.core.auctioneer.Auctioneer;
+import net.powermatcher.core.concentrator.Concentrator;
 
 /**
  * <p>
- * This class represents an implementation of the Session object.
+ * This class represents an implementation of the {@link Session} object.
  * </p>
  * 
  * <p>
  * It is responsible to hold serveral properties like sessionId, agentId,
  * matcherId. There are two important methods. UpdateBid() and updatePrice().
- * UpdateBid() is called by concentrators and agents. UpdatePrice() is called by
- * the auctioneer and concentrators.
+ * UpdateBid() is called by {@link Concentrator} and agents. UpdatePrice() is called by
+ * the {@link Auctioneer} and {@link Concentrator}.
  * 
  * @author FAN
  * @version 1.0
@@ -30,18 +32,40 @@ class SessionImpl implements Session {
 	private final SessionManager sessionManager;
 
 	/**
-	 * Id's of agent, matcher and session.
+	 * Id of the agentRole instance of the session.
 	 */
-	private final String agentId, matcherId, sessionId;
+	private final String agentId;
 
+	/**
+	 * Id of the matcherRole instance of the session.
+	 */
+	private final String matcherId;
+
+	/**
+	 * Id of the session.
+	 */
+	private final String sessionId;
+
+	/**
+	 * The {@link AgentRole} instance links to the {@link MatcherRole} in this {@link Session}.
+	 */
 	private final AgentRole agentRole;
 
+	/**
+	 * The {@link MatcherRole} instance links to the {@link AgentRole} in this {@link Session}.
+	 */
 	private final MatcherRole matcherRole;
 
+	/**
+	 * Holds the clusterId
+	 */
 	private String clusterId = null;
-
+	
+	/**
+	 * The {@link MarketBasis} set from the {@link Auctioneer}
+	 */
 	private MarketBasis marketBasis = null;
-
+	
 	public SessionImpl(SessionManager sessionManager, AgentRole agentRole,
 			String agentId, MatcherRole matcherRole, String matcherId,
 			String sessionId) {

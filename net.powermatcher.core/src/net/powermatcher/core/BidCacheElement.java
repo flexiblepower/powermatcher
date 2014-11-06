@@ -1,11 +1,12 @@
 package net.powermatcher.core;
 
 import net.powermatcher.api.data.Bid;
+import net.powermatcher.api.data.PricePoint;
 
 /**
  * <p>
- * A BidCacheElement instance consists of a bid object associated with a time
- * stamp to record the age of the bid object.
+ * A {@link BidCacheElement} instance consists of a {@link Bid} object
+ * associated with a time stamp to record the age of the {@link Bid} object.
  * </p>
  * 
  * @author FAN
@@ -13,16 +14,18 @@ import net.powermatcher.api.data.Bid;
  */
 public class BidCacheElement {
 	/**
-	 * Define the bid (Bid) field.
+	 * A {@link Bid} curve in either {@link PricePoint} or by an demand array
+	 * representation.
 	 */
 	Bid bid;
+
 	/**
-	 * Define the time stamp (long) field.
+	 * Time stamp for age of {@link Bid}.
 	 */
 	long timestamp;
 
 	/**
-	 * Constructs an instance of this class from the specified bid and time
+	 * Constructs an instance of this class from the specified {@link Bid} and time
 	 * stamp parameters.
 	 * 
 	 * @param bid
@@ -46,7 +49,7 @@ public class BidCacheElement {
 	}
 
 	/**
-	 * Gets the time stamp (long) value.
+	 * Gets the time stamp value.
 	 * 
 	 * @return The time stamp (<code>long</code>) value.
 	 * @see #setTimestamp(long)

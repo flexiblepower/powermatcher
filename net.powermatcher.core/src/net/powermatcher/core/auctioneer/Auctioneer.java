@@ -15,6 +15,7 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.core.BidCache;
+import net.powermatcher.core.concentrator.Concentrator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,19 +29,19 @@ import aQute.bnd.annotation.metatype.Meta;
 
 /**
  * <p>
- * This class represents an auctioneer component which will receive all bids of
- * other agents as a single bid or as an aggregate bid via one or more
- * concentrators.
+ * This class represents an {@link Auctioneer} component which will receive all {@link Bid} of
+ * other agents as a single {@link Bid} or as an aggregate {@link Bid} via one or more
+ * {@link Concentrator}.
  * </p>
  * 
  * <p>
- * It is responsible for defining and sending the market basis and calculating
- * the equilibrium based on the bids from the different agents in the topology.
+ * It is responsible for defining and sending the {@link MarketBasis} and calculating
+ * the equilibrium based on the {@link Bid} from the different agents in the topology.
  * This equilibrium is communicated to the agents down the hierarchy in the form
  * of price update messages.
  * 
- * The price that is communicated contains a price and a market basis which
- * enables the conversion to a normalized price or to any other market basis for
+ * The {@link Price} that is communicated contains a {@link Price} and a {@link MarketBasis} which
+ * enables the conversion to a normalized {@link Price} or to any other {@link MarketBasis} for
  * other financial calculation purposes.
  * </p>
  * 
@@ -97,13 +98,13 @@ public class Auctioneer implements MatcherRole {
 	private ScheduledFuture<?> scheduledFuture;
 
 	/**
-	 * The bid cache maintains an aggregated bid, where bids can be added and
+	 * The bid cache maintains an aggregated {@link Bid}, where bids can be added and
 	 * removed explicitly.
 	 */
 	private BidCache aggregatedBids;
 
 	/**
-	 * The marketBasis for bids and prices.
+	 * The {@link MarketBasis} for {@link Bid} and {@link Price}.
 	 */
 	private MarketBasis marketBasis;
 
@@ -113,7 +114,7 @@ public class Auctioneer implements MatcherRole {
 	private Set<Session> sessions = new HashSet<Session>();
 
 	/**
-	 * Id of the Auctioneer.
+	 * Id of the {@link Auctioneer}.
 	 */
 	private String matcherId;
 
@@ -149,7 +150,6 @@ public class Auctioneer implements MatcherRole {
 
 	@Deactivate
 	public void deactivate() {
-		// TODO how to close all the sessions?
 		for (Session session : sessions.toArray(new Session[sessions.size()])) {
 			session.disconnect();
 			logger.info("Session {} closed", session);
