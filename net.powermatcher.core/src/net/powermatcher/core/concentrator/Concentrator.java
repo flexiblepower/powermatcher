@@ -20,6 +20,7 @@ import net.powermatcher.api.monitoring.Observer;
 import net.powermatcher.api.monitoring.OutgoingBidUpdateEvent;
 import net.powermatcher.api.monitoring.UpdateEvent;
 import net.powermatcher.core.BidCache;
+import net.powermatcher.core.auctioneer.Auctioneer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,15 +34,15 @@ import aQute.bnd.annotation.metatype.Meta;
 
 /**
  * <p>
- * This class represents a concentrator component where several instances can be
- * created.
+ * This class represents a {@link Concentrator} component where several
+ * instances can be created.
  * </p>
  * 
  * <p>
- * The concentrator receives bids from the agents and forwards this in an
- * aggregate bid up in the hierarchy to a concentrator or to the auctioneer. It
- * will receive price updates from the auctioneer and forward them to its
- * connected agents.
+ * The {@link Concentrator} receives {@link Bid} from the agents and forwards
+ * this in an aggregate {@link Bid} up in the hierarchy to a
+ * {@link Concentrator} or to the {@link Auctioneer}. It will receive price
+ * updates from the {@link Auctioneer} and forward them to its connected agents.
  * 
  * @author FAN
  * @version 1.0
@@ -84,13 +85,13 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 	private ScheduledFuture<?> scheduledFuture;
 
 	/**
-	 * Session object for connecting to matcher
+	 * {@link Session} object for connecting to matcher
 	 */
 	private Session sessionToMatcher;
 
 	/**
-	 * The bid cache maintains an aggregated bid, where bids can be added and
-	 * removed explicitly.
+	 * The {@link Bid} cache maintains an aggregated {@link Bid}, where bids can
+	 * be added and removed explicitly.
 	 */
 	private BidCache aggregatedBids;
 

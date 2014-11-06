@@ -11,10 +11,10 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 
 /**
- * The bid cache maintains an aggregated bid, where bids can be added and
- * removed explicitly, or removed implicitly after a bid has expired. The bid
- * cache is fully thread-safe and the calculation of the aggregated bid is
- * optimized.
+ * The {@link BidCache} maintains an aggregated bid, where bids can be added and
+ * removed explicitly, or removed implicitly after a {@link Bid} has expired.
+ * The {@link Bid} cache is fully thread-safe and the calculation of the
+ * aggregated bid is optimized.
  * 
  * @see BidCacheElement
  * @see Bid
