@@ -54,7 +54,6 @@ public class SessionManager {
 		String agentId = getAgentId(properties);
 		if (agentId != null) {
 			if (agentRoles.get(agentId) == agentRole) {
-				// TODO: close session of agent
 				agentRoles.remove(agentId);
 			}
 		}
@@ -87,7 +86,6 @@ public class SessionManager {
 		String matcherId = getMatcherId(properties);
 		if (matcherId != null) {
 			if (matcherRoles.get(matcherId) == matcherRole) {
-				// TODO close sessions
 				matcherRoles.remove(matcherId);
 			}
 		}
