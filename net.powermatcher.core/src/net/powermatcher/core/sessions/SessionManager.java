@@ -24,7 +24,7 @@ import aQute.bnd.annotation.metatype.Meta;
 /**
  * <p>
  * This class represents a sessionmanager component which will store the active
- * sessions between an auctioneer, concentrators and agents.
+ * sessions between an an {@link AgentRole} and a {@link MatcherRole} object.
  * </p>
  * 
  * <p>
