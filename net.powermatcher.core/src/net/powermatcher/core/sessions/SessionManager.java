@@ -10,6 +10,8 @@ import java.util.concurrent.ConcurrentMap;
 import net.powermatcher.api.AgentRole;
 import net.powermatcher.api.MatcherRole;
 import net.powermatcher.api.Session;
+import net.powermatcher.core.auctioneer.Auctioneer;
+import net.powermatcher.core.concentrator.Concentrator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,15 +25,17 @@ import aQute.bnd.annotation.metatype.Meta;
 
 /**
  * <p>
- * This class represents a sessionmanager component which will store the active
- * sessions between an an {@link AgentRole} and a {@link MatcherRole} object.
+ * This class represents a {@link SessionManager} component which will store the
+ * active sessions between an an {@link AgentRole} and a {@link MatcherRole}
+ * object.
  * </p>
  * 
  * <p>
- * It is responsible for connecting and disconnecting an auctioneer,
- * concentrators and agents. In <code>activeSessions</code> the sessions will be
- * stored. The sessionmanager will connect a matcherrole to an agent and an
- * agentrole with a matcher.
+ * It is responsible for connecting and disconnecting an {@link Auctioneer},
+ * {@link Concentrator} and agents. In <code>activeSessions</code> the
+ * {@link Session} will be stored. The {@link SessionManager} will connect a
+ * {@link MatcherRole} to an agent and an {@link AgentRole} with a
+ * {@link MatcherRole}.
  * 
  * @author FAN
  * @version 1.0
