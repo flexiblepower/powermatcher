@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * BidInfo is an immutable type specifying a PowerMatcher bid curve in either a price/demaned point curve or 
+ * Bid is an immutable type specifying a PowerMatcher bid curve in either a price/demaned point curve or 
  * a demand array representation.
  * 
  * @author IBM
@@ -67,12 +67,12 @@ public class Bid {
 	 * Constructs an instance of this class from the specified other parameter.
 	 * 
 	 * @param other
-	 *            The other (<code>BidInfo</code>) parameter.
-	 * @see #BidInfo(MarketBasis)
-	 * @see #BidInfo(MarketBasis,double[])
-	 * @see #BidInfo(MarketBasis,PricePoint)
-	 * @see #BidInfo(MarketBasis,PricePoint,PricePoint)
-	 * @see #BidInfo(MarketBasis,PricePoint[])
+	 *            The other (<code>Bid</code>) parameter.
+	 * @see #Bid(MarketBasis)
+	 * @see #Bid(MarketBasis,double[])
+	 * @see #Bid(MarketBasis,PricePoint)
+	 * @see #Bid(MarketBasis,PricePoint,PricePoint)
+	 * @see #Bid(MarketBasis,PricePoint[])
 	 */
 	public Bid(final Bid other) {
 		this.marketBasis = other.marketBasis;
@@ -85,12 +85,12 @@ public class Bid {
 	 * but assign a new bid number.
 	 * 
 	 * @param other
-	 *            The other (<code>BidInfo</code>) parameter.
-	 * @see #BidInfo(MarketBasis)
-	 * @see #BidInfo(MarketBasis,double[])
-	 * @see #BidInfo(MarketBasis,PricePoint)
-	 * @see #BidInfo(MarketBasis,PricePoint,PricePoint)
-	 * @see #BidInfo(MarketBasis,PricePoint[])
+	 *            The other (<code>Bid</code>) parameter.
+	 * @see #Bid(MarketBasis)
+	 * @see #Bid(MarketBasis,double[])
+	 * @see #Bid(MarketBasis,PricePoint)
+	 * @see #Bid(MarketBasis,PricePoint,PricePoint)
+	 * @see #Bid(MarketBasis,PricePoint[])
 	 */
 	public Bid(final Bid other, final int newBidNumer) {
 		this(other);
@@ -104,11 +104,11 @@ public class Bid {
 	 * 
 	 * @param marketBasis
 	 *            The market basis (<code>MarketBasis</code>) parameter.
-	 * @see #BidInfo(Bid)
-	 * @see #BidInfo(MarketBasis,double[])
-	 * @see #BidInfo(MarketBasis,PricePoint)
-	 * @see #BidInfo(MarketBasis,PricePoint,PricePoint)
-	 * @see #BidInfo(MarketBasis,PricePoint[])
+	 * @see #Bid(Bid)
+	 * @see #Bid(MarketBasis,double[])
+	 * @see #Bid(MarketBasis,PricePoint)
+	 * @see #Bid(MarketBasis,PricePoint,PricePoint)
+	 * @see #Bid(MarketBasis,PricePoint[])
 	 */
 	public Bid(final MarketBasis marketBasis) {
 		this(marketBasis, new PricePoint(0, 0.0d));
@@ -122,11 +122,11 @@ public class Bid {
 	 *            The market basis (<code>MarketBasis</code>) parameter.
 	 * @param demand
 	 *            The demand (<code>double[]</code>) parameter.
-	 * @see #BidInfo(Bid)
-	 * @see #BidInfo(MarketBasis)
-	 * @see #BidInfo(MarketBasis,PricePoint)
-	 * @see #BidInfo(MarketBasis,PricePoint,PricePoint)
-	 * @see #BidInfo(MarketBasis,PricePoint[])
+	 * @see #Bid(Bid)
+	 * @see #Bid(MarketBasis)
+	 * @see #Bid(MarketBasis,PricePoint)
+	 * @see #Bid(MarketBasis,PricePoint,PricePoint)
+	 * @see #Bid(MarketBasis,PricePoint[])
 	 */
 	public Bid(final MarketBasis marketBasis, final double[] demand) {
 		if (demand == null || marketBasis.getPriceSteps() != demand.length) {
@@ -152,11 +152,11 @@ public class Bid {
 	 *            The market basis (<code>MarketBasis</code>) parameter.
 	 * @param pricePoint
 	 *            The price point (<code>PricePoint</code>) parameter.
-	 * @see #BidInfo(Bid)
-	 * @see #BidInfo(MarketBasis)
-	 * @see #BidInfo(MarketBasis,double[])
-	 * @see #BidInfo(MarketBasis,PricePoint,PricePoint)
-	 * @see #BidInfo(MarketBasis,PricePoint[])
+	 * @see #Bid(Bid)
+	 * @see #Bid(MarketBasis)
+	 * @see #Bid(MarketBasis,double[])
+	 * @see #Bid(MarketBasis,PricePoint,PricePoint)
+	 * @see #Bid(MarketBasis,PricePoint[])
 	 */
 	public Bid(final MarketBasis marketBasis, final PricePoint pricePoint) {
 		this.marketBasis = marketBasis;
@@ -173,11 +173,11 @@ public class Bid {
 	 *            The price point1 (<code>PricePoint</code>) parameter.
 	 * @param pricePoint2
 	 *            The price point2 (<code>PricePoint</code>) parameter.
-	 * @see #BidInfo(Bid)
-	 * @see #BidInfo(MarketBasis)
-	 * @see #BidInfo(MarketBasis,double[])
-	 * @see #BidInfo(MarketBasis,PricePoint)
-	 * @see #BidInfo(MarketBasis,PricePoint[])
+	 * @see #Bid(Bid)
+	 * @see #Bid(MarketBasis)
+	 * @see #Bid(MarketBasis,double[])
+	 * @see #Bid(MarketBasis,PricePoint)
+	 * @see #Bid(MarketBasis,PricePoint[])
 	 */
 	public Bid(final MarketBasis marketBasis, final PricePoint pricePoint1, final PricePoint pricePoint2) {
 		this(marketBasis, new PricePoint[] { pricePoint1, pricePoint2 });
@@ -193,11 +193,11 @@ public class Bid {
 	 * @param bidNumber The bid number
 	 * @param pricePoints
 	 *            The price points (<code>PricePoint[]</code>) parameter.
-	 * @see #BidInfo(Bid)
-	 * @see #BidInfo(MarketBasis)
-	 * @see #BidInfo(MarketBasis,double[])
-	 * @see #BidInfo(MarketBasis,PricePoint)
-	 * @see #BidInfo(MarketBasis,PricePoint,PricePoint)
+	 * @see #Bid(Bid)
+	 * @see #Bid(MarketBasis)
+	 * @see #Bid(MarketBasis,double[])
+	 * @see #Bid(MarketBasis,PricePoint)
+	 * @see #Bid(MarketBasis,PricePoint,PricePoint)
 	 */
 	private Bid(final MarketBasis marketBasis, final int bidNumber, final PricePoint[] pricePoints) {
 		this.marketBasis = marketBasis;
@@ -213,11 +213,11 @@ public class Bid {
 	 *            The market basis (<code>MarketBasis</code>) parameter.
 	 * @param pricePoints
 	 *            The price points (<code>PricePoint[]</code>) parameter.
-	 * @see #BidInfo(Bid)
-	 * @see #BidInfo(MarketBasis)
-	 * @see #BidInfo(MarketBasis,double[])
-	 * @see #BidInfo(MarketBasis,PricePoint)
-	 * @see #BidInfo(MarketBasis,PricePoint,PricePoint)
+	 * @see #Bid(Bid)
+	 * @see #Bid(MarketBasis)
+	 * @see #Bid(MarketBasis,double[])
+	 * @see #Bid(MarketBasis,PricePoint)
+	 * @see #Bid(MarketBasis,PricePoint,PricePoint)
 	 */
 	public Bid(final MarketBasis marketBasis, final PricePoint[] pricePoints) {
 		if (pricePoints == null || pricePoints.length < 0) {
@@ -252,12 +252,12 @@ public class Bid {
 	 * @param bidNumber The bid number
 	 * @param demand
 	 *            The demand (<code>double[]</code>) parameter.
-	 * @see #BidInfo()
-	 * @see #BidInfo(Bid)
-	 * @see #BidInfo(MarketBasis)
-	 * @see #BidInfo(MarketBasis,PricePoint)
-	 * @see #BidInfo(MarketBasis,PricePoint,PricePoint)
-	 * @see #BidInfo(MarketBasis,PricePoint[])
+	 * @see #Bid()
+	 * @see #Bid(Bid)
+	 * @see #Bid(MarketBasis)
+	 * @see #Bid(MarketBasis,PricePoint)
+	 * @see #Bid(MarketBasis,PricePoint,PricePoint)
+	 * @see #Bid(MarketBasis,PricePoint[])
 	 */
 	private Bid(MarketBasis marketBasis, final int bidNumber, double[] demand) {
 		this.marketBasis = marketBasis;
@@ -269,7 +269,7 @@ public class Bid {
 	 * Aggregate with the specified other parameter.
 	 * 
 	 * @param other
-	 *            The other (<code>BidInfo</code>) parameter.
+	 *            The other (<code>Bid</code>) parameter.
 	 * @return A copy of this bid with the other bid aggregated into it.
 	 */
 	public Bid aggregate(final Bid other) {
@@ -283,11 +283,11 @@ public class Bid {
 
 	/**
 	 * Calculate intersection with the specified target demand and return the
-	 * PriceInfo result.
+	 * Price result.
 	 * 
 	 * @param targetDemand
 	 *            The target demand (<code>double</code>) parameter.
-	 * @return Results of the intersection (<code>PriceInfo</code>) value.
+	 * @return Results of the intersection (<code>Price</code>) value.
 	 */
 	public Price calculateIntersection(final double targetDemand) {
 		double[] demand = getUnclonedDemand();
@@ -664,7 +664,7 @@ public class Bid {
 	 * of aggregate. The other bid does not have to be based on the same market basis.
 	 * 
 	 * @param other
-	 *            The other (<code>BidInfo</code>) parameter.
+	 *            The other (<code>Bid</code>) parameter.
 	 * @return A copy of this bid with the other bid subtracted from it.
 	 */
 	public Bid subtract(final Bid other) {
@@ -719,7 +719,7 @@ public class Bid {
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder();
-		b.append("BidInfo{bidNumber=").append(this.bidNumber);
+		b.append("Bid{bidNumber=").append(this.bidNumber);
 		PricePoint[] points = this.pricePoints;
 		/* Print price points if available, and if the most compact representation */
 		if (points != null && points.length < this.marketBasis.getPriceSteps() / 2) {

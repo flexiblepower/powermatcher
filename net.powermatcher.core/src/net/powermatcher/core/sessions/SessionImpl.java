@@ -8,7 +8,7 @@ import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 
 class SessionImpl implements Session {
-	private final SessionManager wiringManager;
+	private final SessionManager sessionManager;
 	private final String agentId, matcherId, sessionId;
 	private final AgentRole agentRole;
 	private final MatcherRole matcherRole;
@@ -16,8 +16,8 @@ class SessionImpl implements Session {
 	private String clusterId = null;
 	private MarketBasis marketBasis = null;
 	
-	public SessionImpl(SessionManager wiringManager, AgentRole agentRole, String agentId, MatcherRole matcherRole, String matcherId, String sessionId) {
-		this.wiringManager = wiringManager;
+	public SessionImpl(SessionManager sessionManager, AgentRole agentRole, String agentId, MatcherRole matcherRole, String matcherId, String sessionId) {
+		this.sessionManager = sessionManager;
 		this.agentId = agentId;
 		this.matcherId = matcherId;
 		this.agentRole =agentRole;
@@ -86,6 +86,6 @@ class SessionImpl implements Session {
 	public void disconnect() {
 		agentRole.disconnectFromMatcher(this);
 		matcherRole.disconnectFromAgent(this);
-		wiringManager.disconnected(this);
+		sessionManager.disconnected(this);
 	}
 }

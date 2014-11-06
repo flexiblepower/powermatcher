@@ -123,7 +123,7 @@ public class BidCache {
 
 	/**
 	 * Return the aggregated bid for the non-expired bids that are currently in
-	 * the cache. Returns a bid info that is a copy and therefore thread safe.
+	 * the cache. Returns a bid that is a copy and therefore thread safe.
 	 * 
 	 * @param marketBasis
 	 *            The market basis (<code>MarketBasis</code>) parameter.
@@ -190,7 +190,7 @@ public class BidCache {
 	 * @param agentId
 	 *            The agent ID (<code>String</code>) parameter.
 	 * @param newBid
-	 *            The new bid info (<code>Bid</code>) parameter.
+	 *            The new bid (<code>Bid</code>) parameter.
 	 * @return Returns the old bid (<code>Bid</code>), or null if the agent
 	 *         is new.
 	 * @see #getAggregatedBid(MarketBasis)
