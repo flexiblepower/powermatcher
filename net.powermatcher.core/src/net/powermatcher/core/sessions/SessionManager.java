@@ -24,7 +24,7 @@ import aQute.bnd.annotation.metatype.Meta;
 /**
  * <p>
  * This class represents a sessionmanager component which will store the active
- * sessions between an auctioneer, concentrators and agents.
+ * sessions between an an {@link AgentRole} and a {@link MatcherRole} object.
  * </p>
  * 
  * <p>
@@ -112,7 +112,6 @@ public class SessionManager {
 		String agentId = getAgentId(properties);
 		if (agentId != null) {
 			if (agentRoles.get(agentId) == agentRole) {
-				// TODO: close session of agent
 				agentRoles.remove(agentId);
 			}
 		}
@@ -137,7 +136,6 @@ public class SessionManager {
 		String matcherId = getMatcherId(properties);
 		if (matcherId != null) {
 			if (matcherRoles.get(matcherId) == matcherRole) {
-				// TODO close sessions
 				matcherRoles.remove(matcherId);
 			}
 		}
