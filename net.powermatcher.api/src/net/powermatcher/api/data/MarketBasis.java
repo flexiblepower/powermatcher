@@ -15,10 +15,6 @@ import java.util.Locale;
  */
 public class MarketBasis {
 	/**
-	 * Define the marketref mask (int) constant.
-	 */
-	private static final int MARKETREF_MASK = 0xFF;
-	/**
 	 * Define the root locale symbols (DecimalFormatSymbols) constant.
 	 */
 	public static DecimalFormatSymbols ROOT_SYMBOLS = DecimalFormatSymbols.getInstance(Locale.ROOT);
@@ -67,14 +63,6 @@ public class MarketBasis {
 	 * Define the maximum price (double) field.
 	 */
 	private double maximumPrice;
-	/**
-	 * Define the significance (int) field.
-	 */
-	private int significance;
-	/**
-	 * Define the market ref (int) field.
-	 */
-	private int marketRef;
 
 	/**
 	 * Define the zero price step (int) field.
@@ -101,24 +89,18 @@ public class MarketBasis {
 	 * @param marketRef
 	 *            The market ref (<code>int</code>) parameter.
 	 */
-	public MarketBasis(final String commodity, final String currency, final int priceSteps, final double minimumPrice,
-			final double maximumPrice, final int significance, final int marketRef) {
+	public MarketBasis(final String commodity, final String currency, final int priceSteps, final double minimumPrice, final double maximumPrice) {
 		if (priceSteps <= 0) {
 			throw new InvalidParameterException("Price steps must be > 0.");
 		}
 		if (maximumPrice <= minimumPrice) {
 			throw new InvalidParameterException("Maximum price must be > minimum price.");
 		}
-		if (significance < 0) {
-			throw new InvalidParameterException("Significance must be >= 0.");
-		}
 		this.commodity = commodity;
 		this.currency = currency;
 		this.priceSteps = priceSteps;
 		this.minimumPrice = minimumPrice;
 		this.maximumPrice = maximumPrice;
-		this.significance = significance;
-		this.marketRef = marketRef & MARKETREF_MASK;
 		this.zeroPriceStep = toPriceStep(0.0d);
 	}
 
@@ -186,9 +168,9 @@ public class MarketBasis {
 	public boolean equals(final Object obj) {
 		MarketBasis other = (MarketBasis) ((obj instanceof MarketBasis) ? obj : null);
 		return this == other
-				|| (other != null && other.marketRef == this.marketRef && equals(other.commodity, this.commodity)
+				|| (other != null && equals(other.commodity, this.commodity)
 						&& equals(other.currency, this.currency) && other.priceSteps == this.priceSteps
-						&& other.minimumPrice == this.minimumPrice && other.maximumPrice == this.maximumPrice && other.significance == this.significance);
+						&& other.minimumPrice == this.minimumPrice && other.maximumPrice == this.maximumPrice);
 	}
 
 	/**
@@ -207,15 +189,6 @@ public class MarketBasis {
 	 */
 	public String getCurrency() {
 		return this.currency;
-	}
-
-	/**
-	 * Gets the market ref (int) value.
-	 * 
-	 * @return The market ref (<code>int</code>) value.
-	 */
-	public int getMarketRef() {
-		return this.marketRef;
 	}
 
 	/**
@@ -255,15 +228,6 @@ public class MarketBasis {
 	}
 
 	/**
-	 * Gets the significance (int) value.
-	 * 
-	 * @return The significance (<code>int</code>) value.
-	 */
-	public int getSignificance() {
-		return this.significance;
-	}
-
-	/**
 	 * Hash code and return the int result.
 	 * 
 	 * @return Results of the hash code (<code>int</code>) value.
@@ -273,13 +237,11 @@ public class MarketBasis {
 		final int prime = 31;
 		int result = prime + ((this.commodity == null) ? 0 : this.commodity.hashCode());
 		result = prime * result + ((this.currency == null) ? 0 : this.currency.hashCode());
-		result = prime * result + this.marketRef;
 		long temp = Double.doubleToLongBits(this.maximumPrice);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		temp = Double.doubleToLongBits(this.minimumPrice);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		result = prime * result + this.priceSteps;
-		result = prime * result + this.significance;
 		return result;
 	}
 
@@ -299,12 +261,8 @@ public class MarketBasis {
 	 * @see #toPrice(int)
 	 */
 	public double roundPrice(final double price) {
-		if (this.significance >= 0 && this.significance <= 15) {
-			BigDecimal bd = new BigDecimal(Double.toString(price));
-			bd = bd.setScale(this.significance, BigDecimal.ROUND_HALF_UP);
-			return bd.doubleValue();
-		}
-		return price;
+		BigDecimal bd = new BigDecimal(Double.toString(price));
+		return bd.doubleValue();
 	}
 
 	/**
@@ -396,8 +354,6 @@ public class MarketBasis {
 		b.append(", minimumPrice=").append(PRICE_FORMAT.format(this.minimumPrice));
 		b.append(", maximumPrice=").append(PRICE_FORMAT.format(this.maximumPrice));
 		b.append(", priceSteps=").append(this.priceSteps);
-		b.append(", significance=").append(this.significance);
-		b.append(", marketRef=").append(this.marketRef);
 		b.append('}');
 		return b.toString();
 	}

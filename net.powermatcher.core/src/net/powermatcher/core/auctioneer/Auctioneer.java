@@ -1,5 +1,6 @@
 package net.powermatcher.core.auctioneer;
 
+import java.security.InvalidParameterException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -25,6 +26,25 @@ import aQute.bnd.annotation.component.Reference;
 import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
+/**
+ * <p>
+ * This class represents an auctioneer component which will receive all bids of other agents
+ * as a single bid or as an aggregate bid via one or more concentrators.
+ * </p>
+ * 
+ * <p>
+ * 
+ * It is responsible for defining and sending the market basis and calculating the equilibrium based on the bids 
+ * from the different agents in the topology.
+ * This equilibrium is communicated to the agents down the hierarchy in the form of price update messages.
+ * 
+ * The price that is communicated contains a price and a market basis which enables the conversion to a normalized price 
+ * or to any other market basis for other financial calculation purposes.
+ * 
+ * @author FAN
+ * @version 1.0
+ * 
+ */
 @Component(designateFactory = Auctioneer.Config.class, immediate = true)
 public class Auctioneer implements MatcherRole {
 	private static final Logger logger = LoggerFactory.getLogger(Auctioneer.class);
@@ -56,37 +76,57 @@ public class Auctioneer implements MatcherRole {
 		long priceUpdateRate();
 	}
 
+	/**
+     * TimeService that is used for obtaining real or simulated time.
+     */
 	private TimeService timeService;
 
+	/**
+	 * Scheduler that can schedule commands to run after a given delay, or to execute periodically.
+	 */
+	private ScheduledExecutorService scheduler;
+	
+	/**
+	 * A delayed result-bearing action that can be cancelled.
+	 */
+	private ScheduledFuture<?> scheduledFuture;
+
+	/**
+	 * The bid cache maintains an aggregated bid, where bids can be added and
+     * removed explicitly.
+	 */
+	private BidCache aggregatedBids;
+	
+	/**
+	 * The marketBasis specifies The PowerMatcher market basis for bids and prices.
+	 */
+	private MarketBasis marketBasis;
+	
+	/**
+	 * Holds the sessions from the agents.
+	 */
+	private Set<Session> sessions = new HashSet<Session>();
+	
+	/**
+	 * Name/Id of the Auctioneer.
+	 */
+	private String matcherId;
+	
 	@Reference
 	public void setTimeService(TimeService timeService) {
 		this.timeService = timeService;
 	}
-
-	private ScheduledExecutorService scheduler;
 
 	@Reference
 	public void setExecutorService(ScheduledExecutorService scheduler) {
 		this.scheduler = scheduler;
 	}
 	
-	private ScheduledFuture<?> scheduledFuture;
-
-	private BidCache aggregatedBids;
-
-	private MarketBasis marketBasis;
-
-	private Set<Session> sessions = new HashSet<Session>();
-
-	private String matcherId;
-	
 	@Activate
 	void activate(final Map<String, Object> properties) {
 		Config config = Configurable.createConfigurable(Config.class, properties);
 		
-		// TODO remove marketref
-		// TODO remove significance
-		this.marketBasis = new MarketBasis(config.commodity(), config.currency(), config.priceSteps(), config.minimumPrice(), config.maximumPrice(), 2, 0);
+		this.marketBasis = new MarketBasis(config.commodity(), config.currency(), config.priceSteps(), config.minimumPrice(), config.maximumPrice());
 		this.aggregatedBids = new BidCache(this.timeService, config.bidTimeout());
 		this.matcherId = config.matcherId();
 		
@@ -100,9 +140,10 @@ public class Auctioneer implements MatcherRole {
 	
 	@Deactivate
 	public void deactivate() {
-		// TODO how to close all the sessions?
+		// TODO how to close all the sessions?		
 		for (Session session : sessions.toArray(new Session[sessions.size()])) {
 			session.disconnect();
+			logger.info("Session {} closed", session);
 		}
 		
 		if(!sessions.isEmpty()) {
@@ -136,15 +177,12 @@ public class Auctioneer implements MatcherRole {
 
 	@Override
 	public synchronized void updateBid(Session session, Bid newBid) {
-		// TODO Auto-generated method stub
 		if (!sessions.contains(session)) {
-			// TODO throw exception
-			return;
+			throw new IllegalStateException("No session found");
 		}
 		
 		if (!newBid.getMarketBasis().equals(this.marketBasis)) {
-			// TODO throw exception
-			return;
+			throw new InvalidParameterException("Marketbasis new bid differs from marketbasis auctioneer");
 		}
 		
 		// Update agent in aggregatedBids
