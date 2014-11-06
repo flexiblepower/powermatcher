@@ -149,7 +149,6 @@ public class Auctioneer implements MatcherRole {
 
 	@Deactivate
 	public void deactivate() {
-		// TODO how to close all the sessions?
 		for (Session session : sessions.toArray(new Session[sessions.size()])) {
 			session.disconnect();
 			logger.info("Session {} closed", session);
