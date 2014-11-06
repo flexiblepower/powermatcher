@@ -8,10 +8,18 @@ import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
 /**
- * MarketBasis is an immutable type specifying the PowerMatcher market basis for bids and prices.
+ * <p>
+ * MarketBasis is an immutable type specifying the market basis for bids and prices.
+ * </p>
  * 
- * @author IBM
- * @version 0.9.0
+ * <p>
+ * It defines a market basis by commodity, currency, minimum price, maximum price, 
+ * number of steps and significance. 
+ * The agent re-ceives market basis updates from its parent matcher
+ * 
+ * 
+ * @author FAN
+ * @version 1.0
  */
 public class MarketBasis {
 	/**
@@ -47,18 +55,22 @@ public class MarketBasis {
 	 * Define the commodity (String) field.
 	 */
 	private String commodity;
+
 	/**
 	 * Define the currency (String) field.
 	 */
 	private String currency;
+
 	/**
 	 * Define the price steps (int) field.
 	 */
 	private int priceSteps;
+
 	/**
 	 * Define the minimum price (double) field.
 	 */
 	private double minimumPrice;
+
 	/**
 	 * Define the maximum price (double) field.
 	 */

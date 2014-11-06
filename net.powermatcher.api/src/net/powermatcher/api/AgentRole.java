@@ -4,7 +4,7 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
 
 /**
- * A {@link AgentRole} defines the inteface for classes that can receive a
+ * A {@link AgentRole} defines the interface for classes that can receive a
  * {@link Price} and send a {@link Bid}, based on that {@link Price}. An
  * {@link AgentRole} can be linked with zero of one {@link MatcherRole}
  * instances. These are linked by a {@link Session}.
