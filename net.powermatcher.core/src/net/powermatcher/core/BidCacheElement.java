@@ -1,44 +1,47 @@
 package net.powermatcher.core;
 
 import net.powermatcher.api.data.Bid;
+import net.powermatcher.api.data.PricePoint;
 
 /**
- * A BidCacheElement instance consists of a bid info object
- * associated with a time stamp to record the age of the bid info
- * object.
+ * <p>
+ * A {@link BidCacheElement} instance consists of a {@link Bid} object
+ * associated with a time stamp to record the age of the {@link Bid} object.
+ * </p>
  * 
- * @author IBM
- * @version 0.9.0
+ * @author FAN
+ * @version 1.0
  */
 public class BidCacheElement {
 	/**
-	 * Define the bid info (Bid) field.
+	 * A {@link Bid} curve in either {@link PricePoint} or by an demand array
+	 * representation.
 	 */
 	Bid bid;
+
 	/**
-	 * Define the time stamp (long) field.
+	 * Time stamp for age of {@link Bid}.
 	 */
 	long timestamp;
 
 	/**
-	 * Constructs an instance of this class from the specified bid info and time
+	 * Constructs an instance of this class from the specified {@link Bid} and time
 	 * stamp parameters.
 	 * 
 	 * @param bid
-	 *            The bid info (<code>Bid</code>) parameter.
+	 *            The bid (<code>Bid</code>) parameter.
 	 * @param timestamp
 	 *            The time stamp (<code>long</code>) parameter.
 	 */
 	public BidCacheElement(final Bid bid, final long timestamp) {
-		super();
 		this.bid = bid;
 		this.timestamp = timestamp;
 	}
 
 	/**
-	 * Gets the bid info value.
+	 * Gets the bid value.
 	 * 
-	 * @return The bid info (<code>Bid</code>) value.
+	 * @return The bid (<code>Bid</code>) value.
 	 * @see #setBid(Bid)
 	 */
 	public Bid getBid() {
@@ -46,7 +49,7 @@ public class BidCacheElement {
 	}
 
 	/**
-	 * Gets the time stamp (long) value.
+	 * Gets the time stamp value.
 	 * 
 	 * @return The time stamp (<code>long</code>) value.
 	 * @see #setTimestamp(long)
@@ -56,10 +59,10 @@ public class BidCacheElement {
 	}
 
 	/**
-	 * Sets the bid info value.
+	 * Sets the bid value.
 	 * 
 	 * @param bid
-	 *            The bid info (<code>Bid</code>) parameter.
+	 *            The bid (<code>Bid</code>) parameter.
 	 * @see #getBid()
 	 */
 	public void setBid(final Bid bid) {

@@ -11,18 +11,17 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 
 /**
- * The bid cache maintains an aggregated bid, where bids can be added and
- * removed explicitly, or removed implicitly after a bid has expired. The bid
- * cache is fully thread-safe and the calculation of the aggregated bid is
- * optimized.
- * 
+ * The {@link BidCache} maintains an aggregated bid, where bids can be added and
+ * removed explicitly, or removed implicitly after a {@link Bid} has expired.
+ * The {@link Bid} cache is fully thread-safe and the calculation of the
+ * aggregated bid is optimized.
  * 
  * @see BidCacheElement
  * @see Bid
  * @see MarketBasis
  * 
- * @author IBM
- * @version 0.9.0
+ * @author FAN
+ * @version 1.0
  */
 public class BidCache {
 	/**
@@ -74,41 +73,27 @@ public class BidCache {
 	public synchronized Set<String> cleanup() {
 		Set<String> removedAgents = new HashSet<String>();
 
-		// TODO check, but can be removed!
-		// TimeService timeSource = this.timeService;
-//		if (timeSource == null) {
-//			/*
-//			 * If a time source has not been set yet, always discard the
-//			 * aggregated bid.
-//			 */
-//			this.aggregatedBid = null;
-//		} else {
-			/*
-			 * Otherwise, clean up expired bids and discard the aggregated bid
-			 * when it is too old.
-			 */
-			long currentTime = timeService.currentTimeMillis();
-			boolean agentsRemoved = false;
-			Set<String> keys = this.bidCache.keySet();
-			for (Iterator<String> iterator = keys.iterator(); iterator
-					.hasNext();) {
-				String agentId = iterator.next();
-				BidCacheElement element = this.bidCache.get(agentId);
-				long timeStamp = element.getTimestamp();
-				/* Only remove bids if the age is know */
-				if (timeStamp != 0
-						&& currentTime - timeStamp >= this.expirationTimeMillis) {
-					removedAgents.add(agentId);
-					iterator.remove();
-					agentsRemoved = true;
-				}
+		long currentTime = timeService.currentTimeMillis();
+		boolean agentsRemoved = false;
+		Set<String> keys = this.bidCache.keySet();
+		for (Iterator<String> iterator = keys.iterator(); iterator.hasNext();) {
+			String agentId = iterator.next();
+			BidCacheElement element = this.bidCache.get(agentId);
+			long timeStamp = element.getTimestamp();
+			/* Only remove bids if the age is know */
+			if (timeStamp != 0
+					&& currentTime - timeStamp >= this.expirationTimeMillis) {
+				removedAgents.add(agentId);
+				iterator.remove();
+				agentsRemoved = true;
 			}
-			if (agentsRemoved
-					|| currentTime - this.lastResetTime >= this.expirationTimeMillis) {
-				this.aggregatedBid = null;
-				this.lastResetTime = currentTime;
-			}
-//		}
+		}
+		if (agentsRemoved
+				|| currentTime - this.lastResetTime >= this.expirationTimeMillis) {
+			this.aggregatedBid = null;
+			this.lastResetTime = currentTime;
+		}
+
 		return removedAgents;
 	}
 
@@ -123,7 +108,7 @@ public class BidCache {
 
 	/**
 	 * Return the aggregated bid for the non-expired bids that are currently in
-	 * the cache. Returns a bid info that is a copy and therefore thread safe.
+	 * the cache. Returns a bid that is a copy and therefore thread safe.
 	 * 
 	 * @param marketBasis
 	 *            The market basis (<code>MarketBasis</code>) parameter.
@@ -164,6 +149,37 @@ public class BidCache {
 	}
 
 	/**
+	 * Update bid with the specified agent ID and new bid parameters and return
+	 * the Bid result.
+	 * 
+	 * @param agentId
+	 *            The agent ID (<code>String</code>) parameter.
+	 * @param newBid
+	 *            The new bid (<code>Bid</code>) parameter.
+	 * @return Returns the old bid (<code>Bid</code>), or null if the agent is
+	 *         new.
+	 * @see #getAggregatedBid(MarketBasis)
+	 * @see #getLastBid(String)
+	 */
+	public synchronized Bid updateBid(final String agentId, final Bid newBid) {
+		assert newBid != null;
+		TimeService timeSource = this.timeService;
+		long currentTime = (timeSource == null) ? 0 : timeSource
+				.currentTimeMillis();
+		BidCacheElement element = new BidCacheElement(newBid, currentTime);
+		BidCacheElement oldElement = this.bidCache.put(agentId, element);
+		Bid oldBid = null;
+		if (this.aggregatedBid != null) {
+			if (oldElement != null) {
+				oldBid = oldElement.getBid();
+				this.aggregatedBid = this.aggregatedBid.subtract(oldBid);
+			}
+			this.aggregatedBid = this.aggregatedBid.aggregate(newBid);
+		}
+		return oldBid;
+	}
+
+	/**
 	 * Remove agent with the specified agent ID parameter and return the Bid
 	 * result.
 	 * 
@@ -182,37 +198,4 @@ public class BidCache {
 		}
 		return lastBid;
 	}
-
-	/**
-	 * Update bid with the specified agent ID and new bid parameters and return
-	 * the Bid result.
-	 * 
-	 * @param agentId
-	 *            The agent ID (<code>String</code>) parameter.
-	 * @param newBid
-	 *            The new bid info (<code>Bid</code>) parameter.
-	 * @return Returns the old bid (<code>Bid</code>), or null if the agent
-	 *         is new.
-	 * @see #getAggregatedBid(MarketBasis)
-	 * @see #getLastBid(String)
-	 */
-	public synchronized Bid updateBid(final String agentId,
-			final Bid newBid) {
-		assert newBid != null;
-		TimeService timeSource = this.timeService;
-		long currentTime = (timeSource == null) ? 0 : timeSource
-				.currentTimeMillis();
-		BidCacheElement element = new BidCacheElement(newBid, currentTime);
-		BidCacheElement oldElement = this.bidCache.put(agentId, element);
-		Bid oldBid = null;
-		if (this.aggregatedBid != null) {
-			if (oldElement != null) {
-				oldBid = oldElement.getBid();
-				this.aggregatedBid = this.aggregatedBid.subtract(oldBid);
-			}
-			this.aggregatedBid = this.aggregatedBid.aggregate(newBid);
-		}
-		return oldBid;
-	}
-
 }

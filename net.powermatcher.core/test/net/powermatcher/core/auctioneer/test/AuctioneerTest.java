@@ -29,7 +29,7 @@ public class AuctioneerTest {
 	private final static int NR_AGENTS = 21;
 	
 	//This needs to be the same as the MarketBasis created in the Auctioneer
-	private final MarketBasis marketBasis = new MarketBasis("electricity", "EUR", 11, 0, 10, 2, 0);
+	private final MarketBasis marketBasis = new MarketBasis("electricity", "EUR", 11, 0, 10);
 	private Map<String, Object> auctioneerProperties;
 
 	private Auctioneer auctioneer;

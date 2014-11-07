@@ -2,7 +2,7 @@ package net.powermatcher.api.data;
 
 
 /**
- * PriceInfo is an immutable type specifying a PowerMatcher market price.
+ * Price is an immutable type specifying a PowerMatcher market price.
  * 
  * @author IBM
  * @version 0.9.0
@@ -105,11 +105,11 @@ public class Price {
 
 	/**
 	 * To market basis with the specified new market basis parameter and return
-	 * the BidInfo result.
+	 * the Bid result.
 	 * 
 	 * @param newMarketBasis
 	 *            The new market basis (<code>MarketBasis</code>) parameter.
-	 * @return Results of the to market basis (<code>BidInfo</code>) value.
+	 * @return Results of the to market basis (<code>Bid</code>) value.
 	 * @see #getMarketBasis()
 	 */
 	public Price toMarketBasis(final MarketBasis newMarketBasis) {
