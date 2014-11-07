@@ -47,7 +47,7 @@ public class IncomingPriceUpdateEvent extends UpdateEvent {
 
 	@Override
 	public String toString() {
-		return IncomingBidUpdateEvent.class.getSimpleName() + " " +
+		return IncomingPriceUpdateEvent.class.getSimpleName() + " " +
 				super.toString() + ", price = " + price.toString();
 	}
 }

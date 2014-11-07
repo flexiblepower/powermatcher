@@ -26,18 +26,18 @@ import aQute.bnd.annotation.metatype.Meta;
  * {@link Observable} services are able to call the update method of 
  * {@link Observer} with {@link UpdateEvent} events.
  */
-@Component(immediate = true, designateFactory = AbstractObserver.Config.class)
-public class AbstractObserver implements Observer {
+@Component(immediate = true, designateFactory = ObserverBase.Config.class)
+public class ObserverBase implements Observer {
 
 	/**
-	 * OSGI configuration of the {@link AbstractObserver}
+	 * OSGI configuration of the {@link ObserverBase}
 	 */
 	public static interface Config {
 		@Meta.AD
 		List<String> filter();
 	}
 
-	private static final Logger logger = LoggerFactory.getLogger(AbstractObserver.class);
+	private static final Logger logger = LoggerFactory.getLogger(ObserverBase.class);
 
 	/**
 	 * Holds the available observables
@@ -87,7 +87,7 @@ public class AbstractObserver implements Observer {
 			logger.warn("An observable with the id " + observableId + " was already registered");
 		} else {
 			// Attach new observer.
-			logger.info("Start observing {}", observable.getObserverId());
+			logger.info("Start observing [{}]", observable.getObserverId());
 			observable.addObserver(this);
 		}
 	}

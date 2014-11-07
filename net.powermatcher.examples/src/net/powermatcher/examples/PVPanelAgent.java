@@ -1,8 +1,6 @@
 package net.powermatcher.examples;
 
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -15,9 +13,7 @@ import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PricePoint;
 import net.powermatcher.api.monitoring.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.Observable;
-import net.powermatcher.api.monitoring.Observer;
 import net.powermatcher.api.monitoring.OutgoingBidUpdateEvent;
-import net.powermatcher.api.monitoring.UpdateEvent;
 import net.powermatcher.core.monitoring.ObservableBase;
 
 import org.slf4j.Logger;
@@ -30,8 +26,9 @@ import aQute.bnd.annotation.component.Reference;
 import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
-@Component(designateFactory = PVPanelAgent.Config.class, immediate = true)
-public class PVPanelAgent implements AgentRole, Observable {
+@Component(designateFactory = PVPanelAgent.Config.class, immediate = true, 
+	provide = {Observable.class, AgentRole.class})
+public class PVPanelAgent extends ObservableBase implements AgentRole {
 	private static final Logger logger = LoggerFactory.getLogger(PVPanelAgent.class);
 	
 	public static interface Config {
@@ -122,6 +119,7 @@ public class PVPanelAgent implements AgentRole, Observable {
 		return this.agentId;
 	}
 
+	/*
 	private final Set<Observer> observers = new CopyOnWriteArraySet<Observer>();
 
 	@Override
@@ -139,4 +137,5 @@ public class PVPanelAgent implements AgentRole, Observable {
 			observer.update(event);
 		}
 	}
+	*/
 }

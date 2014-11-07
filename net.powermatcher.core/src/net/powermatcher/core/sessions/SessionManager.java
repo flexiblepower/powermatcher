@@ -183,7 +183,7 @@ public class SessionManager {
 					MatcherRole matcherRole = matcherRoles.get(matcherId);
 
 					if (agentRole != null && matcherRole != null) {
-						logger.info("Connecting session: {}", sessionId);
+						logger.info("Connecting session: [{}]", sessionId);
 						Session session = new SessionImpl(this, agentRole,
 								agentId, matcherRole, matcherId, sessionId);
 						if (matcherRole.connectToAgent(session)) {

@@ -3,7 +3,6 @@ package net.powermatcher.core.concentrator;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -16,9 +15,7 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.monitoring.IncomingBidUpdateEvent;
 import net.powermatcher.api.monitoring.Observable;
-import net.powermatcher.api.monitoring.Observer;
 import net.powermatcher.api.monitoring.OutgoingBidUpdateEvent;
-import net.powermatcher.api.monitoring.UpdateEvent;
 import net.powermatcher.core.BidCache;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.monitoring.ObservableBase;
@@ -49,8 +46,9 @@ import aQute.bnd.annotation.metatype.Meta;
  * @version 1.0
  * 
  */
-@Component(designateFactory = Concentrator.Config.class, immediate = true)
-public class Concentrator implements MatcherRole, AgentRole, Observable {
+@Component(designateFactory = Concentrator.Config.class, immediate = true, 
+	provide = {Observable.class, MatcherRole.class, AgentRole.class})
+public class Concentrator  extends ObservableBase implements MatcherRole, AgentRole {
 	private static final Logger logger = LoggerFactory
 			.getLogger(Concentrator.class);
 
@@ -244,6 +242,7 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 		}
 	}
 
+	/*
 	private final Set<Observer> observers = new CopyOnWriteArraySet<Observer>();
 
 	@Override
@@ -261,4 +260,5 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 			observer.update(event);
 		}
 	}
+	*/
 }

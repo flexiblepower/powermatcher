@@ -4,7 +4,6 @@ import java.security.InvalidParameterException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -16,8 +15,6 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.monitoring.Observable;
-import net.powermatcher.api.monitoring.Observer;
-import net.powermatcher.api.monitoring.UpdateEvent;
 import net.powermatcher.core.BidCache;
 import net.powermatcher.core.concentrator.Concentrator;
 import net.powermatcher.core.monitoring.ObservableBase;
@@ -54,8 +51,9 @@ import aQute.bnd.annotation.metatype.Meta;
  * @version 1.0
  * 
  */
-@Component(designateFactory = Auctioneer.Config.class, immediate = true)
-public class Auctioneer implements MatcherRole, Observable {
+@Component(designateFactory = Auctioneer.Config.class, immediate = true, 
+	provide = {Observable.class, MatcherRole.class})
+public class Auctioneer extends ObservableBase implements MatcherRole {
 	private static final Logger logger = LoggerFactory
 			.getLogger(Auctioneer.class);
 
@@ -228,6 +226,8 @@ public class Auctioneer implements MatcherRole, Observable {
 	protected Price determinePrice(Bid aggregatedBid) {
 		return aggregatedBid.calculateIntersection(0);
 	}
+	
+	/*
 	private final Set<Observer> observers = new CopyOnWriteArraySet<Observer>();
 
 	@Override
@@ -245,4 +245,5 @@ public class Auctioneer implements MatcherRole, Observable {
 			observer.update(event);
 		}
 	}
+	*/
 }
