@@ -6,7 +6,6 @@ import net.powermatcher.api.AgentRole;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
-import net.powermatcher.api.data.Price;
 
 /**
  * An {@link IncomingBidUpdateEvent} is sent when an {@link AgentRole} receives
@@ -56,5 +55,11 @@ public class IncomingBidUpdateEvent extends UpdateEvent {
 
 	public Bid getBid() {
 		return bid;
+	}
+
+	@Override
+	public String toString() {
+		return IncomingBidUpdateEvent.class.getSimpleName() + " " +
+				super.toString() + ", fromAgentId = " + this.fromAgentId + ", bid = " + bid.toString();
 	}
 }

@@ -18,6 +18,7 @@ import net.powermatcher.api.monitoring.Observable;
 import net.powermatcher.api.monitoring.Observer;
 import net.powermatcher.api.monitoring.OutgoingBidUpdateEvent;
 import net.powermatcher.api.monitoring.UpdateEvent;
+import net.powermatcher.core.monitoring.ObservableBase;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +79,7 @@ public class PVPanelAgent implements AgentRole, Observable {
 					-700));
 			logger.debug("updateBid({})", newBid);
 			session.updateBid(newBid);
-			publishEvent(new OutgoingBidUpdateEvent("agentId",
+			this.publishEvent(new OutgoingBidUpdateEvent(agentId,
 					session.getSessionId(), timeService.currentDate(), newBid));
 		}
 	}
@@ -110,13 +111,17 @@ public class PVPanelAgent implements AgentRole, Observable {
 	public void updatePrice(Price newPrice) {
 		logger.debug("updatePrice({})", newPrice);
 		// TODO real arguments
-		publishEvent(new IncomingPriceUpdateEvent("agentId",
+		this.publishEvent(new IncomingPriceUpdateEvent(agentId,
 				session.getSessionId(), timeService.currentDate(), newPrice));
 
 		logger.debug("Received price update [{}]", newPrice);
 	}
 
-	// TODO refactor to separate (base)object
+	@Override
+	public String getObserverId() {
+		return this.agentId;
+	}
+
 	private final Set<Observer> observers = new CopyOnWriteArraySet<Observer>();
 
 	@Override
@@ -129,7 +134,7 @@ public class PVPanelAgent implements AgentRole, Observable {
 		observers.remove(observer);
 	}
 
-	void publishEvent(UpdateEvent event) {
+	public void publishEvent(UpdateEvent event) {
 		for (Observer observer : observers) {
 			observer.update(event);
 		}

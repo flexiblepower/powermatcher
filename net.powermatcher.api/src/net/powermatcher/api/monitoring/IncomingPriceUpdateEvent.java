@@ -5,7 +5,6 @@ import java.util.Date;
 import net.powermatcher.api.AgentRole;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
-import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
 
 /**
@@ -44,5 +43,11 @@ public class IncomingPriceUpdateEvent extends UpdateEvent {
 
 	public Price getPrice() {
 		return price;
+	}
+
+	@Override
+	public String toString() {
+		return IncomingBidUpdateEvent.class.getSimpleName() + " " +
+				super.toString() + ", price = " + price.toString();
 	}
 }

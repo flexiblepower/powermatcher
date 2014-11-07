@@ -21,6 +21,7 @@ import net.powermatcher.api.monitoring.OutgoingBidUpdateEvent;
 import net.powermatcher.api.monitoring.UpdateEvent;
 import net.powermatcher.core.BidCache;
 import net.powermatcher.core.auctioneer.Auctioneer;
+import net.powermatcher.core.monitoring.ObservableBase;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,9 +100,6 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 	 * Holds the sessions from the agents.
 	 */
 	private Set<Session> sessionToAgents = new HashSet<Session>();
-
-	// TODO refactor to separate (base)object
-	private final Set<Observer> observers = new CopyOnWriteArraySet<Observer>();
 
 	/**
 	 * OSGI configuration meta type with info about the concentrator.
@@ -228,6 +226,11 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 		}
 	}
 
+	@Override
+	public String getObserverId() {
+		return this.config.agentId();
+	}
+
 	protected void doBidUpdate() {
 		if (sessionToMatcher != null) {
 			Bid aggregatedBid = this.aggregatedBids
@@ -241,6 +244,8 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 		}
 	}
 
+	private final Set<Observer> observers = new CopyOnWriteArraySet<Observer>();
+
 	@Override
 	public void addObserver(Observer observer) {
 		observers.add(observer);
@@ -251,7 +256,7 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 		observers.remove(observer);
 	}
 
-	void publishEvent(UpdateEvent event) {
+	public void publishEvent(UpdateEvent event) {
 		for (Observer observer : observers) {
 			observer.update(event);
 		}

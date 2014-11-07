@@ -47,4 +47,10 @@ public class OutgoingBidUpdateEvent extends UpdateEvent {
 	public Bid getBid() {
 		return bid;
 	}
+
+	@Override
+	public String toString() {
+		return IncomingBidUpdateEvent.class.getSimpleName() + " " +
+				super.toString() + ", bid = " + bid.toString();
+	}
 }

@@ -4,6 +4,7 @@ import java.security.InvalidParameterException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -14,8 +15,12 @@ import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
+import net.powermatcher.api.monitoring.Observable;
+import net.powermatcher.api.monitoring.Observer;
+import net.powermatcher.api.monitoring.UpdateEvent;
 import net.powermatcher.core.BidCache;
 import net.powermatcher.core.concentrator.Concentrator;
+import net.powermatcher.core.monitoring.ObservableBase;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +55,7 @@ import aQute.bnd.annotation.metatype.Meta;
  * 
  */
 @Component(designateFactory = Auctioneer.Config.class, immediate = true)
-public class Auctioneer implements MatcherRole {
+public class Auctioneer implements MatcherRole, Observable {
 	private static final Logger logger = LoggerFactory
 			.getLogger(Auctioneer.class);
 
@@ -204,6 +209,11 @@ public class Auctioneer implements MatcherRole {
 				session.getSessionId());
 	}
 
+	@Override
+	public String getObserverId() {
+		return matcherId;
+	}
+
 	synchronized void publishNewPrice() {
 		Bid aggregatedBid = this.aggregatedBids
 				.getAggregatedBid(this.marketBasis);
@@ -217,5 +227,22 @@ public class Auctioneer implements MatcherRole {
 
 	protected Price determinePrice(Bid aggregatedBid) {
 		return aggregatedBid.calculateIntersection(0);
+	}
+	private final Set<Observer> observers = new CopyOnWriteArraySet<Observer>();
+
+	@Override
+	public void addObserver(Observer observer) {
+		observers.add(observer);
+	}
+
+	@Override
+	public void removeObserver(Observer observer) {
+		observers.remove(observer);
+	}
+
+	public void publishEvent(UpdateEvent event) {
+		for (Observer observer : observers) {
+			observer.update(event);
+		}
 	}
 }
