@@ -163,7 +163,7 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 
 	@Override
 	public synchronized void disconnectFromMatcher(Session session) {
-		for (Session agentSession : sessionToAgents) {
+		for (Session agentSession : sessionToAgents.toArray(new Session[sessionToAgents.size()])) {
 			agentSession.disconnect();
 		}
 		this.sessionToMatcher = null;
