@@ -11,9 +11,10 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.core.auctioneer.Auctioneer;
+import net.powermatcher.core.mock.MockAgent;
 import net.powermatcher.core.sessions.SessionManager;
+import net.powermatcher.core.time.SystemTimeService;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,8 +22,8 @@ import org.junit.Test;
  * JUnit test for the Auctioneer
  * 
  * Every test requires a different number agents. In setUp() NR_AGENTS are 
- * instantiated. Every test the desired number of agents can be binded and 
- * unbinded using the functions bindAgents() and unbindAgents().
+ * instantiated. Every test the desired number of agents can be added and 
+ * removed using the functions addAgents() and removeAgents().
  */
 public class AuctioneerTest {
 
@@ -45,16 +46,16 @@ public class AuctioneerTest {
 		auctioneerProperties = new HashMap<>();
 		auctioneerProperties.put("id", "auctioneer");
 		auctioneerProperties.put("matcherId", "auctioneer");
-		auctioneerProperties.put("matcherId", "auctioneer");
 		auctioneerProperties.put("commodity", "electricity");
 		auctioneerProperties.put("currency", "EUR");
 		auctioneerProperties.put("priceSteps", "11");
 		auctioneerProperties.put("minimumPrice", "0");
 		auctioneerProperties.put("maximumPrice", "10");
 		auctioneerProperties.put("bidTimeout", "600");
-		auctioneerProperties.put("priceUpdateRate", "30");
+		auctioneerProperties.put("priceUpdateRate", "1");
 
 		auctioneer.setExecutorService(new ScheduledThreadPoolExecutor(10));
+		auctioneer.setTimeService(new SystemTimeService());
 		auctioneer.activate(auctioneerProperties);
 
 		List<String> activeConnections = new ArrayList<>();
@@ -71,9 +72,10 @@ public class AuctioneerTest {
 		Map<String, Object> sessionProperties = new HashMap<>();
 		sessionProperties.put("activeConnections", activeConnections);
 		
-		this.sessionManager = new SessionManager();
-		this.sessionManager.addMatcherRole(auctioneer, auctioneerProperties);
-		this.sessionManager.activate(sessionProperties);
+		//Session
+		sessionManager = new SessionManager();
+		sessionManager.addMatcherRole(auctioneer, auctioneerProperties);
+		sessionManager.activate(sessionProperties);
 	}
 	
 	private void addAgents(int number) {

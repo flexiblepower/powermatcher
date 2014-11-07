@@ -5,4 +5,5 @@ Export-Package: net.powermatcher.core*
 	net.powermatcher.api;version=latest,\
 	biz.aQute.bnd.annotation,\
 	slf4j.api,\
-	${junit}
+	${junit},\
+	slf4j.simple
