@@ -81,7 +81,7 @@ public class Auctioneer implements MatcherRole {
 	private String matcherId;
 	
 	@Activate
-	void activate(final Map<String, Object> properties) {
+	public void activate(final Map<String, Object> properties) {
 		Config config = Configurable.createConfigurable(Config.class, properties);
 		
 		// TODO remove marketref
@@ -153,7 +153,13 @@ public class Auctioneer implements MatcherRole {
 		logger.debug("Received bid update [{}] from session [{}]", newBid, session.getSessionId());
 	}
 
-	synchronized void publishNewPrice() {
+	/**
+	 * Generates the new price out of the aggregated bids and sends this to all
+	 * listeners
+	 * TODO This is temporarily made public instead of default to test some things.
+	 * This should be fixed as soon as possible.
+	 */
+	public synchronized void publishNewPrice() {
 		Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis);
 		Price newPrice = determinePrice(aggregatedBid);
 		for (Session session : this.sessions) {
