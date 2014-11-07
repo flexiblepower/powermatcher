@@ -37,25 +37,6 @@ public class Bid {
 	private int bidNumber;
 
 	/**
-	 * Create a deep clone of the price point array.
-	 * 
-	 * @param unclonedPricePoints
-	 *            The price point array to be cloned, or null.
-	 * @return The cloned price point array, or null if unclonedPricePoints is
-	 *         null.
-	 */
-	private static PricePoint[] clone(PricePoint[] unclonedPricePoints) {
-		if (unclonedPricePoints == null) {
-			return null;
-		}
-		PricePoint[] pricePoints = new PricePoint[unclonedPricePoints.length];
-		for (int i = 0; i < pricePoints.length; i++) {
-			pricePoints[i] = new PricePoint(unclonedPricePoints[i]);
-		}
-		return pricePoints;
-	}
-
-	/**
 	 * Constructs an instance of this class from the specified other parameter.
 	 * 
 	 * @param other
@@ -268,6 +249,193 @@ public class Bid {
 	}
 
 	/**
+	 * Aggregate with the specified other parameter.
+	 * 
+	 * @param other
+	 *            The other (<code>Bid</code>) parameter.
+	 * @return A copy of this bid with the other bid aggregated into it.
+	 */
+	public Bid aggregate(final Bid other) {
+		double[] otherDemand = other.toMarketBasis(this.marketBasis)
+				.getUnclonedDemand();
+		double[] aggregatedDemand = this.getDemand();
+		for (int i = 0; i < aggregatedDemand.length; i++) {
+			aggregatedDemand[i] += otherDemand[i];
+		}
+		return new Bid(this.marketBasis, this.bidNumber, aggregatedDemand);
+	}
+
+	/**
+	 * Calculate intersection with the specified target demand and return the
+	 * Price result.
+	 * 
+	 * @param targetDemand
+	 *            The target demand (<code>double</code>) parameter.
+	 * @return Results of the intersection (<code>Price</code>) value.
+	 */
+	// TODO The Cyclomatic Complexity of this method "calculateIntersection" is
+	// 12 which is greater than 10 authorized.
+	public Price calculateIntersection(final double targetDemand) {
+		double[] unclonedDemand = getUnclonedDemand();
+		int leftBound = 0;
+		int rightBound = unclonedDemand.length - 1;
+		int middle = rightBound / 2;
+		while (leftBound < middle) {
+			if (unclonedDemand[middle] > targetDemand) {
+				leftBound = middle;
+			} else {
+				rightBound = middle;
+			}
+			middle = (leftBound + rightBound) / 2;
+		}
+	
+		/*
+		 * Find the point where the demand falls below the target
+		 */
+		while (rightBound < unclonedDemand.length
+				&& unclonedDemand[rightBound] >= targetDemand) {
+			rightBound += 1;
+		}
+	
+		/*
+		 * The index of the point which is just above the intersection is now
+		 * stored in the variable 'middle'. This means that middle + 1 is the
+		 * index of the point that lies just under the intersection. That means
+		 * that the exact intersection is between middle and middle+1, hence a
+		 * weighted interpolation is needed.
+		 * 
+		 * Pricing for boundary cases: 1) If the curve is a flat line, if the
+		 * demand is positive the price will become the maximum price, or if the
+		 * demand is zero or negative, the price will become 0. 2) If the curve
+		 * is a single step, the price of the stepping point (the left or the
+		 * right boundary).
+		 */
+		int priceStep;
+	
+		// TODO Refactor this code to not nest more than 3
+		// if/for/while/switch/try statements.
+		if (leftBound > 0 && rightBound < unclonedDemand.length) {
+			/* Interpolate */
+			double interpolation = ((unclonedDemand[leftBound] - targetDemand) / (unclonedDemand[leftBound] - unclonedDemand[rightBound]))
+					* (rightBound - leftBound);
+			priceStep = leftBound + (int) Math.ceil(interpolation);
+		} else {
+			if (leftBound == 0 && rightBound == unclonedDemand.length) {
+				/* Curve is flat line or single step at leftBound */
+				if (unclonedDemand[leftBound] != 0) {
+					/*
+					 * Curve is flat line for non-zero demand or single step at
+					 * leftBound
+					 */
+					if (unclonedDemand[leftBound + 1] == 0) {
+						/* Curve is a single step at leftBound */
+						priceStep = leftBound + 1;
+					} else {
+						/* Curve is flat line for non-zero demand */
+						priceStep = rightBound - 1;
+					}
+				} else {
+					/* Curve is flat line for zero demand 0 */
+					priceStep = this.marketBasis.toPriceStep(0);
+				}
+			} else {
+				/* Curve is a single step at leftBound */
+				priceStep = unclonedDemand[leftBound] <= targetDemand ? leftBound
+						: leftBound + 1;
+			}
+		}
+		double intersectionPrice = this.marketBasis.toPrice(this.marketBasis
+				.boundPriceStep(priceStep));
+		return new Price(this.marketBasis, intersectionPrice);
+	}
+
+	/**
+	 * Subtract the other bid curve from this bid curve. Subtract is the inverse
+	 * of aggregate. The other bid does not have to be based on the same market
+	 * basis.
+	 * 
+	 * @param other
+	 *            The other (<code>Bid</code>) parameter.
+	 * @return A copy of this bid with the other bid subtracted from it.
+	 */
+	public Bid subtract(final Bid other) {
+		double[] otherDemand = other.toMarketBasis(this.marketBasis)
+				.getUnclonedDemand();
+		double[] newDemand = this.getDemand();
+		for (int i = 0; i < newDemand.length; i++) {
+			newDemand[i] -= otherDemand[i];
+		}
+		return new Bid(this.marketBasis, this.bidNumber, newDemand);
+	}
+
+	/**
+	 * Convert this bid to another market basis.
+	 * 
+	 * @param newMarketBasis
+	 *            The new market basis (<code>MarketBasis</code>) parameter.
+	 * @return A copy of this bid converted to the new market basis.
+	 * @see #getMarketBasis()
+	 */
+	public Bid toMarketBasis(final MarketBasis newMarketBasis) {
+		if (this.marketBasis.equals(newMarketBasis)) {
+			return this;
+		} else {
+			assert this.marketBasis.getCommodity().equals(
+					newMarketBasis.getCommodity());
+			assert this.marketBasis.getCurrency().equals(
+					newMarketBasis.getCurrency());
+			if (this.pricePoints == null) {
+				double[] oldDemand = getUnclonedDemand();
+				double[] newDemand = new double[newMarketBasis.getPriceSteps()];
+				for (int i = 0; i < newDemand.length; i++) {
+					double newPrice = this.marketBasis
+							.boundPrice(newMarketBasis.toPrice(i));
+					int oldPriceStep = this.marketBasis.toPriceStep(newPrice);
+					newDemand[i] = oldDemand[oldPriceStep];
+				}
+				return new Bid(newMarketBasis, this.bidNumber, newDemand);
+			} else {
+				PricePoint[] newPricePoints = new PricePoint[this.pricePoints.length];
+				for (int i = 0; i < newPricePoints.length; i++) {
+					PricePoint oldPricePoint = this.pricePoints[i];
+					double price = this.marketBasis.toPrice(this.marketBasis
+							.toPriceStep(oldPricePoint.getNormalizedPrice()));
+					newPricePoints[i] = new PricePoint(
+							newMarketBasis.toNormalizedPrice(price),
+							oldPricePoint.getDemand());
+				}
+				return new Bid(newMarketBasis, this.bidNumber, newPricePoints);
+			}
+		}
+	}
+
+	/**
+	 * Transpose the bid curve by adding an offset to the demand.
+	 * 
+	 * @param offset
+	 *            The offset (<code>double</code>) parameter.
+	 */
+	public Bid transpose(final double offset) {
+		double[] newDemand = this.getDemand();
+		for (int i = 0; i < newDemand.length; i++) {
+			newDemand[i] += offset;
+		}
+		return new Bid(this.marketBasis, this.bidNumber, newDemand);
+	}
+
+	/**
+	 * Create a new PricePoint corresponding to the demand value at priceSte.
+	 * 
+	 * @param priceStep
+	 *            The price step (<code>int</code>) parameter.
+	 * @return The new (<code>PricePoint</code>).
+	 */
+	private PricePoint newPoint(int priceStep) {
+		return new PricePoint(this.marketBasis.toNormalizedPrice(priceStep),
+				this.demand[priceStep]);
+	}
+
+	/**
 	 * Gets the bid number (int) value.
 	 * 
 	 * @return The bid number (<code>int</code>) value.
@@ -299,9 +467,11 @@ public class Bid {
 	 * @see #getMinimumDemand()
 	 */
 	private double[] getUnclonedDemand() {
+		// TODO Refactor this code to not nest more than 3
+		// if/for/while/switch/try statements
 		if (this.demand == null && this.pricePoints != null) {
 			int priceSteps = this.marketBasis.getPriceSteps();
-			double[] demand = new double[priceSteps];
+			double[] newDemand = new double[priceSteps];
 			int numPoints = this.pricePoints.length;
 			int i = 0;
 			double lastValue = numPoints == 0 ? 0 : this.pricePoints[0]
@@ -316,18 +486,18 @@ public class Bid {
 				if (steps > 0) {
 					double delta = (value - lastValue) / steps;
 					while (i <= priceStep) {
-						demand[i] = value - (priceStep - i) * delta;
+						newDemand[i] = value - (priceStep - i) * delta;
 						i += 1;
 					}
 				} else {
-					demand[priceStep] = value;
+					newDemand[priceStep] = value;
 				}
 				lastValue = value;
 			}
 			while (i < priceSteps) {
-				demand[i++] = lastValue;
+				newDemand[i++] = lastValue;
 			}
-			this.demand = demand;
+			this.demand = newDemand;
 		}
 		return this.demand;
 	}
@@ -361,8 +531,8 @@ public class Bid {
 	 * @see #getMinimumDemand()
 	 */
 	public double getDemand(final int priceStep) {
-		double demand[] = getUnclonedDemand();
-		return demand[this.marketBasis.boundPriceStep(priceStep)];
+		double[] unclonedDemand = getUnclonedDemand();
+		return unclonedDemand[this.marketBasis.boundPriceStep(priceStep)];
 	}
 
 	/**
@@ -384,10 +554,8 @@ public class Bid {
 		double maxDemand = 0;
 		if (this.pricePoints != null && this.pricePoints.length > 0) {
 			maxDemand = this.pricePoints[0].getDemand();
-		} else if (this.demand != null) {
-			if (this.demand.length > 0) {
-				maxDemand = this.demand[0];
-			}
+		} else if (this.demand != null && this.demand.length > 0) {
+			maxDemand = this.demand[0];
 		}
 		return maxDemand;
 	}
@@ -402,10 +570,8 @@ public class Bid {
 		if (this.pricePoints != null && this.pricePoints.length > 0) {
 			minDemand = this.pricePoints[this.pricePoints.length - 1]
 					.getDemand();
-		} else if (this.demand != null) {
-			if (this.demand.length > 0) {
-				minDemand = this.demand[this.demand.length - 1];
-			}
+		} else if (this.demand != null && this.demand.length > 0) {
+			minDemand = this.demand[this.demand.length - 1];
 		}
 		return minDemand;
 	}
@@ -429,6 +595,8 @@ public class Bid {
 	 *         null if no price points or demand array has been set.
 	 * @see #getPricePoints()
 	 */
+	// TODO The Cyclomatic Complexity of this method "getCalculatedPricePoints"
+	// is 18 which is greater than 10 authorized.
 	public PricePoint[] getCalculatedPricePoints() {
 		PricePoint[] calculatedPricePoints = null;
 		if (this.pricePoints != null) {
@@ -475,11 +643,14 @@ public class Bid {
 				}
 				i += 1;
 
+				// TODO Refactor this code to not nest more than 3
+				// if/for/while/switch/try statements.
 				/*
 				 * If not at the end of the demand array, check if the following
 				 * segment is a step or an inclining segment.
 				 */
 				if (i < priceSteps - 1) {
+					// TODO Test for floating point equality. Not just ==
 					if (this.demand[i] - this.demand[i + 1] == delta) {
 						/*
 						 * Here i is in a constantly inclining or declining
@@ -544,128 +715,6 @@ public class Bid {
 	public double getScaleFactor(final int maxValue) {
 		return Math.max(getMaximumDemand(), -getMinimumDemand()) / maxValue;
 	}
-	
-	/**
-	 * Aggregate with the specified other parameter.
-	 * 
-	 * @param other
-	 *            The other (<code>Bid</code>) parameter.
-	 * @return A copy of this bid with the other bid aggregated into it.
-	 */
-	public Bid aggregate(final Bid other) {
-		double[] otherDemand = other.toMarketBasis(this.marketBasis)
-				.getUnclonedDemand();
-		double[] aggregatedDemand = this.getDemand();
-		for (int i = 0; i < aggregatedDemand.length; i++) {
-			aggregatedDemand[i] += otherDemand[i];
-		}
-		return new Bid(this.marketBasis, this.bidNumber, aggregatedDemand);
-	}
-
-	/**
-	 * Calculate intersection with the specified target demand and return the
-	 * Price result.
-	 * 
-	 * @param targetDemand
-	 *            The target demand (<code>double</code>) parameter.
-	 * @return Results of the intersection (<code>Price</code>) value.
-	 */
-	public Price calculateIntersection(final double targetDemand) {
-		double[] demand = getUnclonedDemand();
-		int leftBound = 0;
-		int rightBound = demand.length - 1;
-		int middle = rightBound / 2;
-		while (leftBound < middle) {
-			if (demand[middle] > targetDemand) {
-				leftBound = middle;
-			} else {
-				rightBound = middle;
-			}
-			middle = (leftBound + rightBound) / 2;
-		}
-
-		/*
-		 * Find the point where the demand falls below the target
-		 */
-		while (rightBound < demand.length && demand[rightBound] >= targetDemand) {
-			rightBound += 1;
-		}
-
-		/*
-		 * The index of the point which is just above the intersection is now
-		 * stored in the variable 'middle'. This means that middle + 1 is the
-		 * index of the point that lies just under the intersection. That means
-		 * that the exact intersection is between middle and middle+1, hence a
-		 * weighted interpolation is needed.
-		 * 
-		 * Pricing for boundary cases: 1) If the curve is a flat line, if the
-		 * demand is positive the price will become the maximum price, or if the
-		 * demand is zero or negative, the price will become 0. 2) If the curve
-		 * is a single step, the price of the stepping point (the left or the
-		 * right boundary).
-		 */
-		int priceStep;
-		if (leftBound > 0 && rightBound < demand.length) {
-			/* Interpolate */
-			double interpolation = ((demand[leftBound] - targetDemand) / (demand[leftBound] - demand[rightBound]))
-					* (rightBound - leftBound);
-			priceStep = leftBound + (int) Math.ceil(interpolation);
-		} else {
-			if (leftBound == 0 && rightBound == demand.length) {
-				/* Curve is flat line or single step at leftBound */
-				if (demand[leftBound] != 0) {
-					/*
-					 * Curve is flat line for non-zero demand or single step at
-					 * leftBound
-					 */
-					if (demand[leftBound + 1] == 0) {
-						/* Curve is a single step at leftBound */
-						priceStep = leftBound + 1;
-					} else {
-						/* Curve is flat line for non-zero demand */
-						priceStep = rightBound - 1;
-					}
-				} else {
-					/* Curve is flat line for zero demand 0 */
-					priceStep = this.marketBasis.toPriceStep(0);
-				}
-			} else {
-				/* Curve is a single step at leftBound */
-				priceStep = demand[leftBound] <= targetDemand ? leftBound
-						: leftBound + 1;
-			}
-		}
-		double intersectionPrice = this.marketBasis.toPrice(this.marketBasis
-				.boundPriceStep(priceStep));
-		return new Price(this.marketBasis, intersectionPrice);
-	}
-
-	/**
-	 * Create a new PricePoint corresponding to the demand value at priceSte.
-	 * 
-	 * @param priceStep
-	 *            The price step (<code>int</code>) parameter.
-	 * @return The new (<code>PricePoint</code>).
-	 */
-	private PricePoint newPoint(int priceStep) {
-		return new PricePoint(this.marketBasis.toNormalizedPrice(priceStep),
-				this.demand[priceStep]);
-	}
-
-	/**
-	 * Equals with the specified obj1 and obj2 parameters and return the boolean
-	 * result.
-	 * 
-	 * @param obj1
-	 *            The obj1 (<code>Object</code>) parameter.
-	 * @param obj2
-	 *            The obj2 (<code>Object</code>) parameter.
-	 * @return Results of the equals (<code>boolean</code>) value.
-	 * @see #equals(Object)
-	 */
-	private static boolean equals(final Object obj1, final Object obj2) {
-		return obj1 == obj2 || (obj1 != null && obj1.equals(obj2));
-	}
 
 	/**
 	 * Equals with the specified obj parameter and return the boolean result.
@@ -677,9 +726,11 @@ public class Bid {
 	@Override
 	public boolean equals(final Object obj) {
 		Bid other = (Bid) ((obj instanceof Bid) ? obj : null);
+		// TODO Reduce the number of conditional operators (4) used in the
+		// expression (maximum allowed 3).
 		return this == other
 				|| (other != null && other.bidNumber == this.bidNumber
-						&& equals(other.marketBasis, this.marketBasis) && Arrays
+						&& this.marketBasis.equals(other.marketBasis) && Arrays
 							.equals(other.getUnclonedDemand(),
 									this.getUnclonedDemand()));
 	}
@@ -701,66 +752,6 @@ public class Bid {
 	}
 
 	/**
-	 * Subtract the other bid curve from this bid curve. Subtract is the inverse
-	 * of aggregate. The other bid does not have to be based on the same market
-	 * basis.
-	 * 
-	 * @param other
-	 *            The other (<code>Bid</code>) parameter.
-	 * @return A copy of this bid with the other bid subtracted from it.
-	 */
-	public Bid subtract(final Bid other) {
-		double[] otherDemand = other.toMarketBasis(this.marketBasis)
-				.getUnclonedDemand();
-		double[] newDemand = this.getDemand();
-		for (int i = 0; i < newDemand.length; i++) {
-			newDemand[i] -= otherDemand[i];
-		}
-		return new Bid(this.marketBasis, this.bidNumber, newDemand);
-	}
-
-	/**
-	 * Convert this bid to another market basis.
-	 * 
-	 * @param newMarketBasis
-	 *            The new market basis (<code>MarketBasis</code>) parameter.
-	 * @return A copy of this bid converted to the new market basis.
-	 * @see #getMarketBasis()
-	 */
-	public Bid toMarketBasis(final MarketBasis newMarketBasis) {
-		if (this.marketBasis.equals(newMarketBasis)) {
-			return this;
-		} else {
-			assert this.marketBasis.getCommodity().equals(
-					newMarketBasis.getCommodity());
-			assert this.marketBasis.getCurrency().equals(
-					newMarketBasis.getCurrency());
-			if (this.pricePoints == null) {
-				double[] oldDemand = getUnclonedDemand();
-				double[] newDemand = new double[newMarketBasis.getPriceSteps()];
-				for (int i = 0; i < newDemand.length; i++) {
-					double newPrice = this.marketBasis
-							.boundPrice(newMarketBasis.toPrice(i));
-					int oldPriceStep = this.marketBasis.toPriceStep(newPrice);
-					newDemand[i] = oldDemand[oldPriceStep];
-				}
-				return new Bid(newMarketBasis, this.bidNumber, newDemand);
-			} else {
-				PricePoint[] newPricePoints = new PricePoint[this.pricePoints.length];
-				for (int i = 0; i < newPricePoints.length; i++) {
-					PricePoint oldPricePoint = this.pricePoints[i];
-					double price = this.marketBasis.toPrice(this.marketBasis
-							.toPriceStep(oldPricePoint.getNormalizedPrice()));
-					newPricePoints[i] = new PricePoint(
-							newMarketBasis.toNormalizedPrice(price),
-							oldPricePoint.getDemand());
-				}
-				return new Bid(newMarketBasis, this.bidNumber, newPricePoints);
-			}
-		}
-	}
-
-	/**
 	 * Returns the string value.
 	 * 
 	 * @return The string (<code>String</code>) value.
@@ -774,6 +765,8 @@ public class Bid {
 		 * Print price points if available, and if the most compact
 		 * representation
 		 */
+		// TODO Refactor this code to not nest more than 3
+		// if/for/while/switch/try statements.
 		if (points != null
 				&& points.length < this.marketBasis.getPriceSteps() / 2) {
 			b.append(", PricePoint[]{");
@@ -794,14 +787,15 @@ public class Bid {
 			}
 			b.append("}, ");
 		} else {
-			double demand[] = getUnclonedDemand();
-			if (demand != null) {
+			double[] unclonedDemand = getUnclonedDemand();
+			if (unclonedDemand != null) {
 				b.append(", demand[]{");
-				for (int i = 0; i < demand.length; i++) {
+				for (int i = 0; i < unclonedDemand.length; i++) {
 					if (i > 0) {
 						b.append(',');
 					}
-					b.append(MarketBasis.DEMAND_FORMAT.format(demand[i]));
+					b.append(MarketBasis.DEMAND_FORMAT
+							.format(unclonedDemand[i]));
 				}
 				b.append("}, ");
 			}
@@ -812,17 +806,25 @@ public class Bid {
 	}
 
 	/**
-	 * Transpose the bid curve by adding an offset to the demand.
+	 * Create a deep clone of the price point array.
 	 * 
-	 * @param offset
-	 *            The offset (<code>double</code>) parameter.
+	 * @param unclonedPricePoints
+	 *            The price point array to be cloned, or null.
+	 * @return The cloned price point array, or null if unclonedPricePoints is
+	 *         null.
 	 */
-	public Bid transpose(final double offset) {
-		double[] newDemand = this.getDemand();
-		for (int i = 0; i < newDemand.length; i++) {
-			newDemand[i] += offset;
+	private static PricePoint[] clone(PricePoint[] unclonedPricePoints) {
+		if (unclonedPricePoints == null) {
+			// TODO this should return new PricePoint[0], not null.
+			// getCalculatedPricePoints might will have to be refactored
+
+			return null;
 		}
-		return new Bid(this.marketBasis, this.bidNumber, newDemand);
+		PricePoint[] pricePoints = new PricePoint[unclonedPricePoints.length];
+		for (int i = 0; i < pricePoints.length; i++) {
+			pricePoints[i] = new PricePoint(unclonedPricePoints[i]);
+		}
+		return pricePoints;
 	}
 
 }

@@ -27,7 +27,7 @@ public class BidCache {
 	/**
 	 * Define the default bid expiration time (long) field.
 	 */
-	public final static long DEFAULT_BID_EXPIRATION_TIME = 300;
+	public static final long DEFAULT_BID_EXPIRATION_TIME = 300;
 	/**
 	 * Define the time source (TimeService) that is used for obtaining real or
 	 * simulated time.
@@ -59,9 +59,58 @@ public class BidCache {
 	 */
 	public BidCache(final TimeService timeService, final int expirationTime) {
 		this.lastResetTime = 0;
-		this.expirationTimeMillis = expirationTime * 1000l;
+		this.expirationTimeMillis = expirationTime * 1000L;
 		this.bidCache = new HashMap<String, BidCacheElement>();
 		this.timeService = timeService;
+	}
+
+	/**
+	 * Update bid with the specified agent ID and new bid parameters and return
+	 * the Bid result.
+	 * 
+	 * @param agentId
+	 *            The agent ID (<code>String</code>) parameter.
+	 * @param newBid
+	 *            The new bid (<code>Bid</code>) parameter.
+	 * @return Returns the old bid (<code>Bid</code>), or null if the agent is
+	 *         new.
+	 * @see #getAggregatedBid(MarketBasis)
+	 * @see #getLastBid(String)
+	 */
+	public synchronized Bid updateBid(final String agentId, final Bid newBid) {
+		assert newBid != null;
+		TimeService timeSource = this.timeService;
+		long currentTime = (timeSource == null) ? 0 : timeSource
+				.currentTimeMillis();
+		BidCacheElement element = new BidCacheElement(newBid, currentTime);
+		BidCacheElement oldElement = this.bidCache.put(agentId, element);
+		Bid oldBid = null;
+		if (this.aggregatedBid != null) {
+			if (oldElement != null) {
+				oldBid = oldElement.getBid();
+				this.aggregatedBid = this.aggregatedBid.subtract(oldBid);
+			}
+			this.aggregatedBid = this.aggregatedBid.aggregate(newBid);
+		}
+		return oldBid;
+	}
+
+	/**
+	 * Remove agent with the specified agent ID parameter and return the Bid
+	 * result.
+	 * 
+	 * @param agentId
+	 *            The agent ID (<code>String</code>) parameter.
+	 * @return Results of the remove agent (<code>Bid</code>) value.
+	 */
+	public synchronized Bid removeAgent(final String agentId) {
+		BidCacheElement oldElement = this.bidCache.remove(agentId);
+		Bid lastBid = null;
+		if (this.aggregatedBid != null && oldElement != null) {
+				lastBid = oldElement.getBid();
+				this.aggregatedBid = this.aggregatedBid.subtract(lastBid);
+		}
+		return lastBid;
 	}
 
 	/**
@@ -118,13 +167,13 @@ public class BidCache {
 		if (marketBasis != null) {
 			if (this.aggregatedBid == null
 					|| !this.aggregatedBid.getMarketBasis().equals(marketBasis)) {
-				Bid aggregatedBid = new Bid(marketBasis);
+				Bid newAggregatedBid = new Bid(marketBasis);
 				Set<String> idSet = this.bidCache.keySet();
 				for (String agentId : idSet) {
 					Bid bid = getLastBid(agentId);
-					aggregatedBid = aggregatedBid.aggregate(bid);
+					newAggregatedBid = newAggregatedBid.aggregate(bid);
 				}
-				this.aggregatedBid = aggregatedBid;
+				this.aggregatedBid = newAggregatedBid;
 			}
 			return this.aggregatedBid;
 		}
@@ -144,57 +193,6 @@ public class BidCache {
 		Bid lastBid = null;
 		if (element != null) {
 			lastBid = element.getBid();
-		}
-		return lastBid;
-	}
-
-	/**
-	 * Update bid with the specified agent ID and new bid parameters and return
-	 * the Bid result.
-	 * 
-	 * @param agentId
-	 *            The agent ID (<code>String</code>) parameter.
-	 * @param newBid
-	 *            The new bid (<code>Bid</code>) parameter.
-	 * @return Returns the old bid (<code>Bid</code>), or null if the agent is
-	 *         new.
-	 * @see #getAggregatedBid(MarketBasis)
-	 * @see #getLastBid(String)
-	 */
-	public synchronized Bid updateBid(final String agentId, final Bid newBid) {
-		assert newBid != null;
-		TimeService timeSource = this.timeService;
-		long currentTime = (timeSource == null) ? 0 : timeSource
-				.currentTimeMillis();
-		BidCacheElement element = new BidCacheElement(newBid, currentTime);
-		BidCacheElement oldElement = this.bidCache.put(agentId, element);
-		Bid oldBid = null;
-		if (this.aggregatedBid != null) {
-			if (oldElement != null) {
-				oldBid = oldElement.getBid();
-				this.aggregatedBid = this.aggregatedBid.subtract(oldBid);
-			}
-			this.aggregatedBid = this.aggregatedBid.aggregate(newBid);
-		}
-		return oldBid;
-	}
-
-	/**
-	 * Remove agent with the specified agent ID parameter and return the Bid
-	 * result.
-	 * 
-	 * @param agentId
-	 *            The agent ID (<code>String</code>) parameter.
-	 * @return Results of the remove agent (<code>Bid</code>) value.
-	 */
-	public synchronized Bid removeAgent(final String agentId) {
-		BidCacheElement oldElement = this.bidCache.remove(agentId);
-		Bid lastBid = null;
-		if (this.aggregatedBid != null) {
-			if (oldElement != null) {
-				lastBid = oldElement.getBid();
-				this.aggregatedBid = this.aggregatedBid.subtract(lastBid);
-			}
 		}
 		return lastBid;
 	}
