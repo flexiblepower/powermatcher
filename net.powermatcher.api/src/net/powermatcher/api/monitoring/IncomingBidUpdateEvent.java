@@ -6,7 +6,6 @@ import net.powermatcher.api.AgentRole;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
-import net.powermatcher.api.data.Price;
 
 /**
  * An {@link IncomingBidUpdateEvent} is sent when an {@link AgentRole} receives
