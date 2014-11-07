@@ -14,8 +14,10 @@ import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.monitoring.IncomingBidUpdateEvent;
+import net.powermatcher.api.monitoring.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.Observable;
 import net.powermatcher.api.monitoring.OutgoingBidUpdateEvent;
+import net.powermatcher.api.monitoring.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.BidCache;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.monitoring.ObservableBase;
@@ -218,9 +220,15 @@ public class Concentrator  extends ObservableBase implements MatcherRole, AgentR
 	public void updatePrice(Price newPrice) {
 		logger.debug("Received price update [{}]", newPrice);
 
+		this.publishEvent(new IncomingPriceUpdateEvent(this.config.agentId(),
+				this.sessionToMatcher.getSessionId(), timeService.currentDate(), newPrice));
+
 		// Publish new price to connected agents
 		for (Session session : this.sessionToAgents) {
 			session.updatePrice(newPrice);
+
+			this.publishEvent(new OutgoingPriceUpdateEvent(this.config.agentId(),
+					session.getSessionId(), timeService.currentDate(), newPrice));
 		}
 	}
 
@@ -241,24 +249,4 @@ public class Concentrator  extends ObservableBase implements MatcherRole, AgentR
 			logger.debug("Updating aggregated bid [{}]", aggregatedBid);
 		}
 	}
-
-	/*
-	private final Set<Observer> observers = new CopyOnWriteArraySet<Observer>();
-
-	@Override
-	public void addObserver(Observer observer) {
-		observers.add(observer);
-	}
-
-	@Override
-	public void removeObserver(Observer observer) {
-		observers.remove(observer);
-	}
-
-	public void publishEvent(UpdateEvent event) {
-		for (Observer observer : observers) {
-			observer.update(event);
-		}
-	}
-	*/
 }

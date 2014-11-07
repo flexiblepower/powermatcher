@@ -20,7 +20,7 @@ import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
 /**
- * Abstract version of an observer which can be used as a base for implementation.
+ * Base class used to create an observer.
  * The observer searches for {@link Observable} services and adds itself.
  * 
  * {@link Observable} services are able to call the update method of 
@@ -33,7 +33,7 @@ public class ObserverBase implements Observer {
 	 * OSGI configuration of the {@link ObserverBase}
 	 */
 	public static interface Config {
-		@Meta.AD
+		@Meta.AD(required = false)
 		List<String> filter();
 	}
 
@@ -85,20 +85,13 @@ public class ObserverBase implements Observer {
 		String observableId = observable.getObserverId();
 		if (observables.putIfAbsent(observableId, observable) != null) {
 			logger.warn("An observable with the id " + observableId + " was already registered");
-		} else {
-			// Attach new observer.
-			logger.info("Start observing [{}]", observable.getObserverId());
-			observable.addObserver(this);
 		}
+		
+		updateObservables();
 	}
 
 	public void removeObservable(Observable observable, Map<String, Object> properties) {
-		String observableId = properties.get("agentId").toString();
-
-		// Observer is already removed
-		if (observableId == null) {
-			return;
-		}
+		String observableId = observable.getObserverId();
 
 		// Check whether actually observing and remove
 		if (observing.get(observableId) == observable) {
@@ -106,17 +99,40 @@ public class ObserverBase implements Observer {
 		}
 	}
 	
+	/**
+	 * Update the connections to the observables.
+	 * The filter is taken into account is present.
+	 */
 	private void updateObservables() {
 		for (String observableId : this.observables.keySet()) {
-			// TODO check filter
-
-			// Attach to new observers
-			if (!this.observing.containsKey(observableId)) {
-				Observable observable = this.observables.get(observableId);
-				observable.addObserver(this);
-				observing.put(observableId, observable);
-				logger.info("Attached to observable {}", observableId);
+			// Check against filter whether observable should be observed
+			if (this.filter != null && this.filter.size() > 0 && 
+					!this.filter.contains(observableId)) {
+				// Remove observer when still observing
+				if (this.observing.containsKey(observableId)) {
+					Observable toRemove = this.observing.remove(observableId);
+					toRemove.removeObserver(this);
+					logger.info("Detached from observable [{}]", observableId);
+				}
+				
+				continue;
 			}
+
+			this.addObservable(observableId);
+		}
+	}
+	
+	/**
+	 * Start observing the specified observable.
+	 * @param observableId observable to observe.
+	 */
+	private void addObservable(String observableId) {
+		// Only attach to new observers
+		if (!this.observing.containsKey(observableId)) {
+			Observable observable = this.observables.get(observableId);
+			observable.addObserver(this);
+			observing.put(observableId, observable);
+			logger.info("Attached to observable [{}]", observableId);
 		}
 	}
 	

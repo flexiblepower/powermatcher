@@ -118,24 +118,4 @@ public class PVPanelAgent extends ObservableBase implements AgentRole {
 	public String getObserverId() {
 		return this.agentId;
 	}
-
-	/*
-	private final Set<Observer> observers = new CopyOnWriteArraySet<Observer>();
-
-	@Override
-	public void addObserver(Observer observer) {
-		observers.add(observer);
-	}
-
-	@Override
-	public void removeObserver(Observer observer) {
-		observers.remove(observer);
-	}
-
-	public void publishEvent(UpdateEvent event) {
-		for (Observer observer : observers) {
-			observer.update(event);
-		}
-	}
-	*/
 }

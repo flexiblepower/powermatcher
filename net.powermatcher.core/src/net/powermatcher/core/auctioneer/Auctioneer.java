@@ -15,6 +15,7 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.monitoring.Observable;
+import net.powermatcher.api.monitoring.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.BidCache;
 import net.powermatcher.core.concentrator.Concentrator;
 import net.powermatcher.core.monitoring.ObservableBase;
@@ -216,7 +217,11 @@ public class Auctioneer extends ObservableBase implements MatcherRole {
 		Bid aggregatedBid = this.aggregatedBids
 				.getAggregatedBid(this.marketBasis);
 		Price newPrice = determinePrice(aggregatedBid);
+		
 		for (Session session : this.sessions) {
+			this.publishEvent(new OutgoingPriceUpdateEvent(matcherId,
+					session.getSessionId(), timeService.currentDate(), newPrice));
+
 			session.updatePrice(newPrice);
 			logger.debug("New price: {}, session {}", newPrice,
 					session.getSessionId());
@@ -225,25 +230,5 @@ public class Auctioneer extends ObservableBase implements MatcherRole {
 
 	protected Price determinePrice(Bid aggregatedBid) {
 		return aggregatedBid.calculateIntersection(0);
-	}
-	
-	/*
-	private final Set<Observer> observers = new CopyOnWriteArraySet<Observer>();
-
-	@Override
-	public void addObserver(Observer observer) {
-		observers.add(observer);
-	}
-
-	@Override
-	public void removeObserver(Observer observer) {
-		observers.remove(observer);
-	}
-
-	public void publishEvent(UpdateEvent event) {
-		for (Observer observer : observers) {
-			observer.update(event);
-		}
-	}
-	*/
+	}	
 }
