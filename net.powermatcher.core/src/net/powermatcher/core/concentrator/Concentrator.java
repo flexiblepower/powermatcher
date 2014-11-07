@@ -119,7 +119,7 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 	}
 
 	@Activate
-	void activate(final Map<String, Object> properties) {
+	public void activate(final Map<String, Object> properties) {
 		config = Configurable.createConfigurable(Config.class, properties);
 
 		this.aggregatedBids = new BidCache(this.timeService,
@@ -228,7 +228,12 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 		}
 	}
 
-	protected void doBidUpdate() {
+	/**
+	 * sends the aggregatedbids to the matcher
+	 * this method has temporarily been made public due to issues with the scheduler.
+	 * TODO fix this asap
+	 */
+	public void doBidUpdate() {
 		if (sessionToMatcher != null) {
 			Bid aggregatedBid = this.aggregatedBids
 					.getAggregatedBid(this.sessionToMatcher.getMarketBasis());
