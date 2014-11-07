@@ -50,7 +50,7 @@ import aQute.bnd.annotation.metatype.Meta;
  */
 @Component(designateFactory = Concentrator.Config.class, immediate = true)
 public class Concentrator implements MatcherRole, AgentRole, Observable {
-	private static final Logger logger = LoggerFactory
+	private static final Logger LOGGER = LoggerFactory
 			.getLogger(Concentrator.class);
 
 	@Meta.OCD
@@ -132,9 +132,11 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 			}
 		}, 0, config.bidUpdateRate(), TimeUnit.SECONDS);
 
-		logger.info("Agent [{}], activated", config.agentId());
+		LOGGER.info("Agent [{}], activated", config.agentId());
 	}
 
+	// TODO sessionToMatcher is used in synchronized methods. Do we have do synchronize
+	// deactivate? SessiontoMatcher is normally only set once, so maybe not.
 	@Deactivate
 	public void deactivate() {
 		for (Session session : sessionToAgents
@@ -145,13 +147,13 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 		sessionToMatcher.disconnect();
 
 		if (!sessionToAgents.isEmpty()) {
-			logger.warn("Could not disconnect all sessions. Left: {}",
+			LOGGER.warn("Could not disconnect all sessions. Left: {}",
 					sessionToAgents);
 		}
 
 		scheduledFuture.cancel(false);
 
-		logger.info("Agent [{}], deactivated", config.agentId());
+		LOGGER.info("Agent [{}], deactivated", config.agentId());
 	}
 
 	@Override
@@ -161,7 +163,7 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 
 	@Override
 	public synchronized void disconnectFromMatcher(Session session) {
-		for (Session agentSession : sessionToAgents) {
+		for (Session agentSession : sessionToAgents.toArray(new Session[sessionToAgents.size()])) {
 			agentSession.disconnect();
 		}
 		this.sessionToMatcher = null;
@@ -179,7 +181,7 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 
 		this.aggregatedBids.updateBid(session.getSessionId(), new Bid(
 				this.sessionToMatcher.getMarketBasis()));
-		logger.info("Agent connected with session [{}]", session.getSessionId());
+		LOGGER.info("Agent connected with session [{}]", session.getSessionId());
 		return true;
 	}
 
@@ -192,7 +194,7 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 
 		this.aggregatedBids.removeAgent(session.getSessionId());
 
-		logger.info("Agent disconnected with session [{}]",
+		LOGGER.info("Agent disconnected with session [{}]",
 				session.getSessionId());
 	}
 
@@ -214,13 +216,13 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 		// Update agent in aggregatedBids
 		this.aggregatedBids.updateBid(session.getSessionId(), newBid);
 
-		logger.info("Received bid update [{}] from session [{}]", newBid,
+		LOGGER.info("Received bid update [{}] from session [{}]", newBid,
 				session.getSessionId());
 	}
 
 	@Override
 	public void updatePrice(Price newPrice) {
-		logger.debug("Received price update [{}]", newPrice);
+		LOGGER.debug("Received price update [{}]", newPrice);
 
 		// Publish new price to connected agents
 		for (Session session : this.sessionToAgents) {
@@ -233,7 +235,8 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 	 * this method has temporarily been made public due to issues with the scheduler.
 	 * TODO fix this asap
 	 */
-	public void doBidUpdate() {
+	public synchronized void doBidUpdate() {
+
 		if (sessionToMatcher != null) {
 			Bid aggregatedBid = this.aggregatedBids
 					.getAggregatedBid(this.sessionToMatcher.getMarketBasis());
@@ -242,7 +245,7 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 					sessionToMatcher.getSessionId(), timeService.currentDate(),
 					aggregatedBid));
 
-			logger.debug("Updating aggregated bid [{}]", aggregatedBid);
+			LOGGER.debug("Updating aggregated bid [{}]", aggregatedBid);
 		}
 	}
 
