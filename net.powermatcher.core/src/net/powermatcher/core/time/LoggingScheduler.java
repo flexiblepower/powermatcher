@@ -20,7 +20,7 @@ import aQute.bnd.annotation.component.Deactivate;
 
 @Component
 public class LoggingScheduler implements ScheduledExecutorService {
-	static final Logger logger = LoggerFactory
+	static final Logger LOGGER = LoggerFactory
 			.getLogger(LoggingScheduler.class);
 
 	private final ScheduledExecutorService executor;
@@ -37,7 +37,7 @@ public class LoggingScheduler implements ScheduledExecutorService {
 			try {
 				return wrapped.call();
 			} catch (Exception ex) {
-				logger.error("Error while executing " + wrapped, ex);
+				LOGGER.error("Error while executing " + wrapped, ex);
 				return null;
 			}
 		}
@@ -53,9 +53,9 @@ public class LoggingScheduler implements ScheduledExecutorService {
 		@Override
 		public void run() {
 			try {
-				wrapped.run();
+				new Thread(wrapped).start();
 			} catch (Exception ex) {
-				logger.error("Error while executing " + wrapped, ex);
+				LOGGER.error("Error while executing " + wrapped, ex);
 			}
 		}
 	}

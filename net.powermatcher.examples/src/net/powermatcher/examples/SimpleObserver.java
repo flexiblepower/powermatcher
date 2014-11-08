@@ -81,7 +81,7 @@ public class SimpleObserver extends ObserverBase {
 
 		// ConfigAdmin will sometimes generate a filter with 1 empty element. Ignore it. 
 		if (filter != null && filter.size() > 0 && filter.get(0).length() == 0) {
-			this.filter = new ArrayList<>(); 
+			this.filter = new ArrayList<String>(); 
 		}
 
 		updateObservables();

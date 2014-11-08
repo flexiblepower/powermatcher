@@ -48,7 +48,7 @@ public class SessionManager {
 		List<String> activeConnections();
 	}
 
-	private static final Logger logger = LoggerFactory
+	private static final Logger LOGGER = LoggerFactory
 			.getLogger(SessionManager.class);
 
 	private static final String KEY_AGENT_ID = "agentId";
@@ -87,9 +87,9 @@ public class SessionManager {
 	public void addAgentRole(AgentRole agentRole, Map<String, Object> properties) {
 		String agentId = getAgentId(properties);
 		if (agentId == null) {
-			logger.warn("Registered an agent with no agentId: " + agentRole);
+			LOGGER.warn("Registered an agent with no agentId: " + agentRole);
 		} else if (agentRoles.putIfAbsent(agentId, agentRole) != null) {
-			logger.warn("An agent with the id " + agentId
+			LOGGER.warn("An agent with the id " + agentId
 					+ " was already registered");
 		} else {
 			updateConnections(true);
@@ -101,10 +101,10 @@ public class SessionManager {
 			Map<String, Object> properties) {
 		String matcherId = getMatcherId(properties);
 		if (matcherId == null) {
-			logger.warn("Registered an matcher with no matcherId: "
+			LOGGER.warn("Registered an matcher with no matcherId: "
 					+ matcherRole);
 		} else if (matcherRoles.putIfAbsent(matcherId, matcherRole) != null) {
-			logger.warn("An matcher with the id " + matcherId
+			LOGGER.warn("An matcher with the id " + matcherId
 					+ " was already registered");
 		} else {
 			updateConnections(true);
@@ -114,10 +114,8 @@ public class SessionManager {
 	public void removeAgentRole(AgentRole agentRole,
 			Map<String, Object> properties) {
 		String agentId = getAgentId(properties);
-		if (agentId != null) {
-			if (agentRoles.get(agentId) == agentRole) {
+		if (agentId != null && agentRoles.get(agentId) == agentRole) {
 				agentRoles.remove(agentId);
-			}
 		}
 	}
 
@@ -138,10 +136,8 @@ public class SessionManager {
 	public void removeMatcherRole(MatcherRole matcherRole,
 			Map<String, Object> properties) {
 		String matcherId = getMatcherId(properties);
-		if (matcherId != null) {
-			if (matcherRoles.get(matcherId) == matcherRole) {
+		if (matcherId != null && matcherRoles.get(matcherId) == matcherRole) {
 				matcherRoles.remove(matcherId);
-			}
 		}
 	}
 
@@ -154,17 +150,18 @@ public class SessionManager {
 	}
 
 	private synchronized void updateConnections(boolean firstTry) {
+		//TODO Refactor this code to not nest more than 3 if/for/while/switch/try statements.
 		if (wantedSessions != null) {
-			HashSet<String> sessionsToRemove = new HashSet<String>(
+			Set<String> sessionsToRemove = new HashSet<String>(
 					activeSessions.keySet());
 			sessionsToRemove.removeAll(wantedSessions);
 
-			HashSet<String> sessionsToCreate = new HashSet<String>(
+			Set<String> sessionsToCreate = new HashSet<String>(
 					wantedSessions);
 			sessionsToCreate.removeAll(activeSessions.keySet());
 
 			for (String sessionId : sessionsToRemove) {
-				logger.info("Disconnecting session: {}", sessionId);
+				LOGGER.info("Disconnecting session: {}", sessionId);
 				Session session = activeSessions.remove(sessionId);
 				session.disconnect();
 			}
@@ -173,7 +170,7 @@ public class SessionManager {
 			for (String sessionId : sessionsToCreate) {
 				String[] split = sessionId.split("::");
 				if (split.length != 2) {
-					logger.warn("Illegal configuration for connection: "
+					LOGGER.warn("Illegal configuration for connection: "
 							+ sessionId);
 				} else {
 					String agentId = split[0];
@@ -183,14 +180,15 @@ public class SessionManager {
 					MatcherRole matcherRole = matcherRoles.get(matcherId);
 
 					if (agentRole != null && matcherRole != null) {
-						logger.info("Connecting session: [{}]", sessionId);
+						LOGGER.info("Connecting session: [{}]", sessionId);
 						Session session = new SessionImpl(this, agentRole,
 								agentId, matcherRole, matcherId, sessionId);
 						if (matcherRole.connectToAgent(session)) {
 							agentRole.connectToMatcher(session);
 							activeSessions.put(sessionId, session);
 						} else {
-							retry = true; // TODO: better check?
+							// TODO: better check?
+							retry = true; 
 						}
 					}
 				}

@@ -13,8 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Base class used to create an observer.
- * The observer searches for {@link Observable} services and adds itself.
+ * Base class used to create an {@link Observer}.
+ * The {@link Observer} searches for {@link Observable} services and adds itself.
  * 
  * {@link Observable} services are able to call the update method of 
  * {@link Observer} with {@link UpdateEvent} events.
@@ -24,20 +24,25 @@ public abstract class ObserverBase implements Observer {
 	private static final Logger logger = LoggerFactory.getLogger(ObserverBase.class);
 
 	/**
-	 * Holds the available observables
+	 * Holds the available {@link Observable} services
 	 */
 	private ConcurrentMap<String, Observable> observables = new ConcurrentHashMap<String, Observable>();
 
 	/**
-	 * Holds the current observables being observed
+	 * Holds the current {@link Observable} services being observed
 	 */
 	private ConcurrentMap<String, Observable> observing = new ConcurrentHashMap<String, Observable>();
 
 	/**
-	 * Filter containing all id's which must be observed.
+	 * Filter containing all observableId's which must be observed.
 	 */
 	protected abstract List<String> filter();
 	
+	/**
+	 * Add an {@link Observable} to the list of available {@link Observable} services
+	 * @param observable {@link Observable} to add.
+	 * @param properties configuration properties of {@link Observable} service
+	 */
 	public void addObservable(Observable observable, Map<String, Object> properties) {
 		String observableId = observable.getObserverId();
 		if (observables.putIfAbsent(observableId, observable) != null) {
@@ -47,6 +52,11 @@ public abstract class ObserverBase implements Observer {
 		updateObservables();
 	}
 
+	/**
+	 * Removes an {@link Observable} from the list of available {@link Observable} services
+	 * @param observable {@link Observable} to remove.
+	 * @param properties configuration properties of {@link Observable} service
+	 */
 	public void removeObservable(Observable observable, Map<String, Object> properties) {
 		String observableId = observable.getObserverId();
 
@@ -57,8 +67,16 @@ public abstract class ObserverBase implements Observer {
 	}
 	
 	/**
-	 * Update the connections to the observables.
-	 * The filter is taken into account is present.
+	 * Update the connections to the {@link Observable} services.
+	 * The filter is taken into account is present:
+	 * <ul>
+	 * 	<li>
+	 * 		Filter is NULL or empty, all available {@link Observable} services will be observed.
+	 * 	</li>
+	 * 	<li>
+	 * 		Filter is not empty, only {@link Observable} services from filter will be observed.
+	 * 	</li>
+	 * </ul>
 	 */
 	public void updateObservables() {
 		for (String observableId : this.observables.keySet()) {
@@ -80,8 +98,8 @@ public abstract class ObserverBase implements Observer {
 	}
 	
 	/**
-	 * Start observing the specified observable.
-	 * @param observableId observable to observe.
+	 * Start observing the specified {@link Observable} service.
+	 * @param observableId id of {@link Observable}.
 	 */
 	private void addObservable(String observableId) {
 		// Only attach to new observers

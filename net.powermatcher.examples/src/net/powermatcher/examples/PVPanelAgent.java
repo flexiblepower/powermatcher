@@ -29,35 +29,32 @@ import aQute.bnd.annotation.metatype.Meta;
 @Component(designateFactory = PVPanelAgent.Config.class, immediate = true, 
 	provide = {Observable.class, AgentRole.class})
 public class PVPanelAgent extends ObservableBase implements AgentRole {
-	private static final Logger logger = LoggerFactory.getLogger(PVPanelAgent.class);
-	
+
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(PVPanelAgent.class);
+
 	public static interface Config {
 		@Meta.AD(deflt = "pvpanel")
 		String agentId();
-		
+
 		@Meta.AD(deflt = "30", description = "Number of seconds between bid updates")
 		long bidUpdateRate();
 	}
 
 	private ScheduledFuture<?> scheduledFuture;
+
 	private ScheduledExecutorService scheduler;
 
-	@Reference
-	public void setScheduler(ScheduledExecutorService scheduler) {
-		this.scheduler = scheduler;
-	}
+	private Session session;
 
 	private TimeService timeService;
-	private String agentId;
 
-	@Reference
-	public void setTimeService(TimeService timeService) {
-		this.timeService = timeService;
-	}
+	private String agentId;
 
 	@Activate
 	public void activate(Map<String, Object> properties) {
-		Config config = Configurable.createConfigurable(Config.class, properties);
+		Config config = Configurable.createConfigurable(Config.class,
+				properties);
 		agentId = config.agentId();
 
 		scheduledFuture = scheduler.scheduleAtFixedRate(new Runnable() {
@@ -67,51 +64,59 @@ public class PVPanelAgent extends ObservableBase implements AgentRole {
 			}
 		}, 0, config.bidUpdateRate(), TimeUnit.SECONDS);
 
-		logger.info("Agent [{}], activated", config.agentId());
+		LOGGER.info("Agent [{}], activated", config.agentId());
+	}
+
+	@Deactivate
+	public void deactivate() {
+		if (session != null) {
+			session.disconnect();
+		}
+
+		scheduledFuture.cancel(false);
+
+		LOGGER.info("Agent [{}], deactivated", agentId);
 	}
 
 	protected void doBidUpdate() {
 		if (session != null) {
 			Bid newBid = new Bid(session.getMarketBasis(), new PricePoint(0,
 					-700));
-			logger.debug("updateBid({})", newBid);
+			LOGGER.debug("updateBid({})", newBid);
 			session.updateBid(newBid);
 			this.publishEvent(new OutgoingBidUpdateEvent(agentId,
 					session.getSessionId(), timeService.currentDate(), newBid));
 		}
 	}
 
-	@Deactivate
-	public void deactivate() {
-		if(session != null) {
-			session.disconnect();
-		}
-		
-		scheduledFuture.cancel(false);
-		
-		logger.info("Agent [{}], deactivated", agentId);
-	}
+	@Override
+	public void updatePrice(Price newPrice) {
+		LOGGER.debug("updatePrice({})", newPrice);
+		publishEvent(new IncomingPriceUpdateEvent(agentId,
+				session.getSessionId(), timeService.currentDate(), newPrice));
 
-	private Session session;
+		LOGGER.debug("Received price update [{}]", newPrice);
+	}
 
 	@Override
 	public void connectToMatcher(Session session) {
 		this.session = session;
 	}
-	
+
 	@Override
 	public void disconnectFromMatcher(Session session) {
 		this.session = null;
 	}
 
-	@Override
-	public void updatePrice(Price newPrice) {
-		logger.debug("updatePrice({})", newPrice);
-		// TODO real arguments
-		this.publishEvent(new IncomingPriceUpdateEvent(agentId,
-				session.getSessionId(), timeService.currentDate(), newPrice));
+	@Reference
+	public void setScheduler(ScheduledExecutorService scheduler) {
+		this.scheduler = scheduler;
+	}
 
-		logger.debug("Received price update [{}]", newPrice);
+
+	@Reference
+	public void setTimeService(TimeService timeService) {
+		this.timeService = timeService;
 	}
 
 	@Override

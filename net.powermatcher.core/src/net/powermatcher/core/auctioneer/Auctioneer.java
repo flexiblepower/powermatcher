@@ -14,6 +14,7 @@ import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
+import net.powermatcher.api.monitoring.IncomingBidUpdateEvent;
 import net.powermatcher.api.monitoring.Observable;
 import net.powermatcher.api.monitoring.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.BidCache;
@@ -32,20 +33,21 @@ import aQute.bnd.annotation.metatype.Meta;
 
 /**
  * <p>
- * This class represents an {@link Auctioneer} component which will receive all {@link Bid} of
- * other agents as a single {@link Bid} or as an aggregate {@link Bid} via one or more
- * {@link Concentrator}.
+ * This class represents an {@link Auctioneer} component which will receive all
+ * {@link Bid} of other agents as a single {@link Bid} or as an aggregate
+ * {@link Bid} via one or more {@link Concentrator}.
  * </p>
  * 
  * <p>
- * It is responsible for defining and sending the {@link MarketBasis} and calculating
- * the equilibrium based on the {@link Bid} from the different agents in the topology.
- * This equilibrium is communicated to the agents down the hierarchy in the form
- * of price update messages.
+ * It is responsible for defining and sending the {@link MarketBasis} and
+ * calculating the equilibrium based on the {@link Bid} from the different
+ * agents in the topology. This equilibrium is communicated to the agents down
+ * the hierarchy in the form of price update messages.
  * 
- * The {@link Price} that is communicated contains a {@link Price} and a {@link MarketBasis} which
- * enables the conversion to a normalized {@link Price} or to any other {@link MarketBasis} for
- * other financial calculation purposes.
+ * The {@link Price} that is communicated contains a {@link Price} and a
+ * {@link MarketBasis} which enables the conversion to a normalized
+ * {@link Price} or to any other {@link MarketBasis} for other financial
+ * calculation purposes.
  * </p>
  * 
  * @author FAN
@@ -55,9 +57,9 @@ import aQute.bnd.annotation.metatype.Meta;
 @Component(designateFactory = Auctioneer.Config.class, immediate = true, 
 	provide = {Observable.class, MatcherRole.class})
 public class Auctioneer extends ObservableBase implements MatcherRole {
-	private static final Logger logger = LoggerFactory
-			.getLogger(Auctioneer.class);
 
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(Auctioneer.class);
 	@Meta.OCD
 	public static interface Config {
 		@Meta.AD(deflt = "auctioneer")
@@ -102,8 +104,8 @@ public class Auctioneer extends ObservableBase implements MatcherRole {
 	private ScheduledFuture<?> scheduledFuture;
 
 	/**
-	 * The bid cache maintains an aggregated {@link Bid}, where bids can be added and
-	 * removed explicitly.
+	 * The bid cache maintains an aggregated {@link Bid}, where bids can be
+	 * added and removed explicitly.
 	 */
 	private BidCache aggregatedBids;
 
@@ -122,21 +124,13 @@ public class Auctioneer extends ObservableBase implements MatcherRole {
 	 */
 	private String matcherId;
 
-	@Reference
-	public void setTimeService(TimeService timeService) {
-		this.timeService = timeService;
-	}
-
-	@Reference
-	public void setExecutorService(ScheduledExecutorService scheduler) {
-		this.scheduler = scheduler;
-	}
-
+	// TODO marketBasis, aggregatedBids and
+	// matcherId are used in synchronized methods. Do we have do synchronize
+	// activate? It's only called once, so maybe not.
 	@Activate
 	void activate(final Map<String, Object> properties) {
 		Config config = Configurable.createConfigurable(Config.class,
 				properties);
-
 		this.marketBasis = new MarketBasis(config.commodity(),
 				config.currency(), config.priceSteps(), config.minimumPrice(),
 				config.maximumPrice());
@@ -156,11 +150,11 @@ public class Auctioneer extends ObservableBase implements MatcherRole {
 	public void deactivate() {
 		for (Session session : sessions.toArray(new Session[sessions.size()])) {
 			session.disconnect();
-			logger.info("Session {} closed", session);
+			LOGGER.info("Session {} closed", session);
 		}
 
 		if (!sessions.isEmpty()) {
-			logger.warn("Could not disconnect all sessions. Left: {}", sessions);
+			LOGGER.warn("Could not disconnect all sessions. Left: {}", sessions);
 		}
 
 		scheduledFuture.cancel(false);
@@ -173,7 +167,7 @@ public class Auctioneer extends ObservableBase implements MatcherRole {
 		this.sessions.add(session);
 		this.aggregatedBids.updateBid(session.getSessionId(), new Bid(
 				this.marketBasis));
-		logger.info("Agent connected with session [{}]", session.getSessionId());
+		LOGGER.info("Agent connected with session [{}]", session.getSessionId());
 		return true;
 	}
 
@@ -186,7 +180,7 @@ public class Auctioneer extends ObservableBase implements MatcherRole {
 
 		this.aggregatedBids.removeAgent(session.getSessionId());
 
-		logger.info("Agent disconnected with session [{}]",
+		LOGGER.info("Agent disconnected with session [{}]",
 				session.getSessionId());
 	}
 
@@ -204,8 +198,11 @@ public class Auctioneer extends ObservableBase implements MatcherRole {
 		// Update agent in aggregatedBids
 		this.aggregatedBids.updateBid(session.getSessionId(), newBid);
 
-		logger.debug("Received bid update [{}] from session [{}]", newBid,
+		LOGGER.debug("Received bid update [{}] from session [{}]", newBid,
 				session.getSessionId());
+
+		this.publishEvent(new IncomingBidUpdateEvent(matcherId,
+				session.getSessionId(), timeService.currentDate(), session.getAgentId(), newBid));
 	}
 
 	@Override
@@ -223,12 +220,22 @@ public class Auctioneer extends ObservableBase implements MatcherRole {
 					session.getSessionId(), timeService.currentDate(), newPrice));
 
 			session.updatePrice(newPrice);
-			logger.debug("New price: {}, session {}", newPrice,
+			LOGGER.debug("New price: {}, session {}", newPrice,
 					session.getSessionId());
 		}
 	}
 
 	protected Price determinePrice(Bid aggregatedBid) {
 		return aggregatedBid.calculateIntersection(0);
+	}
+
+	@Reference
+	public void setTimeService(TimeService timeService) {
+		this.timeService = timeService;
+	}
+
+	@Reference
+	public void setExecutorService(ScheduledExecutorService scheduler) {
+		this.scheduler = scheduler;
 	}	
 }
