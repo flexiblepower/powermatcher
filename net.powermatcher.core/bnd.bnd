@@ -4,4 +4,5 @@ Export-Package: net.powermatcher.core*
 -buildpath:  \
 	net.powermatcher.api;version=latest,\
 	biz.aQute.bnd.annotation,\
-	slf4j.api
+	slf4j.api,\
+	${junit}
