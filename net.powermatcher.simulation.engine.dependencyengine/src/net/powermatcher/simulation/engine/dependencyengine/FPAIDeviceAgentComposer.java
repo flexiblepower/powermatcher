@@ -106,7 +106,7 @@ public class FPAIDeviceAgentComposer extends AgentComposer<Agent> {
 		String schedulerReferenceName = getReferenceNameTo(bundleContext, driverNodeDescriptor.getFactoryPid(),
 				ScheduledExecutorService.class);
 
-		// adjust configuration so that the driver uses the right scheduler (using a «reference-name».target property)
+		// adjust configuration so that the driver uses the right scheduler (using a reference-name.target property)
 		String targetPropertyKey = schedulerReferenceName + ComponentConstants.REFERENCE_TARGET_SUFFIX;
 		String targetFilter = "(" + Constants.SERVICE_ID + "=" + schedulerServiceId + ")";
 		configuration.put(targetPropertyKey, targetFilter);
