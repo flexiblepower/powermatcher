@@ -3,6 +3,9 @@ package net.powermatcher.api.data.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
+
+import java.security.InvalidParameterException;
+
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.PricePoint;
@@ -52,10 +55,10 @@ public class BidTest {
     Bid bidInfo10;
 
     /**
-     * @throws Exception
+     * @throws InvalidParameterException
      */
     @Before
-    public void setUp() throws Exception {
+    public void setUp() throws InvalidParameterException {
         this.marketBasis0 = new MarketBasis(COMMODITY_ELECTRICITY, CURRENCY_EUR, 5, -1.0d, 7.0d);
         this.marketBasis1 = new MarketBasis(COMMODITY_ELECTRICITY, CURRENCY_EUR, 10, -1.0d, 7.0d);
         this.marketBasis2 = new MarketBasis(COMMODITY_ELECTRICITY, CURRENCY_EUR, 255, -127.0d, 127.0d);
@@ -213,5 +216,5 @@ public class BidTest {
     public void testEffectiveDemand() {
         assertEquals(-100.0d, this.bidInfo10.getDemand(20.0), 0.0d);
     }
-
+    
 }

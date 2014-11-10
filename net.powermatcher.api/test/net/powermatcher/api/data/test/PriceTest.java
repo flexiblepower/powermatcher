@@ -3,6 +3,9 @@ package net.powermatcher.api.data.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+
+import java.security.InvalidParameterException;
+
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 
@@ -22,10 +25,10 @@ public class PriceTest {
     Price priceInfo;
 
     /**
-     * @throws Exception
+     * @throws InvalidParameterException
      */
     @Before
-    public void setUp() throws Exception {
+    public void setUp() throws InvalidParameterException {
         this.marketBasis = new MarketBasis(COMMODITY_ELECTRICITY, CURRENCY_EUR, 10, -1.0d, 8.0d);
         this.priceInfo = new Price(this.marketBasis, 2.0d);
     }
