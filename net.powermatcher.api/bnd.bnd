@@ -1,4 +1,5 @@
 Bundle-Version: 1.0.0.${tstamp}
 Export-Package:  net.powermatcher.api*
 -buildpath:  \
-	biz.aQute.bnd.annotation
+	biz.aQute.bnd.annotation,\
+	${junit}

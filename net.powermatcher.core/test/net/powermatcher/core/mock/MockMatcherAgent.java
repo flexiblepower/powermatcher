@@ -12,7 +12,6 @@ public class MockMatcherAgent extends MockAgent implements MatcherRole {
 
     private Map<String, Object> matcherProperties;
     private Bid lastReceivedBid;
-    private Session agentSession;
     private MarketBasis marketBasis;
 
     public MockMatcherAgent(String agentId) {
@@ -25,13 +24,11 @@ public class MockMatcherAgent extends MockAgent implements MatcherRole {
     public boolean connectToAgent(Session session) {
         session.setMarketBasis(this.marketBasis);
         session.setClusterId(this.matcherProperties.get("matcherId").toString());
-        this.agentSession = session;
         return true;
     }
 
     @Override
     public void disconnectFromAgent(Session session) {
-        this.agentSession = null;
     }
 
     @Override

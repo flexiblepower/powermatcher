@@ -2,7 +2,6 @@ package net.powermatcher.core.mock;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import net.powermatcher.api.AgentRole;
 import net.powermatcher.api.Session;
