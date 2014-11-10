@@ -3,7 +3,6 @@ package net.powermatcher.core.concentrator;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -15,12 +14,13 @@ import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.monitoring.IncomingBidUpdateEvent;
+import net.powermatcher.api.monitoring.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.Observable;
-import net.powermatcher.api.monitoring.Observer;
 import net.powermatcher.api.monitoring.OutgoingBidUpdateEvent;
-import net.powermatcher.api.monitoring.UpdateEvent;
+import net.powermatcher.api.monitoring.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.BidCache;
 import net.powermatcher.core.auctioneer.Auctioneer;
+import net.powermatcher.core.monitoring.ObservableBase;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,8 +48,10 @@ import aQute.bnd.annotation.metatype.Meta;
  * @version 1.0
  * 
  */
-@Component(designateFactory = Concentrator.Config.class, immediate = true)
-public class Concentrator implements MatcherRole, AgentRole, Observable {
+@Component(designateFactory = Concentrator.Config.class, immediate = true, 
+	provide = {Observable.class, MatcherRole.class, AgentRole.class})
+public class Concentrator  extends ObservableBase implements MatcherRole, AgentRole {
+
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(Concentrator.class);
 
@@ -100,9 +102,6 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 	 */
 	private Set<Session> sessionToAgents = new HashSet<Session>();
 
-	// TODO refactor to separate (base)object
-	private final Set<Observer> observers = new CopyOnWriteArraySet<Observer>();
-
 	/**
 	 * OSGI configuration meta type with info about the concentrator.
 	 */
@@ -143,8 +142,10 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 				.toArray(new Session[sessionToAgents.size()])) {
 			session.disconnect();
 		}
-
-		sessionToMatcher.disconnect();
+		
+		if (sessionToMatcher != null) {
+			sessionToMatcher.disconnect();
+		}
 
 		if (!sessionToAgents.isEmpty()) {
 			LOGGER.warn("Could not disconnect all sessions. Left: {}",
@@ -224,10 +225,21 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 	public void updatePrice(Price newPrice) {
 		LOGGER.debug("Received price update [{}]", newPrice);
 
+		this.publishEvent(new IncomingPriceUpdateEvent(this.config.agentId(),
+				this.sessionToMatcher.getSessionId(), timeService.currentDate(), newPrice));
+
 		// Publish new price to connected agents
 		for (Session session : this.sessionToAgents) {
 			session.updatePrice(newPrice);
+
+			this.publishEvent(new OutgoingPriceUpdateEvent(this.config.agentId(),
+					session.getSessionId(), timeService.currentDate(), newPrice));
 		}
+	}
+
+	@Override
+	public String getObserverId() {
+		return this.config.agentId();
 	}
 
 	protected synchronized void doBidUpdate() {
@@ -240,22 +252,6 @@ public class Concentrator implements MatcherRole, AgentRole, Observable {
 					aggregatedBid));
 
 			LOGGER.debug("Updating aggregated bid [{}]", aggregatedBid);
-		}
-	}
-
-	@Override
-	public void addObserver(Observer observer) {
-		observers.add(observer);
-	}
-
-	@Override
-	public void removeObserver(Observer observer) {
-		observers.remove(observer);
-	}
-
-	void publishEvent(UpdateEvent event) {
-		for (Observer observer : observers) {
-			observer.update(event);
 		}
 	}
 }

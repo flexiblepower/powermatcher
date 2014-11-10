@@ -8,3 +8,4 @@ cnf/cache/
 .sonar/
 build/
 sonar-runner.properties
+RemoteSystemsTempFiles/.project

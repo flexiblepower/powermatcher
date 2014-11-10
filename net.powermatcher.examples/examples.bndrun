@@ -30,3 +30,4 @@
 	org.slf4j.osgi-over-slf4j;version='[1.7.7,1.7.8)',\
 	osgi.cmpn;version='[4.3.1,4.3.2)',\
 	slf4j.api;version='[1.7.7,1.7.8)'
+-runvm: -Dorg.eclipse.jetty.LEVEL=INFO

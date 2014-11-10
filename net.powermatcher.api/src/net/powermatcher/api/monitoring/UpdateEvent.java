@@ -18,8 +18,6 @@ import net.powermatcher.api.TimeService;
  */
 
 public abstract class UpdateEvent {
-	// TODO do we want an agent type?
-
 	/**
 	 * The id of the {@link AgentRole} subclass sending the UpdateEvent.
 	 */
@@ -64,5 +62,10 @@ public abstract class UpdateEvent {
 
 	public Date getTimestamp() {
 		return timestamp;
+	}
+	
+	@Override
+	public String toString() {
+		return "agentId = " + this.agentId + ", sessionId = " + this.sessionId + ", timestamp " + this.timestamp;
 	}
 }

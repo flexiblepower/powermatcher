@@ -1,8 +1,6 @@
 package net.powermatcher.examples;
 
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -15,9 +13,8 @@ import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PricePoint;
 import net.powermatcher.api.monitoring.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.Observable;
-import net.powermatcher.api.monitoring.Observer;
 import net.powermatcher.api.monitoring.OutgoingBidUpdateEvent;
-import net.powermatcher.api.monitoring.UpdateEvent;
+import net.powermatcher.core.monitoring.ObservableBase;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,8 +26,10 @@ import aQute.bnd.annotation.component.Reference;
 import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
-@Component(designateFactory = PVPanelAgent.Config.class, immediate = true)
-public class PVPanelAgent implements AgentRole, Observable {
+@Component(designateFactory = PVPanelAgent.Config.class, immediate = true, 
+	provide = {Observable.class, AgentRole.class})
+public class PVPanelAgent extends ObservableBase implements AgentRole {
+
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(PVPanelAgent.class);
 
@@ -47,9 +46,6 @@ public class PVPanelAgent implements AgentRole, Observable {
 	private ScheduledExecutorService scheduler;
 
 	private Session session;
-
-	// TODO refactor to separate (base)object
-	private final Set<Observer> observers = new CopyOnWriteArraySet<Observer>();
 
 	private TimeService timeService;
 
@@ -88,7 +84,7 @@ public class PVPanelAgent implements AgentRole, Observable {
 					-700));
 			LOGGER.debug("updateBid({})", newBid);
 			session.updateBid(newBid);
-			publishEvent(new OutgoingBidUpdateEvent("agentId",
+			this.publishEvent(new OutgoingBidUpdateEvent(agentId,
 					session.getSessionId(), timeService.currentDate(), newBid));
 		}
 	}
@@ -96,8 +92,7 @@ public class PVPanelAgent implements AgentRole, Observable {
 	@Override
 	public void updatePrice(Price newPrice) {
 		LOGGER.debug("updatePrice({})", newPrice);
-		// TODO real arguments
-		publishEvent(new IncomingPriceUpdateEvent("agentId",
+		publishEvent(new IncomingPriceUpdateEvent(agentId,
 				session.getSessionId(), timeService.currentDate(), newPrice));
 
 		LOGGER.debug("Received price update [{}]", newPrice);
@@ -118,25 +113,14 @@ public class PVPanelAgent implements AgentRole, Observable {
 		this.scheduler = scheduler;
 	}
 
+
 	@Reference
 	public void setTimeService(TimeService timeService) {
 		this.timeService = timeService;
 	}
 
-	// TODO refactor to separate (base)object
 	@Override
-	public void addObserver(Observer observer) {
-		observers.add(observer);
-	}
-
-	@Override
-	public void removeObserver(Observer observer) {
-		observers.remove(observer);
-	}
-
-	void publishEvent(UpdateEvent event) {
-		for (Observer observer : observers) {
-			observer.update(event);
-		}
+	public String getObserverId() {
+		return this.agentId;
 	}
 }
