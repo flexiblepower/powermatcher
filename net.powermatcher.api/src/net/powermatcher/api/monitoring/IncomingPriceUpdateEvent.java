@@ -44,4 +44,10 @@ public class IncomingPriceUpdateEvent extends UpdateEvent {
 	public Price getPrice() {
 		return price;
 	}
+
+	@Override
+	public String toString() {
+		return IncomingPriceUpdateEvent.class.getSimpleName() + " " +
+				super.toString() + ", price = " + price.toString();
+	}
 }

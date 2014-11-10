@@ -14,8 +14,12 @@ import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
+import net.powermatcher.api.monitoring.IncomingBidUpdateEvent;
+import net.powermatcher.api.monitoring.Observable;
+import net.powermatcher.api.monitoring.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.BidCache;
 import net.powermatcher.core.concentrator.Concentrator;
+import net.powermatcher.core.monitoring.ObservableBase;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,11 +54,12 @@ import aQute.bnd.annotation.metatype.Meta;
  * @version 1.0
  * 
  */
-@Component(designateFactory = Auctioneer.Config.class, immediate = true)
-public class Auctioneer implements MatcherRole {
+@Component(designateFactory = Auctioneer.Config.class, immediate = true, 
+	provide = {Observable.class, MatcherRole.class})
+public class Auctioneer extends ObservableBase implements MatcherRole {
+
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(Auctioneer.class);
-
 	@Meta.OCD
 	public static interface Config {
 		@Meta.AD(deflt = "auctioneer")
@@ -195,6 +200,14 @@ public class Auctioneer implements MatcherRole {
 
 		LOGGER.debug("Received bid update [{}] from session [{}]", newBid,
 				session.getSessionId());
+
+		this.publishEvent(new IncomingBidUpdateEvent(matcherId,
+				session.getSessionId(), timeService.currentDate(), session.getAgentId(), newBid));
+	}
+
+	@Override
+	public String getObserverId() {
+		return matcherId;
 	}
 
 	/**
@@ -207,7 +220,11 @@ public class Auctioneer implements MatcherRole {
 		Bid aggregatedBid = this.aggregatedBids
 				.getAggregatedBid(this.marketBasis);
 		Price newPrice = determinePrice(aggregatedBid);
+		
 		for (Session session : this.sessions) {
+			this.publishEvent(new OutgoingPriceUpdateEvent(matcherId,
+					session.getSessionId(), timeService.currentDate(), newPrice));
+
 			session.updatePrice(newPrice);
 			LOGGER.debug("New price: {}, session {}", newPrice,
 					session.getSessionId());
@@ -226,5 +243,5 @@ public class Auctioneer implements MatcherRole {
 	@Reference
 	public void setExecutorService(ScheduledExecutorService scheduler) {
 		this.scheduler = scheduler;
-	}
+	}	
 }

@@ -7,3 +7,4 @@ Export-Package: net.powermatcher.core*
 	slf4j.api,\
 	${junit},\
 	slf4j.simple
+
