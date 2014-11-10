@@ -14,7 +14,7 @@ import net.powermatcher.api.data.PricePoint;
 import net.powermatcher.api.monitoring.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.Observable;
 import net.powermatcher.api.monitoring.OutgoingBidUpdateEvent;
-import net.powermatcher.core.monitoring.ObservableBase;
+import net.powermatcher.core.monitoring.BaseObservable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ import aQute.bnd.annotation.metatype.Meta;
 
 @Component(designateFactory = PVPanelAgent.Config.class, immediate = true, 
 	provide = {Observable.class, AgentRole.class})
-public class PVPanelAgent extends ObservableBase implements AgentRole {
+public class PVPanelAgent extends BaseObservable implements AgentRole {
 
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(PVPanelAgent.class);

@@ -19,7 +19,7 @@ import net.powermatcher.api.monitoring.Observable;
 import net.powermatcher.api.monitoring.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.BidCache;
 import net.powermatcher.core.concentrator.Concentrator;
-import net.powermatcher.core.monitoring.ObservableBase;
+import net.powermatcher.core.monitoring.BaseObservable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +56,7 @@ import aQute.bnd.annotation.metatype.Meta;
  */
 @Component(designateFactory = Auctioneer.Config.class, immediate = true, 
 	provide = {Observable.class, MatcherRole.class})
-public class Auctioneer extends ObservableBase implements MatcherRole {
+public class Auctioneer extends BaseObservable implements MatcherRole {
 
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(Auctioneer.class);

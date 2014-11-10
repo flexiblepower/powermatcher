@@ -19,9 +19,9 @@ import org.slf4j.LoggerFactory;
  * {@link Observable} services are able to call the update method of 
  * {@link Observer} with {@link UpdateEvent} events.
  */
-public abstract class ObserverBase implements Observer {
+public abstract class BaseObserver implements Observer {
 
-	private static final Logger logger = LoggerFactory.getLogger(ObserverBase.class);
+	private static final Logger logger = LoggerFactory.getLogger(BaseObserver.class);
 
 	/**
 	 * Holds the available {@link Observable} services

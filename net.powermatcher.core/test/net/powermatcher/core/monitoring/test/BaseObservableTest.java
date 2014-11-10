@@ -1,4 +1,4 @@
-package net.powermatcher.core.monitoring;
+package net.powermatcher.core.monitoring.test;
 
 import java.util.Date;
 
@@ -7,76 +7,60 @@ import net.powermatcher.api.data.Price;
 import net.powermatcher.api.monitoring.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.Observer;
 import net.powermatcher.api.monitoring.UpdateEvent;
+import net.powermatcher.core.mock.MockBaseObservable;
+import net.powermatcher.core.mock.MockObserver;
 
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
-public class ObservableBaseTest {
+public class BaseObservableTest {
 
-	private class ObserverMock implements Observer {
-
-		private boolean hasReceivedEvent;
-		
-		@Override
-		public void update(UpdateEvent event) {
-			this.hasReceivedEvent = true;
-		}
-	}
-	
-	private class ObservableBaseMock extends ObservableBase {
-
-		@Override
-		public String getObserverId() {
-			return "ObservableMock";
-		}
-		
-	}
-	
 	@Test
 	public void oneObserverTest() {
-		ObserverMock observer = new ObserverMock();
+	    MockObserver observer = new MockObserver();
 		
-		ObservableBaseMock observable = new ObservableBaseMock();
+		MockBaseObservable observable = new MockBaseObservable();
 		observable.addObserver(observer);
 		observable.publishEvent(createDummyEvent());
 		
-		assertTrue(observer.hasReceivedEvent);
+		assertTrue(observer.hasReceivedEvent());
 	}	
 
 	@Test
 	public void twoObserversTest() {
-		ObserverMock observer1 = new ObserverMock();
-		ObserverMock observer2 = new ObserverMock();
+	    MockObserver observer1 = new MockObserver();
+	    MockObserver observer2 = new MockObserver();
 		
-		ObservableBaseMock observable = new ObservableBaseMock();
+		MockBaseObservable observable = new MockBaseObservable();
 		observable.addObserver(observer1);
 		observable.addObserver(observer2);
 		observable.publishEvent(createDummyEvent());
 		
-		assertTrue(observer1.hasReceivedEvent);
-		assertTrue(observer2.hasReceivedEvent);
+		assertTrue(observer1.hasReceivedEvent());
+		assertTrue(observer2.hasReceivedEvent());
 	}	
 
 	@Test
 	public void removeObserversTest() {
-		ObserverMock observer1 = new ObserverMock();
-		ObserverMock observer2 = new ObserverMock();
+	    MockObserver observer1 = new MockObserver();
+	    MockObserver observer2 = new MockObserver();
 		
-		ObservableBaseMock observable = new ObservableBaseMock();
+		MockBaseObservable observable = new MockBaseObservable();
 		observable.addObserver(observer1);
 		observable.addObserver(observer2);
 		observable.removeObserver(observer2);
 		observable.publishEvent(createDummyEvent());
 		
-		assertTrue(observer1.hasReceivedEvent);
-		assertFalse(observer2.hasReceivedEvent);
+		assertTrue(observer1.hasReceivedEvent());
+		assertFalse(observer2.hasReceivedEvent());
 	}	
 
 	@Test
 	public void duplicateRemoveObserversTest() {
-		ObserverMock observer1 = new ObserverMock();
+		MockObserver observer1 = new MockObserver();
 		
-		ObservableBaseMock observable = new ObservableBaseMock();
+		MockBaseObservable observable = new MockBaseObservable();
 		observable.addObserver(observer1);
 		observable.removeObserver(observer1);
 		observable.removeObserver(observer1);
@@ -84,14 +68,14 @@ public class ObservableBaseTest {
 
 	@Test
 	public void noObserversTest() {
-		ObservableBaseMock observable = new ObservableBaseMock();
+		MockBaseObservable observable = new MockBaseObservable();
 		
-		ObserverMock observer1 = new ObserverMock();
+		MockObserver observer1 = new MockObserver();
 		observable.addObserver(observer1);
 		observable.removeObserver(observer1);
 
 		observable.publishEvent(createDummyEvent());
-		assertFalse(observer1.hasReceivedEvent);
+		assertFalse(observer1.hasReceivedEvent());
 	}
 
 	private UpdateEvent createDummyEvent() {
