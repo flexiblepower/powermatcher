@@ -15,7 +15,7 @@ import net.powermatcher.api.monitoring.UpdateEvent;
  * @author FAN
  * @version 1.0
  */
-public abstract class ObservableBase implements Observable {
+public abstract class BaseObservable implements Observable {
 	/**
 	 * Collection of {@link Observer} services.
 	 */

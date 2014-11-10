@@ -19,7 +19,7 @@ import net.powermatcher.api.monitoring.Observable;
 import net.powermatcher.api.monitoring.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.BidCache;
 import net.powermatcher.core.concentrator.Concentrator;
-import net.powermatcher.core.monitoring.ObservableBase;
+import net.powermatcher.core.monitoring.BaseObservable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +56,7 @@ import aQute.bnd.annotation.metatype.Meta;
  */
 @Component(designateFactory = Auctioneer.Config.class, immediate = true, 
 	provide = {Observable.class, MatcherRole.class})
-public class Auctioneer extends ObservableBase implements MatcherRole {
+public class Auctioneer extends BaseObservable implements MatcherRole {
 
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(Auctioneer.class);
@@ -128,7 +128,7 @@ public class Auctioneer extends ObservableBase implements MatcherRole {
 	// matcherId are used in synchronized methods. Do we have do synchronize
 	// activate? It's only called once, so maybe not.
 	@Activate
-	void activate(final Map<String, Object> properties) {
+	public void activate(final Map<String, Object> properties) {
 		Config config = Configurable.createConfigurable(Config.class,
 				properties);
 		this.marketBasis = new MarketBasis(config.commodity(),
@@ -210,7 +210,13 @@ public class Auctioneer extends ObservableBase implements MatcherRole {
 		return matcherId;
 	}
 
-	synchronized void publishNewPrice() {
+	/**
+	 * Generates the new price out of the aggregated bids and sends this to all
+	 * listeners
+	 * TODO This is temporarily made public instead of default to test some things.
+	 * This should be fixed as soon as possible.
+	 */
+	public synchronized void publishNewPrice() {
 		Bid aggregatedBid = this.aggregatedBids
 				.getAggregatedBid(this.marketBasis);
 		Price newPrice = determinePrice(aggregatedBid);

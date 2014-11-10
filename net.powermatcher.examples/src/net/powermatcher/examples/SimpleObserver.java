@@ -6,7 +6,7 @@ import java.util.Map;
 
 import net.powermatcher.api.monitoring.Observable;
 import net.powermatcher.api.monitoring.UpdateEvent;
-import net.powermatcher.core.monitoring.ObserverBase;
+import net.powermatcher.core.monitoring.BaseObserver;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +22,7 @@ import aQute.bnd.annotation.metatype.Meta;
  * Example Observer which simply writes log entries of received events.
  */
 @Component(immediate = true, designateFactory = SimpleObserver.Config.class)
-public class SimpleObserver extends ObserverBase {
+public class SimpleObserver extends BaseObserver {
 
 	private static final Logger logger = LoggerFactory.getLogger(SimpleObserver.class);
 

@@ -20,7 +20,7 @@ import net.powermatcher.api.monitoring.OutgoingBidUpdateEvent;
 import net.powermatcher.api.monitoring.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.BidCache;
 import net.powermatcher.core.auctioneer.Auctioneer;
-import net.powermatcher.core.monitoring.ObservableBase;
+import net.powermatcher.core.monitoring.BaseObservable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +50,7 @@ import aQute.bnd.annotation.metatype.Meta;
  */
 @Component(designateFactory = Concentrator.Config.class, immediate = true, 
 	provide = {Observable.class, MatcherRole.class, AgentRole.class})
-public class Concentrator  extends ObservableBase implements MatcherRole, AgentRole {
+public class Concentrator extends BaseObservable implements MatcherRole, AgentRole {
 
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(Concentrator.class);
@@ -118,7 +118,7 @@ public class Concentrator  extends ObservableBase implements MatcherRole, AgentR
 	}
 
 	@Activate
-	void activate(final Map<String, Object> properties) {
+	public void activate(final Map<String, Object> properties) {
 		config = Configurable.createConfigurable(Config.class, properties);
 
 		this.aggregatedBids = new BidCache(this.timeService,
@@ -236,13 +236,18 @@ public class Concentrator  extends ObservableBase implements MatcherRole, AgentR
 					session.getSessionId(), timeService.currentDate(), newPrice));
 		}
 	}
+	
+    @Override
+    public String getObserverId() {
+        return this.config.agentId();
+    }
 
-	@Override
-	public String getObserverId() {
-		return this.config.agentId();
-	}
-
-	protected synchronized void doBidUpdate() {
+	/**
+	 * sends the aggregatedbids to the matcher
+	 * this method has temporarily been made public due to issues with the scheduler.
+	 * TODO fix this asap
+	 */
+	public synchronized void doBidUpdate() {
 		if (sessionToMatcher != null) {
 			Bid aggregatedBid = this.aggregatedBids
 					.getAggregatedBid(this.sessionToMatcher.getMarketBasis());
