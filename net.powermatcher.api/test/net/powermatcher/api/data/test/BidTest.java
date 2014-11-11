@@ -216,5 +216,5 @@ public class BidTest {
     public void testEffectiveDemand() {
         assertEquals(-100.0d, this.bidInfo10.getDemand(20.0), 0.0d);
     }
-    
+
 }
