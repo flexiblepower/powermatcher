@@ -83,7 +83,7 @@ public abstract class BaseObserver implements Observer {
     public void updateObservables() {
         for (String observableId : this.observables.keySet()) {
             // Check against filter whether observable should be observed
-            if (this.filter() != null && this.filter().size() > 0 && !this.filter().contains(observableId)) {
+            if (this.filter() != null && !this.filter().isEmpty() && !this.filter().contains(observableId)) {
                 // Remove observer when still observing
                 if (this.observing.containsKey(observableId)) {
                     Observable toRemove = this.observing.remove(observableId);

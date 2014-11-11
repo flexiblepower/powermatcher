@@ -24,7 +24,7 @@ import aQute.bnd.annotation.metatype.Meta;
 @Component(immediate = true, designateFactory = SimpleObserver.Config.class)
 public class SimpleObserver extends BaseObserver {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleObserver.class);
+    private static final Logger logger = LoggerFactory.getLogger(SimpleObserver.class);
 
     private List<String> filter;
 
@@ -76,7 +76,7 @@ public class SimpleObserver extends BaseObserver {
 
     @Override
     public void update(UpdateEvent event) {
-        LOGGER.info("Received event: {}", event);
+        logger.info("Received event: {}", event);
     }
 
     private void processConfig(Map<String, Object> properties) {
@@ -84,7 +84,7 @@ public class SimpleObserver extends BaseObserver {
         this.filter = config.filter();
 
         // ConfigAdmin will sometimes generate a filter with 1 empty element. Ignore it.
-        if (filter != null && filter.size() > 0 && filter.get(0).length() == 0) {
+        if (filter != null && !filter.isEmpty() && filter.get(0).isEmpty()) {
             this.filter = new ArrayList<String>();
         }
 
