@@ -64,6 +64,7 @@ public class SimpleObserver extends BaseObserver {
         super.addObservable(observable, properties);
     }
 
+    //TODO this method only calls the superclass. is it missing an annotation?
     @Override
     public void removeObservable(Observable observable, Map<String, Object> properties) {
         super.removeObservable(observable, properties);
@@ -84,7 +85,7 @@ public class SimpleObserver extends BaseObserver {
         this.filter = config.filter();
 
         // ConfigAdmin will sometimes generate a filter with 1 empty element. Ignore it.
-        if (filter != null && filter.size() > 0 && filter.get(0).length() == 0) {
+        if (filter != null && !filter.isEmpty() && filter.get(0).isEmpty()) {
             this.filter = new ArrayList<String>();
         }
 
