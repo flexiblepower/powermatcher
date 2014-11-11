@@ -24,7 +24,7 @@ import aQute.bnd.annotation.metatype.Meta;
 @Component(immediate = true, designateFactory = SimpleObserver.Config.class)
 public class SimpleObserver extends BaseObserver {
 
-    private static final Logger logger = LoggerFactory.getLogger(SimpleObserver.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleObserver.class);
 
     private List<String> filter;
 
@@ -76,7 +76,7 @@ public class SimpleObserver extends BaseObserver {
 
     @Override
     public void update(UpdateEvent event) {
-        logger.info("Received event: {}", event);
+        LOGGER.info("Received event: {}", event);
     }
 
     private void processConfig(Map<String, Object> properties) {

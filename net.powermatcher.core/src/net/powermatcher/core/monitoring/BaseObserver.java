@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class BaseObserver implements Observer {
 
-    private static final Logger logger = LoggerFactory.getLogger(BaseObserver.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseObserver.class);
 
     /**
      * Holds the available {@link Observable} services
@@ -48,7 +48,7 @@ public abstract class BaseObserver implements Observer {
     public void addObservable(Observable observable, Map<String, Object> properties) {
         String observableId = observable.getObserverId();
         if (observables.putIfAbsent(observableId, observable) != null) {
-            logger.warn("An observable with the id " + observableId + " was already registered");
+            LOGGER.warn("An observable with the id " + observableId + " was already registered");
         }
 
         updateObservables();
@@ -88,7 +88,7 @@ public abstract class BaseObserver implements Observer {
                 if (this.observing.containsKey(observableId)) {
                     Observable toRemove = this.observing.remove(observableId);
                     toRemove.removeObserver(this);
-                    logger.info("Detached from observable [{}]", observableId);
+                    LOGGER.info("Detached from observable [{}]", observableId);
                 }
 
                 continue;
@@ -110,7 +110,7 @@ public abstract class BaseObserver implements Observer {
             Observable observable = this.observables.get(observableId);
             observable.addObserver(this);
             observing.put(observableId, observable);
-            logger.info("Attached to observable [{}]", observableId);
+            LOGGER.info("Attached to observable [{}]", observableId);
         }
     }
 }
