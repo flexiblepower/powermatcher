@@ -64,6 +64,7 @@ public class SimpleObserver extends BaseObserver {
         super.addObservable(observable, properties);
     }
 
+    //TODO this method only calls the superclass. is it missing an annotation?
     @Override
     public void removeObservable(Observable observable, Map<String, Object> properties) {
         super.removeObservable(observable, properties);
