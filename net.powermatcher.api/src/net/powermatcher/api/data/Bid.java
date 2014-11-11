@@ -716,24 +716,26 @@ public class Bid {
 		return Math.max(getMaximumDemand(), -getMinimumDemand()) / maxValue;
 	}
 
-	/**
-	 * Equals with the specified obj parameter and return the boolean result.
-	 * 
-	 * @param obj
-	 *            The obj (<code>Object</code>) parameter.
-	 * @return Results of the equals (<code>boolean</code>) value.
-	 */
-	@Override
-	public boolean equals(final Object obj) {
-		Bid other = (Bid) ((obj instanceof Bid) ? obj : null);
-		// TODO Reduce the number of conditional operators (4) used in the
-		// expression (maximum allowed 3).
-		return this == other
-				|| (other != null && other.bidNumber == this.bidNumber
-						&& this.marketBasis.equals(other.marketBasis) && Arrays
-							.equals(other.getUnclonedDemand(),
-									this.getUnclonedDemand()));
-	}
+    /**
+     * Compares the provided object to this instance of the class according to
+     * the equals rules.
+     * 
+     * @param obj
+     *          The object to compare with.
+     * @return true if this equals the object, false otherwise.
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        Bid other = (Bid) ((obj instanceof Bid) ? obj : null);
+        if (other == null)
+            return false;
+
+        if (this == other)
+            return true;
+
+        return other.bidNumber == this.bidNumber && this.marketBasis.equals(other.marketBasis)
+                && Arrays.equals(other.getUnclonedDemand(), this.getUnclonedDemand());
+    }
 
 	/**
 	 * Hash code and return the int result.
