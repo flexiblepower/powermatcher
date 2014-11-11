@@ -34,229 +34,213 @@ import aQute.bnd.annotation.metatype.Meta;
 
 /**
  * <p>
- * This class represents a {@link Concentrator} component where several
- * instances can be created.
+ * This class represents a {@link Concentrator} component where several instances can be created.
  * </p>
  * 
  * <p>
- * The {@link Concentrator} receives {@link Bid} from the agents and forwards
- * this in an aggregate {@link Bid} up in the hierarchy to a
- * {@link Concentrator} or to the {@link Auctioneer}. It will receive price
- * updates from the {@link Auctioneer} and forward them to its connected agents.
+ * The {@link Concentrator} receives {@link Bid} from the agents and forwards this in an aggregate {@link Bid} up in the
+ * hierarchy to a {@link Concentrator} or to the {@link Auctioneer}. It will receive price updates from the
+ * {@link Auctioneer} and forward them to its connected agents.
  * 
  * @author FAN
  * @version 1.0
  * 
  */
-@Component(designateFactory = Concentrator.Config.class, immediate = true, 
-	provide = {Observable.class, MatcherRole.class, AgentRole.class})
+@Component(designateFactory = Concentrator.Config.class, immediate = true, provide = { Observable.class,
+        MatcherRole.class, AgentRole.class })
 public class Concentrator extends BaseObservable implements MatcherRole, AgentRole {
 
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(Concentrator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Concentrator.class);
 
-	@Meta.OCD
-	public static interface Config {
-		@Meta.AD(deflt = "concentrator")
-		String matcherId();
+    @Meta.OCD
+    public static interface Config {
+        @Meta.AD(deflt = "concentrator")
+        String matcherId();
 
-		@Meta.AD(deflt = "600", description = "Nr of seconds before a bid becomes invalidated")
-		int bidTimeout();
+        @Meta.AD(deflt = "600", description = "Nr of seconds before a bid becomes invalidated")
+        int bidTimeout();
 
-		@Meta.AD(deflt = "60", description = "Number of seconds between bid updates")
-		long bidUpdateRate();
+        @Meta.AD(deflt = "60", description = "Number of seconds between bid updates")
+        long bidUpdateRate();
 
-		@Meta.AD(deflt = "concentrator")
-		String agentId();
-	}
+        @Meta.AD(deflt = "concentrator")
+        String agentId();
+    }
 
-	/**
-	 * TimeService that is used for obtaining real or simulated time.
-	 */
-	private TimeService timeService;
+    /**
+     * TimeService that is used for obtaining real or simulated time.
+     */
+    private TimeService timeService;
 
-	/**
-	 * Scheduler that can schedule commands to run after a given delay, or to
-	 * execute periodically.
-	 */
-	private ScheduledExecutorService scheduler;
+    /**
+     * Scheduler that can schedule commands to run after a given delay, or to execute periodically.
+     */
+    private ScheduledExecutorService scheduler;
 
-	/**
-	 * A delayed result-bearing action that can be cancelled.
-	 */
-	private ScheduledFuture<?> scheduledFuture;
+    /**
+     * A delayed result-bearing action that can be cancelled.
+     */
+    private ScheduledFuture<?> scheduledFuture;
 
-	/**
-	 * {@link Session} object for connecting to matcher
-	 */
-	private Session sessionToMatcher;
+    /**
+     * {@link Session} object for connecting to matcher
+     */
+    private Session sessionToMatcher;
 
-	/**
-	 * The {@link Bid} cache maintains an aggregated {@link Bid}, where bids can
-	 * be added and removed explicitly.
-	 */
-	private BidCache aggregatedBids;
+    /**
+     * The {@link Bid} cache maintains an aggregated {@link Bid}, where bids can be added and removed explicitly.
+     */
+    private BidCache aggregatedBids;
 
-	/**
-	 * Holds the sessions from the agents.
-	 */
-	private Set<Session> sessionToAgents = new HashSet<Session>();
+    /**
+     * Holds the sessions from the agents.
+     */
+    private Set<Session> sessionToAgents = new HashSet<Session>();
 
-	/**
-	 * OSGI configuration meta type with info about the concentrator.
-	 */
-	private Config config;
+    /**
+     * OSGI configuration meta type with info about the concentrator.
+     */
+    private Config config;
 
-	@Reference
-	public void setTimeService(TimeService timeService) {
-		this.timeService = timeService;
-	}
+    @Reference
+    public void setTimeService(TimeService timeService) {
+        this.timeService = timeService;
+    }
 
-	@Reference
-	public void setExecutorService(ScheduledExecutorService scheduler) {
-		this.scheduler = scheduler;
-	}
+    @Reference
+    public void setExecutorService(ScheduledExecutorService scheduler) {
+        this.scheduler = scheduler;
+    }
 
-	@Activate
-	public void activate(final Map<String, Object> properties) {
-		config = Configurable.createConfigurable(Config.class, properties);
+    @Activate
+    public void activate(final Map<String, Object> properties) {
+        config = Configurable.createConfigurable(Config.class, properties);
 
-		this.aggregatedBids = new BidCache(this.timeService,
-				config.bidTimeout());
+        this.aggregatedBids = new BidCache(this.timeService, config.bidTimeout());
 
-		scheduledFuture = this.scheduler.scheduleAtFixedRate(new Runnable() {
-			@Override
-			public void run() {
-				doBidUpdate();
-			}
-		}, 0, config.bidUpdateRate(), TimeUnit.SECONDS);
+        scheduledFuture = this.scheduler.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                doBidUpdate();
+            }
+        }, 0, config.bidUpdateRate(), TimeUnit.SECONDS);
 
-		LOGGER.info("Agent [{}], activated", config.agentId());
-	}
+        LOGGER.info("Agent [{}], activated", config.agentId());
+    }
 
-	// TODO sessionToMatcher is used in synchronized methods. Do we have do synchronize
-	// deactivate? SessiontoMatcher is normally only set once, so maybe not.
-	@Deactivate
-	public void deactivate() {
-		for (Session session : sessionToAgents
-				.toArray(new Session[sessionToAgents.size()])) {
-			session.disconnect();
-		}
-		
-		if (sessionToMatcher != null) {
-			sessionToMatcher.disconnect();
-		}
+    // TODO sessionToMatcher is used in synchronized methods. Do we have do synchronize
+    // deactivate? SessiontoMatcher is normally only set once, so maybe not.
+    @Deactivate
+    public void deactivate() {
+        for (Session session : sessionToAgents.toArray(new Session[sessionToAgents.size()])) {
+            session.disconnect();
+        }
 
-		if (!sessionToAgents.isEmpty()) {
-			LOGGER.warn("Could not disconnect all sessions. Left: {}",
-					sessionToAgents);
-		}
+        if (sessionToMatcher != null) {
+            sessionToMatcher.disconnect();
+        }
 
-		scheduledFuture.cancel(false);
+        if (!sessionToAgents.isEmpty()) {
+            LOGGER.warn("Could not disconnect all sessions. Left: {}", sessionToAgents);
+        }
 
-		LOGGER.info("Agent [{}], deactivated", config.agentId());
-	}
+        scheduledFuture.cancel(false);
 
-	@Override
-	public synchronized void connectToMatcher(Session session) {
-		this.sessionToMatcher = session;
-	}
+        LOGGER.info("Agent [{}], deactivated", config.agentId());
+    }
 
-	@Override
-	public synchronized void disconnectFromMatcher(Session session) {
-		for (Session agentSession : sessionToAgents.toArray(new Session[sessionToAgents.size()])) {
-			agentSession.disconnect();
-		}
-		this.sessionToMatcher = null;
-	}
+    @Override
+    public synchronized void connectToMatcher(Session session) {
+        this.sessionToMatcher = session;
+    }
 
-	@Override
-	public synchronized boolean connectToAgent(Session session) {
-		if (this.sessionToMatcher == null) {
-			return false;
-		}
+    @Override
+    public synchronized void disconnectFromMatcher(Session session) {
+        for (Session agentSession : sessionToAgents.toArray(new Session[sessionToAgents.size()])) {
+            agentSession.disconnect();
+        }
+        this.sessionToMatcher = null;
+    }
 
-		this.sessionToAgents.add(session);
-		session.setMarketBasis(this.sessionToMatcher.getMarketBasis());
-		session.setClusterId(this.sessionToMatcher.getClusterId());
+    @Override
+    public synchronized boolean connectToAgent(Session session) {
+        if (this.sessionToMatcher == null) {
+            return false;
+        }
 
-		this.aggregatedBids.updateBid(session.getSessionId(), new Bid(
-				this.sessionToMatcher.getMarketBasis()));
-		LOGGER.info("Agent connected with session [{}]", session.getSessionId());
-		return true;
-	}
+        this.sessionToAgents.add(session);
+        session.setMarketBasis(this.sessionToMatcher.getMarketBasis());
+        session.setClusterId(this.sessionToMatcher.getClusterId());
 
-	@Override
-	public synchronized void disconnectFromAgent(Session session) {
-		// Find session
-		if (!sessionToAgents.remove(session)) {
-			return;
-		}
+        this.aggregatedBids.updateBid(session.getSessionId(), new Bid(this.sessionToMatcher.getMarketBasis()));
+        LOGGER.info("Agent connected with session [{}]", session.getSessionId());
+        return true;
+    }
 
-		this.aggregatedBids.removeAgent(session.getSessionId());
+    @Override
+    public synchronized void disconnectFromAgent(Session session) {
+        // Find session
+        if (!sessionToAgents.remove(session)) {
+            return;
+        }
 
-		LOGGER.info("Agent disconnected with session [{}]",
-				session.getSessionId());
-	}
+        this.aggregatedBids.removeAgent(session.getSessionId());
 
-	@Override
-	public synchronized void updateBid(Session session, Bid newBid) {
+        LOGGER.info("Agent disconnected with session [{}]", session.getSessionId());
+    }
 
-		if (!sessionToAgents.contains(session)) {
-			throw new IllegalStateException("No session found");
-		}
-		if (!newBid.getMarketBasis().equals(
-				this.sessionToMatcher.getMarketBasis())) {
-			throw new IllegalArgumentException(
-					"Marketbasis new bid differs from marketbasis auctioneer");
-		}
+    @Override
+    public synchronized void updateBid(Session session, Bid newBid) {
 
-		this.publishEvent(new IncomingBidUpdateEvent(config.agentId(), session
-				.getSessionId(), timeService.currentDate(), "agentId", newBid));
+        if (!sessionToAgents.contains(session)) {
+            throw new IllegalStateException("No session found");
+        }
+        if (!newBid.getMarketBasis().equals(this.sessionToMatcher.getMarketBasis())) {
+            throw new IllegalArgumentException("Marketbasis new bid differs from marketbasis auctioneer");
+        }
 
-		// Update agent in aggregatedBids
-		this.aggregatedBids.updateBid(session.getSessionId(), newBid);
+        this.publishEvent(new IncomingBidUpdateEvent(config.agentId(), session.getSessionId(), timeService
+                .currentDate(), "agentId", newBid));
 
-		LOGGER.info("Received bid update [{}] from session [{}]", newBid,
-				session.getSessionId());
-	}
+        // Update agent in aggregatedBids
+        this.aggregatedBids.updateBid(session.getSessionId(), newBid);
 
-	@Override
-	public void updatePrice(Price newPrice) {
-		LOGGER.debug("Received price update [{}]", newPrice);
+        LOGGER.info("Received bid update [{}] from session [{}]", newBid, session.getSessionId());
+    }
 
-		this.publishEvent(new IncomingPriceUpdateEvent(this.config.agentId(),
-				this.sessionToMatcher.getSessionId(), timeService.currentDate(), newPrice));
+    @Override
+    public void updatePrice(Price newPrice) {
+        LOGGER.debug("Received price update [{}]", newPrice);
 
-		// Publish new price to connected agents
-		for (Session session : this.sessionToAgents) {
-			session.updatePrice(newPrice);
+        this.publishEvent(new IncomingPriceUpdateEvent(this.config.agentId(), this.sessionToMatcher.getSessionId(),
+                timeService.currentDate(), newPrice));
 
-			this.publishEvent(new OutgoingPriceUpdateEvent(this.config.agentId(),
-					session.getSessionId(), timeService.currentDate(), newPrice));
-		}
-	}
-	
+        // Publish new price to connected agents
+        for (Session session : this.sessionToAgents) {
+            session.updatePrice(newPrice);
+
+            this.publishEvent(new OutgoingPriceUpdateEvent(this.config.agentId(), session.getSessionId(), timeService
+                    .currentDate(), newPrice));
+        }
+    }
+
     @Override
     public String getObserverId() {
         return this.config.agentId();
     }
 
-	/**
-	 * sends the aggregatedbids to the matcher
-	 * this method has temporarily been made public due to issues with the scheduler.
-	 * TODO fix this asap
-	 */
-	public synchronized void doBidUpdate() {
-		if (sessionToMatcher != null) {
-			Bid aggregatedBid = this.aggregatedBids
-					.getAggregatedBid(this.sessionToMatcher.getMarketBasis());
-			this.sessionToMatcher.updateBid(aggregatedBid);
-			publishEvent(new OutgoingBidUpdateEvent(config.agentId(),
-					sessionToMatcher.getSessionId(), timeService.currentDate(),
-					aggregatedBid));
+    /**
+     * sends the aggregatedbids to the matcher this method has temporarily been made public due to issues with the
+     * scheduler. TODO fix this asap
+     */
+    public synchronized void doBidUpdate() {
+        if (sessionToMatcher != null) {
+            Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.sessionToMatcher.getMarketBasis());
+            this.sessionToMatcher.updateBid(aggregatedBid);
+            publishEvent(new OutgoingBidUpdateEvent(config.agentId(), sessionToMatcher.getSessionId(),
+                    timeService.currentDate(), aggregatedBid));
 
-			LOGGER.debug("Updating aggregated bid [{}]", aggregatedBid);
-		}
-	}
+            LOGGER.debug("Updating aggregated bid [{}]", aggregatedBid);
+        }
+    }
 }

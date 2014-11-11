@@ -8,14 +8,14 @@ import net.powermatcher.api.TimeService;
 @Component
 public class SystemTimeService implements TimeService {
 
-	@Override
-	public long currentTimeMillis() {
-		return System.currentTimeMillis();
-	}
+    @Override
+    public long currentTimeMillis() {
+        return System.currentTimeMillis();
+    }
 
-	@Override
-	public Date currentDate() {
-		return new Date();
-	}
+    @Override
+    public Date currentDate() {
+        return new Date();
+    }
 
 }

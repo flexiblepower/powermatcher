@@ -1,7 +1,0 @@
-Export-Package: net.powermatcher.simulation.configuration
--buildpath: net.powermatcher.core.agent;version=latest,\
-	net.powermatcher.telemetry.service;version=latest,\
-	net.powermatcher.core.adapter;version=latest,\
-	net.powermatcher.telemetry.model;version=latest,\
-	${junit}
-Bundle-Version: 1.0.0
