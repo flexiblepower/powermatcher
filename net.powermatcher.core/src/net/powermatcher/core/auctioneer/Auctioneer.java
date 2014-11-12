@@ -14,9 +14,9 @@ import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
-import net.powermatcher.api.monitoring.IncomingBidUpdateEvent;
-import net.powermatcher.api.monitoring.Observable;
-import net.powermatcher.api.monitoring.OutgoingPriceUpdateEvent;
+import net.powermatcher.api.monitoring.IncomingBidEvent;
+import net.powermatcher.api.monitoring.ObservableAgent;
+import net.powermatcher.api.monitoring.OutgoingPriceEvent;
 import net.powermatcher.core.BidCache;
 import net.powermatcher.core.concentrator.Concentrator;
 import net.powermatcher.core.monitoring.BaseObservable;
@@ -51,7 +51,7 @@ import aQute.bnd.annotation.metatype.Meta;
  * @version 1.0
  * 
  */
-@Component(designateFactory = Auctioneer.Config.class, immediate = true, provide = { Observable.class,
+@Component(designateFactory = Auctioneer.Config.class, immediate = true, provide = { ObservableAgent.class,
         MatcherRole.class })
 public class Auctioneer extends BaseObservable implements MatcherRole {
 
@@ -189,7 +189,7 @@ public class Auctioneer extends BaseObservable implements MatcherRole {
 
         LOGGER.debug("Received bid update [{}] from session [{}]", newBid, session.getSessionId());
 
-        this.publishEvent(new IncomingBidUpdateEvent(matcherId, session.getSessionId(), timeService.currentDate(),
+        this.publishEvent(new IncomingBidEvent(matcherId, session.getSessionId(), timeService.currentDate(),
                 session.getAgentId(), newBid));
     }
 
@@ -207,7 +207,7 @@ public class Auctioneer extends BaseObservable implements MatcherRole {
         Price newPrice = determinePrice(aggregatedBid);
 
         for (Session session : this.sessions) {
-            this.publishEvent(new OutgoingPriceUpdateEvent(matcherId, session.getSessionId(),
+            this.publishEvent(new OutgoingPriceEvent(matcherId, session.getSessionId(),
                     timeService.currentDate(), newPrice));
 
             session.updatePrice(newPrice);

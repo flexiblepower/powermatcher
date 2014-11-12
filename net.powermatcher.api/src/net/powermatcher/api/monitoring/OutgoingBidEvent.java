@@ -9,13 +9,13 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
 
 /**
- * An {@link OutgoingBidUpdateEvent} is sent when an {@link AgentRole} sends a new {@link Bid}.
+ * An {@link OutgoingBidEvent} is sent when an {@link AgentRole} sends a new {@link Bid}.
  * 
  * @author FAN
  * @version 1.0
  * 
  */
-public class OutgoingBidUpdateEvent extends UpdateEvent {
+public class OutgoingBidEvent extends AgentEvent {
 
     /**
      * The new {@link Bid} created by the {@link AgentRole} subclass.
@@ -34,7 +34,7 @@ public class OutgoingBidUpdateEvent extends UpdateEvent {
      * @param bid
      *            The new {@link Price} created by the {@link AgentRole} subclass.
      */
-    public OutgoingBidUpdateEvent(String agentId, String sessionId, Date timestamp, Bid bid) {
+    public OutgoingBidEvent(String agentId, String sessionId, Date timestamp, Bid bid) {
         super(agentId, sessionId, timestamp);
         this.bid = bid;
     }
@@ -45,6 +45,6 @@ public class OutgoingBidUpdateEvent extends UpdateEvent {
 
     @Override
     public String toString() {
-        return OutgoingBidUpdateEvent.class.getSimpleName() + " " + super.toString() + ", bid = " + bid.toString();
+        return OutgoingBidEvent.class.getSimpleName() + " " + super.toString() + ", bid = " + bid.toString();
     }
 }

@@ -9,14 +9,14 @@ import net.powermatcher.api.TimeService;
 /**
  * The base class for update events.
  * 
- * {@link AgentRole} subclasses implement the {@link Observable} interface and can send an {@link UpdateEvent} to every
- * {@link Observer} that observes this class.
+ * {@link AgentRole} subclasses implement the {@link ObservableAgent} interface and can send an {@link AgentEvent} to every
+ * {@link AgentObserver} that observes this class.
  * 
  * @author FAN
  * @version 1.0
  */
 
-public abstract class UpdateEvent {
+public abstract class AgentEvent {
     /**
      * The id of the {@link AgentRole} subclass sending the UpdateEvent.
      */
@@ -42,7 +42,7 @@ public abstract class UpdateEvent {
      * @param timestamp
      *            The {@link Date} received from the {@link TimeService}
      */
-    public UpdateEvent(String agentId, String sessionId, Date timestamp) {
+    public AgentEvent(String agentId, String sessionId, Date timestamp) {
         this.agentId = agentId;
         this.sessionId = sessionId;
         this.timestamp = timestamp;

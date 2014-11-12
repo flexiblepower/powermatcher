@@ -8,15 +8,16 @@ import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Price;
 
 /**
- * An {@link IncomingPriceUpdateEvent} is sent when an {@link AgentRole} receives a new {@link Price}.
+ * An {@link OutgoingPriceEvent} is sent when an {@link AgentRole} sends a new {@link Price}.
  * 
  * @author FAN
  * @version 1.0
+ * 
  */
-public class IncomingPriceUpdateEvent extends UpdateEvent {
+public class OutgoingPriceEvent extends AgentEvent {
 
     /**
-     * The received {@link Price}
+     * The new {@link Price} created by the {@link AgentRole} subclass.
      */
     private final Price price;
 
@@ -30,9 +31,9 @@ public class IncomingPriceUpdateEvent extends UpdateEvent {
      * @param timestamp
      *            The {@link Date} received from the {@link TimeService}
      * @param price
-     *            The received {@link Price}.
+     *            The new {@link Price} created by the {@link AgentRole} subclass.
      */
-    public IncomingPriceUpdateEvent(String agentId, String sessionId, Date timestamp, Price price) {
+    public OutgoingPriceEvent(String agentId, String sessionId, Date timestamp, Price price) {
         super(agentId, sessionId, timestamp);
         this.price = price;
     }
@@ -43,7 +44,7 @@ public class IncomingPriceUpdateEvent extends UpdateEvent {
 
     @Override
     public String toString() {
-        return IncomingPriceUpdateEvent.class.getSimpleName() + " " + super.toString() + ", price = "
+        return OutgoingPriceEvent.class.getSimpleName() + " " + super.toString() + ", price = "
                 + price.toString();
     }
 }

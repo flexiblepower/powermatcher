@@ -4,9 +4,9 @@ import java.util.Date;
 
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
-import net.powermatcher.api.monitoring.IncomingPriceUpdateEvent;
-import net.powermatcher.api.monitoring.Observer;
-import net.powermatcher.api.monitoring.UpdateEvent;
+import net.powermatcher.api.monitoring.IncomingPriceEvent;
+import net.powermatcher.api.monitoring.AgentObserver;
+import net.powermatcher.api.monitoring.AgentEvent;
 import net.powermatcher.core.mock.MockBaseObservable;
 import net.powermatcher.mock.MockObserver;
 
@@ -78,8 +78,8 @@ public class BaseObservableTest {
         assertFalse(observer1.hasReceivedEvent());
     }
 
-    private UpdateEvent createDummyEvent() {
+    private AgentEvent createDummyEvent() {
         MarketBasis marketBasis = new MarketBasis("Electicity", "EUR", 10, 0.0, 100.0);
-        return new IncomingPriceUpdateEvent("agent1", "sessionId", new Date(), new Price(marketBasis, 0));
+        return new IncomingPriceEvent("agent1", "sessionId", new Date(), new Price(marketBasis, 0));
     }
 }
