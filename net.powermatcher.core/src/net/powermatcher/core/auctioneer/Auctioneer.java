@@ -33,215 +33,199 @@ import aQute.bnd.annotation.metatype.Meta;
 
 /**
  * <p>
- * This class represents an {@link Auctioneer} component which will receive all
- * {@link Bid} of other agents as a single {@link Bid} or as an aggregate
- * {@link Bid} via one or more {@link Concentrator}.
+ * This class represents an {@link Auctioneer} component which will receive all {@link Bid} of other agents as a single
+ * {@link Bid} or as an aggregate {@link Bid} via one or more {@link Concentrator}.
  * </p>
  * 
  * <p>
- * It is responsible for defining and sending the {@link MarketBasis} and
- * calculating the equilibrium based on the {@link Bid} from the different
- * agents in the topology. This equilibrium is communicated to the agents down
- * the hierarchy in the form of price update messages.
+ * It is responsible for defining and sending the {@link MarketBasis} and calculating the equilibrium based on the
+ * {@link Bid} from the different agents in the topology. This equilibrium is communicated to the agents down the
+ * hierarchy in the form of price update messages.
  * 
- * The {@link Price} that is communicated contains a {@link Price} and a
- * {@link MarketBasis} which enables the conversion to a normalized
- * {@link Price} or to any other {@link MarketBasis} for other financial
- * calculation purposes.
+ * The {@link Price} that is communicated contains a {@link Price} and a {@link MarketBasis} which enables the
+ * conversion to a normalized {@link Price} or to any other {@link MarketBasis} for other financial calculation
+ * purposes.
  * </p>
  * 
  * @author FAN
  * @version 1.0
  * 
  */
-@Component(designateFactory = Auctioneer.Config.class, immediate = true, 
-	provide = {Observable.class, MatcherRole.class})
+@Component(designateFactory = Auctioneer.Config.class, immediate = true, provide = { Observable.class,
+        MatcherRole.class })
 public class Auctioneer extends BaseObservable implements MatcherRole {
 
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(Auctioneer.class);
-	@Meta.OCD
-	public static interface Config {
-		@Meta.AD(deflt = "auctioneer")
-		String matcherId();
+    private static final Logger LOGGER = LoggerFactory.getLogger(Auctioneer.class);
 
-		@Meta.AD(deflt = "electricity", description = "Commodity of the market basis")
-		String commodity();
+    @Meta.OCD
+    public static interface Config {
+        @Meta.AD(deflt = "auctioneer")
+        String matcherId();
 
-		@Meta.AD(deflt = "EUR", description = "Currency of the market basis")
-		String currency();
+        @Meta.AD(deflt = "electricity", description = "Commodity of the market basis")
+        String commodity();
 
-		@Meta.AD(deflt = "100", description = "Number of price steps in the market basis")
-		int priceSteps();
+        @Meta.AD(deflt = "EUR", description = "Currency of the market basis")
+        String currency();
 
-		@Meta.AD(deflt = "0", description = "Minimum price of the market basis")
-		double minimumPrice();
+        @Meta.AD(deflt = "100", description = "Number of price steps in the market basis")
+        int priceSteps();
 
-		@Meta.AD(deflt = "1", description = "Maximum price of the market basis")
-		double maximumPrice();
+        @Meta.AD(deflt = "0", description = "Minimum price of the market basis")
+        double minimumPrice();
 
-		@Meta.AD(deflt = "600", description = "Nr of seconds before a bid becomes invalidated")
-		int bidTimeout();
+        @Meta.AD(deflt = "1", description = "Maximum price of the market basis")
+        double maximumPrice();
 
-		@Meta.AD(deflt = "30", description = "Number of seconds between price updates")
-		long priceUpdateRate();
-	}
+        @Meta.AD(deflt = "600", description = "Nr of seconds before a bid becomes invalidated")
+        int bidTimeout();
 
-	/**
-	 * TimeService that is used for obtaining real or simulated time.
-	 */
-	private TimeService timeService;
+        @Meta.AD(deflt = "30", description = "Number of seconds between price updates")
+        long priceUpdateRate();
+    }
 
-	/**
-	 * Scheduler that can schedule commands to run after a given delay, or to
-	 * execute periodically.
-	 */
-	private ScheduledExecutorService scheduler;
+    /**
+     * TimeService that is used for obtaining real or simulated time.
+     */
+    private TimeService timeService;
 
-	/**
-	 * A delayed result-bearing action that can be cancelled.
-	 */
-	private ScheduledFuture<?> scheduledFuture;
+    /**
+     * Scheduler that can schedule commands to run after a given delay, or to execute periodically.
+     */
+    private ScheduledExecutorService scheduler;
 
-	/**
-	 * The bid cache maintains an aggregated {@link Bid}, where bids can be
-	 * added and removed explicitly.
-	 */
-	private BidCache aggregatedBids;
+    /**
+     * A delayed result-bearing action that can be cancelled.
+     */
+    private ScheduledFuture<?> scheduledFuture;
 
-	/**
-	 * The {@link MarketBasis} for {@link Bid} and {@link Price}.
-	 */
-	private MarketBasis marketBasis;
+    /**
+     * The bid cache maintains an aggregated {@link Bid}, where bids can be added and removed explicitly.
+     */
+    private BidCache aggregatedBids;
 
-	/**
-	 * Holds the sessions from the agents.
-	 */
-	private Set<Session> sessions = new HashSet<Session>();
+    /**
+     * The {@link MarketBasis} for {@link Bid} and {@link Price}.
+     */
+    private MarketBasis marketBasis;
 
-	/**
-	 * Id of the {@link Auctioneer}.
-	 */
-	private String matcherId;
+    /**
+     * Holds the sessions from the agents.
+     */
+    private Set<Session> sessions = new HashSet<Session>();
 
-	// TODO marketBasis, aggregatedBids and
-	// matcherId are used in synchronized methods. Do we have do synchronize
-	// activate? It's only called once, so maybe not.
-	@Activate
-	public void activate(final Map<String, Object> properties) {
-		Config config = Configurable.createConfigurable(Config.class,
-				properties);
-		this.marketBasis = new MarketBasis(config.commodity(),
-				config.currency(), config.priceSteps(), config.minimumPrice(),
-				config.maximumPrice());
-		this.aggregatedBids = new BidCache(this.timeService,
-				config.bidTimeout());
-		this.matcherId = config.matcherId();
+    /**
+     * Id of the {@link Auctioneer}.
+     */
+    private String matcherId;
 
-		scheduledFuture = this.scheduler.scheduleAtFixedRate(new Runnable() {
-			@Override
-			public void run() {
-				publishNewPrice();
-			}
-		}, 0, config.priceUpdateRate(), TimeUnit.SECONDS);
-	}
+    // TODO marketBasis, aggregatedBids and
+    // matcherId are used in synchronized methods. Do we have do synchronize
+    // activate? It's only called once, so maybe not.
+    @Activate
+    public void activate(final Map<String, Object> properties) {
+        Config config = Configurable.createConfigurable(Config.class, properties);
+        this.marketBasis = new MarketBasis(config.commodity(), config.currency(), config.priceSteps(),
+                config.minimumPrice(), config.maximumPrice());
+        this.aggregatedBids = new BidCache(this.timeService, config.bidTimeout());
+        this.matcherId = config.matcherId();
 
-	@Deactivate
-	public void deactivate() {
-		for (Session session : sessions.toArray(new Session[sessions.size()])) {
-			session.disconnect();
-			LOGGER.info("Session {} closed", session);
-		}
+        scheduledFuture = this.scheduler.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                publishNewPrice();
+            }
+        }, 0, config.priceUpdateRate(), TimeUnit.SECONDS);
+    }
 
-		if (!sessions.isEmpty()) {
-			LOGGER.warn("Could not disconnect all sessions. Left: {}", sessions);
-		}
+    @Deactivate
+    public void deactivate() {
+        for (Session session : sessions.toArray(new Session[sessions.size()])) {
+            session.disconnect();
+            LOGGER.info("Session {} closed", session);
+        }
 
-		scheduledFuture.cancel(false);
-	}
+        if (!sessions.isEmpty()) {
+            LOGGER.warn("Could not disconnect all sessions. Left: {}", sessions);
+        }
 
-	@Override
-	public synchronized boolean connectToAgent(Session session) {
-		session.setMarketBasis(marketBasis);
-		session.setClusterId(matcherId);
-		this.sessions.add(session);
-		this.aggregatedBids.updateBid(session.getSessionId(), new Bid(
-				this.marketBasis));
-		LOGGER.info("Agent connected with session [{}]", session.getSessionId());
-		return true;
-	}
+        scheduledFuture.cancel(false);
+    }
 
-	@Override
-	public synchronized void disconnectFromAgent(Session session) {
-		// Find session
-		if (!sessions.remove(session)) {
-			return;
-		}
+    @Override
+    public synchronized boolean connectToAgent(Session session) {
+        session.setMarketBasis(marketBasis);
+        session.setClusterId(matcherId);
+        this.sessions.add(session);
+        this.aggregatedBids.updateBid(session.getSessionId(), new Bid(this.marketBasis));
+        LOGGER.info("Agent connected with session [{}]", session.getSessionId());
+        return true;
+    }
 
-		this.aggregatedBids.removeAgent(session.getSessionId());
+    @Override
+    public synchronized void disconnectFromAgent(Session session) {
+        // Find session
+        if (!sessions.remove(session)) {
+            return;
+        }
 
-		LOGGER.info("Agent disconnected with session [{}]",
-				session.getSessionId());
-	}
+        this.aggregatedBids.removeAgent(session.getSessionId());
 
-	@Override
-	public synchronized void updateBid(Session session, Bid newBid) {
-		if (!sessions.contains(session)) {
-			throw new IllegalStateException("No session found");
-		}
+        LOGGER.info("Agent disconnected with session [{}]", session.getSessionId());
+    }
 
-		if (!newBid.getMarketBasis().equals(this.marketBasis)) {
-			throw new InvalidParameterException(
-					"Marketbasis new bid differs from marketbasis auctioneer");
-		}
+    @Override
+    public synchronized void updateBid(Session session, Bid newBid) {
+        if (!sessions.contains(session)) {
+            throw new IllegalStateException("No session found");
+        }
 
-		// Update agent in aggregatedBids
-		this.aggregatedBids.updateBid(session.getSessionId(), newBid);
+        if (!newBid.getMarketBasis().equals(this.marketBasis)) {
+            throw new InvalidParameterException("Marketbasis new bid differs from marketbasis auctioneer");
+        }
 
-		LOGGER.debug("Received bid update [{}] from session [{}]", newBid,
-				session.getSessionId());
+        // Update agent in aggregatedBids
+        this.aggregatedBids.updateBid(session.getSessionId(), newBid);
 
-		this.publishEvent(new IncomingBidUpdateEvent(matcherId,
-				session.getSessionId(), timeService.currentDate(), session.getAgentId(), newBid));
-	}
+        LOGGER.debug("Received bid update [{}] from session [{}]", newBid, session.getSessionId());
 
-	@Override
-	public String getObserverId() {
-		return matcherId;
-	}
+        this.publishEvent(new IncomingBidUpdateEvent(matcherId, session.getSessionId(), timeService.currentDate(),
+                session.getAgentId(), newBid));
+    }
 
-	/**
-	 * Generates the new price out of the aggregated bids and sends this to all
-	 * listeners
-	 * TODO This is temporarily made public instead of default to test some things.
-	 * This should be fixed as soon as possible.
-	 */
-	public synchronized void publishNewPrice() {
-		Bid aggregatedBid = this.aggregatedBids
-				.getAggregatedBid(this.marketBasis);
-		Price newPrice = determinePrice(aggregatedBid);
-		
-		for (Session session : this.sessions) {
-			this.publishEvent(new OutgoingPriceUpdateEvent(matcherId,
-					session.getSessionId(), timeService.currentDate(), newPrice));
+    @Override
+    public String getObserverId() {
+        return matcherId;
+    }
 
-			session.updatePrice(newPrice);
-			LOGGER.debug("New price: {}, session {}", newPrice,
-					session.getSessionId());
-		}
-	}
+    /**
+     * Generates the new price out of the aggregated bids and sends this to all listeners TODO This is temporarily made
+     * public instead of default to test some things. This should be fixed as soon as possible.
+     */
+    public synchronized void publishNewPrice() {
+        Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis);
+        Price newPrice = determinePrice(aggregatedBid);
 
-	protected Price determinePrice(Bid aggregatedBid) {
-		return aggregatedBid.calculateIntersection(0);
-	}
+        for (Session session : this.sessions) {
+            this.publishEvent(new OutgoingPriceUpdateEvent(matcherId, session.getSessionId(),
+                    timeService.currentDate(), newPrice));
 
-	@Reference
-	public void setTimeService(TimeService timeService) {
-		this.timeService = timeService;
-	}
+            session.updatePrice(newPrice);
+            LOGGER.debug("New price: {}, session {}", newPrice, session.getSessionId());
+        }
+    }
 
-	@Reference
-	public void setExecutorService(ScheduledExecutorService scheduler) {
-		this.scheduler = scheduler;
-	}	
+    protected Price determinePrice(Bid aggregatedBid) {
+        return aggregatedBid.calculateIntersection(0);
+    }
+
+    @Reference
+    public void setTimeService(TimeService timeService) {
+        this.timeService = timeService;
+    }
+
+    @Reference
+    public void setExecutorService(ScheduledExecutorService scheduler) {
+        this.scheduler = scheduler;
+    }
 }

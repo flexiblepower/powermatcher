@@ -251,6 +251,5 @@ public class BidTest {
         Assert.assertThat(bid2.equals(bid2), is(true));
         Assert.assertThat(otherBid.equals(testBid), is(true));
     }
-    }
-    
+
 }

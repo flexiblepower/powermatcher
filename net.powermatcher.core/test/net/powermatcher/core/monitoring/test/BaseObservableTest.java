@@ -16,70 +16,70 @@ import static org.junit.Assert.*;
 
 public class BaseObservableTest {
 
-	@Test
-	public void oneObserverTest() {
-	    MockObserver observer = new MockObserver();
-		
-		MockBaseObservable observable = new MockBaseObservable();
-		observable.addObserver(observer);
-		observable.publishEvent(createDummyEvent());
-		
-		assertTrue(observer.hasReceivedEvent());
-	}	
+    @Test
+    public void oneObserverTest() {
+        MockObserver observer = new MockObserver();
 
-	@Test
-	public void twoObserversTest() {
-	    MockObserver observer1 = new MockObserver();
-	    MockObserver observer2 = new MockObserver();
-		
-		MockBaseObservable observable = new MockBaseObservable();
-		observable.addObserver(observer1);
-		observable.addObserver(observer2);
-		observable.publishEvent(createDummyEvent());
-		
-		assertTrue(observer1.hasReceivedEvent());
-		assertTrue(observer2.hasReceivedEvent());
-	}	
+        MockBaseObservable observable = new MockBaseObservable();
+        observable.addObserver(observer);
+        observable.publishEvent(createDummyEvent());
 
-	@Test
-	public void removeObserversTest() {
-	    MockObserver observer1 = new MockObserver();
-	    MockObserver observer2 = new MockObserver();
-		
-		MockBaseObservable observable = new MockBaseObservable();
-		observable.addObserver(observer1);
-		observable.addObserver(observer2);
-		observable.removeObserver(observer2);
-		observable.publishEvent(createDummyEvent());
-		
-		assertTrue(observer1.hasReceivedEvent());
-		assertFalse(observer2.hasReceivedEvent());
-	}	
+        assertTrue(observer.hasReceivedEvent());
+    }
 
-	@Test
-	public void duplicateRemoveObserversTest() {
-		MockObserver observer1 = new MockObserver();
-		
-		MockBaseObservable observable = new MockBaseObservable();
-		observable.addObserver(observer1);
-		observable.removeObserver(observer1);
-		observable.removeObserver(observer1);
-	}
+    @Test
+    public void twoObserversTest() {
+        MockObserver observer1 = new MockObserver();
+        MockObserver observer2 = new MockObserver();
 
-	@Test
-	public void noObserversTest() {
-		MockBaseObservable observable = new MockBaseObservable();
-		
-		MockObserver observer1 = new MockObserver();
-		observable.addObserver(observer1);
-		observable.removeObserver(observer1);
+        MockBaseObservable observable = new MockBaseObservable();
+        observable.addObserver(observer1);
+        observable.addObserver(observer2);
+        observable.publishEvent(createDummyEvent());
 
-		observable.publishEvent(createDummyEvent());
-		assertFalse(observer1.hasReceivedEvent());
-	}
+        assertTrue(observer1.hasReceivedEvent());
+        assertTrue(observer2.hasReceivedEvent());
+    }
 
-	private UpdateEvent createDummyEvent() {
-		MarketBasis marketBasis = new MarketBasis("Electicity", "EUR", 10, 0.0, 100.0);
-		return new IncomingPriceUpdateEvent("agent1", "sessionId", new Date(), new Price(marketBasis, 0));		
-	}
+    @Test
+    public void removeObserversTest() {
+        MockObserver observer1 = new MockObserver();
+        MockObserver observer2 = new MockObserver();
+
+        MockBaseObservable observable = new MockBaseObservable();
+        observable.addObserver(observer1);
+        observable.addObserver(observer2);
+        observable.removeObserver(observer2);
+        observable.publishEvent(createDummyEvent());
+
+        assertTrue(observer1.hasReceivedEvent());
+        assertFalse(observer2.hasReceivedEvent());
+    }
+
+    @Test
+    public void duplicateRemoveObserversTest() {
+        MockObserver observer1 = new MockObserver();
+
+        MockBaseObservable observable = new MockBaseObservable();
+        observable.addObserver(observer1);
+        observable.removeObserver(observer1);
+        observable.removeObserver(observer1);
+    }
+
+    @Test
+    public void noObserversTest() {
+        MockBaseObservable observable = new MockBaseObservable();
+
+        MockObserver observer1 = new MockObserver();
+        observable.addObserver(observer1);
+        observable.removeObserver(observer1);
+
+        observable.publishEvent(createDummyEvent());
+        assertFalse(observer1.hasReceivedEvent());
+    }
+
+    private UpdateEvent createDummyEvent() {
+        MarketBasis marketBasis = new MarketBasis("Electicity", "EUR", 10, 0.0, 100.0);
+        return new IncomingPriceUpdateEvent("agent1", "sessionId", new Date(), new Price(marketBasis, 0));
+    }
 }

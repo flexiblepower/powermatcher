@@ -24,66 +24,71 @@ import aQute.bnd.annotation.metatype.Meta;
 @Component(immediate = true, designateFactory = SimpleObserver.Config.class)
 public class SimpleObserver extends BaseObserver {
 
-	private static final Logger logger = LoggerFactory.getLogger(SimpleObserver.class);
+    private static final Logger logger = LoggerFactory.getLogger(SimpleObserver.class);
 
-	private List<String> filter;
-	
-	/**
-	 * OSGI configuration of the {@link SimpleObserver}
-	 */
-	public static interface Config {
-		@Meta.AD(required = false)
-		List<String> filter();
-	}
+    private List<String> filter;
 
-	/**
-	 * Activate the component.
-	 * @param properties updated configuration properties
-	 */
-	@Activate
-	public synchronized void activate(Map<String, Object> properties) {
-		processConfig(properties);
-	}
-	
-	/**
-	 * Handle configuration modifications.
-	 * @param properties updated configuration properties
-	 */
-	@Modified
-	public synchronized void modified(Map<String, Object> properties) {
-		processConfig(properties);
-	}
+    /**
+     * OSGI configuration of the {@link SimpleObserver}
+     */
+    public static interface Config {
+        @Meta.AD(required = false)
+        List<String> filter();
+    }
 
-	@Override
-	@Reference(dynamic = true, multiple = true, optional = true)
-	public void addObservable(Observable observable, Map<String, Object> properties) {
-		super.addObservable(observable, properties);
-	}	
+    /**
+     * Activate the component.
+     * 
+     * @param properties
+     *            updated configuration properties
+     */
+    @Activate
+    public synchronized void activate(Map<String, Object> properties) {
+        processConfig(properties);
+    }
 
-	@Override
-	public void removeObservable(Observable observable, Map<String, Object> properties) {
-		super.removeObservable(observable, properties);
-	}
+    /**
+     * Handle configuration modifications.
+     * 
+     * @param properties
+     *            updated configuration properties
+     */
+    @Modified
+    public synchronized void modified(Map<String, Object> properties) {
+        processConfig(properties);
+    }
 
-	@Override
-	protected List<String> filter() {
-		return this.filter;
-	}
-	
-	@Override
-	public void update(UpdateEvent event) {
-		logger.info("Received event: {}", event);
-	}
-	
-	private void processConfig(Map<String, Object> properties) {
-		Config config = Configurable.createConfigurable(Config.class, properties);
-		this.filter = config.filter();
+    @Override
+    @Reference(dynamic = true, multiple = true, optional = true)
+    public void addObservable(Observable observable, Map<String, Object> properties) {
+        super.addObservable(observable, properties);
+    }
 
-		// ConfigAdmin will sometimes generate a filter with 1 empty element. Ignore it. 
-		if (filter != null && filter.size() > 0 && filter.get(0).length() == 0) {
-			this.filter = new ArrayList<String>(); 
-		}
+    //TODO this method only calls the superclass. is it missing an annotation?
+    @Override
+    public void removeObservable(Observable observable, Map<String, Object> properties) {
+        super.removeObservable(observable, properties);
+    }
 
-		updateObservables();
-	}
+    @Override
+    protected List<String> filter() {
+        return this.filter;
+    }
+
+    @Override
+    public void update(UpdateEvent event) {
+        logger.info("Received event: {}", event);
+    }
+
+    private void processConfig(Map<String, Object> properties) {
+        Config config = Configurable.createConfigurable(Config.class, properties);
+        this.filter = config.filter();
+
+        // ConfigAdmin will sometimes generate a filter with 1 empty element. Ignore it.
+        if (filter != null && !filter.isEmpty() && filter.get(0).isEmpty()) {
+            this.filter = new ArrayList<String>();
+        }
+
+        updateObservables();
+    }
 }

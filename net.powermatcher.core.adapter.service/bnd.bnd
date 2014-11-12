@@ -1,5 +1,0 @@
-Bundle-Copyright: Copyright (c) 2012, 2013 FlexiblePower Alliance Network (FAN).
-Bundle-Category: PowerMatcher Core
-Export-Package: net.powermatcher.core.adapter.service
-Bundle-Version: 0.9.0
--buildpath: net.powermatcher.core.configurable;version=latest
