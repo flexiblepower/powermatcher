@@ -16,6 +16,7 @@ import net.powermatcher.core.sessions.SessionManager;
 import net.powermatcher.core.time.SystemTimeService;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -43,7 +44,8 @@ public class AuctioneerTest {
         this.auctioneer = new Auctioneer();
 
         auctioneerProperties = new HashMap<String, Object>();
-        auctioneerProperties.put("id", "auctioneer");
+        auctioneerProperties.put("agentId", "auctioneer");
+        auctioneerProperties.put("clusterId", "DefaultCluster");
         auctioneerProperties.put("matcherId", "auctioneer");
         auctioneerProperties.put("commodity", "electricity");
         auctioneerProperties.put("currency", "EUR");
