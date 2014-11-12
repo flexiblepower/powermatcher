@@ -46,10 +46,10 @@ public class ConcentratorTest {
 
     @Before
     public void setUp() throws Exception {
-        List<String> activeConnections = new ArrayList<>();
+        List<String> activeConnections = new ArrayList<String>();
         // Concentrator to be tested
         concentrator = new Concentrator();
-        concentratorProperties = new HashMap<>();
+        concentratorProperties = new HashMap<String, Object>();
         concentratorProperties.put("matcherId", "concentrator");
         concentratorProperties.put("bidTimeout", "600");
         concentratorProperties.put("bidUpdateRate", "30");
@@ -78,7 +78,7 @@ public class ConcentratorTest {
             activeConnections.add(agentId + "::" + "concentrator");
         }
 
-        Map<String, Object> sessionProperties = new HashMap<>();
+        Map<String, Object> sessionProperties = new HashMap<String, Object>();
         sessionProperties.put("activeConnections", activeConnections);
         sessionManager.activate(sessionProperties);
 
