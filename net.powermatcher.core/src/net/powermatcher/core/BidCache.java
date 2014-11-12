@@ -1,8 +1,10 @@
 package net.powermatcher.core;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -47,6 +49,31 @@ public class BidCache {
      * Define the aggregated bid (Bid) field.
      */
     private Bid aggregatedBid;
+    
+    public class AggregatedBidInfo {
+    	
+    	private Bid aggregatedBid;
+    	
+    	private Map<String, Bid> bids;
+
+		public Bid getAggregatedBid() {
+			return aggregatedBid;
+		}
+
+		public void setAggregatedBid(Bid aggregatedBid) {
+			this.aggregatedBid = aggregatedBid;
+		}
+
+		public Map<String, Bid> getBids() {
+			return bids;
+		}
+
+		public void setBids(Map<String, Bid> bids) {
+			this.bids = bids;
+		}    	
+    }
+    
+    private Map<Integer, AggregatedBidInfo> aggregatedBidHistory = new HashMap<Integer, AggregatedBidInfo>();
 
     /**
      * Default constructor
@@ -156,18 +183,32 @@ public class BidCache {
      */
     public synchronized Bid getAggregatedBid(final MarketBasis marketBasis) {
         if (marketBasis != null) {
+        	
+        	AggregatedBidInfo info = new AggregatedBidInfo();
+        	
             if (this.aggregatedBid == null || !this.aggregatedBid.getMarketBasis().equals(marketBasis)) {
                 Bid newAggregatedBid = new Bid(marketBasis);
                 Set<String> idSet = this.bidCache.keySet();
                 for (String agentId : idSet) {
                     Bid bid = getLastBid(agentId);
+                    info.getBids().put(agentId, bid);
+                    
                     newAggregatedBid = newAggregatedBid.aggregate(bid);
                 }
+                
                 this.aggregatedBid = newAggregatedBid;
+                info.setAggregatedBid(newAggregatedBid);
             }
+            
+            aggregatedBidHistory.put(this.aggregatedBid.getBidNumber(), info);
+            
             return this.aggregatedBid;
         }
         return null;
+    }
+    
+    public synchronized AggregatedBidInfo getAggregatedBidInfo(int aggregatedBidNumber) {
+    	return this.aggregatedBidHistory.get((Integer)aggregatedBidNumber);
     }
 
     /**

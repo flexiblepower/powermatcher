@@ -18,9 +18,10 @@ import net.powermatcher.api.monitoring.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.Observable;
 import net.powermatcher.api.monitoring.OutgoingBidUpdateEvent;
 import net.powermatcher.api.monitoring.OutgoingPriceUpdateEvent;
+import net.powermatcher.core.BaseAgent;
 import net.powermatcher.core.BidCache;
+import net.powermatcher.core.BidCache.AggregatedBidInfo;
 import net.powermatcher.core.auctioneer.Auctioneer;
-import net.powermatcher.core.monitoring.BaseObservable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,14 +49,14 @@ import aQute.bnd.annotation.metatype.Meta;
  */
 @Component(designateFactory = Concentrator.Config.class, immediate = true, provide = { Observable.class,
         MatcherRole.class, AgentRole.class })
-public class Concentrator extends BaseObservable implements MatcherRole, AgentRole {
+public class Concentrator extends BaseAgent implements MatcherRole, AgentRole {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Concentrator.class);
 
     @Meta.OCD
     public static interface Config {
-        @Meta.AD(deflt = "concentrator")
-        String matcherId();
+        @Meta.AD(deflt = "auctioneer")
+        String desiredParentId();
 
         @Meta.AD(deflt = "600", description = "Nr of seconds before a bid becomes invalidated")
         int bidTimeout();
@@ -65,6 +66,9 @@ public class Concentrator extends BaseObservable implements MatcherRole, AgentRo
 
         @Meta.AD(deflt = "concentrator")
         String agentId();
+
+        @Meta.AD(deflt = "concentrator")
+        String matcherId();
     }
 
     /**
@@ -116,6 +120,9 @@ public class Concentrator extends BaseObservable implements MatcherRole, AgentRo
     public void activate(final Map<String, Object> properties) {
         config = Configurable.createConfigurable(Config.class, properties);
 
+        this.setAgentId(config.agentId());
+        this.setDesiredParentId(config.desiredParentId());
+        
         this.aggregatedBids = new BidCache(this.timeService, config.bidTimeout());
 
         scheduledFuture = this.scheduler.scheduleAtFixedRate(new Runnable() {
@@ -215,18 +222,27 @@ public class Concentrator extends BaseObservable implements MatcherRole, AgentRo
         this.publishEvent(new IncomingPriceUpdateEvent(this.config.agentId(), this.sessionToMatcher.getSessionId(),
                 timeService.currentDate(), newPrice));
 
+        // Find aggregated bid info
+        AggregatedBidInfo info = this.aggregatedBids.getAggregatedBidInfo(newPrice.getBidNumber());
+        if (info == null) {
+        	// ignore price and log warning
+        }
+        
         // Publish new price to connected agents
         for (Session session : this.sessionToAgents) {
-            session.updatePrice(newPrice);
+        	Bid originalAgentBid = info.getBids().get(session.getAgentId());       
+        	if (originalAgentBid == null) {
+        		// ignore price for this agent and log warning
+        		continue;
+        	}
+        	
+        	Price agentPrice = new Price(newPrice.getMarketBasis(), newPrice, originalAgentBid.getBidNumber());
+        	
+            session.updatePrice(agentPrice);
 
             this.publishEvent(new OutgoingPriceUpdateEvent(this.config.agentId(), session.getSessionId(), timeService
                     .currentDate(), newPrice));
         }
-    }
-
-    @Override
-    public String getObserverId() {
-        return this.config.agentId();
     }
 
     /**
