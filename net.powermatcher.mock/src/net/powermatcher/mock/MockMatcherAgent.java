@@ -1,4 +1,4 @@
-package net.powermatcher.core.mock;
+package net.powermatcher.mock;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +16,7 @@ public class MockMatcherAgent extends MockAgent implements MatcherRole {
 
     public MockMatcherAgent(String agentId) {
         super(agentId);
-        this.matcherProperties = new HashMap<>();
+        this.matcherProperties = new HashMap<String, Object>();
         this.matcherProperties.put("matcherId", agentId);
     }
 

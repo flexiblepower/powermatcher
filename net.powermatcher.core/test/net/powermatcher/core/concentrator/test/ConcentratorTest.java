@@ -12,10 +12,10 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.core.concentrator.Concentrator;
-import net.powermatcher.core.mock.MockAgent;
-import net.powermatcher.core.mock.MockMatcherAgent;
 import net.powermatcher.core.sessions.SessionManager;
 import net.powermatcher.core.time.SystemTimeService;
+import net.powermatcher.mock.MockAgent;
+import net.powermatcher.mock.MockMatcherAgent;
 
 import org.junit.After;
 import org.junit.Before;

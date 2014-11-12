@@ -1,4 +1,4 @@
-package net.powermatcher.core.mock;
+package net.powermatcher.mock;
 
 import net.powermatcher.api.monitoring.Observer;
 import net.powermatcher.api.monitoring.UpdateEvent;

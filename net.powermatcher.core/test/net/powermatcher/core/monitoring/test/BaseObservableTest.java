@@ -8,7 +8,7 @@ import net.powermatcher.api.monitoring.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.Observer;
 import net.powermatcher.api.monitoring.UpdateEvent;
 import net.powermatcher.core.mock.MockBaseObservable;
-import net.powermatcher.core.mock.MockObserver;
+import net.powermatcher.mock.MockObserver;
 
 import org.junit.Test;
 
