@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import net.powermatcher.api.monitoring.Observable;
-import net.powermatcher.api.monitoring.UpdateEvent;
+import net.powermatcher.api.monitoring.ObservableAgent;
+import net.powermatcher.api.monitoring.AgentEvent;
 import net.powermatcher.core.monitoring.BaseObserver;
 
 import org.slf4j.Logger;
@@ -60,13 +60,13 @@ public class SimpleObserver extends BaseObserver {
 
     @Override
     @Reference(dynamic = true, multiple = true, optional = true)
-    public void addObservable(Observable observable, Map<String, Object> properties) {
+    public void addObservable(ObservableAgent observable, Map<String, Object> properties) {
         super.addObservable(observable, properties);
     }
 
     //TODO this method only calls the superclass. is it missing an annotation?
     @Override
-    public void removeObservable(Observable observable, Map<String, Object> properties) {
+    public void removeObservable(ObservableAgent observable, Map<String, Object> properties) {
         super.removeObservable(observable, properties);
     }
 
@@ -76,7 +76,7 @@ public class SimpleObserver extends BaseObserver {
     }
 
     @Override
-    public void update(UpdateEvent event) {
+    public void update(AgentEvent event) {
         logger.info("Received event: {}", event);
     }
 

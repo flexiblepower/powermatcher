@@ -5,32 +5,32 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import net.powermatcher.api.monitoring.Observable;
-import net.powermatcher.api.monitoring.Observer;
-import net.powermatcher.api.monitoring.UpdateEvent;
+import net.powermatcher.api.monitoring.ObservableAgent;
+import net.powermatcher.api.monitoring.AgentObserver;
+import net.powermatcher.api.monitoring.AgentEvent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Base class used to create an {@link Observer}. The {@link Observer} searches for {@link Observable} services and adds
+ * Base class used to create an {@link AgentObserver}. The {@link AgentObserver} searches for {@link ObservableAgent} services and adds
  * itself.
  * 
- * {@link Observable} services are able to call the update method of {@link Observer} with {@link UpdateEvent} events.
+ * {@link ObservableAgent} services are able to call the update method of {@link AgentObserver} with {@link AgentEvent} events.
  */
-public abstract class BaseObserver implements Observer {
+public abstract class BaseObserver implements AgentObserver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseObserver.class);
 
     /**
-     * Holds the available {@link Observable} services
+     * Holds the available {@link ObservableAgent} services
      */
-    private ConcurrentMap<String, Observable> observables = new ConcurrentHashMap<String, Observable>();
+    private ConcurrentMap<String, ObservableAgent> observables = new ConcurrentHashMap<String, ObservableAgent>();
 
     /**
-     * Holds the current {@link Observable} services being observed
+     * Holds the current {@link ObservableAgent} services being observed
      */
-    private ConcurrentMap<String, Observable> observing = new ConcurrentHashMap<String, Observable>();
+    private ConcurrentMap<String, ObservableAgent> observing = new ConcurrentHashMap<String, ObservableAgent>();
 
     /**
      * Filter containing all observableId's which must be observed.
@@ -38,14 +38,14 @@ public abstract class BaseObserver implements Observer {
     protected abstract List<String> filter();
 
     /**
-     * Add an {@link Observable} to the list of available {@link Observable} services
+     * Add an {@link ObservableAgent} to the list of available {@link ObservableAgent} services
      * 
      * @param observable
-     *            {@link Observable} to add.
+     *            {@link ObservableAgent} to add.
      * @param properties
-     *            configuration properties of {@link Observable} service
+     *            configuration properties of {@link ObservableAgent} service
      */
-    public void addObservable(Observable observable, Map<String, Object> properties) {
+    public void addObservable(ObservableAgent observable, Map<String, Object> properties) {
         String observableId = observable.getObserverId();
         if (observables.putIfAbsent(observableId, observable) != null) {
             LOGGER.warn("An observable with the id " + observableId + " was already registered");
@@ -55,14 +55,14 @@ public abstract class BaseObserver implements Observer {
     }
 
     /**
-     * Removes an {@link Observable} from the list of available {@link Observable} services
+     * Removes an {@link ObservableAgent} from the list of available {@link ObservableAgent} services
      * 
      * @param observable
-     *            {@link Observable} to remove.
+     *            {@link ObservableAgent} to remove.
      * @param properties
-     *            configuration properties of {@link Observable} service
+     *            configuration properties of {@link ObservableAgent} service
      */
-    public void removeObservable(Observable observable, Map<String, Object> properties) {
+    public void removeObservable(ObservableAgent observable, Map<String, Object> properties) {
         String observableId = observable.getObserverId();
 
         // Check whether actually observing and remove
@@ -72,12 +72,12 @@ public abstract class BaseObserver implements Observer {
     }
 
     /**
-     * Update the connections to the {@link Observable} services. The filter is taken into account is present:
+     * Update the connections to the {@link ObservableAgent} services. The filter is taken into account is present:
      * <ul>
      * <li>
-     * Filter is NULL or empty, all available {@link Observable} services will be observed.</li>
+     * Filter is NULL or empty, all available {@link ObservableAgent} services will be observed.</li>
      * <li>
-     * Filter is not empty, only {@link Observable} services from filter will be observed.</li>
+     * Filter is not empty, only {@link ObservableAgent} services from filter will be observed.</li>
      * </ul>
      */
     public void updateObservables() {
@@ -86,7 +86,7 @@ public abstract class BaseObserver implements Observer {
             if (this.filter() != null && !this.filter().isEmpty() && !this.filter().contains(observableId)) {
                 // Remove observer when still observing
                 if (this.observing.containsKey(observableId)) {
-                    Observable toRemove = this.observing.remove(observableId);
+                    ObservableAgent toRemove = this.observing.remove(observableId);
                     toRemove.removeObserver(this);
                     LOGGER.info("Detached from observable [{}]", observableId);
                 }
@@ -99,15 +99,15 @@ public abstract class BaseObserver implements Observer {
     }
 
     /**
-     * Start observing the specified {@link Observable} service.
+     * Start observing the specified {@link ObservableAgent} service.
      * 
      * @param observableId
-     *            id of {@link Observable}.
+     *            id of {@link ObservableAgent}.
      */
     private void addObservable(String observableId) {
         // Only attach to new observers
         if (!this.observing.containsKey(observableId)) {
-            Observable observable = this.observables.get(observableId);
+            ObservableAgent observable = this.observables.get(observableId);
             observable.addObserver(this);
             observing.put(observableId, observable);
             LOGGER.info("Attached to observable [{}]", observableId);
