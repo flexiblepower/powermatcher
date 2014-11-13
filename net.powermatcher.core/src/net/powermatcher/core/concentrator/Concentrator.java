@@ -199,7 +199,7 @@ public class Concentrator extends BaseObservable implements MatcherRole, AgentRo
             throw new IllegalArgumentException("Marketbasis new bid differs from marketbasis auctioneer");
         }
 
-        this.publishEvent(new IncomingBidEvent(config.agentId(), session.getSessionId(), timeService
+        this.publishEvent(new IncomingBidEvent(session.getClusterId(), config.agentId(), session.getSessionId(), timeService
                 .currentDate(), "agentId", newBid));
 
         // Update agent in aggregatedBids
@@ -212,14 +212,14 @@ public class Concentrator extends BaseObservable implements MatcherRole, AgentRo
     public void updatePrice(Price newPrice) {
         LOGGER.debug("Received price update [{}]", newPrice);
 
-        this.publishEvent(new IncomingPriceEvent(this.config.agentId(), this.sessionToMatcher.getSessionId(),
+        this.publishEvent(new IncomingPriceEvent(sessionToMatcher.getClusterId(), this.config.agentId(), this.sessionToMatcher.getSessionId(),
                 timeService.currentDate(), newPrice));
 
         // Publish new price to connected agents
         for (Session session : this.sessionToAgents) {
             session.updatePrice(newPrice);
 
-            this.publishEvent(new OutgoingPriceEvent(this.config.agentId(), session.getSessionId(), timeService
+            this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), this.config.agentId(), session.getSessionId(), timeService
                     .currentDate(), newPrice));
         }
     }
@@ -237,7 +237,7 @@ public class Concentrator extends BaseObservable implements MatcherRole, AgentRo
         if (sessionToMatcher != null) {
             Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.sessionToMatcher.getMarketBasis());
             this.sessionToMatcher.updateBid(aggregatedBid);
-            publishEvent(new OutgoingBidEvent(config.agentId(), sessionToMatcher.getSessionId(),
+            publishEvent(new OutgoingBidEvent(sessionToMatcher.getClusterId(), config.agentId(), sessionToMatcher.getSessionId(),
                     timeService.currentDate(), aggregatedBid));
 
             LOGGER.debug("Updating aggregated bid [{}]", aggregatedBid);

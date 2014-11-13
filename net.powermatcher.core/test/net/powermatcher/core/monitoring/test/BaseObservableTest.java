@@ -80,6 +80,6 @@ public class BaseObservableTest {
 
     private AgentEvent createDummyEvent() {
         MarketBasis marketBasis = new MarketBasis("Electicity", "EUR", 10, 0.0, 100.0);
-        return new IncomingPriceEvent("agent1", "sessionId", new Date(), new Price(marketBasis, 0));
+        return new IncomingPriceEvent("auctioneer", "agent1", "sessionId", new Date(), new Price(marketBasis, 0));
     }
 }

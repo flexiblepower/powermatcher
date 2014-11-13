@@ -81,7 +81,7 @@ public class PVPanelAgent extends BaseObservable implements AgentRole {
             Bid newBid = new Bid(session.getMarketBasis(), new PricePoint(0, -700));
             LOGGER.debug("updateBid({})", newBid);
             session.updateBid(newBid);
-            this.publishEvent(new OutgoingBidEvent(agentId, session.getSessionId(), timeService.currentDate(),
+            this.publishEvent(new OutgoingBidEvent(session.getClusterId(), agentId, session.getSessionId(), timeService.currentDate(),
                     newBid));
         }
     }
@@ -89,7 +89,7 @@ public class PVPanelAgent extends BaseObservable implements AgentRole {
     @Override
     public void updatePrice(Price newPrice) {
         LOGGER.debug("updatePrice({})", newPrice);
-        publishEvent(new IncomingPriceEvent(agentId, session.getSessionId(), timeService.currentDate(), newPrice));
+        publishEvent(new IncomingPriceEvent(session.getClusterId(), agentId, session.getSessionId(), timeService.currentDate(), newPrice));
 
         LOGGER.debug("Received price update [{}]", newPrice);
     }

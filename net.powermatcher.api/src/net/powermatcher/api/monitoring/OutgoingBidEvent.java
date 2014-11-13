@@ -25,6 +25,9 @@ public class OutgoingBidEvent extends AgentEvent {
     /**
      * Constructs an instance of this class.
      * 
+     * @param clusterId
+	 *            The id of the cluster the {@link AgentRole} subclass sending
+	 *            the UpdateEvent is running in.
      * @param agentId
      *            The id of the {@link AgentRole} subclass sending the UpdateEvent.
      * @param sessionId
@@ -34,8 +37,8 @@ public class OutgoingBidEvent extends AgentEvent {
      * @param bid
      *            The new {@link Price} created by the {@link AgentRole} subclass.
      */
-    public OutgoingBidEvent(String agentId, String sessionId, Date timestamp, Bid bid) {
-        super(agentId, sessionId, timestamp);
+    public OutgoingBidEvent(String clusterId, String agentId, String sessionId, Date timestamp, Bid bid) {
+        super(clusterId, agentId, sessionId, timestamp);
         this.bid = bid;
     }
 
