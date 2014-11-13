@@ -1,26 +1,29 @@
 package net.powermatcher.core.monitoring.test;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Date;
 
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
-import net.powermatcher.api.monitoring.IncomingPriceEvent;
-import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.AgentEvent;
-import net.powermatcher.core.mock.MockBaseObservable;
+import net.powermatcher.api.monitoring.IncomingPriceEvent;
+import net.powermatcher.core.mock.MockAgent;
 import net.powermatcher.core.mock.MockObserver;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
-public class BaseObservableTest {
+/**
+ * Validates the behavior of ObservableAgent as implemented by BaseAgent.
+ */
+public class ObservableAgentTest {
 
     @Test
     public void oneObserverTest() {
         MockObserver observer = new MockObserver();
 
-        MockBaseObservable observable = new MockBaseObservable();
+        MockAgent observable = new MockAgent("agentId");
         observable.addObserver(observer);
         observable.publishEvent(createDummyEvent());
 
@@ -32,7 +35,7 @@ public class BaseObservableTest {
         MockObserver observer1 = new MockObserver();
         MockObserver observer2 = new MockObserver();
 
-        MockBaseObservable observable = new MockBaseObservable();
+        MockAgent observable = new MockAgent("agentId");
         observable.addObserver(observer1);
         observable.addObserver(observer2);
         observable.publishEvent(createDummyEvent());
@@ -46,7 +49,7 @@ public class BaseObservableTest {
         MockObserver observer1 = new MockObserver();
         MockObserver observer2 = new MockObserver();
 
-        MockBaseObservable observable = new MockBaseObservable();
+        MockAgent observable = new MockAgent("agentId");
         observable.addObserver(observer1);
         observable.addObserver(observer2);
         observable.removeObserver(observer2);
@@ -60,7 +63,7 @@ public class BaseObservableTest {
     public void duplicateRemoveObserversTest() {
         MockObserver observer1 = new MockObserver();
 
-        MockBaseObservable observable = new MockBaseObservable();
+        MockAgent observable = new MockAgent("agentId");
         observable.addObserver(observer1);
         observable.removeObserver(observer1);
         observable.removeObserver(observer1);
@@ -68,7 +71,7 @@ public class BaseObservableTest {
 
     @Test
     public void noObserversTest() {
-        MockBaseObservable observable = new MockBaseObservable();
+        MockAgent observable = new MockAgent("agentId");
 
         MockObserver observer1 = new MockObserver();
         observable.addObserver(observer1);

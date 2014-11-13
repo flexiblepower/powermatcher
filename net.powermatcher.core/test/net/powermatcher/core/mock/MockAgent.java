@@ -7,8 +7,9 @@ import net.powermatcher.api.AgentRole;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
+import net.powermatcher.core.BaseAgent;
 
-public class MockAgent implements AgentRole {
+public class MockAgent extends BaseAgent implements AgentRole {
 
     private Map<String, Object> agentProperties;
     private Price lastPriceUpdate;

@@ -18,9 +18,9 @@ import net.powermatcher.api.monitoring.IncomingPriceEvent;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.OutgoingBidEvent;
 import net.powermatcher.api.monitoring.OutgoingPriceEvent;
+import net.powermatcher.core.BaseAgent;
 import net.powermatcher.core.BidCache;
 import net.powermatcher.core.auctioneer.Auctioneer;
-import net.powermatcher.core.monitoring.BaseObservable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,14 +48,14 @@ import aQute.bnd.annotation.metatype.Meta;
  */
 @Component(designateFactory = Concentrator.Config.class, immediate = true, provide = { ObservableAgent.class,
         MatcherRole.class, AgentRole.class })
-public class Concentrator extends BaseObservable implements MatcherRole, AgentRole {
+public class Concentrator extends BaseAgent implements MatcherRole, AgentRole {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Concentrator.class);
 
     @Meta.OCD
     public static interface Config {
-        @Meta.AD(deflt = "concentrator")
-        String matcherId();
+        @Meta.AD(deflt = "auctioneer")
+        String desiredParentId();
 
         @Meta.AD(deflt = "600", description = "Nr of seconds before a bid becomes invalidated")
         int bidTimeout();
@@ -65,6 +65,9 @@ public class Concentrator extends BaseObservable implements MatcherRole, AgentRo
 
         @Meta.AD(deflt = "concentrator")
         String agentId();
+
+        @Meta.AD(deflt = "concentrator")
+        String matcherId();
     }
 
     /**
@@ -116,6 +119,9 @@ public class Concentrator extends BaseObservable implements MatcherRole, AgentRo
     public void activate(final Map<String, Object> properties) {
         config = Configurable.createConfigurable(Config.class, properties);
 
+        this.setAgentId(config.agentId());
+        this.setDesiredParentId(config.desiredParentId());
+        
         this.aggregatedBids = new BidCache(this.timeService, config.bidTimeout());
 
         scheduledFuture = this.scheduler.scheduleAtFixedRate(new Runnable() {
@@ -222,11 +228,6 @@ public class Concentrator extends BaseObservable implements MatcherRole, AgentRo
             this.publishEvent(new OutgoingPriceEvent(this.config.agentId(), session.getSessionId(), timeService
                     .currentDate(), newPrice));
         }
-    }
-
-    @Override
-    public String getObserverId() {
-        return this.config.agentId();
     }
 
     /**
