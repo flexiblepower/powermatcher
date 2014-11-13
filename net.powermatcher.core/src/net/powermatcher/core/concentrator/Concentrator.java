@@ -155,7 +155,7 @@ public class Concentrator extends BaseObservable implements MatcherRole, AgentRo
     }
 
     @Override
-    public synchronized void disconnectFromMatcher(Session session) {
+    public synchronized void matcherRoleDisconnected(Session session) {
         for (Session agentSession : sessionToAgents.toArray(new Session[sessionToAgents.size()])) {
             agentSession.disconnect();
         }
@@ -178,7 +178,7 @@ public class Concentrator extends BaseObservable implements MatcherRole, AgentRo
     }
 
     @Override
-    public synchronized void disconnectFromAgent(Session session) {
+    public synchronized void agentRoleDisconnected(Session session) {
         // Find session
         if (!sessionToAgents.remove(session)) {
             return;

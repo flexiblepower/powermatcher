@@ -163,7 +163,7 @@ public class Auctioneer extends BaseObservable implements MatcherRole {
     }
 
     @Override
-    public synchronized void disconnectFromAgent(Session session) {
+    public synchronized void agentRoleDisconnected(Session session) {
         // Find session
         if (!sessions.remove(session)) {
             return;
