@@ -11,9 +11,9 @@ import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PricePoint;
-import net.powermatcher.api.monitoring.IncomingPriceUpdateEvent;
-import net.powermatcher.api.monitoring.Observable;
-import net.powermatcher.api.monitoring.OutgoingBidUpdateEvent;
+import net.powermatcher.api.monitoring.IncomingPriceEvent;
+import net.powermatcher.api.monitoring.ObservableAgent;
+import net.powermatcher.api.monitoring.OutgoingBidEvent;
 import net.powermatcher.core.BaseAgent;
 
 import org.slf4j.Logger;
@@ -26,7 +26,7 @@ import aQute.bnd.annotation.component.Reference;
 import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
-@Component(designateFactory = PVPanelAgent.Config.class, immediate = true, provide = { Observable.class,
+@Component(designateFactory = PVPanelAgent.Config.class, immediate = true, provide = { ObservableAgent.class,
         AgentRole.class })
 public class PVPanelAgent extends BaseAgent implements AgentRole {
 
@@ -83,7 +83,7 @@ public class PVPanelAgent extends BaseAgent implements AgentRole {
             Bid newBid = new Bid(session.getMarketBasis(), new PricePoint(0, -700));
             LOGGER.debug("updateBid({})", newBid);
             session.updateBid(newBid);
-            this.publishEvent(new OutgoingBidUpdateEvent(this.getAgentId(), session.getSessionId(), timeService.currentDate(),
+            this.publishEvent(new OutgoingBidEvent(this.getAgentId(), session.getSessionId(), timeService.currentDate(),
                     newBid));
         }
     }
@@ -91,7 +91,7 @@ public class PVPanelAgent extends BaseAgent implements AgentRole {
     @Override
     public void updatePrice(Price newPrice) {
         LOGGER.debug("updatePrice({})", newPrice);
-        publishEvent(new IncomingPriceUpdateEvent(this.getAgentId(), session.getSessionId(), timeService.currentDate(), newPrice));
+        publishEvent(new IncomingPriceEvent(this.getAgentId(), session.getSessionId(), timeService.currentDate(), newPrice));
 
         LOGGER.debug("Received price update [{}]", newPrice);
     }

@@ -1,12 +1,14 @@
 package net.powermatcher.core;
 
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import net.powermatcher.api.Agent;
-import net.powermatcher.api.monitoring.Observable;
-import net.powermatcher.api.monitoring.Observer;
-import net.powermatcher.api.monitoring.UpdateEvent;
+import net.powermatcher.api.monitoring.AgentEvent;
+import net.powermatcher.api.monitoring.AgentObserver;
+import net.powermatcher.api.monitoring.ObservableAgent;
 
 /**
  * Base implementation of an {@link Agent}. It provides basic functionality required in each {@link Agent}.
@@ -15,7 +17,7 @@ import net.powermatcher.api.monitoring.UpdateEvent;
  * @author FAN
  * @version 1.0
  */
-public abstract class BaseAgent implements Agent, Observable {
+public abstract class BaseAgent implements Agent, ObservableAgent {
 
     private String agentId;
 
@@ -26,7 +28,7 @@ public abstract class BaseAgent implements Agent, Observable {
     /**
      * Collection of {@link Observer} services.
      */
-    private final Set<Observer> observers = new CopyOnWriteArraySet<Observer>();
+    private final Set<AgentObserver> observers = new CopyOnWriteArraySet<AgentObserver>();
     
 	@Override
 	public String getObserverId() {
@@ -35,12 +37,12 @@ public abstract class BaseAgent implements Agent, Observable {
 	}
 
 	@Override
-	public void addObserver(Observer observer) {
+	public void addObserver(AgentObserver observer) {
         observers.add(observer);
 	}
 
 	@Override
-	public void removeObserver(Observer observer) {
+	public void removeObserver(AgentObserver observer) {
         observers.remove(observer);
 	}
 
@@ -77,8 +79,8 @@ public abstract class BaseAgent implements Agent, Observable {
      * @param event
      *            The event to publish.
      */
-    public void publishEvent(UpdateEvent event) {
-        for (Observer observer : observers) {
+    public void publishEvent(AgentEvent event) {
+        for (AgentObserver observer : observers) {
             observer.update(event);
         }
     }

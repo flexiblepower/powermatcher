@@ -8,12 +8,12 @@ import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
 
 /**
- * An {@link IncomingBidUpdateEvent} is sent when an {@link AgentRole} receives a new {@link Bid}.
+ * An {@link IncomingBidEvent} is sent when an {@link AgentRole} receives a new {@link Bid}.
  * 
  * @author FAN
  * @version 1.0
  */
-public class IncomingBidUpdateEvent extends UpdateEvent {
+public class IncomingBidEvent extends AgentEvent {
 
     /**
      * The id of the Agent that sent the {@link Bid}
@@ -39,7 +39,7 @@ public class IncomingBidUpdateEvent extends UpdateEvent {
      * @param bid
      *            The received {@link Bid}.
      */
-    public IncomingBidUpdateEvent(String agentId, String sessionId, Date timestamp, String fromAgentId, Bid bid) {
+    public IncomingBidEvent(String agentId, String sessionId, Date timestamp, String fromAgentId, Bid bid) {
         super(agentId, sessionId, timestamp);
         this.fromAgentId = fromAgentId;
         this.bid = bid;
@@ -55,7 +55,7 @@ public class IncomingBidUpdateEvent extends UpdateEvent {
 
     @Override
     public String toString() {
-        return IncomingBidUpdateEvent.class.getSimpleName() + " " + super.toString() + ", fromAgentId = "
+        return IncomingBidEvent.class.getSimpleName() + " " + super.toString() + ", fromAgentId = "
                 + this.fromAgentId + ", bid = " + bid.toString();
     }
 }
