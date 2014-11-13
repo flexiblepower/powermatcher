@@ -134,8 +134,8 @@ class SessionImpl implements Session {
 
     @Override
     public void disconnect() {
-        agentRole.disconnectFromMatcher(this);
-        matcherRole.disconnectFromAgent(this);
+        agentRole.matcherRoleDisconnected(this);
+        matcherRole.agentRoleDisconnected(this);
         sessionManager.disconnected(this);
     }
 }

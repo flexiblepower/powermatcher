@@ -100,7 +100,7 @@ public class PVPanelAgent extends BaseObservable implements AgentRole {
     }
 
     @Override
-    public void disconnectFromMatcher(Session session) {
+    public void matcherRoleDisconnected(Session session) {
         this.session = null;
     }
 

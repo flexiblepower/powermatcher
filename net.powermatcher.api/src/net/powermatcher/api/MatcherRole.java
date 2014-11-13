@@ -30,7 +30,7 @@ public interface MatcherRole {
      * @param session
      *            the {@link Session} that will link this {@link MatcherRole} with a {@link AgentRole}.
      */
-    void disconnectFromAgent(Session session);
+    void agentRoleDisconnected(Session session);
 
     /**
      * Used to update the {@link Bid} used by this {@link AgentRole} instance.
