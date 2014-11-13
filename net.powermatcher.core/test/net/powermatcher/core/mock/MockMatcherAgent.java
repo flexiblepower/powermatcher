@@ -28,7 +28,7 @@ public class MockMatcherAgent extends MockAgent implements MatcherRole {
     }
 
     @Override
-    public void disconnectFromAgent(Session session) {
+    public void agentRoleDisconnected(Session session) {
     }
 
     @Override

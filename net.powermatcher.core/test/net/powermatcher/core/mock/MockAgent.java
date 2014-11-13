@@ -25,7 +25,7 @@ public class MockAgent implements AgentRole {
     }
 
     @Override
-    public void disconnectFromMatcher(Session session) {
+    public void matcherRoleDisconnected(Session session) {
         this.session = null;
     }
 
