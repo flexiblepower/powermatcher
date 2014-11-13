@@ -1,0 +1,10 @@
+Bundle-Version: 1.0.0.${tstamp}
+-buildpath:  \
+	net.powermatcher.api;version=latest,\
+	slf4j.api,\
+	biz.aQute.bnd.annotation,\
+	net.powermatcher.core;version=latest
+Private-Package:  \
+	net.powermatcher.examples
+Service-Component:  \
+	*

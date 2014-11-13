@@ -1,611 +1,611 @@
-<?xml version='1.0' encoding='utf-8'?>
-<repository increment='1385980547784' name='Release' xmlns='http://www.osgi.org/xmlns/repository/v1.0.0'>
+<?xml version="1.0" encoding="utf-8"?>
+<repository increment="1415029694884" name="Release" xmlns="http://www.osgi.org/xmlns/repository/v1.0.0">
   <resource>
-    <capability namespace='osgi.identity'>
-      <attribute name='osgi.identity' value='net.powermatcher.core.configurable'/>
-      <attribute name='type' value='osgi.bundle'/>
-      <attribute name='version' type='Version' value='0.9.0'/>
+    <capability namespace="osgi.identity">
+      <attribute name="osgi.identity" value="net.powermatcher.core.adapter.service"/>
+      <attribute name="type" value="osgi.bundle"/>
+      <attribute name="version" type="Version" value="0.9.0"/>
     </capability>
-    <capability namespace='osgi.content'>
-      <attribute name='osgi.content' value='60605d3313877d02d41aed60aebd822410fc371c0162b656bdb695d89d1059ba'/>
-      <attribute name='url' value='net.powermatcher.core.configurable/net.powermatcher.core.configurable-0.9.0.jar'/>
-      <attribute name='size' type='Long' value='20295'/>
-      <attribute name='mime' value='application/vnd.osgi.bundle'/>
+    <capability namespace="osgi.content">
+      <attribute name="osgi.content" value="c33f8b471a5797279c006bd99fb950e3942b18ec5f422a5e4573456aa2a567e2"/>
+      <attribute name="url" value="net.powermatcher.core.adapter.service/net.powermatcher.core.adapter.service-0.9.0.jar"/>
+      <attribute name="size" type="Long" value="13458"/>
+      <attribute name="mime" value="application/vnd.osgi.bundle"/>
     </capability>
-    <capability namespace='osgi.wiring.bundle'>
-      <attribute name='osgi.wiring.bundle' value='net.powermatcher.core.configurable'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
+    <capability namespace="osgi.wiring.bundle">
+      <attribute name="osgi.wiring.bundle" value="net.powermatcher.core.adapter.service"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
     </capability>
-    <capability namespace='osgi.wiring.host'>
-      <attribute name='osgi.wiring.host' value='net.powermatcher.core.configurable'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
+    <capability namespace="osgi.wiring.host">
+      <attribute name="osgi.wiring.host" value="net.powermatcher.core.adapter.service"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
     </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.configurable'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.configurable'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.configurable.service'/>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.adapter.service"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.adapter.service"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.configurable.service"/>
     </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.configurable.service'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.configurable'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-    </capability>
-  </resource>
-  <resource>
-    <capability namespace='osgi.identity'>
-      <attribute name='osgi.identity' value='net.powermatcher.core.messaging.protocol.adapter'/>
-      <attribute name='type' value='osgi.bundle'/>
-      <attribute name='version' type='Version' value='0.9.0'/>
-    </capability>
-    <capability namespace='osgi.content'>
-      <attribute name='osgi.content' value='7b1a45256034af07cd702422c6bfba6030786e9d41d29158c0d93dc746f82c05'/>
-      <attribute name='url' value='net.powermatcher.core.messaging.protocol.adapter/net.powermatcher.core.messaging.protocol.adapter-0.9.0.jar'/>
-      <attribute name='size' type='Long' value='111121'/>
-      <attribute name='mime' value='application/vnd.osgi.bundle'/>
-    </capability>
-    <capability namespace='osgi.wiring.bundle'>
-      <attribute name='osgi.wiring.bundle' value='net.powermatcher.core.messaging.protocol.adapter'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-    </capability>
-    <capability namespace='osgi.wiring.host'>
-      <attribute name='osgi.wiring.host' value='net.powermatcher.core.messaging.protocol.adapter'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-    </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.messaging.protocol.adapter.config'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.messaging.protocol.adapter'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.messaging.framework.config'/>
-    </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.messaging.protocol.adapter'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.messaging.protocol.adapter'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.adapter.service,net.powermatcher.core.agent.framework.data,net.powermatcher.core.agent.framework.log,net.powermatcher.core.agent.framework.service,net.powermatcher.core.configurable.service,net.powermatcher.core.messaging.framework,net.powermatcher.core.messaging.protocol.adapter.config,net.powermatcher.core.messaging.protocol.adapter.constants,net.powermatcher.core.messaging.protocol.adapter.msg'/>
-    </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.messaging.protocol.adapter.msg'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.messaging.protocol.adapter'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.agent.framework.data'/>
-    </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.messaging.protocol.adapter.log'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.messaging.protocol.adapter'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.agent.framework.data,net.powermatcher.core.agent.framework.log,net.powermatcher.core.messaging.protocol.adapter.msg'/>
-    </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.messaging.protocol.adapter.constants'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.messaging.protocol.adapter'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-    </capability>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(osgi.wiring.package=net.powermatcher.core.adapter.service)'/>
-    </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework.config)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
-    </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework.data)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
-    </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework.log)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
-    </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
-    </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.configurable.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
-    </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.messaging.framework)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
-    </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.messaging.framework.config)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
-    </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.messaging.protocol.adapter.msg)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.configurable.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
     </requirement>
   </resource>
   <resource>
-    <capability namespace='osgi.identity'>
-      <attribute name='osgi.identity' value='net.powermatcher.core.agent'/>
-      <attribute name='type' value='osgi.bundle'/>
-      <attribute name='version' type='Version' value='0.9.0'/>
+    <capability namespace="osgi.identity">
+      <attribute name="osgi.identity" value="net.powermatcher.core.adapter"/>
+      <attribute name="type" value="osgi.bundle"/>
+      <attribute name="version" type="Version" value="0.9.0"/>
     </capability>
-    <capability namespace='osgi.content'>
-      <attribute name='osgi.content' value='d1d60dd7e269d1b7cf58262c6861e9acd5960c8280b434f0e1404572d273b42a'/>
-      <attribute name='url' value='net.powermatcher.core.agent/net.powermatcher.core.agent-0.9.0.jar'/>
-      <attribute name='size' type='Long' value='78988'/>
-      <attribute name='mime' value='application/vnd.osgi.bundle'/>
+    <capability namespace="osgi.content">
+      <attribute name="osgi.content" value="12637c465efbb1a28906ea6bbd74ac044fc76a69e9522a93a814433e12ec0824"/>
+      <attribute name="url" value="net.powermatcher.core.adapter/net.powermatcher.core.adapter-0.9.0.jar"/>
+      <attribute name="size" type="Long" value="47378"/>
+      <attribute name="mime" value="application/vnd.osgi.bundle"/>
     </capability>
-    <capability namespace='osgi.wiring.bundle'>
-      <attribute name='osgi.wiring.bundle' value='net.powermatcher.core.agent'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
+    <capability namespace="osgi.wiring.bundle">
+      <attribute name="osgi.wiring.bundle" value="net.powermatcher.core.adapter"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
     </capability>
-    <capability namespace='osgi.wiring.host'>
-      <attribute name='osgi.wiring.host' value='net.powermatcher.core.agent'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
+    <capability namespace="osgi.wiring.host">
+      <attribute name="osgi.wiring.host" value="net.powermatcher.core.adapter"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
     </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.agent.framework'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.agent'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.agent.framework.config,net.powermatcher.core.agent.framework.data,net.powermatcher.core.agent.framework.log,net.powermatcher.core.agent.framework.service,net.powermatcher.core.configurable.service,net.powermatcher.core.object,net.powermatcher.core.scheduler.service'/>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.adapter"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.adapter"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.adapter.service,net.powermatcher.core.configurable.service,net.powermatcher.core.object"/>
     </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.agent.framework.config'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.agent'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.object.config'/>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.adapter.config"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.adapter"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.object.config"/>
     </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.agent.framework.data'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.agent'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.agent.framework.service'/>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.object"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.adapter"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.adapter.service,net.powermatcher.core.configurable,net.powermatcher.core.configurable.service,net.powermatcher.core.scheduler.service,org.slf4j"/>
     </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.agent.framework.log'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.agent'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.adapter.service,net.powermatcher.core.agent.framework.data'/>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.object.config"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.adapter"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
     </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.agent.framework.service'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.agent'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.adapter.service,net.powermatcher.core.agent.framework.data'/>
-    </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.agent.framework.task'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.agent'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-    </capability>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.adapter.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.adapter.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
     </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.configurable.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.configurable)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
     </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.object)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.configurable.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
     </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.object.config)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.scheduler.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
     </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(osgi.wiring.package=net.powermatcher.core.scheduler.service)'/>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=org.slf4j)(version&gt;=1.7.0)(!(version&gt;=2.0.0)))"/>
     </requirement>
   </resource>
   <resource>
-    <capability namespace='osgi.identity'>
-      <attribute name='osgi.identity' value='net.powermatcher.core.scheduler.service'/>
-      <attribute name='type' value='osgi.bundle'/>
-      <attribute name='version' type='Version' value='0.9.0'/>
+    <capability namespace="osgi.identity">
+      <attribute name="osgi.identity" value="net.powermatcher.core.agent.auctioneer"/>
+      <attribute name="type" value="osgi.bundle"/>
+      <attribute name="version" type="Version" value="0.9.0"/>
     </capability>
-    <capability namespace='osgi.content'>
-      <attribute name='osgi.content' value='5a2b8ef91cf51e57b5092da6e069f176b58072e94d92bf43555d4ed59bc4160d'/>
-      <attribute name='url' value='net.powermatcher.core.scheduler.service/net.powermatcher.core.scheduler.service-0.9.0.jar'/>
-      <attribute name='size' type='Long' value='6318'/>
-      <attribute name='mime' value='application/vnd.osgi.bundle'/>
+    <capability namespace="osgi.content">
+      <attribute name="osgi.content" value="d03157fcd93c6ab18560d2626beeec8caa525af6b1f3ed6ae940c548af055dd1"/>
+      <attribute name="url" value="net.powermatcher.core.agent.auctioneer/net.powermatcher.core.agent.auctioneer-0.9.0.jar"/>
+      <attribute name="size" type="Long" value="12693"/>
+      <attribute name="mime" value="application/vnd.osgi.bundle"/>
     </capability>
-    <capability namespace='osgi.wiring.bundle'>
-      <attribute name='osgi.wiring.bundle' value='net.powermatcher.core.scheduler.service'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
+    <capability namespace="osgi.wiring.bundle">
+      <attribute name="osgi.wiring.bundle" value="net.powermatcher.core.agent.auctioneer"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
     </capability>
-    <capability namespace='osgi.wiring.host'>
-      <attribute name='osgi.wiring.host' value='net.powermatcher.core.scheduler.service'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
+    <capability namespace="osgi.wiring.host">
+      <attribute name="osgi.wiring.host" value="net.powermatcher.core.agent.auctioneer"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
     </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.scheduler.service'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.scheduler.service'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.adapter.service'/>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.agent.auctioneer"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.agent.auctioneer"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.agent.auctioneer.service,net.powermatcher.core.agent.framework,net.powermatcher.core.agent.framework.data,net.powermatcher.core.configurable.service"/>
     </capability>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.adapter.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.agent.auctioneer.config"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.agent.auctioneer"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.agent.framework.config"/>
+    </capability>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.agent.auctioneer.service"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.agent.auctioneer"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.adapter.service,net.powermatcher.core.agent.framework.data"/>
+    </capability>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(osgi.wiring.package=net.powermatcher.core.adapter.service)"/>
+    </requirement>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
+    </requirement>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework.config)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
+    </requirement>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework.data)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
+    </requirement>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.configurable.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
     </requirement>
   </resource>
   <resource>
-    <capability namespace='osgi.identity'>
-      <attribute name='osgi.identity' value='net.powermatcher.core.messaging.mqttv3'/>
-      <attribute name='type' value='osgi.bundle'/>
-      <attribute name='version' type='Version' value='0.9.0'/>
+    <capability namespace="osgi.identity">
+      <attribute name="osgi.identity" value="net.powermatcher.core.agent.concentrator"/>
+      <attribute name="type" value="osgi.bundle"/>
+      <attribute name="version" type="Version" value="0.9.0"/>
     </capability>
-    <capability namespace='osgi.content'>
-      <attribute name='osgi.content' value='0a53a100b84865a79783550a35d6014cda5d4dac7ecf42b71607a80543ea764d'/>
-      <attribute name='url' value='net.powermatcher.core.messaging.mqttv3/net.powermatcher.core.messaging.mqttv3-0.9.0.jar'/>
-      <attribute name='size' type='Long' value='25889'/>
-      <attribute name='mime' value='application/vnd.osgi.bundle'/>
+    <capability namespace="osgi.content">
+      <attribute name="osgi.content" value="453a4e276858bc691c908014f232da736a55da553983cdd20d1a1444f37bb1df"/>
+      <attribute name="url" value="net.powermatcher.core.agent.concentrator/net.powermatcher.core.agent.concentrator-0.9.0.jar"/>
+      <attribute name="size" type="Long" value="19838"/>
+      <attribute name="mime" value="application/vnd.osgi.bundle"/>
     </capability>
-    <capability namespace='osgi.wiring.bundle'>
-      <attribute name='osgi.wiring.bundle' value='net.powermatcher.core.messaging.mqttv3'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
+    <capability namespace="osgi.wiring.bundle">
+      <attribute name="osgi.wiring.bundle" value="net.powermatcher.core.agent.concentrator"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
     </capability>
-    <capability namespace='osgi.wiring.host'>
-      <attribute name='osgi.wiring.host' value='net.powermatcher.core.messaging.mqttv3'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
+    <capability namespace="osgi.wiring.host">
+      <attribute name="osgi.wiring.host" value="net.powermatcher.core.agent.concentrator"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
     </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.messaging.mqttv3'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.messaging.mqttv3'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.adapter,net.powermatcher.core.adapter.service,net.powermatcher.core.configurable.service,net.powermatcher.core.messaging.framework,net.powermatcher.core.messaging.service,net.powermatcher.core.object'/>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.agent.concentrator"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.agent.concentrator"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.agent.concentrator.framework,net.powermatcher.core.configurable.service"/>
     </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.messaging.mqttv3.config'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.messaging.mqttv3'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.adapter.config'/>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.agent.concentrator.config"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.agent.concentrator"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.agent.framework.config"/>
     </capability>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(osgi.wiring.package=net.powermatcher.core.adapter)'/>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.agent.concentrator.framework"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.agent.concentrator"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.agent.concentrator.service,net.powermatcher.core.agent.framework,net.powermatcher.core.agent.framework.data,net.powermatcher.core.configurable.service"/>
+    </capability>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.agent.concentrator.service"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.agent.concentrator"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.adapter.service"/>
+    </capability>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(osgi.wiring.package=net.powermatcher.core.adapter.service)"/>
     </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(osgi.wiring.package=net.powermatcher.core.adapter.config)'/>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
     </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(osgi.wiring.package=net.powermatcher.core.adapter.service)'/>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework.config)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
     </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.configurable)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework.data)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
     </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.configurable.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
-    </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.messaging.framework)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
-    </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.messaging.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
-    </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(osgi.wiring.package=net.powermatcher.core.object)'/>
-    </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(osgi.wiring.package=org.eclipse.paho.client.mqttv3)'/>
-    </requirement>
-  </resource>
-  <resource>
-    <capability namespace='osgi.identity'>
-      <attribute name='osgi.identity' value='net.powermatcher.core.agent.concentrator'/>
-      <attribute name='type' value='osgi.bundle'/>
-      <attribute name='version' type='Version' value='0.9.0'/>
-    </capability>
-    <capability namespace='osgi.content'>
-      <attribute name='osgi.content' value='453a4e276858bc691c908014f232da736a55da553983cdd20d1a1444f37bb1df'/>
-      <attribute name='url' value='net.powermatcher.core.agent.concentrator/net.powermatcher.core.agent.concentrator-0.9.0.jar'/>
-      <attribute name='size' type='Long' value='19838'/>
-      <attribute name='mime' value='application/vnd.osgi.bundle'/>
-    </capability>
-    <capability namespace='osgi.wiring.bundle'>
-      <attribute name='osgi.wiring.bundle' value='net.powermatcher.core.agent.concentrator'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-    </capability>
-    <capability namespace='osgi.wiring.host'>
-      <attribute name='osgi.wiring.host' value='net.powermatcher.core.agent.concentrator'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-    </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.agent.concentrator'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.agent.concentrator'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.agent.concentrator.framework,net.powermatcher.core.configurable.service'/>
-    </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.agent.concentrator.config'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.agent.concentrator'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.agent.framework.config'/>
-    </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.agent.concentrator.framework'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.agent.concentrator'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.agent.concentrator.service,net.powermatcher.core.agent.framework,net.powermatcher.core.agent.framework.data,net.powermatcher.core.configurable.service'/>
-    </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.agent.concentrator.service'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.agent.concentrator'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.adapter.service'/>
-    </capability>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(osgi.wiring.package=net.powermatcher.core.adapter.service)'/>
-    </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
-    </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework.config)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
-    </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework.data)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
-    </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.configurable.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.configurable.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
     </requirement>
   </resource>
   <resource>
-    <capability namespace='osgi.identity'>
-      <attribute name='osgi.identity' value='net.powermatcher.core.agent.auctioneer'/>
-      <attribute name='type' value='osgi.bundle'/>
-      <attribute name='version' type='Version' value='0.9.0'/>
+    <capability namespace="osgi.identity">
+      <attribute name="osgi.identity" value="net.powermatcher.core.agent.marketbasis.adapter"/>
+      <attribute name="type" value="osgi.bundle"/>
+      <attribute name="version" type="Version" value="0.9.0"/>
     </capability>
-    <capability namespace='osgi.content'>
-      <attribute name='osgi.content' value='d03157fcd93c6ab18560d2626beeec8caa525af6b1f3ed6ae940c548af055dd1'/>
-      <attribute name='url' value='net.powermatcher.core.agent.auctioneer/net.powermatcher.core.agent.auctioneer-0.9.0.jar'/>
-      <attribute name='size' type='Long' value='12693'/>
-      <attribute name='mime' value='application/vnd.osgi.bundle'/>
+    <capability namespace="osgi.content">
+      <attribute name="osgi.content" value="8a9c21d9b7198599698d5cff9a663fce946b50dbf20b631ba9064874db3421af"/>
+      <attribute name="url" value="net.powermatcher.core.agent.marketbasis.adapter/net.powermatcher.core.agent.marketbasis.adapter-0.9.0.jar"/>
+      <attribute name="size" type="Long" value="13991"/>
+      <attribute name="mime" value="application/vnd.osgi.bundle"/>
     </capability>
-    <capability namespace='osgi.wiring.bundle'>
-      <attribute name='osgi.wiring.bundle' value='net.powermatcher.core.agent.auctioneer'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
+    <capability namespace="osgi.wiring.bundle">
+      <attribute name="osgi.wiring.bundle" value="net.powermatcher.core.agent.marketbasis.adapter"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
     </capability>
-    <capability namespace='osgi.wiring.host'>
-      <attribute name='osgi.wiring.host' value='net.powermatcher.core.agent.auctioneer'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
+    <capability namespace="osgi.wiring.host">
+      <attribute name="osgi.wiring.host" value="net.powermatcher.core.agent.marketbasis.adapter"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
     </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.agent.auctioneer'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.agent.auctioneer'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.agent.auctioneer.service,net.powermatcher.core.agent.framework,net.powermatcher.core.agent.framework.data,net.powermatcher.core.configurable.service'/>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.agent.marketbasis.adapter.config"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.agent.marketbasis.adapter"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.adapter.config"/>
     </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.agent.auctioneer.config'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.agent.auctioneer'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.agent.framework.config'/>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.agent.marketbasis.adapter"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.agent.marketbasis.adapter"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.adapter,net.powermatcher.core.adapter.service,net.powermatcher.core.agent.framework.service,net.powermatcher.core.configurable.service"/>
     </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.agent.auctioneer.service'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.agent.auctioneer'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.adapter.service,net.powermatcher.core.agent.framework.data'/>
-    </capability>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(osgi.wiring.package=net.powermatcher.core.adapter.service)'/>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.adapter)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
     </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.adapter.config)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
     </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework.config)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(osgi.wiring.package=net.powermatcher.core.adapter.service)"/>
     </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework.data)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework.data)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
     </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.configurable.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
+    </requirement>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.configurable.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
     </requirement>
   </resource>
   <resource>
-    <capability namespace='osgi.identity'>
-      <attribute name='osgi.identity' value='net.powermatcher.core.agent.marketbasis.adapter'/>
-      <attribute name='type' value='osgi.bundle'/>
-      <attribute name='version' type='Version' value='0.9.0'/>
+    <capability namespace="osgi.identity">
+      <attribute name="osgi.identity" value="net.powermatcher.core.agent"/>
+      <attribute name="type" value="osgi.bundle"/>
+      <attribute name="version" type="Version" value="0.9.0"/>
     </capability>
-    <capability namespace='osgi.content'>
-      <attribute name='osgi.content' value='8a9c21d9b7198599698d5cff9a663fce946b50dbf20b631ba9064874db3421af'/>
-      <attribute name='url' value='net.powermatcher.core.agent.marketbasis.adapter/net.powermatcher.core.agent.marketbasis.adapter-0.9.0.jar'/>
-      <attribute name='size' type='Long' value='13991'/>
-      <attribute name='mime' value='application/vnd.osgi.bundle'/>
+    <capability namespace="osgi.content">
+      <attribute name="osgi.content" value="d1d60dd7e269d1b7cf58262c6861e9acd5960c8280b434f0e1404572d273b42a"/>
+      <attribute name="url" value="net.powermatcher.core.agent/net.powermatcher.core.agent-0.9.0.jar"/>
+      <attribute name="size" type="Long" value="78988"/>
+      <attribute name="mime" value="application/vnd.osgi.bundle"/>
     </capability>
-    <capability namespace='osgi.wiring.bundle'>
-      <attribute name='osgi.wiring.bundle' value='net.powermatcher.core.agent.marketbasis.adapter'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
+    <capability namespace="osgi.wiring.bundle">
+      <attribute name="osgi.wiring.bundle" value="net.powermatcher.core.agent"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
     </capability>
-    <capability namespace='osgi.wiring.host'>
-      <attribute name='osgi.wiring.host' value='net.powermatcher.core.agent.marketbasis.adapter'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
+    <capability namespace="osgi.wiring.host">
+      <attribute name="osgi.wiring.host" value="net.powermatcher.core.agent"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
     </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.agent.marketbasis.adapter.config'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.agent.marketbasis.adapter'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.adapter.config'/>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.agent.framework"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.agent"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.agent.framework.config,net.powermatcher.core.agent.framework.data,net.powermatcher.core.agent.framework.log,net.powermatcher.core.agent.framework.service,net.powermatcher.core.configurable.service,net.powermatcher.core.object,net.powermatcher.core.scheduler.service"/>
     </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.agent.marketbasis.adapter'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.agent.marketbasis.adapter'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.adapter,net.powermatcher.core.adapter.service,net.powermatcher.core.agent.framework.service,net.powermatcher.core.configurable.service'/>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.agent.framework.config"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.agent"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.object.config"/>
     </capability>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.adapter)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.agent.framework.data"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.agent"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.agent.framework.service"/>
+    </capability>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.agent.framework.log"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.agent"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.adapter.service,net.powermatcher.core.agent.framework.data"/>
+    </capability>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.agent.framework.service"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.agent"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.adapter.service,net.powermatcher.core.agent.framework.data"/>
+    </capability>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.agent.framework.task"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.agent"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+    </capability>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.adapter.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
     </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.adapter.config)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.configurable.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
     </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(osgi.wiring.package=net.powermatcher.core.adapter.service)'/>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.object)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
     </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework.data)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.object.config)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
     </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
-    </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.configurable.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
-    </requirement>
-  </resource>
-  <resource>
-    <capability namespace='osgi.identity'>
-      <attribute name='osgi.identity' value='net.powermatcher.core.adapter'/>
-      <attribute name='type' value='osgi.bundle'/>
-      <attribute name='version' type='Version' value='0.9.0'/>
-    </capability>
-    <capability namespace='osgi.content'>
-      <attribute name='osgi.content' value='12637c465efbb1a28906ea6bbd74ac044fc76a69e9522a93a814433e12ec0824'/>
-      <attribute name='url' value='net.powermatcher.core.adapter/net.powermatcher.core.adapter-0.9.0.jar'/>
-      <attribute name='size' type='Long' value='47378'/>
-      <attribute name='mime' value='application/vnd.osgi.bundle'/>
-    </capability>
-    <capability namespace='osgi.wiring.bundle'>
-      <attribute name='osgi.wiring.bundle' value='net.powermatcher.core.adapter'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-    </capability>
-    <capability namespace='osgi.wiring.host'>
-      <attribute name='osgi.wiring.host' value='net.powermatcher.core.adapter'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-    </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.adapter'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.adapter'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.adapter.service,net.powermatcher.core.configurable.service,net.powermatcher.core.object'/>
-    </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.adapter.config'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.adapter'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.object.config'/>
-    </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.object'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.adapter'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.adapter.service,net.powermatcher.core.configurable,net.powermatcher.core.configurable.service,net.powermatcher.core.scheduler.service,org.slf4j'/>
-    </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.object.config'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.adapter'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-    </capability>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.adapter.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
-    </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.configurable)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
-    </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.configurable.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
-    </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.scheduler.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
-    </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=org.slf4j)(version&gt;=1.7.0)(!(version&gt;=2.0.0)))'/>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(osgi.wiring.package=net.powermatcher.core.scheduler.service)"/>
     </requirement>
   </resource>
   <resource>
-    <capability namespace='osgi.identity'>
-      <attribute name='osgi.identity' value='net.powermatcher.core.messaging.framework'/>
-      <attribute name='type' value='osgi.bundle'/>
-      <attribute name='version' type='Version' value='0.9.0'/>
+    <capability namespace="osgi.identity">
+      <attribute name="osgi.identity" value="net.powermatcher.core.configurable"/>
+      <attribute name="type" value="osgi.bundle"/>
+      <attribute name="version" type="Version" value="0.9.0"/>
     </capability>
-    <capability namespace='osgi.content'>
-      <attribute name='osgi.content' value='6210e37c2133c9d4a3b4bc7c27af3c6f7bf76fbd9abd454ca722d79884228775'/>
-      <attribute name='url' value='net.powermatcher.core.messaging.framework/net.powermatcher.core.messaging.framework-0.9.0.jar'/>
-      <attribute name='size' type='Long' value='19959'/>
-      <attribute name='mime' value='application/vnd.osgi.bundle'/>
+    <capability namespace="osgi.content">
+      <attribute name="osgi.content" value="60605d3313877d02d41aed60aebd822410fc371c0162b656bdb695d89d1059ba"/>
+      <attribute name="url" value="net.powermatcher.core.configurable/net.powermatcher.core.configurable-0.9.0.jar"/>
+      <attribute name="size" type="Long" value="20295"/>
+      <attribute name="mime" value="application/vnd.osgi.bundle"/>
     </capability>
-    <capability namespace='osgi.wiring.bundle'>
-      <attribute name='osgi.wiring.bundle' value='net.powermatcher.core.messaging.framework'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
+    <capability namespace="osgi.wiring.bundle">
+      <attribute name="osgi.wiring.bundle" value="net.powermatcher.core.configurable"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
     </capability>
-    <capability namespace='osgi.wiring.host'>
-      <attribute name='osgi.wiring.host' value='net.powermatcher.core.messaging.framework'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
+    <capability namespace="osgi.wiring.host">
+      <attribute name="osgi.wiring.host" value="net.powermatcher.core.configurable"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
     </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.messaging.framework'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.messaging.framework'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.adapter,net.powermatcher.core.configurable.service,net.powermatcher.core.messaging.service'/>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.configurable"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.configurable"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.configurable.service"/>
     </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.messaging.framework.config'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.messaging.framework'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.adapter.config'/>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.configurable.service"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.configurable"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
     </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.messaging.service'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.messaging.framework'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.adapter.service,net.powermatcher.core.configurable.service,net.powermatcher.core.messaging.framework'/>
+  </resource>
+  <resource>
+    <capability namespace="osgi.identity">
+      <attribute name="osgi.identity" value="net.powermatcher.core.messaging.framework"/>
+      <attribute name="type" value="osgi.bundle"/>
+      <attribute name="version" type="Version" value="0.9.0"/>
     </capability>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.adapter)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
+    <capability namespace="osgi.content">
+      <attribute name="osgi.content" value="6210e37c2133c9d4a3b4bc7c27af3c6f7bf76fbd9abd454ca722d79884228775"/>
+      <attribute name="url" value="net.powermatcher.core.messaging.framework/net.powermatcher.core.messaging.framework-0.9.0.jar"/>
+      <attribute name="size" type="Long" value="19959"/>
+      <attribute name="mime" value="application/vnd.osgi.bundle"/>
+    </capability>
+    <capability namespace="osgi.wiring.bundle">
+      <attribute name="osgi.wiring.bundle" value="net.powermatcher.core.messaging.framework"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+    </capability>
+    <capability namespace="osgi.wiring.host">
+      <attribute name="osgi.wiring.host" value="net.powermatcher.core.messaging.framework"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+    </capability>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.messaging.framework"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.messaging.framework"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.adapter,net.powermatcher.core.configurable.service,net.powermatcher.core.messaging.service"/>
+    </capability>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.messaging.framework.config"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.messaging.framework"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.adapter.config"/>
+    </capability>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.messaging.service"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.messaging.framework"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.adapter.service,net.powermatcher.core.configurable.service,net.powermatcher.core.messaging.framework"/>
+    </capability>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.adapter)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
     </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.adapter.config)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.adapter.config)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
     </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.adapter.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.adapter.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
     </requirement>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.configurable.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.configurable.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
     </requirement>
   </resource>
   <resource>
-    <capability namespace='osgi.identity'>
-      <attribute name='osgi.identity' value='net.powermatcher.core.adapter.service'/>
-      <attribute name='type' value='osgi.bundle'/>
-      <attribute name='version' type='Version' value='0.9.0'/>
+    <capability namespace="osgi.identity">
+      <attribute name="osgi.identity" value="net.powermatcher.core.messaging.mqttv3"/>
+      <attribute name="type" value="osgi.bundle"/>
+      <attribute name="version" type="Version" value="0.9.0"/>
     </capability>
-    <capability namespace='osgi.content'>
-      <attribute name='osgi.content' value='c33f8b471a5797279c006bd99fb950e3942b18ec5f422a5e4573456aa2a567e2'/>
-      <attribute name='url' value='net.powermatcher.core.adapter.service/net.powermatcher.core.adapter.service-0.9.0.jar'/>
-      <attribute name='size' type='Long' value='13458'/>
-      <attribute name='mime' value='application/vnd.osgi.bundle'/>
+    <capability namespace="osgi.content">
+      <attribute name="osgi.content" value="0a53a100b84865a79783550a35d6014cda5d4dac7ecf42b71607a80543ea764d"/>
+      <attribute name="url" value="net.powermatcher.core.messaging.mqttv3/net.powermatcher.core.messaging.mqttv3-0.9.0.jar"/>
+      <attribute name="size" type="Long" value="25889"/>
+      <attribute name="mime" value="application/vnd.osgi.bundle"/>
     </capability>
-    <capability namespace='osgi.wiring.bundle'>
-      <attribute name='osgi.wiring.bundle' value='net.powermatcher.core.adapter.service'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
+    <capability namespace="osgi.wiring.bundle">
+      <attribute name="osgi.wiring.bundle" value="net.powermatcher.core.messaging.mqttv3"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
     </capability>
-    <capability namespace='osgi.wiring.host'>
-      <attribute name='osgi.wiring.host' value='net.powermatcher.core.adapter.service'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
+    <capability namespace="osgi.wiring.host">
+      <attribute name="osgi.wiring.host" value="net.powermatcher.core.messaging.mqttv3"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
     </capability>
-    <capability namespace='osgi.wiring.package'>
-      <attribute name='osgi.wiring.package' value='net.powermatcher.core.adapter.service'/>
-      <attribute name='version' type='Version' value='2.0.0'/>
-      <attribute name='bundle-symbolic-name' value='net.powermatcher.core.adapter.service'/>
-      <attribute name='bundle-version' type='Version' value='0.9.0'/>
-      <directive name='uses' value='net.powermatcher.core.configurable.service'/>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.messaging.mqttv3"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.messaging.mqttv3"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.adapter,net.powermatcher.core.adapter.service,net.powermatcher.core.configurable.service,net.powermatcher.core.messaging.framework,net.powermatcher.core.messaging.service,net.powermatcher.core.object"/>
     </capability>
-    <requirement namespace='osgi.wiring.package'>
-      <directive name='filter' value='(&amp;(osgi.wiring.package=net.powermatcher.core.configurable.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))'/>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.messaging.mqttv3.config"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.messaging.mqttv3"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.adapter.config"/>
+    </capability>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(osgi.wiring.package=net.powermatcher.core.adapter)"/>
+    </requirement>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(osgi.wiring.package=net.powermatcher.core.adapter.config)"/>
+    </requirement>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(osgi.wiring.package=net.powermatcher.core.adapter.service)"/>
+    </requirement>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.configurable)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
+    </requirement>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.configurable.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
+    </requirement>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.messaging.framework)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
+    </requirement>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.messaging.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
+    </requirement>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(osgi.wiring.package=net.powermatcher.core.object)"/>
+    </requirement>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(osgi.wiring.package=org.eclipse.paho.client.mqttv3)"/>
+    </requirement>
+  </resource>
+  <resource>
+    <capability namespace="osgi.identity">
+      <attribute name="osgi.identity" value="net.powermatcher.core.messaging.protocol.adapter"/>
+      <attribute name="type" value="osgi.bundle"/>
+      <attribute name="version" type="Version" value="0.9.0"/>
+    </capability>
+    <capability namespace="osgi.content">
+      <attribute name="osgi.content" value="7b1a45256034af07cd702422c6bfba6030786e9d41d29158c0d93dc746f82c05"/>
+      <attribute name="url" value="net.powermatcher.core.messaging.protocol.adapter/net.powermatcher.core.messaging.protocol.adapter-0.9.0.jar"/>
+      <attribute name="size" type="Long" value="111121"/>
+      <attribute name="mime" value="application/vnd.osgi.bundle"/>
+    </capability>
+    <capability namespace="osgi.wiring.bundle">
+      <attribute name="osgi.wiring.bundle" value="net.powermatcher.core.messaging.protocol.adapter"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+    </capability>
+    <capability namespace="osgi.wiring.host">
+      <attribute name="osgi.wiring.host" value="net.powermatcher.core.messaging.protocol.adapter"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+    </capability>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.messaging.protocol.adapter.config"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.messaging.protocol.adapter"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.messaging.framework.config"/>
+    </capability>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.messaging.protocol.adapter"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.messaging.protocol.adapter"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.adapter.service,net.powermatcher.core.agent.framework.data,net.powermatcher.core.agent.framework.log,net.powermatcher.core.agent.framework.service,net.powermatcher.core.configurable.service,net.powermatcher.core.messaging.framework,net.powermatcher.core.messaging.protocol.adapter.config,net.powermatcher.core.messaging.protocol.adapter.constants,net.powermatcher.core.messaging.protocol.adapter.msg"/>
+    </capability>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.messaging.protocol.adapter.msg"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.messaging.protocol.adapter"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.agent.framework.data"/>
+    </capability>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.messaging.protocol.adapter.log"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.messaging.protocol.adapter"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.agent.framework.data,net.powermatcher.core.agent.framework.log,net.powermatcher.core.messaging.protocol.adapter.msg"/>
+    </capability>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.messaging.protocol.adapter.constants"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.messaging.protocol.adapter"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+    </capability>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(osgi.wiring.package=net.powermatcher.core.adapter.service)"/>
+    </requirement>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework.config)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
+    </requirement>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework.data)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
+    </requirement>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework.log)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
+    </requirement>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.agent.framework.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
+    </requirement>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.configurable.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
+    </requirement>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.messaging.framework)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
+    </requirement>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.messaging.framework.config)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
+    </requirement>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.messaging.protocol.adapter.msg)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
+    </requirement>
+  </resource>
+  <resource>
+    <capability namespace="osgi.identity">
+      <attribute name="osgi.identity" value="net.powermatcher.core.scheduler.service"/>
+      <attribute name="type" value="osgi.bundle"/>
+      <attribute name="version" type="Version" value="0.9.0"/>
+    </capability>
+    <capability namespace="osgi.content">
+      <attribute name="osgi.content" value="5a2b8ef91cf51e57b5092da6e069f176b58072e94d92bf43555d4ed59bc4160d"/>
+      <attribute name="url" value="net.powermatcher.core.scheduler.service/net.powermatcher.core.scheduler.service-0.9.0.jar"/>
+      <attribute name="size" type="Long" value="6318"/>
+      <attribute name="mime" value="application/vnd.osgi.bundle"/>
+    </capability>
+    <capability namespace="osgi.wiring.bundle">
+      <attribute name="osgi.wiring.bundle" value="net.powermatcher.core.scheduler.service"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+    </capability>
+    <capability namespace="osgi.wiring.host">
+      <attribute name="osgi.wiring.host" value="net.powermatcher.core.scheduler.service"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+    </capability>
+    <capability namespace="osgi.wiring.package">
+      <attribute name="osgi.wiring.package" value="net.powermatcher.core.scheduler.service"/>
+      <attribute name="version" type="Version" value="2.0.0"/>
+      <attribute name="bundle-symbolic-name" value="net.powermatcher.core.scheduler.service"/>
+      <attribute name="bundle-version" type="Version" value="0.9.0"/>
+      <directive name="uses" value="net.powermatcher.core.adapter.service"/>
+    </capability>
+    <requirement namespace="osgi.wiring.package">
+      <directive name="filter" value="(&amp;(osgi.wiring.package=net.powermatcher.core.adapter.service)(version&gt;=2.0.0)(!(version&gt;=3.0.0)))"/>
     </requirement>
   </resource>
 </repository>

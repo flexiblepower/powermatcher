@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<telemetry-provider xmlns="http://powermatcher.net/telemetry-metadata/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://powermatcher.net/telemetry-metadata/ telemetry.xsd" class="net.powermatcher.simulation.models.RefridgeratorModel">
-	<measurement key="temperature" description="temperature of the refridgerator" unit="C" />
-	<status key="compressor" description="compressor state" options="on,off" />
-	<control key="temperature-setpoint" description="target temperature" unit="C" />
-	<alert key="max-temperature-exceeded" description="temperature to high" />
-</telemetry-provider>
