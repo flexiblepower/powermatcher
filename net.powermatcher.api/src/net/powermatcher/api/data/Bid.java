@@ -674,11 +674,13 @@ public class Bid {
     @Override
     public boolean equals(final Object obj) {
         Bid other = (Bid) ((obj instanceof Bid) ? obj : null);
-        if (other == null)
+        if (other == null) {
             return false;
+        }
 
-        if (this == other)
+        if (this == other) {
             return true;
+        }
 
         return other.bidNumber == this.bidNumber && this.marketBasis.equals(other.marketBasis)
                 && Arrays.equals(other.getUnclonedDemand(), this.getUnclonedDemand());
