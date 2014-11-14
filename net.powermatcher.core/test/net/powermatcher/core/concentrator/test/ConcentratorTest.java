@@ -51,6 +51,7 @@ public class ConcentratorTest {
         concentrator = new Concentrator();
         concentratorProperties = new HashMap<String, Object>();
         concentratorProperties.put("matcherId", "concentrator");
+        concentratorProperties.put("desiredParentId", "auctioneer");
         concentratorProperties.put("bidTimeout", "600");
         concentratorProperties.put("bidUpdateRate", "30");
         concentratorProperties.put("agentId", "concentrator");

@@ -19,6 +19,7 @@ import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.sessions.SessionManager;
 import net.powermatcher.core.time.SystemTimeService;
+import net.powermatcher.integration.util.AuctioneerWrapper;
 import net.powermatcher.integration.util.CsvBidReader;
 import net.powermatcher.integration.util.CsvExpectedResultsReader;
 import net.powermatcher.mock.MockAgent;
@@ -40,7 +41,7 @@ public class ResilienceTest {
     protected MarketBasis marketBasis;
 
     // The direct upstream matcher for the agents
-    protected Auctioneer matcherAgent;
+    protected AuctioneerWrapper matcherAgent;
 
     // List of matcher agents (for setting market basis)
     protected List<MatcherRole> matchers;
@@ -53,22 +54,6 @@ public class ResilienceTest {
 
     // List of active connections
     protected List<String> activeConnections;
-
-    @Before
-    public void setUp() throws Exception {
-
-        // Create agent list
-        this.agentList = new ArrayList<MockAgent>();
-
-        // Create matcher list
-        this.matchers = new ArrayList<MatcherRole>();
-
-        // Create Session manager
-        this.sessionManager = new SessionManager();
-
-        // Active connections 
-        this.activeConnections = new ArrayList<>();
-    }
 
     @After
     public void tearDown() throws IOException {
@@ -86,25 +71,30 @@ public class ResilienceTest {
         for (MockAgent agent : agents) {
             sessionManager.removeAgentRole(agent, agent.getAgentProperties());
         }
-
     }
 
     protected void setMarketBasis(MarketBasis marketBasis) {
         this.marketBasis = marketBasis;
-        // matcherAgent.
     }
 
     protected void prepareTest(String testID, String suffix) throws IOException, DataFormatException {
+        // Create agent list
+        this.agentList = new ArrayList<MockAgent>();
+
+        // Create matcher list
+        this.matchers = new ArrayList<MatcherRole>();
+
+        // Active connections
+        this.activeConnections = new ArrayList<>();
         // Get the expected results
         this.resultsReader = new CsvExpectedResultsReader(getExpectedResultsFile(testID, suffix));
 
-        // Set the market basis
-        // setMarketBasis(this.resultsReader.getMarketBasis());
         this.marketBasis = resultsReader.getMarketBasis();
-        this.matcherAgent = new Auctioneer();
+        this.matcherAgent = new AuctioneerWrapper();
         Map<String, Object> auctioneerProperties = new HashMap<>();
         auctioneerProperties.put("id", "auctioneer");
         auctioneerProperties.put("matcherId", "auctioneer");
+        auctioneerProperties.put("agentId", "auctioneer");
         auctioneerProperties.put("commodity", "electricity");
         auctioneerProperties.put("currency", "EUR");
         auctioneerProperties.put("priceSteps", marketBasis.getPriceSteps());
@@ -112,6 +102,7 @@ public class ResilienceTest {
         auctioneerProperties.put("maximumPrice", marketBasis.getMaximumPrice());
         auctioneerProperties.put("bidTimeout", "600");
         auctioneerProperties.put("priceUpdateRate", "1");
+        auctioneerProperties.put("clusterId", "testCluster");
 
         this.matchers.add(this.matcherAgent);
 
@@ -123,6 +114,7 @@ public class ResilienceTest {
         sessionProperties.put("activeConnections", activeConnections);
 
         // Session
+        this.sessionManager = new SessionManager();
         sessionManager.addMatcherRole(matcherAgent, auctioneerProperties);
         sessionManager.activate(sessionProperties);
 
@@ -175,7 +167,7 @@ public class ResilienceTest {
                 System.err.println("Incorrect bid specification found: " + e.getMessage());
                 bid = null;
             }
-
+            matcherAgent.publishNewPrice();
         } while (!stop);
 
         // Write aggregated demand array

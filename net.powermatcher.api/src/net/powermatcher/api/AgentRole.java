@@ -28,7 +28,7 @@ public interface AgentRole {
      * @param session
      *            the {@link Session} that will couple this {@link AgentRole} with its {@link MatcherRole}.
      */
-    void disconnectFromMatcher(Session session);
+    void matcherRoleDisconnected(Session session);
 
     /**
      * Used to update the {@link Price} used by this {@link AgentRole} instance.

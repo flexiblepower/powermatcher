@@ -44,7 +44,8 @@ public class AuctioneerTest {
         this.auctioneer = new Auctioneer();
 
         auctioneerProperties = new HashMap<String, Object>();
-        auctioneerProperties.put("id", "auctioneer");
+        auctioneerProperties.put("agentId", "auctioneer");
+        auctioneerProperties.put("clusterId", "DefaultCluster");
         auctioneerProperties.put("matcherId", "auctioneer");
         auctioneerProperties.put("commodity", "electricity");
         auctioneerProperties.put("currency", "EUR");
