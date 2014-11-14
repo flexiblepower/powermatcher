@@ -13,16 +13,14 @@ import net.powermatcher.api.data.Price;
  * @author FAN
  * @version 1.0
  */
-public class IncomingPriceEvent extends AgentEvent {
-
-    /**
-     * The received {@link Price}
-     */
-    private final Price price;
+public class IncomingPriceEvent extends PriceEvent {
 
     /**
      * Constructs an instance of this class.
      * 
+     * @param clusterId
+	 *            The id of the cluster the {@link AgentRole} subclass sending
+	 *            the UpdateEvent is running in.
      * @param agentId
      *            The id of the {@link AgentRole} subclass sending the UpdateEvent.
      * @param sessionId
@@ -32,18 +30,13 @@ public class IncomingPriceEvent extends AgentEvent {
      * @param price
      *            The received {@link Price}.
      */
-    public IncomingPriceEvent(String agentId, String sessionId, Date timestamp, Price price) {
-        super(agentId, sessionId, timestamp);
-        this.price = price;
-    }
-
-    public Price getPrice() {
-        return price;
+    public IncomingPriceEvent(String clusterId, String agentId, String sessionId, Date timestamp, Price price) {
+        super(clusterId, agentId, sessionId, timestamp, price);
     }
 
     @Override
     public String toString() {
         return IncomingPriceEvent.class.getSimpleName() + " " + super.toString() + ", price = "
-                + price.toString();
+                + getPrice().toString();
     }
 }

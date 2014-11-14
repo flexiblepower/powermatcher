@@ -199,7 +199,7 @@ public class Auctioneer extends BaseAgent implements MatcherRole {
 
         LOGGER.debug("Received bid update [{}] from session [{}]", newBid, session.getSessionId());
 
-        this.publishEvent(new IncomingBidEvent(matcherId, session.getSessionId(), timeService.currentDate(),
+        this.publishEvent(new IncomingBidEvent(session.getClusterId(), matcherId, session.getSessionId(), timeService.currentDate(),
                 session.getAgentId(), newBid));
     }
 
@@ -212,7 +212,7 @@ public class Auctioneer extends BaseAgent implements MatcherRole {
         Price newPrice = determinePrice(aggregatedBid);
 
         for (Session session : this.sessions) {
-            this.publishEvent(new OutgoingPriceEvent(matcherId, session.getSessionId(),
+            this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), matcherId, session.getSessionId(),
                     timeService.currentDate(), newPrice));
 
             session.updatePrice(newPrice);

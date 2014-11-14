@@ -17,6 +17,12 @@ import net.powermatcher.api.TimeService;
  */
 
 public abstract class AgentEvent {
+	
+    /**
+     * The id of cluster the {@link AgentRole} subclass sending the UpdateEvent is running in.
+     */
+    private final String clusterId;    
+
     /**
      * The id of the {@link AgentRole} subclass sending the UpdateEvent.
      */
@@ -35,6 +41,9 @@ public abstract class AgentEvent {
     /**
      * Constructs an instance of this class.
      * 
+     * @param clusterId
+	 *            The id of the cluster the {@link AgentRole} subclass sending
+	 *            the UpdateEvent is running in.
      * @param agentId
      *            The id of the {@link AgentRole} subclass sending the UpdateEvent.
      * @param sessionId
@@ -42,7 +51,8 @@ public abstract class AgentEvent {
      * @param timestamp
      *            The {@link Date} received from the {@link TimeService}
      */
-    public AgentEvent(String agentId, String sessionId, Date timestamp) {
+    public AgentEvent(String clusterId, String agentId, String sessionId, Date timestamp) {
+    	this.clusterId = clusterId;
         this.agentId = agentId;
         this.sessionId = sessionId;
         this.timestamp = timestamp;
@@ -59,9 +69,14 @@ public abstract class AgentEvent {
     public Date getTimestamp() {
         return timestamp;
     }
+    
+	public String getClusterId() {
+		return clusterId;
+	}
 
     @Override
     public String toString() {
-        return "agentId = " + this.agentId + ", sessionId = " + this.sessionId + ", timestamp " + this.timestamp;
+        return "clusterId = " + this.clusterId + ", agentId = " + this.agentId + ", sessionId = " + this.sessionId + ", timestamp " + this.timestamp;
     }
+
 }
