@@ -14,7 +14,7 @@ import net.powermatcher.api.data.PricePoint;
 import net.powermatcher.api.monitoring.IncomingPriceEvent;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.OutgoingBidEvent;
-import net.powermatcher.core.monitoring.BaseObservable;
+import net.powermatcher.core.BaseAgent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,11 +28,14 @@ import aQute.bnd.annotation.metatype.Meta;
 
 @Component(designateFactory = PVPanelAgent.Config.class, immediate = true, provide = { ObservableAgent.class,
         AgentRole.class })
-public class PVPanelAgent extends BaseObservable implements AgentRole {
+public class PVPanelAgent extends BaseAgent implements AgentRole {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PVPanelAgent.class);
 
     public static interface Config {
+        @Meta.AD(deflt = "concentrator")
+        String desiredParentId();
+
         @Meta.AD(deflt = "pvpanel")
         String agentId();
 
@@ -48,13 +51,12 @@ public class PVPanelAgent extends BaseObservable implements AgentRole {
 
     private TimeService timeService;
 
-    private String agentId;
-
     @Activate
     public void activate(Map<String, Object> properties) {
         Config config = Configurable.createConfigurable(Config.class, properties);
-        agentId = config.agentId();
-
+        this.setAgentId(config.agentId());
+        this.setDesiredParentId(config.desiredParentId());
+        
         scheduledFuture = scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -73,7 +75,7 @@ public class PVPanelAgent extends BaseObservable implements AgentRole {
 
         scheduledFuture.cancel(false);
 
-        LOGGER.info("Agent [{}], deactivated", agentId);
+        LOGGER.info("Agent [{}], deactivated", this.getAgentId());
     }
 
     protected void doBidUpdate() {
@@ -81,7 +83,7 @@ public class PVPanelAgent extends BaseObservable implements AgentRole {
             Bid newBid = new Bid(session.getMarketBasis(), new PricePoint(0, -700));
             LOGGER.debug("updateBid({})", newBid);
             session.updateBid(newBid);
-            this.publishEvent(new OutgoingBidEvent(agentId, session.getSessionId(), timeService.currentDate(),
+            this.publishEvent(new OutgoingBidEvent(this.getAgentId(), session.getSessionId(), timeService.currentDate(),
                     newBid));
         }
     }
@@ -89,7 +91,7 @@ public class PVPanelAgent extends BaseObservable implements AgentRole {
     @Override
     public void updatePrice(Price newPrice) {
         LOGGER.debug("updatePrice({})", newPrice);
-        publishEvent(new IncomingPriceEvent(agentId, session.getSessionId(), timeService.currentDate(), newPrice));
+        publishEvent(new IncomingPriceEvent(this.getAgentId(), session.getSessionId(), timeService.currentDate(), newPrice));
 
         LOGGER.debug("Received price update [{}]", newPrice);
     }
@@ -112,10 +114,5 @@ public class PVPanelAgent extends BaseObservable implements AgentRole {
     @Reference
     public void setTimeService(TimeService timeService) {
         this.timeService = timeService;
-    }
-
-    @Override
-    public String getObserverId() {
-        return this.agentId;
     }
 }
