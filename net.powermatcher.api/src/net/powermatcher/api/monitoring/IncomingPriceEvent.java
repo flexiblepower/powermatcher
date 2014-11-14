@@ -30,8 +30,8 @@ public class IncomingPriceEvent extends PriceEvent {
      * @param price
      *            The received {@link Price}.
      */
-    public IncomingPriceEvent(String clusterId, String agentId, String sessionId, Date timestamp, Price price) {
-        super(clusterId, agentId, sessionId, timestamp, price);
+    public IncomingPriceEvent(String clusterId, String agentId, String sessionId, Date timestamp, Price price, Qualifier qualifier) {
+        super(clusterId, agentId, sessionId, timestamp, price, qualifier);
     }
 
     @Override

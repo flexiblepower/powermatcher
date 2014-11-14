@@ -11,8 +11,8 @@ public class BidLogRecord extends LogRecord {
 
     private Bid bid;
 
-    public BidLogRecord(BidEvent event, Date logTime, DateFormat dateFormat, String qualifier) {
-        super(event.getClusterId(), event.getAgentId(), qualifier, logTime, event.getTimestamp(), dateFormat);
+    public BidLogRecord(BidEvent event, Date logTime, DateFormat dateFormat) {
+        super(event.getClusterId(), event.getAgentId(), event.getQualifier(), logTime, event.getTimestamp(), dateFormat);
 
         this.bid = event.getBid();
     }
@@ -21,7 +21,7 @@ public class BidLogRecord extends LogRecord {
     public String[] getLine() {
         MarketBasis marketBasis = bid.getMarketBasis();
 
-        return new String[] { getDateFormat().format(getLogTime()), getClusterId(), getAgentId(), getQualifier(),
+        return new String[] { getDateFormat().format(getLogTime()), getClusterId(), getAgentId(), getQualifier().getDescription(),
                 marketBasis.getCommodity(), marketBasis.getCurrency(),
                 MarketBasis.PRICE_FORMAT.format(marketBasis.getMinimumPrice()),
                 MarketBasis.PRICE_FORMAT.format(marketBasis.getMaximumPrice()),
