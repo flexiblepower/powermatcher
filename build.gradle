@@ -17,6 +17,7 @@ task generatesonar << {
 	settingsFile.text = ''
 	settingsFile << 'sonar.sources=src\n'
 	settingsFile << 'sonar.binaries=bin\n'
+	settingsFile << 'sonar.junit.reportsPath=generated/test-results\n'
 	
 	// Add all projects comma separated
 	settingsFile << 'sonar.modules='
