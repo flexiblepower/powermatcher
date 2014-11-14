@@ -3,30 +3,29 @@ package net.powermatcher.api.monitoring;
 import java.util.Date;
 
 import net.powermatcher.api.AgentRole;
+import net.powermatcher.api.MatcherRole;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
+import net.powermatcher.api.data.Price;
 
 /**
- * An {@link BidEvent} is sent when an {@link AgentRole} receives a new {@link Bid}.
+ * An {@link BidEvent} is sent when an {@link Bid} is sent or Received by an {@link AgentRole} or a {@link MatcherRole}.
  * 
  * @author FAN
  * @version 1.0
+ * 
  */
-public abstract class BidEvent extends AgentEvent {
+public class BidEvent extends AgentEvent {
 
     /**
-     * The id of the Agent that sent the {@link Bid}
+     * The new {@link Bid} created by the {@link AgentRole} subclass.
      */
-    private String fromAgentId;
-
-    /**
-     * The received {@link Bid}
-     */
-    private Bid bid;
+    private final Bid bid;
 
     /**
      * Constructs an instance of this class.
+     * 
      * @param clusterId
 	 *            The id of the cluster the {@link AgentRole} subclass sending
 	 *            the UpdateEvent is running in.
@@ -36,19 +35,12 @@ public abstract class BidEvent extends AgentEvent {
      *            The id of the {@link Session} of the {@link AgentRole} subclass sending the UpdateEvent
      * @param timestamp
      *            The {@link Date} received from the {@link TimeService}
-     * @param fromAgentId
-     *            The id of the Agent that sent the {@link Bid}.
      * @param bid
-     *            The received {@link Bid}.
+     *            The new {@link Price} created by the {@link AgentRole} subclass.
      */
-    public BidEvent(String clusterId, String agentId, String sessionId, Date timestamp, String fromAgentId, Bid bid) {
+    public BidEvent(String clusterId, String agentId, String sessionId, Date timestamp, Bid bid) {
         super(clusterId, agentId, sessionId, timestamp);
-        this.fromAgentId = fromAgentId;
         this.bid = bid;
-    }
-
-    public String getFromAgentId() {
-        return fromAgentId;
     }
 
     public Bid getBid() {
@@ -57,7 +49,6 @@ public abstract class BidEvent extends AgentEvent {
 
     @Override
     public String toString() {
-        return BidEvent.class.getSimpleName() + " " + super.toString() + ", fromAgentId = "
-                + this.fromAgentId + ", bid = " + bid.toString();
+        return OutgoingBidEvent.class.getSimpleName() + " " + super.toString() + ", bid = " + bid.toString();
     }
 }

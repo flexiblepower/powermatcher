@@ -9,20 +9,26 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import net.powermatcher.api.TimeService;
+import net.powermatcher.api.monitoring.BidEvent;
 import net.powermatcher.api.monitoring.IncomingBidEvent;
 import net.powermatcher.api.monitoring.IncomingPriceEvent;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.AgentEvent;
 import net.powermatcher.api.monitoring.OutgoingBidEvent;
 import net.powermatcher.api.monitoring.OutgoingPriceEvent;
+import net.powermatcher.api.monitoring.PriceEvent;
 import net.powermatcher.core.monitoring.BaseObserver;
 
 import org.slf4j.Logger;
@@ -150,51 +156,46 @@ public class CSVLogger extends BaseObserver {
         LOGGER.info("Received event: {}", event);
 
         if (event instanceof IncomingBidEvent) {
-            BidLogRecord bidLogRecord = new BidLogRecord(event, timeService.currentDate(), dateFormat,
-                    ((IncomingBidEvent) event).getBid(), MATCHER_QUALIFIER);
+            BidLogRecord bidLogRecord = new BidLogRecord((BidEvent) event, timeService.currentDate(), dateFormat,
+                    MATCHER_QUALIFIER);
             bidLogRecords.add(bidLogRecord);
 
         } else if (event instanceof OutgoingBidEvent) {
             // TODO this differs for device agents and concentrators/auctioneers
             // addBidEvent(AGENT_QAULIFIER);
 
-            BidLogRecord bidLogRecord = new BidLogRecord(event, timeService.currentDate(), dateFormat,
-                    ((OutgoingBidEvent) event).getBid(), MATCHER_QUALIFIER);
+            BidLogRecord bidLogRecord = new BidLogRecord((BidEvent) event, timeService.currentDate(), dateFormat,
+                    MATCHER_QUALIFIER);
             bidLogRecords.add(bidLogRecord);
         } else if (event instanceof IncomingPriceEvent) {
-            PriceLogRecord priceLogRecord = new PriceLogRecord(event, timeService.currentDate(), dateFormat,
-                    ((IncomingPriceEvent) event).getPrice(), AGENT_QAULIFIER);
+            PriceLogRecord priceLogRecord = new PriceLogRecord((PriceEvent) event, timeService.currentDate(),
+                    dateFormat, AGENT_QAULIFIER);
             priceLogRecords.add(priceLogRecord);
 
         } else if (event instanceof OutgoingPriceEvent) {
-            PriceLogRecord priceLogRecord = new PriceLogRecord(event, timeService.currentDate(), dateFormat,
-                    ((OutgoingPriceEvent) event).getPrice(), MATCHER_QUALIFIER);
+            PriceLogRecord priceLogRecord = new PriceLogRecord((PriceEvent) event, timeService.currentDate(),
+                    dateFormat, MATCHER_QUALIFIER);
             priceLogRecords.add(priceLogRecord);
         }
     }
 
     private void writeLogs() {
 
-        // TODO sort by date?
-
         // TODO concurrency issues
 
         for (LogRecord l : bidLogRecords.toArray(new LogRecord[bidLogRecords.size()])) {
             writeLineToCSV(l.getLine(), bidlogFile);
+            bidLogRecords.remove(l);
         }
-
-        // TODO you'll lose events this way
-        bidLogRecords.clear();
 
         LOGGER.info("CSVLogger [{}] wrote to {}", loggerId, bidlogFile);
 
         for (LogRecord l : priceLogRecords.toArray(new LogRecord[priceLogRecords.size()])) {
             writeLineToCSV(l.getLine(), priceLogFile);
+            priceLogRecords.remove(l);
         }
 
-        priceLogRecords.clear();
         LOGGER.info("CSVLogger [{}] wrote to [{}]", loggerId, priceLogFile);
-
     }
 
     /**
@@ -239,7 +240,7 @@ public class CSVLogger extends BaseObserver {
     @Modified
     public synchronized void modified(Map<String, Object> properties) {
 
-        // TODO what to do when properties change? Filter could be okay, but the rest would mess everything up.
+        // TODO what to do when properties change? Filter could be okay, but the rest could mess everything up.
         processConfig(properties);
     }
 
@@ -248,8 +249,6 @@ public class CSVLogger extends BaseObserver {
     public void addObservable(ObservableAgent observable, Map<String, Object> properties) {
         super.addObservable(observable, properties);
     }
-
-    // TODO this method only calls the superclass. is it missing an annotation?
 
     @Override
     protected List<String> filter() {
@@ -272,16 +271,23 @@ public class CSVLogger extends BaseObserver {
         // TODO what to do with invalid pattern?
         this.dateFormat = new SimpleDateFormat(config.dateFormat());
 
-        this.priceLogFile = new File(config.logLocation() + File.separator + config.pricelogFilenamePattern());
+        if (config.logLocation() != null) {
+            this.priceLogFile = new File(config.logLocation() + File.separator + config.pricelogFilenamePattern());
 
-        if (!priceLogFile.exists()) {
-            writeLineToCSV(PRICE_HEADER_ROW, priceLogFile);
-        }
+            if (!priceLogFile.exists()) {
+                writeLineToCSV(PRICE_HEADER_ROW, priceLogFile);
+            }
 
-        this.bidlogFile = new File(config.logLocation() + File.separator + config.bidlogFilenamePattern());
+            this.bidlogFile = new File(config.logLocation() + File.separator + config.bidlogFilenamePattern());
 
-        if (!bidlogFile.exists()) {
-            writeLineToCSV(BID_HEADER_ROW, bidlogFile);
+            if (!bidlogFile.exists()) {
+                writeLineToCSV(BID_HEADER_ROW, bidlogFile);
+            }
+        } else {
+         // TODO how to fix this. Default location?
+            this.deactivate();
+            throw new NullPointerException("Log location cannot be empty.");
+         
         }
 
         updateObservables();

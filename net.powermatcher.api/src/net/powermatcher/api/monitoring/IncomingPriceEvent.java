@@ -13,12 +13,7 @@ import net.powermatcher.api.data.Price;
  * @author FAN
  * @version 1.0
  */
-public class IncomingPriceEvent extends AgentEvent {
-
-    /**
-     * The received {@link Price}
-     */
-    private final Price price;
+public class IncomingPriceEvent extends PriceEvent {
 
     /**
      * Constructs an instance of this class.
@@ -36,17 +31,12 @@ public class IncomingPriceEvent extends AgentEvent {
      *            The received {@link Price}.
      */
     public IncomingPriceEvent(String clusterId, String agentId, String sessionId, Date timestamp, Price price) {
-        super(clusterId, agentId, sessionId, timestamp);
-        this.price = price;
-    }
-
-    public Price getPrice() {
-        return price;
+        super(clusterId, agentId, sessionId, timestamp, price);
     }
 
     @Override
     public String toString() {
         return IncomingPriceEvent.class.getSimpleName() + " " + super.toString() + ", price = "
-                + price.toString();
+                + getPrice().toString();
     }
 }

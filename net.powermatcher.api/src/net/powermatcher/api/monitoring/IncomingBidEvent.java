@@ -13,17 +13,12 @@ import net.powermatcher.api.data.Bid;
  * @author FAN
  * @version 1.0
  */
-public class IncomingBidEvent extends AgentEvent {
+public class IncomingBidEvent extends BidEvent {
 
     /**
      * The id of the Agent that sent the {@link Bid}
      */
     private String fromAgentId;
-
-    /**
-     * The received {@link Bid}
-     */
-    private Bid bid;
 
     /**
      * Constructs an instance of this class.
@@ -42,22 +37,17 @@ public class IncomingBidEvent extends AgentEvent {
      *            The received {@link Bid}.
      */
     public IncomingBidEvent(String clusterId, String agentId, String sessionId, Date timestamp, String fromAgentId, Bid bid) {
-        super(clusterId, agentId, sessionId, timestamp);
+        super(clusterId, agentId, sessionId, timestamp, bid);
         this.fromAgentId = fromAgentId;
-        this.bid = bid;
     }
 
     public String getFromAgentId() {
         return fromAgentId;
     }
 
-    public Bid getBid() {
-        return bid;
-    }
-
     @Override
     public String toString() {
         return IncomingBidEvent.class.getSimpleName() + " " + super.toString() + ", fromAgentId = "
-                + this.fromAgentId + ", bid = " + bid.toString();
+                + this.fromAgentId + ", bid = " + getBid().toString();
     }
 }

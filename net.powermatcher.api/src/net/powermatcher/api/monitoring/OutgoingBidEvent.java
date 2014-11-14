@@ -15,12 +15,7 @@ import net.powermatcher.api.data.Price;
  * @version 1.0
  * 
  */
-public class OutgoingBidEvent extends AgentEvent {
-
-    /**
-     * The new {@link Bid} created by the {@link AgentRole} subclass.
-     */
-    private final Bid bid;
+public class OutgoingBidEvent extends BidEvent {
 
     /**
      * Constructs an instance of this class.
@@ -38,16 +33,11 @@ public class OutgoingBidEvent extends AgentEvent {
      *            The new {@link Price} created by the {@link AgentRole} subclass.
      */
     public OutgoingBidEvent(String clusterId, String agentId, String sessionId, Date timestamp, Bid bid) {
-        super(clusterId, agentId, sessionId, timestamp);
-        this.bid = bid;
-    }
-
-    public Bid getBid() {
-        return bid;
+        super(clusterId, agentId, sessionId, timestamp, bid);
     }
 
     @Override
     public String toString() {
-        return OutgoingBidEvent.class.getSimpleName() + " " + super.toString() + ", bid = " + bid.toString();
+        return OutgoingBidEvent.class.getSimpleName() + " " + super.toString() + ", bid = " + getBid().toString();
     }
 }

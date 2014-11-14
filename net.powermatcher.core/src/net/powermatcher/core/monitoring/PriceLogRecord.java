@@ -5,20 +5,16 @@ import java.util.Date;
 
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
-import net.powermatcher.api.monitoring.AgentEvent;
-import net.powermatcher.api.monitoring.IncomingPriceEvent;
-import net.powermatcher.api.monitoring.OutgoingPriceEvent;
+import net.powermatcher.api.monitoring.PriceEvent;
 
 public class PriceLogRecord extends LogRecord {
 
     private Price price;
 
-    public PriceLogRecord(AgentEvent event, Date logTime, DateFormat dateFormat, Price price, String qualifier) {
-        // TODO you can't be sure this is a Price*Event, but unless you're going to cast in this constructor, it will be
-        // fine. Create a "PriceEvent" baseclass?
+    public PriceLogRecord(PriceEvent event, Date logTime, DateFormat dateFormat, String qualifier) {
+        
         super(event.getClusterId(), event.getAgentId(), qualifier, logTime, event.getTimestamp(), dateFormat);
-
-        this.price = price;
+        this.price = event.getPrice();
     }
 
     @Override
@@ -31,4 +27,4 @@ public class PriceLogRecord extends LogRecord {
                 MarketBasis.PRICE_FORMAT.format(marketbasis.getMaximumPrice()),
                 MarketBasis.PRICE_FORMAT.format(price.getCurrentPrice()), getDateFormat().format(getEventTimestamp()) };
     }
-l}
+}
