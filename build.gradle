@@ -1,6 +1,44 @@
 apply from: rootProject.file("${bnd_cnf}/gradle/master.gradle")
 
-//Generate sonar-runner.properties containing all projects and jars
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'jacoco'
+
+	repositories {
+        jcenter()
+    }
+	
+	jacoco {
+		toolVersion = "0.7.1.201405082137"
+		reportsDir = file("$buildDir/jacoco")
+	}
+
+}
+
+/////
+ tasks.withType(Compile) {
+ options.debug = true
+ options.compilerArgs = ["-g"]
+ }
+ ////
+ 
+test {
+    jacoco {
+        append = false
+        destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
+        classDumpFile = file("$buildDir/jacoco/classpathdumps")
+    }
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        csv.enabled false
+        html.destination "${buildDir}/jacocoHtml"
+    }
+}
+
+// Generate sonar-runner.properties containing all projects and jars
 task generatesonar << {
 
 	// Find all OSGI projects and only include BND projects with actual source code
@@ -17,6 +55,8 @@ task generatesonar << {
 	settingsFile.text = ''
 	settingsFile << 'sonar.sources=src\n'
 	settingsFile << 'sonar.binaries=bin\n'
+	settingsFile << 'sonar.junit.reportsPath=generated/test-results\n'
+	settingsFile << 'sonar.jacoco.reportPath=generated/jacoco/test.exec\n'
 	
 	// Add all projects comma separated
 	settingsFile << 'sonar.modules='
