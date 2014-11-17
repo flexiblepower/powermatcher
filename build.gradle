@@ -14,13 +14,6 @@ allprojects {
 	}
 
 }
-
-/////
- tasks.withType(Compile) {
- options.debug = true
- options.compilerArgs = ["-g"]
- }
- ////
  
 test {
     jacoco {
