@@ -8,10 +8,10 @@ import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -80,7 +80,7 @@ public class CSVLogger extends BaseObserver {
         @Meta.AD(deflt = ";", description = "The field separator the logger will use.")
         String separator();
 
-        @Meta.AD(description = "The location of the log files.")
+        @Meta.AD(required= true, description = "The location of the log files.")
         String logLocation();
 
         @Meta.AD(deflt = "30", description = "Time in seconds between file dumps.")
@@ -120,12 +120,12 @@ public class CSVLogger extends BaseObserver {
     /**
      * A set containing all {@link BidLogRecord} instances that haven't been written to file yet.
      */
-    private Set<BidLogRecord> bidLogRecords = new HashSet<>();
+    private BlockingQueue<BidLogRecord> bidLogRecords = new LinkedBlockingQueue<>();
 
     /**
      * A set containing all {@link PriceLogRecord} instances that haven't been written to file yet.
      */
-    private Set<PriceLogRecord> priceLogRecords = new HashSet<>();
+    private BlockingQueue<PriceLogRecord> priceLogRecords = new LinkedBlockingQueue<>();
 
     /**
      * Keeps the thread alive that performs the writeLog() at a set interval
@@ -154,7 +154,7 @@ public class CSVLogger extends BaseObserver {
 
     }
 
-    private void writeLogs(Set<? extends LogRecord> records, File outputFile) {
+    private void writeLogs(BlockingQueue<? extends LogRecord> records, File outputFile) {
 
         // TODO concurrency issues
         for (LogRecord l : records.toArray(new LogRecord[records.size()])) {
@@ -208,7 +208,6 @@ public class CSVLogger extends BaseObserver {
     @Modified
     public synchronized void modified(Map<String, Object> properties) {
 
-        // TODO what to do when properties change? Filter could be okay, but the rest could mess everything up.
         processConfig(properties);
     }
 
@@ -236,26 +235,18 @@ public class CSVLogger extends BaseObserver {
         this.separator = config.separator();
         this.loggerId = config.loggerId();
 
-        // TODO what to do with invalid pattern?
         this.dateFormat = new SimpleDateFormat(config.dateFormat());
 
-        if (config.logLocation() != null) {
-            this.priceLogFile = new File(config.logLocation() + File.separator + config.pricelogFilenamePattern());
+        this.priceLogFile = new File(config.logLocation() + File.separator + config.pricelogFilenamePattern());
 
-            if (!priceLogFile.exists()) {
-                writeLineToCSV(PRICE_HEADER_ROW, priceLogFile);
-            }
+        if (!priceLogFile.exists()) {
+            writeLineToCSV(PRICE_HEADER_ROW, priceLogFile);
+        }
 
-            this.bidlogFile = new File(config.logLocation() + File.separator + config.bidlogFilenamePattern());
+        this.bidlogFile = new File(config.logLocation() + File.separator + config.bidlogFilenamePattern());
 
-            if (!bidlogFile.exists()) {
-                writeLineToCSV(BID_HEADER_ROW, bidlogFile);
-            }
-        } else {
-            // TODO how to fix this. Default location?
-            this.deactivate();
-            throw new NullPointerException("Log location cannot be empty.");
-
+        if (!bidlogFile.exists()) {
+            writeLineToCSV(BID_HEADER_ROW, bidlogFile);
         }
 
         updateObservables();
