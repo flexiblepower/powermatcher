@@ -11,6 +11,7 @@ import net.powermatcher.api.monitoring.AgentEvent;
 import net.powermatcher.api.monitoring.IncomingPriceEvent;
 import net.powermatcher.mock.MockAgent;
 import net.powermatcher.mock.MockObserver;
+import net.powermatcher.api.monitoring.Qualifier;
 
 import org.junit.Test;
 
@@ -83,6 +84,6 @@ public class ObservableAgentTest {
 
     private AgentEvent createDummyEvent() {
         MarketBasis marketBasis = new MarketBasis("Electicity", "EUR", 10, 0.0, 100.0);
-        return new IncomingPriceEvent("agent1", "sessionId", new Date(), new Price(marketBasis, 0));
+        return new IncomingPriceEvent("defaultCluster", "agent1", "sessionId", new Date(), new Price(marketBasis, 0),Qualifier.AGENT);
     }
 }
