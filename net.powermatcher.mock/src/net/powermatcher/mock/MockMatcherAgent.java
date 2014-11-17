@@ -1,4 +1,4 @@
-package net.powermatcher.core.mock;
+package net.powermatcher.mock;
 
 import java.util.HashMap;
 import java.util.Map;

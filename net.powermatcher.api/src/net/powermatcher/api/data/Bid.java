@@ -674,11 +674,16 @@ public class Bid {
     @Override
     public boolean equals(final Object obj) {
         Bid other = (Bid) ((obj instanceof Bid) ? obj : null);
-        // TODO Reduce the number of conditional operators (4) used in the
-        // expression (maximum allowed 3).
-        return this == other
-                || (other != null && other.bidNumber == this.bidNumber && this.marketBasis.equals(other.marketBasis) && Arrays
-                        .equals(other.getUnclonedDemand(), this.getUnclonedDemand()));
+        if (other == null) {
+            return false;
+        }
+
+        if (this == other) {
+            return true;
+        }
+
+        return other.bidNumber == this.bidNumber && this.marketBasis.equals(other.marketBasis)
+                && Arrays.equals(other.getUnclonedDemand(), this.getUnclonedDemand());
     }
 
     /**
