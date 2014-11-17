@@ -233,4 +233,8 @@ public class Auctioneer extends BaseAgent implements MatcherRole {
     public void setExecutorService(ScheduledExecutorService scheduler) {
         this.scheduler = scheduler;
     }
+    
+    protected BidCache getAggregatedBids(){
+        return this.aggregatedBids;
+    }
 }

@@ -11,9 +11,9 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.core.auctioneer.Auctioneer;
-import net.powermatcher.core.mock.MockAgent;
 import net.powermatcher.core.sessions.SessionManager;
 import net.powermatcher.core.time.SystemTimeService;
+import net.powermatcher.mock.MockAgent;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -216,4 +216,5 @@ public class AuctioneerTest {
      * Bid(marketBasis, new double[] {-9,-9,-9,-9, -9,1,1,1,1,1,1})); auctioneer.publishNewPrice(); assertEquals(5,
      * agents[0].getLastPriceUpdate().getCurrentPrice(), 0); removeAgents(4); }
      */
+
 }

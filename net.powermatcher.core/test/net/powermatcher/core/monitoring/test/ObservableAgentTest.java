@@ -9,8 +9,8 @@ import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.monitoring.AgentEvent;
 import net.powermatcher.api.monitoring.IncomingPriceEvent;
-import net.powermatcher.core.mock.MockAgent;
-import net.powermatcher.core.mock.MockObserver;
+import net.powermatcher.mock.MockAgent;
+import net.powermatcher.mock.MockObserver;
 
 import org.junit.Test;
 
