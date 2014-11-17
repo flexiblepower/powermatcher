@@ -32,8 +32,8 @@ public class OutgoingBidEvent extends BidEvent {
      * @param bid
      *            The new {@link Price} created by the {@link AgentRole} subclass.
      */
-    public OutgoingBidEvent(String clusterId, String agentId, String sessionId, Date timestamp, Bid bid) {
-        super(clusterId, agentId, sessionId, timestamp, bid);
+    public OutgoingBidEvent(String clusterId, String agentId, String sessionId, Date timestamp, Bid bid, Qualifier qualifier) {
+        super(clusterId, agentId, sessionId, timestamp, bid, qualifier);
     }
 
     @Override

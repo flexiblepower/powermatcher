@@ -17,6 +17,7 @@ import net.powermatcher.api.data.Price;
 import net.powermatcher.api.monitoring.IncomingBidEvent;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.OutgoingPriceEvent;
+import net.powermatcher.api.monitoring.Qualifier;
 import net.powermatcher.core.BaseAgent;
 import net.powermatcher.core.BidCache;
 import net.powermatcher.core.concentrator.Concentrator;
@@ -200,7 +201,7 @@ public class Auctioneer extends BaseAgent implements MatcherRole {
         LOGGER.debug("Received bid update [{}] from session [{}]", newBid, session.getSessionId());
 
         this.publishEvent(new IncomingBidEvent(session.getClusterId(), matcherId, session.getSessionId(), timeService.currentDate(),
-                session.getAgentId(), newBid));
+                session.getAgentId(), newBid, Qualifier.AGENT));
     }
 
     /**
@@ -213,7 +214,7 @@ public class Auctioneer extends BaseAgent implements MatcherRole {
 
         for (Session session : this.sessions) {
             this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), matcherId, session.getSessionId(),
-                    timeService.currentDate(), newPrice));
+                    timeService.currentDate(), newPrice, Qualifier.MATCHER));
 
             session.updatePrice(newPrice);
             LOGGER.debug("New price: {}, session {}", newPrice, session.getSessionId());

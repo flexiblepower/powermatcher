@@ -9,25 +9,17 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import net.powermatcher.api.TimeService;
 import net.powermatcher.api.monitoring.BidEvent;
-import net.powermatcher.api.monitoring.IncomingBidEvent;
-import net.powermatcher.api.monitoring.IncomingPriceEvent;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.AgentEvent;
-import net.powermatcher.api.monitoring.OutgoingBidEvent;
-import net.powermatcher.api.monitoring.OutgoingPriceEvent;
 import net.powermatcher.api.monitoring.PriceEvent;
 import net.powermatcher.core.monitoring.BaseObserver;
 
@@ -49,10 +41,6 @@ import aQute.bnd.annotation.metatype.Meta;
 public class CSVLogger extends BaseObserver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CSVLogger.class);
-
-    private static final String MATCHER_QUALIFIER = "matcher";
-
-    private static final String AGENT_QAULIFIER = "agent";
 
     /**
      * The header for the bidlog file
@@ -155,47 +143,26 @@ public class CSVLogger extends BaseObserver {
     public void update(AgentEvent event) {
         LOGGER.info("Received event: {}", event);
 
-        if (event instanceof IncomingBidEvent) {
-            BidLogRecord bidLogRecord = new BidLogRecord((BidEvent) event, timeService.currentDate(), dateFormat,
-                    MATCHER_QUALIFIER);
+        if (event instanceof BidEvent) {
+            BidLogRecord bidLogRecord = new BidLogRecord((BidEvent) event, timeService.currentDate(), dateFormat);
             bidLogRecords.add(bidLogRecord);
-
-        } else if (event instanceof OutgoingBidEvent) {
-            // TODO this differs for device agents and concentrators/auctioneers
-            // addBidEvent(AGENT_QAULIFIER);
-
-            BidLogRecord bidLogRecord = new BidLogRecord((BidEvent) event, timeService.currentDate(), dateFormat,
-                    MATCHER_QUALIFIER);
-            bidLogRecords.add(bidLogRecord);
-        } else if (event instanceof IncomingPriceEvent) {
+        } else if (event instanceof PriceEvent) {
             PriceLogRecord priceLogRecord = new PriceLogRecord((PriceEvent) event, timeService.currentDate(),
-                    dateFormat, AGENT_QAULIFIER);
-            priceLogRecords.add(priceLogRecord);
-
-        } else if (event instanceof OutgoingPriceEvent) {
-            PriceLogRecord priceLogRecord = new PriceLogRecord((PriceEvent) event, timeService.currentDate(),
-                    dateFormat, MATCHER_QUALIFIER);
+                    dateFormat);
             priceLogRecords.add(priceLogRecord);
         }
+
     }
 
-    private void writeLogs() {
+    private void writeLogs(Set<? extends LogRecord> records, File outputFile) {
 
         // TODO concurrency issues
-
-        for (LogRecord l : bidLogRecords.toArray(new LogRecord[bidLogRecords.size()])) {
-            writeLineToCSV(l.getLine(), bidlogFile);
-            bidLogRecords.remove(l);
+        for (LogRecord l : records.toArray(new LogRecord[records.size()])) {
+            writeLineToCSV(l.getLine(), outputFile);
+            records.remove(l);
         }
 
-        LOGGER.info("CSVLogger [{}] wrote to {}", loggerId, bidlogFile);
-
-        for (LogRecord l : priceLogRecords.toArray(new LogRecord[priceLogRecords.size()])) {
-            writeLineToCSV(l.getLine(), priceLogFile);
-            priceLogRecords.remove(l);
-        }
-
-        LOGGER.info("CSVLogger [{}] wrote to [{}]", loggerId, priceLogFile);
+        LOGGER.info("CSVLogger [{}] wrote to {}", loggerId, outputFile);
     }
 
     /**
@@ -213,7 +180,8 @@ public class CSVLogger extends BaseObserver {
         scheduledFuture = scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                writeLogs();
+                writeLogs(bidLogRecords, bidlogFile);
+                writeLogs(priceLogRecords, priceLogFile);
             }
         }, 0, config.logUpdateRate(), TimeUnit.SECONDS);
 
@@ -284,10 +252,10 @@ public class CSVLogger extends BaseObserver {
                 writeLineToCSV(BID_HEADER_ROW, bidlogFile);
             }
         } else {
-         // TODO how to fix this. Default location?
+            // TODO how to fix this. Default location?
             this.deactivate();
             throw new NullPointerException("Log location cannot be empty.");
-         
+
         }
 
         updateObservables();

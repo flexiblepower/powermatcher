@@ -11,9 +11,9 @@ public class PriceLogRecord extends LogRecord {
 
     private Price price;
 
-    public PriceLogRecord(PriceEvent event, Date logTime, DateFormat dateFormat, String qualifier) {
+    public PriceLogRecord(PriceEvent event, Date logTime, DateFormat dateFormat) {
         
-        super(event.getClusterId(), event.getAgentId(), qualifier, logTime, event.getTimestamp(), dateFormat);
+        super(event.getClusterId(), event.getAgentId(), event.getQualifier(), logTime, event.getTimestamp(), dateFormat);
         this.price = event.getPrice();
     }
 
@@ -21,7 +21,7 @@ public class PriceLogRecord extends LogRecord {
     public String[] getLine() {
         MarketBasis marketbasis = price.getMarketBasis();
 
-        return new String[] { getDateFormat().format(getLogTime()), getClusterId(), getAgentId(), getQualifier(),
+        return new String[] { getDateFormat().format(getLogTime()), getClusterId(), getAgentId(), getQualifier().getDescription(),
                 marketbasis.getCommodity(), marketbasis.getCurrency(),
                 MarketBasis.PRICE_FORMAT.format(marketbasis.getMinimumPrice()),
                 MarketBasis.PRICE_FORMAT.format(marketbasis.getMaximumPrice()),

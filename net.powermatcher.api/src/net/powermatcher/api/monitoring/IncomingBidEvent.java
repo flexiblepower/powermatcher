@@ -36,8 +36,8 @@ public class IncomingBidEvent extends BidEvent {
      * @param bid
      *            The received {@link Bid}.
      */
-    public IncomingBidEvent(String clusterId, String agentId, String sessionId, Date timestamp, String fromAgentId, Bid bid) {
-        super(clusterId, agentId, sessionId, timestamp, bid);
+    public IncomingBidEvent(String clusterId, String agentId, String sessionId, Date timestamp, String fromAgentId, Bid bid, Qualifier qualifier) {
+        super(clusterId, agentId, sessionId, timestamp, bid, qualifier);
         this.fromAgentId = fromAgentId;
     }
 

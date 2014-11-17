@@ -38,8 +38,8 @@ public class BidEvent extends AgentEvent {
      * @param bid
      *            The new {@link Price} created by the {@link AgentRole} subclass.
      */
-    public BidEvent(String clusterId, String agentId, String sessionId, Date timestamp, Bid bid) {
-        super(clusterId, agentId, sessionId, timestamp);
+    public BidEvent(String clusterId, String agentId, String sessionId, Date timestamp, Bid bid, Qualifier qualifier) {
+        super(clusterId, agentId, sessionId, timestamp, qualifier);
         this.bid = bid;
     }
 

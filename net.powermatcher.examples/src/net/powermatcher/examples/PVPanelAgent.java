@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
 import net.powermatcher.api.AgentRole;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
@@ -13,9 +14,12 @@ import net.powermatcher.api.data.PricePoint;
 import net.powermatcher.api.monitoring.IncomingPriceEvent;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.OutgoingBidEvent;
+import net.powermatcher.api.monitoring.Qualifier;
 import net.powermatcher.core.BaseAgent;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
@@ -74,7 +78,7 @@ public class PVPanelAgent extends BaseAgent implements AgentRole {
             session.updateBid(newBid);
                         
             this.publishEvent(new OutgoingBidEvent(session.getClusterId(),this.getAgentId(), session.getSessionId(),
-                    timeService.currentDate(), newBid));
+                    timeService.currentDate(), newBid, Qualifier.AGENT));
         }
     }
 
@@ -82,7 +86,7 @@ public class PVPanelAgent extends BaseAgent implements AgentRole {
     public void updatePrice(Price newPrice) {
         LOGGER.debug("updatePrice({})", newPrice);
         publishEvent(new IncomingPriceEvent(session.getClusterId(), this.getAgentId(), session.getSessionId(), timeService.currentDate(),
-                newPrice));
+                newPrice, Qualifier.AGENT));
         LOGGER.debug("Received price update [{}]", newPrice);
     }
 

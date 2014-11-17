@@ -31,8 +31,8 @@ public class OutgoingPriceEvent extends PriceEvent {
      * @param price
      *            The new {@link Price} created by the {@link AgentRole} subclass.
      */
-    public OutgoingPriceEvent(String clusterId, String agentId, String sessionId, Date timestamp, Price price) {
-        super(clusterId, agentId, sessionId, timestamp, price);
+    public OutgoingPriceEvent(String clusterId, String agentId, String sessionId, Date timestamp, Price price, Qualifier qualifier) {
+        super(clusterId, agentId, sessionId, timestamp, price, qualifier);
     }
 
     @Override

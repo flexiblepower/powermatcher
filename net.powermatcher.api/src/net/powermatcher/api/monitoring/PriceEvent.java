@@ -35,8 +35,8 @@ public abstract class PriceEvent extends AgentEvent {
      * @param price
      *            The received {@link Price}.
      */
-    public PriceEvent(String clusterId, String agentId, String sessionId, Date timestamp, Price price) {
-        super(clusterId, agentId, sessionId, timestamp);
+    public PriceEvent(String clusterId, String agentId, String sessionId, Date timestamp, Price price, Qualifier qualifier) {
+        super(clusterId, agentId, sessionId, timestamp, qualifier);
         this.price = price;
     }
 
