@@ -100,9 +100,9 @@ class SessionImpl implements Session {
 
     @Override
     public MarketBasis getMarketBasis() {
-        if (marketBasis == null) {
-            throw new IllegalStateException("No marketBasis has been defined");
-        }
+//        if (marketBasis == null) {
+//            throw new IllegalStateException("No marketBasis has been defined");
+//        }
         return marketBasis;
     }
 

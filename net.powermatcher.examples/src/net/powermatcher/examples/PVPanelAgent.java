@@ -80,11 +80,13 @@ public class PVPanelAgent extends BaseAgent implements AgentRole {
 
     protected void doBidUpdate() {
         if (session != null) {
-            Bid newBid = new Bid(session.getMarketBasis(), new PricePoint(0, -700));
-            LOGGER.debug("updateBid({})", newBid);
-            session.updateBid(newBid);
-            this.publishEvent(new OutgoingBidEvent(this.getAgentId(), session.getSessionId(), timeService.currentDate(),
-                    newBid));
+            if (session.getMarketBasis() != null) {
+                Bid newBid = new Bid(session.getMarketBasis(), new PricePoint(0, -700));
+                LOGGER.debug("updateBid({})", newBid);
+                session.updateBid(newBid);
+                this.publishEvent(new OutgoingBidEvent(this.getAgentId(), session.getSessionId(), timeService.currentDate(),
+                        newBid));
+            }
         }
     }
 
