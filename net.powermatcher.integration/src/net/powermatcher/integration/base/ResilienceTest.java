@@ -13,10 +13,8 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.zip.DataFormatException;
 
 import net.powermatcher.api.MatcherRole;
-import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
-import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.sessions.SessionManager;
 import net.powermatcher.core.time.SystemTimeService;
 import net.powermatcher.integration.util.AuctioneerWrapper;
@@ -25,11 +23,13 @@ import net.powermatcher.integration.util.CsvExpectedResultsReader;
 import net.powermatcher.mock.MockAgent;
 
 import org.junit.After;
-import org.junit.Before;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ResilienceTest {
 
-    private final static String MATCHERNAME = "auctioneer";
+    private static final String MATCHERNAME = "auctioneer";
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResilienceTest.class);
 
     // Reader for the bid info input file
     protected CsvBidReader bidReader;
@@ -92,9 +92,9 @@ public class ResilienceTest {
         this.marketBasis = resultsReader.getMarketBasis();
         this.matcherAgent = new AuctioneerWrapper();
         Map<String, Object> auctioneerProperties = new HashMap<>();
-        auctioneerProperties.put("id", "auctioneer");
-        auctioneerProperties.put("matcherId", "auctioneer");
-        auctioneerProperties.put("agentId", "auctioneer");
+        auctioneerProperties.put("id", MATCHERNAME);
+        auctioneerProperties.put("matcherId", MATCHERNAME);
+        auctioneerProperties.put("agentId", MATCHERNAME);
         auctioneerProperties.put("commodity", "electricity");
         auctioneerProperties.put("currency", "EUR");
         auctioneerProperties.put("priceSteps", marketBasis.getPriceSteps());
@@ -148,7 +148,7 @@ public class ResilienceTest {
 
                 if (bid != null) {
                     // Aggregated demand calculation
-                    double demand[] = bid.getDemand();
+                    double[] demand = bid.getDemand();
                     for (int j = 0; j < demand.length; j++) {
                         aggregatedDemand[j] = aggregatedDemand[j] + demand[j];
                     }
@@ -164,19 +164,19 @@ public class ResilienceTest {
                     stop = true;
                 }
             } catch (InvalidParameterException e) {
-                System.err.println("Incorrect bid specification found: " + e.getMessage());
+                LOGGER.error("Incorrect bid specification found: " + e.getMessage());
                 bid = null;
             }
             matcherAgent.publishNewPrice();
         } while (!stop);
 
         // Write aggregated demand array
-        System.out.print("Aggregated demand: ");
+        LOGGER.info("Aggregated demand: ");
         for (int j = 0; j < aggregatedDemand.length; j++) {
             if (j == (aggregatedDemand.length - 1)) {
-                System.out.println(aggregatedDemand[j]);
+                LOGGER.info(String.valueOf(aggregatedDemand[j]));
             } else {
-                System.out.print(aggregatedDemand[j] + ",");
+                LOGGER.info(String.valueOf((aggregatedDemand[j] + ",")));
             }
         }
 
@@ -199,21 +199,21 @@ public class ResilienceTest {
 
     public String getExpectedResultsFile(String testID, String suffix) {
         String csvSuffix = null;
-        if (suffix == null)
+        if (suffix == null) {
             csvSuffix = ".csv";
-        else
+        } else {
             csvSuffix = suffix + ".csv";
-
+        }
         return "input/" + testID + "/AggBidPrice" + csvSuffix;
     }
 
     public String getBidInputFile(String testID, String suffix) {
         String csvSuffix = null;
-        if (suffix == null)
+        if (suffix == null) {
             csvSuffix = ".csv";
-        else
+        } else {
             csvSuffix = suffix + ".csv";
-
+        }
         return "input/" + testID + "/Bids" + csvSuffix;
     }
 
@@ -231,7 +231,6 @@ public class ResilienceTest {
     }
 
     protected void checkAggregatedBid(Bid aggregatedBid) {
-        // Verify the aggregated bid
         assertArrayEquals(this.resultsReader.getAggregatedBid().getDemand(), aggregatedBid.getDemand(), 0);
     }
 }

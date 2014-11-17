@@ -15,7 +15,7 @@ public class AuctioneerWrapper extends Auctioneer {
         return super.getAggregatedBids().getAggregatedBid(marketBasis);
     }
 
-    public void publishPriceInfo() {
+    public void publishPrice() {
         super.publishNewPrice();
     }
 

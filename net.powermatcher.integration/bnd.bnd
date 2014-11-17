@@ -6,7 +6,8 @@
 	biz.aQute.bnd.annotation;version=latest,\
 	net.powermatcher.api;version=latest,\
 	net.powermatcher.core;version=latest,\
-	net.powermatcher.mock;version=latest
+	net.powermatcher.mock;version=latest,\
+	slf4j.api
 -runpath:  \
 	org.mockito.mockito-all
 -runee: JavaSE-1.6

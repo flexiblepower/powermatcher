@@ -1,13 +1,10 @@
 package net.powermatcher.integration.auctioneer;
 
 import java.io.IOException;
-import java.util.Properties;
 import java.util.zip.DataFormatException;
 
 import net.powermatcher.integration.base.ResilienceTest;
-import net.powermatcher.integration.util.AuctioneerWrapper;
 
-import org.junit.Before;
 import org.junit.Test;
 
 public class AuctioneerResilienceTestIAQ2 extends ResilienceTest {
