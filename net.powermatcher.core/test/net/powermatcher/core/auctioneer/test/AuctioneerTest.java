@@ -2,9 +2,7 @@ package net.powermatcher.core.auctioneer.test;
 
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
@@ -38,15 +36,17 @@ public class AuctioneerTest {
 
     private SessionManager sessionManager;
 
+    private static final String AUCTIONEER_NAME = "auctioneer";
+
     @Before
     public void setUp() throws Exception {
         // Init Auctioneer
         this.auctioneer = new Auctioneer();
 
         auctioneerProperties = new HashMap<String, Object>();
-        auctioneerProperties.put("agentId", "auctioneer");
+        auctioneerProperties.put("agentId", AUCTIONEER_NAME);
         auctioneerProperties.put("clusterId", "DefaultCluster");
-        auctioneerProperties.put("matcherId", "auctioneer");
+        auctioneerProperties.put("matcherId", AUCTIONEER_NAME);
         auctioneerProperties.put("commodity", "electricity");
         auctioneerProperties.put("currency", "EUR");
         auctioneerProperties.put("priceSteps", "11");
@@ -59,35 +59,30 @@ public class AuctioneerTest {
         auctioneer.setTimeService(new SystemTimeService());
         auctioneer.activate(auctioneerProperties);
 
-        List<String> activeConnections = new ArrayList<String>();
-
         // Init MockAgents
         this.agents = new MockAgent[NR_AGENTS];
         for (int i = 0; i < NR_AGENTS; i++) {
             String agentId = "agent" + (i + 1);
             MockAgent newAgent = new MockAgent(agentId);
+            newAgent.setDesiredParentId(AUCTIONEER_NAME);
             agents[i] = newAgent;
-            activeConnections.add(agentId + "::" + "auctioneer");
         }
-
-        Map<String, Object> sessionProperties = new HashMap<String, Object>();
-        sessionProperties.put("activeConnections", activeConnections);
 
         // Session
         sessionManager = new SessionManager();
-        sessionManager.addMatcherRole(auctioneer, auctioneerProperties);
-        sessionManager.activate(sessionProperties);
+        sessionManager.addMatcherRole(auctioneer);
+        sessionManager.activate();
     }
 
     private void addAgents(int number) {
         for (int i = 0; i < number; i++) {
-            this.sessionManager.addAgentRole(agents[i], agents[i].getAgentProperties());
+            this.sessionManager.addAgentRole(agents[i]);
         }
     }
 
     private void removeAgents(int number) {
         for (int i = 0; i < number; i++) {
-            this.sessionManager.removeAgentRole(agents[i], agents[i].getAgentProperties());
+            this.sessionManager.removeAgentRole(agents[i]);
         }
     }
 
