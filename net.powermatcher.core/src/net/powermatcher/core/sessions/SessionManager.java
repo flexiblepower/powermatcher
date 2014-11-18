@@ -120,13 +120,17 @@ public class SessionManager {
             MatcherRole matcherRole = matcherRoles.get(matcherId);
 
             if (agentRole != null && matcherRole != null) {
+                final String sessionId = agentId + ":" + matcherId;
+                if (activeSessions.containsKey(sessionId)) {
+                    // session already exists
+                    continue;
+                }
                 LOGGER.info("Connecting session: [{}]", agentId + ":" + matcherId);
-                Session session = new SessionImpl(this, agentRole, agentId, matcherRole, matcherId, agentId + ":"
-                        + matcherId);
+                Session session = new SessionImpl(this, agentRole, agentId, matcherRole, matcherId, sessionId);
                 if (matcherRole.connectToAgent(session)) {
                     agentRole.connectToMatcher(session);
-                    activeSessions.put(agentId + ":" + matcherId, session);
-                    LOGGER.info("Added new active session: {}", agentId + ":" + matcherId);
+                    activeSessions.put(sessionId, session);
+                    LOGGER.info("Added new active session: {}", sessionId);
                 }
             }
         }
