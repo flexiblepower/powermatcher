@@ -23,7 +23,7 @@ public class MockAgent implements Agent, AgentRole, ObservableAgent {
     private String desiredParentId;
     private String clusterId;
 
-    /**
+	/**
      * Collection of {@link Observer} services.
      */
     private final Set<AgentObserver> observers = new CopyOnWriteArraySet<AgentObserver>();
@@ -74,6 +74,10 @@ public class MockAgent implements Agent, AgentRole, ObservableAgent {
     public String getDesiredParentId() {
         return desiredParentId;
     }
+
+    public void setDesiredParentId(String desiredParentId) {
+		this.desiredParentId = desiredParentId;
+	}
 
     @Override
     public String getObserverId() {
