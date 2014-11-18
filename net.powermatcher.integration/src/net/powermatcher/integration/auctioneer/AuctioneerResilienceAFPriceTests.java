@@ -55,7 +55,7 @@ public class AuctioneerResilienceAFPriceTests extends ResilienceTest {
     private void performEquilibriumTest(String testID, String suffix) throws IOException, DataFormatException {
         prepareTest(testID, suffix);
 
-        sendBidsToMatcher(this.matcherAgent);
+        sendBidsToMatcher(this.auctioneer);
 
         checkEquilibriumPrice();
     }
