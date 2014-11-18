@@ -2,9 +2,11 @@ Bundle-Version: 1.0.0.${tstamp}
 -buildpath:  \
 	biz.aQute.bnd.annotation,\
 	org.apache.felix.http.servlet-api,\
+		org.apache.commons.io,\
 	slf4j.api
 Private-Package:  \
 net.powermatcher.visualisation
 
 Service-Component:  \
-	net.powermatcher.visualisation.*
+*
+ Include-Resource: res
