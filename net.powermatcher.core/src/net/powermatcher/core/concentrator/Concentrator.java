@@ -18,6 +18,7 @@ import net.powermatcher.api.monitoring.IncomingPriceEvent;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.OutgoingBidEvent;
 import net.powermatcher.api.monitoring.OutgoingPriceEvent;
+import net.powermatcher.api.monitoring.Qualifier;
 import net.powermatcher.core.BaseAgent;
 import net.powermatcher.core.BidCache;
 import net.powermatcher.core.auctioneer.Auctioneer;
@@ -205,8 +206,8 @@ public class Concentrator extends BaseAgent implements MatcherRole, AgentRole {
             throw new IllegalArgumentException("Marketbasis new bid differs from marketbasis auctioneer");
         }
 
-        this.publishEvent(new IncomingBidEvent(config.agentId(), session.getSessionId(), timeService
-                .currentDate(), "agentId", newBid));
+        this.publishEvent(new IncomingBidEvent(session.getClusterId(), config.agentId(), session.getSessionId(), timeService
+                .currentDate(), "agentId", newBid, Qualifier.AGENT));
 
         // Update agent in aggregatedBids
         this.aggregatedBids.updateBid(session.getSessionId(), newBid);
@@ -218,15 +219,15 @@ public class Concentrator extends BaseAgent implements MatcherRole, AgentRole {
     public void updatePrice(Price newPrice) {
         LOGGER.debug("Received price update [{}]", newPrice);
 
-        this.publishEvent(new IncomingPriceEvent(this.config.agentId(), this.sessionToMatcher.getSessionId(),
-                timeService.currentDate(), newPrice));
+        this.publishEvent(new IncomingPriceEvent(sessionToMatcher.getClusterId(), this.config.agentId(), this.sessionToMatcher.getSessionId(),
+                timeService.currentDate(), newPrice, Qualifier.AGENT));
 
         // Publish new price to connected agents
         for (Session session : this.sessionToAgents) {
             session.updatePrice(newPrice);
 
-            this.publishEvent(new OutgoingPriceEvent(this.config.agentId(), session.getSessionId(), timeService
-                    .currentDate(), newPrice));
+            this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), this.config.agentId(), session.getSessionId(), timeService
+                    .currentDate(), newPrice, Qualifier.MATCHER));
         }
     }
 
@@ -238,8 +239,8 @@ public class Concentrator extends BaseAgent implements MatcherRole, AgentRole {
         if (sessionToMatcher != null) {
             Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.sessionToMatcher.getMarketBasis());
             this.sessionToMatcher.updateBid(aggregatedBid);
-            publishEvent(new OutgoingBidEvent(config.agentId(), sessionToMatcher.getSessionId(),
-                    timeService.currentDate(), aggregatedBid));
+            publishEvent(new OutgoingBidEvent(sessionToMatcher.getClusterId(), config.agentId(), sessionToMatcher.getSessionId(),
+                    timeService.currentDate(), aggregatedBid, Qualifier.MATCHER));
 
             LOGGER.debug("Updating aggregated bid [{}]", aggregatedBid);
         }
