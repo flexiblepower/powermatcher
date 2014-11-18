@@ -4,7 +4,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ IntegrationTestSuite.class, ConcentratorTestSuite.class })
+@Suite.SuiteClasses({ AuctioneerTestSuite.class, ConcentratorTestSuite.class })
 public class IntegrationTestSuite {
 
 }
