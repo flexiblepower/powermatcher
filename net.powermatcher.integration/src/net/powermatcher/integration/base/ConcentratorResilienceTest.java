@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 public class ConcentratorResilienceTest {
 
     private static final String MATCHERAGENTNAME = "auctioneer";
-    private static final String MATCHERNAME = "concentrator";
+    private static final String CONCENTRATOR_NAME = "concentrator";
     private static final Logger LOGGER = LoggerFactory.getLogger(ConcentratorResilienceTest.class);
 
     // Reader for the bid info input file
@@ -56,9 +56,6 @@ public class ConcentratorResilienceTest {
     // SessionManager to handle the connections between matcher and agents
     protected SessionManager sessionManager;
 
-    // List of active connections
-    protected List<String> activeConnections;
-
     @After
     public void tearDown() throws IOException {
         if (this.bidReader != null) {
@@ -68,12 +65,12 @@ public class ConcentratorResilienceTest {
     }
 
     protected void addAgent(MockAgent agent) {
-        sessionManager.addAgentRole(agent, agent.getAgentProperties());
+        sessionManager.addAgentRole(agent);
     }
 
     protected void removeAgents(List<MockAgent> agents, MatcherRole matcher) {
         for (MockAgent agent : agents) {
-            sessionManager.removeAgentRole(agent, agent.getAgentProperties());
+            sessionManager.removeAgentRole(agent);
         }
     }
 
@@ -88,8 +85,6 @@ public class ConcentratorResilienceTest {
         // Create matcher list
         this.matchers = new ArrayList<MatcherRole>();
 
-        // Active connections
-        this.activeConnections = new ArrayList<>();
         // Get the expected results
         this.resultsReader = new CsvExpectedResultsReader(getExpectedResultsFile(testID, suffix));
 
@@ -97,11 +92,11 @@ public class ConcentratorResilienceTest {
         this.matcherAgent = new ConcentratorWrapper();
         Map<String, Object> concentratorProperties = new HashMap<>();
         concentratorProperties = new HashMap<String, Object>();
-        concentratorProperties.put("matcherId", MATCHERNAME);
+        concentratorProperties.put("matcherId", CONCENTRATOR_NAME);
         concentratorProperties.put("desiredParentId", MATCHERAGENTNAME);
         concentratorProperties.put("bidTimeout", "600");
         concentratorProperties.put("bidUpdateRate", "30");
-        concentratorProperties.put("agentId", MATCHERNAME);
+        concentratorProperties.put("agentId", CONCENTRATOR_NAME);
 
         this.matchers.add(this.matcherAgent);
 
@@ -113,16 +108,12 @@ public class ConcentratorResilienceTest {
         matcher.setMarketBasis(marketBasis);
         this.matchers.add(matcher);
 
-        Map<String, Object> sessionProperties = new HashMap<>();
-        sessionProperties.put("activeConnections", activeConnections);
-
         // Session
         this.sessionManager = new SessionManager();
-        sessionManager.addMatcherRole(matcher, matcher.getMatcherProperties());
-        sessionManager.addMatcherRole(matcherAgent, concentratorProperties);
-        sessionManager.addAgentRole(matcherAgent, concentratorProperties);
-        activeConnections.add(MATCHERNAME + "::" + MATCHERAGENTNAME);
-        sessionManager.activate(sessionProperties);
+        sessionManager.addMatcherRole(matcher);
+        sessionManager.addMatcherRole(matcherAgent);
+        sessionManager.addAgentRole(matcherAgent);
+        sessionManager.activate();
 
         // Create the bid reader
         this.bidReader = new CsvBidReader(getBidInputFile(testID, suffix), this.marketBasis);
@@ -173,7 +164,6 @@ public class ConcentratorResilienceTest {
                 LOGGER.error("Incorrect bid specification found: " + e.getMessage());
                 bid = null;
             }
-            // matcherAgent.publishNewPrice();
         } while (!stop);
         matcherAgent.doBidUpdate();
         // Write aggregated demand array
@@ -192,12 +182,7 @@ public class ConcentratorResilienceTest {
         MockAgent newAgent = new MockAgent(agentId);
         this.agentList.add(i, newAgent);
 
-        activeConnections.add(agentId + "::" + MATCHERNAME);
-
-        Map<String, Object> sessionProperties = new HashMap<>();
-        sessionProperties.put("activeConnections", activeConnections);
-        sessionManager.modified(sessionProperties);
-
+        newAgent.setDesiredParentId(CONCENTRATOR_NAME);
         addAgent(newAgent);
         return newAgent;
     }

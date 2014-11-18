@@ -41,7 +41,7 @@ public class ResilienceTest {
     protected MarketBasis marketBasis;
 
     // The direct upstream matcher for the agents
-    protected AuctioneerWrapper matcherAgent;
+    protected AuctioneerWrapper auctioneer;
 
     // List of matcher agents (for setting market basis)
     protected List<MatcherRole> matchers;
@@ -52,24 +52,21 @@ public class ResilienceTest {
     // SessionManager to handle the connections between matcher and agents
     protected SessionManager sessionManager;
 
-    // List of active connections
-    protected List<String> activeConnections;
-
     @After
     public void tearDown() throws IOException {
         if (this.bidReader != null) {
             this.bidReader.closeFile();
         }
-        removeAgents(agentList, this.matcherAgent);
+        removeAgents(agentList, this.auctioneer);
     }
 
     protected void addAgent(MockAgent agent) {
-        sessionManager.addAgentRole(agent, agent.getAgentProperties());
+        sessionManager.addAgentRole(agent);
     }
 
     protected void removeAgents(List<MockAgent> agents, MatcherRole matcher) {
         for (MockAgent agent : agents) {
-            sessionManager.removeAgentRole(agent, agent.getAgentProperties());
+            sessionManager.removeAgentRole(agent);
         }
     }
 
@@ -84,13 +81,11 @@ public class ResilienceTest {
         // Create matcher list
         this.matchers = new ArrayList<MatcherRole>();
 
-        // Active connections
-        this.activeConnections = new ArrayList<>();
         // Get the expected results
         this.resultsReader = new CsvExpectedResultsReader(getExpectedResultsFile(testID, suffix));
 
         this.marketBasis = resultsReader.getMarketBasis();
-        this.matcherAgent = new AuctioneerWrapper();
+        this.auctioneer = new AuctioneerWrapper();
         Map<String, Object> auctioneerProperties = new HashMap<>();
         auctioneerProperties.put("id", MATCHERNAME);
         auctioneerProperties.put("matcherId", MATCHERNAME);
@@ -104,19 +99,16 @@ public class ResilienceTest {
         auctioneerProperties.put("priceUpdateRate", "1");
         auctioneerProperties.put("clusterId", "testCluster");
 
-        this.matchers.add(this.matcherAgent);
+        this.matchers.add(this.auctioneer);
 
-        matcherAgent.setExecutorService(new ScheduledThreadPoolExecutor(10));
-        matcherAgent.setTimeService(new SystemTimeService());
-        matcherAgent.activate(auctioneerProperties);
-
-        Map<String, Object> sessionProperties = new HashMap<>();
-        sessionProperties.put("activeConnections", activeConnections);
+        auctioneer.setExecutorService(new ScheduledThreadPoolExecutor(10));
+        auctioneer.setTimeService(new SystemTimeService());
+        auctioneer.activate(auctioneerProperties);
 
         // Session
         this.sessionManager = new SessionManager();
-        sessionManager.addMatcherRole(matcherAgent, auctioneerProperties);
-        sessionManager.activate(sessionProperties);
+        sessionManager.addMatcherRole(auctioneer);
+        sessionManager.activate();
 
         // Create the bid reader
         this.bidReader = new CsvBidReader(getBidInputFile(testID, suffix), this.marketBasis);
@@ -152,7 +144,6 @@ public class ResilienceTest {
                     for (int j = 0; j < demand.length; j++) {
                         aggregatedDemand[j] = aggregatedDemand[j] + demand[j];
                     }
-
                     if (agentList.size() > i) {
                         newAgent = this.agentList.get(i);
                     } else {
@@ -168,7 +159,7 @@ public class ResilienceTest {
                 bid = null;
             }
         } while (!stop);
-
+        //auctioneer.publishNewPrice();
         // Write aggregated demand array
         LOGGER.info("Aggregated demand: ");
         for (int j = 0; j < aggregatedDemand.length; j++) {
@@ -178,21 +169,16 @@ public class ResilienceTest {
                 LOGGER.info(String.valueOf((aggregatedDemand[j] + ",")));
             }
         }
-
     }
 
     private MockAgent createAgent(int i) {
         String agentId = "agent" + (i + 1);
         MockAgent newAgent = new MockAgent(agentId);
         this.agentList.add(i, newAgent);
-
-        activeConnections.add(agentId + "::" + MATCHERNAME);
-
-        Map<String, Object> sessionProperties = new HashMap<>();
-        sessionProperties.put("activeConnections", activeConnections);
-        sessionManager.modified(sessionProperties);
-
+        
+        newAgent.setDesiredParentId(MATCHERNAME);
         addAgent(newAgent);
+
         return newAgent;
     }
 
@@ -221,7 +207,7 @@ public class ResilienceTest {
 
         // TODO this is direct call for the Auctioneer to update its prices
         // because the scheduler doesn't work properly. Remove this once it does
-        matcherAgent.publishNewPrice();
+        auctioneer.publishNewPrice();
 
         // Verify the price received by the agents
         for (MockAgent agent : agentList) {
