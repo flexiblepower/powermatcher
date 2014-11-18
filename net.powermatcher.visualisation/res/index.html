@@ -1,0 +1,44 @@
+<div class="statline ">
+	Status: <span id="status" class="ui-priority-primary">&nbsp;</span>
+</div>
+
+<div>
+	<button type="button" id="autoconnect"
+		onclick="autoconnect(); return false;">Autoconnect</button>
+	<button type="button" id="connect" disabled=true
+		onclick="connect(); return false;">Connect</button>
+	<button type="button" id="disconnect" disabled=true
+		onclick="disconnect(); return false;">Disconnect</button>
+	<button type="button" id="refresh" onclick="refresh(); return false;">Refresh</button>
+</div>
+
+<div id="cy" style="height: 500px; z-index: -1;"></div>
+<div>
+	<table>
+		<tr>
+			<th id="1a" class="infotable">Nothing selected</th>
+			<td id="1b" class="infotable"></td>
+		</tr>
+		<tr>
+			<th id="2a" class="infotable"></th>
+			<td id="2b" class="infotable"></td>
+		</tr>
+		<tr>
+			<th id="3a" class="infotable"></th>
+			<td id="3b" class="infotable"></td>
+		</tr>
+		<tr>
+			<th id="4a" class="infotable"></th>
+			<td id="4b" class="infotable"></td>
+		</tr>
+		<tr>
+			<th id="5a" class="infotable"></th>
+			<td id="5b" class="infotable"></td>
+		</tr>
+	</table>
+</div>
+
+<script type="text/javascript" src="http://marvl.infotech.monash.edu/webcola/cola.v3.min.js"></script>
+<script type="text/javascript" src="cytoscape.min.js"></script>
+<script type="text/javascript" src="connectionManager.js"></script>
+

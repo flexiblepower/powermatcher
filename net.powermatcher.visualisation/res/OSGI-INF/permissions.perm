@@ -1,0 +1,2 @@
+(org.osgi.framework.ServicePermission "*" "get,register")
+(org.osgi.framework.PackagePermission "*" "import,exportonly")
