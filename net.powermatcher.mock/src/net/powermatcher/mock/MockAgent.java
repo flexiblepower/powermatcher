@@ -17,86 +17,86 @@ import net.powermatcher.api.monitoring.ObservableAgent;
 
 public class MockAgent implements Agent, AgentRole, ObservableAgent {
 
-	private Map<String, Object> agentProperties;
-	private Price lastPriceUpdate;
-	private Session session;
-	private String desiredParentId;
-	private String clusterId;
+    private Map<String, Object> agentProperties;
+    private Price lastPriceUpdate;
+    private Session session;
+    private String desiredParentId;
+    private String clusterId;
 
-	/**
-	 * Collection of {@link Observer} services.
-	 */
-	private final Set<AgentObserver> observers = new CopyOnWriteArraySet<AgentObserver>();
+    /**
+     * Collection of {@link Observer} services.
+     */
+    private final Set<AgentObserver> observers = new CopyOnWriteArraySet<AgentObserver>();
 
-	public MockAgent(String agentId) {
-		this.agentProperties = new HashMap<String, Object>();
-		this.agentProperties.put("agentId", agentId);
-	}
+    public MockAgent(String agentId) {
+        this.agentProperties = new HashMap<String, Object>();
+        this.agentProperties.put("agentId", agentId);
+    }
 
-	@Override
-	public void connectToMatcher(Session session) {
-		this.session = session;
-	}
+    @Override
+    public void connectToMatcher(Session session) {
+        this.session = session;
+    }
 
-	@Override
-	public void matcherRoleDisconnected(Session session) {
-		this.session = null;
-	}
+    @Override
+    public void matcherRoleDisconnected(Session session) {
+        this.session = null;
+    }
 
-	@Override
-	public void updatePrice(Price newPrice) {
-		this.lastPriceUpdate = newPrice;
-	}
+    @Override
+    public void updatePrice(Price newPrice) {
+        this.lastPriceUpdate = newPrice;
+    }
 
-	public void sendBid(Bid newBid) {
-		this.session.updateBid(newBid);
-	}
+    public void sendBid(Bid newBid) {
+        this.session.updateBid(newBid);
+    }
 
-	public Price getLastPriceUpdate() {
-		return lastPriceUpdate;
-	}
+    public Price getLastPriceUpdate() {
+        return lastPriceUpdate;
+    }
 
-	public Map<String, Object> getAgentProperties() {
-		return agentProperties;
-	}
+    public Map<String, Object> getAgentProperties() {
+        return agentProperties;
+    }
 
-	@Override
-	public String getAgentId() {
-		return (String) agentProperties.get("agentId");
-	}
+    @Override
+    public String getAgentId() {
+        return (String) agentProperties.get("agentId");
+    }
 
-	@Override
-	public String getClusterId() {
-		return clusterId;
-	}
+    @Override
+    public String getClusterId() {
+        return clusterId;
+    }
 
-	@Override
-	public String getDesiredParentId() {
-		return desiredParentId;
-	}
+    @Override
+    public String getDesiredParentId() {
+        return desiredParentId;
+    }
 
-	public void setDesiredParentId(String desiredParentId) {
-		this.desiredParentId = desiredParentId;
-	}
+    public void setDesiredParentId(String desiredParentId) {
+        this.desiredParentId = desiredParentId;
+    }
 
-	@Override
-	public String getObserverId() {
-		return this.getAgentId();
-	}
+    @Override
+    public String getObserverId() {
+        return this.getAgentId();
+    }
 
-	@Override
-	public void addObserver(AgentObserver observer) {
-		observers.add(observer);
-	}
+    @Override
+    public void addObserver(AgentObserver observer) {
+        observers.add(observer);
+    }
 
-	@Override
-	public void removeObserver(AgentObserver observer) {
-		observers.remove(observer);
-	}
+    @Override
+    public void removeObserver(AgentObserver observer) {
+        observers.remove(observer);
+    }
 
-	public void publishEvent(AgentEvent event) {
-		for (AgentObserver observer : observers) {
-			observer.update(event);
-		}
-	}
+    public void publishEvent(AgentEvent event) {
+        for (AgentObserver observer : observers) {
+            observer.update(event);
+        }
+    }
 }
