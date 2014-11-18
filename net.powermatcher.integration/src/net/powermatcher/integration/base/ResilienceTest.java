@@ -167,7 +167,6 @@ public class ResilienceTest {
                 LOGGER.error("Incorrect bid specification found: " + e.getMessage());
                 bid = null;
             }
-            matcherAgent.publishNewPrice();
         } while (!stop);
 
         // Write aggregated demand array
