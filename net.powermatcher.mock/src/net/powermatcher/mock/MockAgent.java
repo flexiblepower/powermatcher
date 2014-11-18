@@ -75,6 +75,10 @@ public class MockAgent implements Agent, AgentRole, ObservableAgent {
         return desiredParentId;
     }
 
+    public void setDesiredParentId(String desiredParentId) {
+        this.desiredParentId = desiredParentId;
+    }
+
     @Override
     public String getObserverId() {
         return this.getAgentId();
