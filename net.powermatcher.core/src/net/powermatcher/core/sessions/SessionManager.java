@@ -64,7 +64,7 @@ public class SessionManager {
        private Map<String, String> desiredConnections = new ConcurrentHashMap<String, String>();
 
        @Activate
-       public synchronized void activate(Map<String, Object> properties) {
+       public synchronized void activate() {
              // // Config config = Configurable.createConfigurable(Config.class,
              // // properties);
              // wantedSessions = new HashSet<String>(config.activeConnections());
@@ -72,7 +72,7 @@ public class SessionManager {
        }
 
        @Reference(dynamic = true, multiple = true, optional = true)
-       public void addAgentRole(AgentRole agentRole, Map<String, Object> properties) {
+       public void addAgentRole(AgentRole agentRole) {
              Agent agent = (Agent) agentRole;
              String agentId = agent.getAgentId();
 
@@ -95,7 +95,7 @@ public class SessionManager {
        }
 
        @Reference(dynamic = true, multiple = true, optional = true)
-       public void addMatcherRole(MatcherRole matcherRole, Map<String, Object> properties) {
+       public void addMatcherRole(MatcherRole matcherRole) {
              Agent agent = (Agent) matcherRole;
              String matcherId = agent.getAgentId();
 
@@ -143,8 +143,7 @@ public class SessionManager {
              }
        }
 
-       public void removeAgentRole(AgentRole agentRole,
-                    Map<String, Object> properties) {
+       public void removeAgentRole(AgentRole agentRole) {
              Agent agent = (Agent) agentRole;
              String agentId = agent.getAgentId();
              if (agentId != null && agentRoles.get(agentId) == agentRole) {
@@ -154,8 +153,7 @@ public class SessionManager {
              }
        }
 
-       public void removeMatcherRole(MatcherRole matcherRole,
-                    Map<String, Object> properties) {
+       public void removeMatcherRole(MatcherRole matcherRole) {
              Agent agent = (Agent) matcherRole;
              String matcherId = agent.getAgentId();
              
@@ -170,7 +168,7 @@ public class SessionManager {
        }
 
        @Modified
-       public synchronized void modified(Map<String, Object> properties) {
+       public synchronized void modified() {
              // Config config = Configurable.createConfigurable(Config.class,
              // properties);
              // wantedSessions = new HashSet<String>(config.activeConnections());
