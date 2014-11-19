@@ -158,7 +158,7 @@ public class SessionManager {
             // check if auctioneer
             if (agent.getDesiredParentId() != null) {
                 desiredConnections.remove(matcherId);
-                LOGGER.info("Removed matcher»ndpoint: {}", matcherId);
+                LOGGER.info("Removed matcherEndpoint: {}", matcherId);
             }
             updateConnections();
         }
