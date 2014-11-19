@@ -4,11 +4,16 @@ import java.io.IOException;
 import java.util.List;
 import java.util.zip.DataFormatException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 
 public class CsvExpectedResultsReader {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CsvExpectedResultsReader.class);
+    
     private String inputFile;
     private CsvReader csvReader;
     private MarketBasis marketBasis;
@@ -44,7 +49,7 @@ public class CsvExpectedResultsReader {
     }
 
     private double[] createAggregatedBid(List<String> demandList) throws DataFormatException {
-        if (demandList != null && demandList.size() > 0) {
+        if (demandList != null && !demandList.isEmpty()) {
             double[] demand = new double[demandList.size()];
             int i = 0;
             for (String item : demandList) {
@@ -76,7 +81,7 @@ public class CsvExpectedResultsReader {
     }
 
     private MarketBasis createMarketBasis(List<String> marketBasisData) throws DataFormatException {
-        if (marketBasisData != null && marketBasisData.size() > 0) {
+        if (marketBasisData != null && !marketBasisData.isEmpty()) {
             String commodity = "electricity";
             String currency = "EUR";
             try {
@@ -88,7 +93,7 @@ public class CsvExpectedResultsReader {
                 this.marketBasis = mb;
             } catch (NumberFormatException e) {
                 String msg = "Number format exception parsing market basis parameters. Could not construct market basis.";
-                System.err.println(msg);
+                LOGGER.error(msg);
                 throw new DataFormatException(msg);
             }
         } else {
@@ -96,24 +101,6 @@ public class CsvExpectedResultsReader {
         }
         return this.marketBasis;
     }
-
-    // private void deductMarketBasis(List<String> demandList) throws DataFormatException {
-    // if (demandList != null && demandList.size() > 0) {
-    // String commodity = "electricity";
-    // String currency = "EUR";
-    // int priceSteps = demandList.size();
-    // double minimumPrice = 0.0;
-    // double maximumPrice = priceSteps - 1;
-    // int significance = 1;
-    // int marketRef = 0;
-    //
-    // MarketBasis mb = new MarketBasis(commodity, currency, priceSteps, minimumPrice, maximumPrice);
-    // this.marketBasis = mb;
-    // }
-    // else {
-    // throw new DataFormatException("Could not construct market basis.");
-    // }
-    // }
 
     private void closeFile() throws IOException {
         if (this.csvReader != null) {
