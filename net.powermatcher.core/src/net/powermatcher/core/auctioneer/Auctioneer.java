@@ -18,6 +18,7 @@ import net.powermatcher.api.monitoring.IncomingBidUpdateEvent;
 import net.powermatcher.api.monitoring.Observable;
 import net.powermatcher.api.monitoring.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.BidCache;
+import net.powermatcher.core.BidCache.BidCacheSnapshot;
 import net.powermatcher.core.concentrator.Concentrator;
 import net.powermatcher.core.monitoring.BaseObservable;
 
@@ -203,10 +204,12 @@ public class Auctioneer extends BaseObservable implements MatcherRole {
      * public instead of default to test some things. This should be fixed as soon as possible.
      */
     public synchronized void publishNewPrice() {
+    	   	
         Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis);
         Price newPrice = determinePrice(aggregatedBid);
 
         for (Session session : this.sessions) {
+        	newPrice.setBidNumber(this.aggregatedBids.getLastBid(session.getSessionId()).getBidNumber());
             this.publishEvent(new OutgoingPriceUpdateEvent(matcherId, session.getSessionId(),
                     timeService.currentDate(), newPrice));
 

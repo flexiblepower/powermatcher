@@ -50,11 +50,15 @@ public class BidCache {
      */
     private Bid aggregatedBid;
     
-    public class AggregatedBidInfo {
+    private int snapshotCounter;
+
+	public class BidCacheSnapshot {
     	
     	private Bid aggregatedBid;
     	
-    	private Map<String, Bid> bids;
+    	private Map<String, Bid> bidCacheSnapshot;
+
+		private int count;
 
 		public Bid getAggregatedBid() {
 			return aggregatedBid;
@@ -64,17 +68,25 @@ public class BidCache {
 			this.aggregatedBid = aggregatedBid;
 		}
 
-		public Map<String, Bid> getBids() {
-			return bids;
+		public Map<String, Bid> getBidCacheSnapshot() {
+			return bidCacheSnapshot;
 		}
 
-		public void setBids(Map<String, Bid> bids) {
-			this.bids = bids;
+		public void setBidCacheSnapshot(Map<String, Bid> bidCacheSnapshot) {
+			this.bidCacheSnapshot = bidCacheSnapshot;
+		}
+
+		public void setCount(int snapshotCounter) {
+			this.count = snapshotCounter;			
 		}    	
+		
+		public int getCount() {
+			return this.count;			
+		}  
     }
     
-    private Map<Integer, AggregatedBidInfo> aggregatedBidHistory = new HashMap<Integer, AggregatedBidInfo>();
-
+    private Map<Integer, BidCacheSnapshot> bidCacheHistory = new HashMap<Integer, BidCacheSnapshot>();
+    
     /**
      * Default constructor
      * 
@@ -100,6 +112,19 @@ public class BidCache {
      * @see #getAggregatedBid(MarketBasis)
      * @see #getLastBid(String)
      */
+    
+    public int getSnapshotCounter() {
+		return snapshotCounter;
+	}
+    
+    public int incrSnapshotCounter() {
+		return snapshotCounter =+ 1;
+	}
+
+	public void setSnapshotCounter(int snapshotCounter) {
+		this.snapshotCounter = snapshotCounter;
+	}
+	
     public synchronized Bid updateBid(final String agentId, final Bid newBid) {
         assert newBid != null;
         TimeService timeSource = this.timeService;
@@ -183,32 +208,36 @@ public class BidCache {
      */
     public synchronized Bid getAggregatedBid(final MarketBasis marketBasis) {
         if (marketBasis != null) {
-        	
-        	AggregatedBidInfo info = new AggregatedBidInfo();
-        	
+        	        	
             if (this.aggregatedBid == null || !this.aggregatedBid.getMarketBasis().equals(marketBasis)) {
+            	
+            	BidCacheSnapshot bidCacheSnapshot = new BidCacheSnapshot();
+            	
                 Bid newAggregatedBid = new Bid(marketBasis);
                 Set<String> idSet = this.bidCache.keySet();
                 for (String agentId : idSet) {
                     Bid bid = getLastBid(agentId);
-                    info.getBids().put(agentId, bid);
+                    bidCacheSnapshot.getBidCacheSnapshot().put(agentId, bid);
                     
                     newAggregatedBid = newAggregatedBid.aggregate(bid);
                 }
                 
-                this.aggregatedBid = newAggregatedBid;
-                info.setAggregatedBid(newAggregatedBid);
+                //Increment the counter to create a unique bidNumber for the aggregatedBid. Save it with the BidCacheSnapshot (not used). Update the aggregatedBid with the new Bidnumber.  
+                incrSnapshotCounter();
+                Bid newBidNr = new Bid(newAggregatedBid, getSnapshotCounter());
+                this.aggregatedBid = newBidNr;            
+               
+                bidCacheSnapshot.setCount(getSnapshotCounter());           
+                bidCacheHistory.put(getSnapshotCounter(), bidCacheSnapshot);
             }
-            
-            aggregatedBidHistory.put(this.aggregatedBid.getBidNumber(), info);
-            
+                        
             return this.aggregatedBid;
         }
         return null;
     }
     
-    public synchronized AggregatedBidInfo getAggregatedBidInfo(int aggregatedBidNumber) {
-    	return this.aggregatedBidHistory.get((Integer)aggregatedBidNumber);
+    public synchronized BidCacheSnapshot getMatchingSnapshot(int BidNumber) {
+    	return this.bidCacheHistory.get((Integer)BidNumber);
     }
 
     /**
