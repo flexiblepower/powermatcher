@@ -37,7 +37,7 @@ public interface MatcherRole {
      * 
      * @param session
      *            The session linking this {@link MatcherRole} with a specific {@link AgentRole} instance.
-     * @param newPrice
+     * @param newBid
      *            The new {@link Bid}
      */
     void updateBid(Session session, Bid newBid);
