@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.zip.DataFormatException;
 
-import net.powermatcher.api.MatcherRole;
+import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.core.sessions.SessionManager;
 import net.powermatcher.core.time.SystemTimeService;
@@ -41,7 +41,7 @@ public class ConcentratorResilienceTest extends ResilienceTest{
         this.agentList = new ArrayList<MockAgent>();
 
         // Create matcher list
-        this.matchers = new ArrayList<MatcherRole>();
+        this.matchers = new ArrayList<MatcherEndpoint>();
 
         // Get the expected results
         this.resultsReader = new CsvExpectedResultsReader(getExpectedResultsFile(testID, suffix));
@@ -68,16 +68,19 @@ public class ConcentratorResilienceTest extends ResilienceTest{
 
         // Session
         this.sessionManager = new SessionManager();
-        sessionManager.addMatcherRole(auctioneer);
-        sessionManager.addMatcherRole(concentrator);
-        sessionManager.addAgentRole(concentrator);
+
+        sessionManager.addMatcherEndpoint(auctioneer);
+        sessionManager.addMatcherEndpoint(concentrator);
+        sessionManager.addAgentEndpoint(concentrator);
+
         sessionManager.activate();
 
         // Create the bid reader
         this.bidReader = new CsvBidReader(getBidInputFile(testID, suffix), this.marketBasis);
     }
 
-    protected void sendBidsToMatcher(MatcherRole matcher) throws IOException, DataFormatException {
+    protected void sendBidsToMatcher(MatcherEndpoint matcher) throws IOException, DataFormatException {
+
         Bid bid = null;
         MockAgent newAgent;
 

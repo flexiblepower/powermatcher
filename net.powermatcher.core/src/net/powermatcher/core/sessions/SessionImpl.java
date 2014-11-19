@@ -1,7 +1,7 @@
 package net.powermatcher.core.sessions;
 
-import net.powermatcher.api.AgentRole;
-import net.powermatcher.api.MatcherRole;
+import net.powermatcher.api.AgentEndpoint;
+import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
@@ -31,12 +31,12 @@ class SessionImpl implements Session {
     private final SessionManager sessionManager;
 
     /**
-     * Id of the agentRole instance of the session.
+     * Id of the agentEndpoint instance of the session.
      */
     private final String agentId;
 
     /**
-     * Id of the matcherRole instance of the session.
+     * Id of the matcherEndpoint instance of the session.
      */
     private final String matcherId;
 
@@ -46,14 +46,14 @@ class SessionImpl implements Session {
     private final String sessionId;
 
     /**
-     * The {@link AgentRole} instance links to the {@link MatcherRole} in this {@link Session}.
+     * The {@link AgentEndpoint} instance links to the {@link MatcherEndpoint} in this {@link Session}.
      */
-    private final AgentRole agentRole;
+    private final AgentEndpoint agentEndpoint;
 
     /**
-     * The {@link MatcherRole} instance links to the {@link AgentRole} in this {@link Session}.
+     * The {@link MatcherEndpoint} instance links to the {@link AgentEndpoint} in this {@link Session}.
      */
-    private final MatcherRole matcherRole;
+    private final MatcherEndpoint matcherEndpoint;
 
     /**
      * Holds the clusterId
@@ -65,13 +65,13 @@ class SessionImpl implements Session {
      */
     private MarketBasis marketBasis = null;
 
-    public SessionImpl(SessionManager sessionManager, AgentRole agentRole, String agentId, MatcherRole matcherRole,
+    public SessionImpl(SessionManager sessionManager, AgentEndpoint agentEndpoint, String agentId, MatcherEndpoint matcherEndpoint,
             String matcherId, String sessionId) {
         this.sessionManager = sessionManager;
         this.agentId = agentId;
         this.matcherId = matcherId;
-        this.agentRole = agentRole;
-        this.matcherRole = matcherRole;
+        this.agentEndpoint = agentEndpoint;
+        this.matcherEndpoint = matcherEndpoint;
         this.sessionId = sessionId;
     }
 
@@ -124,18 +124,18 @@ class SessionImpl implements Session {
 
     @Override
     public void updatePrice(Price newPrice) {
-        agentRole.updatePrice(newPrice);
+        agentEndpoint.updatePrice(newPrice);
     }
 
     @Override
     public void updateBid(Bid newBid) {
-        matcherRole.updateBid(this, newBid);
+        matcherEndpoint.updateBid(this, newBid);
     }
 
     @Override
     public void disconnect() {
-        agentRole.matcherRoleDisconnected(this);
-        matcherRole.agentRoleDisconnected(this);
+        agentEndpoint.matcherEndpointDisconnected(this);
+        matcherEndpoint.agentEndpointDisconnected(this);
         sessionManager.disconnected(this);
     }
 }

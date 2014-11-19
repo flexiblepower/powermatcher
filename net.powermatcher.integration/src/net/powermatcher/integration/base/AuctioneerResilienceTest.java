@@ -11,7 +11,7 @@ import java.util.zip.DataFormatException;
 
 import org.junit.After;
 
-import net.powermatcher.api.MatcherRole;
+import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.core.sessions.SessionManager;
 import net.powermatcher.core.time.SystemTimeService;
 import net.powermatcher.integration.util.AuctioneerWrapper;
@@ -29,7 +29,7 @@ public class AuctioneerResilienceTest extends ResilienceTest {
         this.agentList = new ArrayList<MockAgent>();
 
         // Create matcher list
-        this.matchers = new ArrayList<MatcherRole>();
+        this.matchers = new ArrayList<MatcherEndpoint>();
 
         // Get the expected results
         this.resultsReader = new CsvExpectedResultsReader(getExpectedResultsFile(testID, suffix));
@@ -57,7 +57,7 @@ public class AuctioneerResilienceTest extends ResilienceTest {
 
         // Session
         this.sessionManager = new SessionManager();
-        sessionManager.addMatcherRole(auctioneer);
+        sessionManager.addMatcherEndpoint(auctioneer);
         sessionManager.activate();
 
         // Create the bid reader

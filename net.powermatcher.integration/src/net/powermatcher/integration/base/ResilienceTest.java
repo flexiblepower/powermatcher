@@ -7,7 +7,7 @@ import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.zip.DataFormatException;
 
-import net.powermatcher.api.MatcherRole;
+import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.core.sessions.SessionManager;
@@ -33,7 +33,7 @@ public class ResilienceTest {
     protected MarketBasis marketBasis;
 
     // List of matcher agents (for setting market basis)
-    protected List<MatcherRole> matchers;
+    protected List<MatcherEndpoint> matchers;
 
     // List of agents sending bids from
     protected List<MockAgent> agentList;
@@ -42,12 +42,12 @@ public class ResilienceTest {
     protected SessionManager sessionManager;
 
     protected void addAgent(MockAgent agent) {
-        sessionManager.addAgentRole(agent);
+        sessionManager.addAgentEndpoint(agent);
     }
 
-    protected void removeAgents(List<MockAgent> agents, MatcherRole matcher) {
+    protected void removeAgents(List<MockAgent> agents, MatcherEndpoint matcher) {
         for (MockAgent agent : agents) {
-            sessionManager.removeAgentRole(agent);
+            sessionManager.removeAgentEndpoint(agent);
         }
     }
 
@@ -67,7 +67,7 @@ public class ResilienceTest {
         return bid;
     }
 
-    protected void sendBidsToMatcher(MatcherRole matcher) throws IOException, DataFormatException {
+    protected void sendBidsToMatcher(MatcherEndpoint matcher) throws IOException, DataFormatException {
         Bid bid = null;
         MockAgent newAgent;
 

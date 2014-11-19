@@ -47,20 +47,20 @@ public class SessionManagerTest {
         auctioneer.activate(auctioneerProperties);
         this.sessionManager = new SessionManager();
         sessionManager.activate();
-        
+
         testAgent = new MockAgent(AGENT_ID);
         testAgent.setDesiredParentId("auctioneer");
     }
 
     @Test
-    public void testAddAgentRole() {
+    public void testaddAgentEndpoint() {
         // test matcherless agent
-        sessionManager.addAgentRole(testAgent);
+        sessionManager.addAgentEndpoint(testAgent);
         Session agentSession = testAgent.getSession();
         assertNull(agentSession);
 
         // test agent belonging to session.
-        sessionManager.addMatcherRole(auctioneer);
+        sessionManager.addMatcherEndpoint(auctioneer);
         agentSession = testAgent.getSession();
         assertEquals(AGENT_ID, agentSession.getAgentId());
 
@@ -70,47 +70,47 @@ public class SessionManagerTest {
         MockAgent agent2 = new MockAgent(AGENT_ID);
         agent2.setDesiredParentId(AUCTIONEER_NAME);
 
-        sessionManager.addAgentRole(agent2);
+        sessionManager.addAgentEndpoint(agent2);
         int newCode = testAgent.getSession().hashCode();
         assertThat("Codes should be equal", hashCode == newCode, is(true));
     }
 
     @Test
-    public void testAddMatcherRole() {
-        sessionManager.addAgentRole(testAgent);
-        sessionManager.addMatcherRole(auctioneer);
+    public void testaddMatcherEndpoint() {
+        sessionManager.addAgentEndpoint(testAgent);
+        sessionManager.addMatcherEndpoint(auctioneer);
 
         Session agentSession = testAgent.getSession();
         assertEquals(AUCTIONEER_NAME, agentSession.getMatcherId());
         assertEquals(CLUSTER_ID, agentSession.getClusterId());
     }
-    
+
     @Test
-    public void testRemoveAgentRole(){
-        sessionManager.addAgentRole(testAgent);
-        sessionManager.addMatcherRole(auctioneer);
-        
+    public void testremoveAgentEndpoint() {
+        sessionManager.addAgentEndpoint(testAgent);
+        sessionManager.addMatcherEndpoint(auctioneer);
+
         Session session = testAgent.getSession();
         assertThat(session, is(notNullValue()));
 
-        sessionManager.removeAgentRole(testAgent);
+        sessionManager.removeAgentEndpoint(testAgent);
+        System.out.println(testAgent.getSession().getMatcherId());
         assertThat(testAgent.getSession(), is(nullValue()));
     }
-    
+
     @Test
-    public void testRemoveMatcherRole(){
-        sessionManager.addAgentRole(testAgent);
-        sessionManager.addMatcherRole(auctioneer);
-        
+    public void testremoveMatcherEndpoint() {
+        sessionManager.addAgentEndpoint(testAgent);
+        sessionManager.addMatcherEndpoint(auctioneer);
+
         Session session = testAgent.getSession();
         assertThat(session, is(notNullValue()));
 
-        sessionManager.removeMatcherRole(auctioneer);
+        sessionManager.removeMatcherEndpoint(auctioneer);
         assertThat(testAgent.getSession(), is(nullValue()));
-        
-        //re-add matcher, session should be recreated
-        sessionManager.addMatcherRole(auctioneer);
+
+        // re-add matcher, session should be recreated
+        sessionManager.addMatcherEndpoint(auctioneer);
         assertThat(session, is(notNullValue()));
     }
 }
- 
