@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.zip.DataFormatException;
 
-import net.powermatcher.api.MatcherRole;
+import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.core.sessions.SessionManager;
@@ -48,7 +48,7 @@ public class ConcentratorResilienceTest {
     protected MockMatcherAgent matcher;
 
     // List of matcher agents (for setting market basis)
-    protected List<MatcherRole> matchers;
+    protected List<MatcherEndpoint> matchers;
 
     // List of agents sending bids from
     protected List<MockAgent> agentList;
@@ -65,12 +65,12 @@ public class ConcentratorResilienceTest {
     }
 
     protected void addAgent(MockAgent agent) {
-        sessionManager.addAgentRole(agent);
+        sessionManager.addAgentEndpoint(agent);
     }
 
-    protected void removeAgents(List<MockAgent> agents, MatcherRole matcher) {
+    protected void removeAgents(List<MockAgent> agents, MatcherEndpoint matcher) {
         for (MockAgent agent : agents) {
-            sessionManager.removeAgentRole(agent);
+            sessionManager.removeAgentEndpoint(agent);
         }
     }
 
@@ -83,7 +83,7 @@ public class ConcentratorResilienceTest {
         this.agentList = new ArrayList<MockAgent>();
 
         // Create matcher list
-        this.matchers = new ArrayList<MatcherRole>();
+        this.matchers = new ArrayList<MatcherEndpoint>();
 
         // Get the expected results
         this.resultsReader = new CsvExpectedResultsReader(getExpectedResultsFile(testID, suffix));
@@ -110,9 +110,9 @@ public class ConcentratorResilienceTest {
 
         // Session
         this.sessionManager = new SessionManager();
-        sessionManager.addMatcherRole(matcher);
-        sessionManager.addMatcherRole(matcherAgent);
-        sessionManager.addAgentRole(matcherAgent);
+        sessionManager.addMatcherEndpoint(matcher);
+        sessionManager.addMatcherEndpoint(matcherAgent);
+        sessionManager.addAgentEndpoint(matcherAgent);
         sessionManager.activate();
 
         // Create the bid reader
@@ -131,7 +131,7 @@ public class ConcentratorResilienceTest {
         return bid;
     }
 
-    protected void sendBidsToMatcher(MatcherRole matcher) throws IOException, DataFormatException {
+    protected void sendBidsToMatcher(MatcherEndpoint matcher) throws IOException, DataFormatException {
         Bid bid = null;
         MockAgent newAgent;
 

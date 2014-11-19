@@ -7,8 +7,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import net.powermatcher.api.AgentRole;
-import net.powermatcher.api.MatcherRole;
+import net.powermatcher.api.AgentEndpoint;
+import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
@@ -48,8 +48,8 @@ import aQute.bnd.annotation.metatype.Meta;
  * 
  */
 @Component(designateFactory = Concentrator.Config.class, immediate = true, provide = { ObservableAgent.class,
-        MatcherRole.class, AgentRole.class })
-public class Concentrator extends BaseAgent implements MatcherRole, AgentRole {
+        MatcherEndpoint.class, AgentEndpoint.class })
+public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEndpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Concentrator.class);
 
@@ -162,7 +162,7 @@ public class Concentrator extends BaseAgent implements MatcherRole, AgentRole {
     }
 
     @Override
-    public synchronized void matcherRoleDisconnected(Session session) {
+    public synchronized void matcherEndpointDisconnected(Session session) {
         for (Session agentSession : sessionToAgents.toArray(new Session[sessionToAgents.size()])) {
             agentSession.disconnect();
         }
@@ -185,7 +185,7 @@ public class Concentrator extends BaseAgent implements MatcherRole, AgentRole {
     }
 
     @Override
-    public synchronized void agentRoleDisconnected(Session session) {
+    public synchronized void agentEndpointDisconnected(Session session) {
         // Find session
         if (!sessionToAgents.remove(session)) {
             return;

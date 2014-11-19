@@ -2,14 +2,14 @@ package net.powermatcher.api.monitoring;
 
 import java.util.Date;
 
-import net.powermatcher.api.AgentRole;
+import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
 
 /**
  * The base class for update events.
  * 
- * {@link AgentRole} subclasses implement the {@link ObservableAgent} interface and can send an {@link AgentEvent} to
+ * {@link AgentEndpoint} subclasses implement the {@link ObservableAgent} interface and can send an {@link AgentEvent} to
  * every {@link AgentObserver} that observes this class.
  * 
  * @author FAN
@@ -19,17 +19,17 @@ import net.powermatcher.api.TimeService;
 public abstract class AgentEvent {
 
     /**
-     * The id of cluster the {@link AgentRole} subclass sending the UpdateEvent is running in.
+     * The id of cluster the {@link AgentEndpoint} subclass sending the UpdateEvent is running in.
      */
     private final String clusterId;
 
     /**
-     * The id of the {@link AgentRole} subclass sending the UpdateEvent.
+     * The id of the {@link AgentEndpoint} subclass sending the UpdateEvent.
      */
     private final String agentId;
 
     /**
-     * The id of the {@link Session} of the {@link AgentRole} subclass sending the UpdateEvent
+     * The id of the {@link Session} of the {@link AgentEndpoint} subclass sending the UpdateEvent
      */
     private final String sessionId;
 
@@ -47,11 +47,11 @@ public abstract class AgentEvent {
      * Constructs an instance of this class.
      * 
      * @param clusterId
-     *            The id of the cluster the {@link AgentRole} subclass sending the UpdateEvent is running in.
+     *            The id of the cluster the {@link AgentEndpoint} subclass sending the UpdateEvent is running in.
      * @param agentId
-     *            The id of the {@link AgentRole} subclass sending the UpdateEvent.
+     *            The id of the {@link AgentEndpoint} subclass sending the UpdateEvent.
      * @param sessionId
-     *            The id of the {@link Session} of the {@link AgentRole} subclass sending the UpdateEvent
+     *            The id of the {@link Session} of the {@link AgentEndpoint} subclass sending the UpdateEvent
      * @param timestamp
      *            The {@link Date} received from the {@link TimeService}
      */

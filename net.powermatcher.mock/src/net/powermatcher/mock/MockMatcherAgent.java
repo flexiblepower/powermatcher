@@ -3,13 +3,13 @@ package net.powermatcher.mock;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.powermatcher.api.MatcherRole;
+import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 
-public class MockMatcherAgent extends MockAgent implements MatcherRole {
+public class MockMatcherAgent extends MockAgent implements MatcherEndpoint {
 
     private Map<String, Object> matcherProperties;
     private Bid lastReceivedBid;
@@ -31,7 +31,7 @@ public class MockMatcherAgent extends MockAgent implements MatcherRole {
     }
 
     @Override
-    public void agentRoleDisconnected(Session session) {
+    public void agentEndpointDisconnected(Session session) {
         this.session = null;
     }
 
