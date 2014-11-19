@@ -93,6 +93,10 @@ public class MockAgent implements Agent, AgentRole, ObservableAgent {
     public void removeObserver(AgentObserver observer) {
         observers.remove(observer);
     }
+    
+    public Session getSession(){
+        return this.session;
+    }
 
     public void publishEvent(AgentEvent event) {
         for (AgentObserver observer : observers) {
