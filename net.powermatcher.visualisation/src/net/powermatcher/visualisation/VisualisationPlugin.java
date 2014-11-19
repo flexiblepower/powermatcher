@@ -2,7 +2,6 @@ package net.powermatcher.visualisation;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.net.URL;
 
 import javax.servlet.Servlet;
@@ -27,19 +26,21 @@ public class VisualisationPlugin extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-       
+
         String path = req.getPathInfo();
-                
+
         if (path.equals(BASE_PATH)) {
             resp.sendRedirect(BASE_PATH.substring(1) + "/index.html");
             return;
         }
 
+        // html pages have to be sent here with a Stream because the getResource would only return the html page, not
+        // the rest.
         else if (path.endsWith(".html")) {
             resp.setContentType("text/html");
-            
+
             path = path.substring(path.lastIndexOf("/") + 1);
-            
+
             InputStream input = getClass().getClassLoader().getResourceAsStream(path);
             if (input == null) {
                 LOGGER.debug("Could not find file {}", path);
@@ -48,7 +49,7 @@ public class VisualisationPlugin extends HttpServlet {
                 LOGGER.debug("Serving file {}", path);
                 IOUtils.copy(input, resp.getWriter());
             }
-        }        
+        }
     }
 
     @Override
@@ -123,26 +124,31 @@ public class VisualisationPlugin extends HttpServlet {
         // w.close();
     }
 
-//    private void sendJson(HttpServletResponse resp, String graphJson) {
-//        LOGGER.debug("Sending nodes and edges as JSON");
-//        resp.setContentType("application/json");
-//        try {
-//            PrintWriter w = resp.getWriter();
-//            w.print(graphJson);
-//            w.close();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
+    // private void sendJson(HttpServletResponse resp, String graphJson) {
+    // LOGGER.debug("Sending nodes and edges as JSON");
+    // resp.setContentType("application/json");
+    // try {
+    // PrintWriter w = resp.getWriter();
+    // w.print(graphJson);
+    // w.close();
+    // } catch (IOException e) {
+    // e.printStackTrace();
+    // }
+    // }
 
-    //It's set to private and never used locally. But OSGi calls this method, so don't remove it!
     private URL getResource(String path) {
+
+        // I know it's set to private and never used locally. But OSGi's AbstractWebConsole.doGet calls this method, so
+        // don't remove it!
+        // if you return null, it'll continue with AbstractWebConsole.doGet and return the resource. If you return null,
+        // it calls this.doGet()
+
         if (path.endsWith(".js") || path.endsWith(".png") || path.endsWith(".css")) {
-            path = path.substring(path.lastIndexOf("/") + 1);
+            path = path.replaceAll(BASE_PATH + "/", "");
             URL url = getClass().getClassLoader().getResource(path);
             return url;
         } else {
-            //if you return null, it calls to doGet
+            // if you return null, it calls to doGet
             return null;
         }
     }
