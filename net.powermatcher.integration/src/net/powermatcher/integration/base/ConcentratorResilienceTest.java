@@ -17,19 +17,21 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.core.sessions.SessionManager;
 import net.powermatcher.core.time.SystemTimeService;
-import net.powermatcher.integration.util.AuctioneerWrapper;
+import net.powermatcher.integration.util.ConcentratorWrapper;
 import net.powermatcher.integration.util.CsvBidReader;
 import net.powermatcher.integration.util.CsvExpectedResultsReader;
 import net.powermatcher.mock.MockAgent;
+import net.powermatcher.mock.MockMatcherAgent;
 
 import org.junit.After;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ResilienceTest {
+public class ConcentratorResilienceTest {
 
-    private static final String MATCHERNAME = "auctioneer";
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResilienceTest.class);
+    private static final String MATCHERAGENTNAME = "auctioneer";
+    private static final String CONCENTRATOR_NAME = "concentrator";
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConcentratorResilienceTest.class);
 
     // Reader for the bid info input file
     protected CsvBidReader bidReader;
@@ -41,7 +43,9 @@ public class ResilienceTest {
     protected MarketBasis marketBasis;
 
     // The direct upstream matcher for the agents
-    protected AuctioneerWrapper auctioneer;
+    protected ConcentratorWrapper matcherAgent;
+
+    protected MockMatcherAgent matcher;
 
     // List of matcher agents (for setting market basis)
     protected List<MatcherEndpoint> matchers;
@@ -57,7 +61,7 @@ public class ResilienceTest {
         if (this.bidReader != null) {
             this.bidReader.closeFile();
         }
-        removeAgents(agentList, this.auctioneer);
+        removeAgents(agentList, this.matcherAgent);
     }
 
     protected void addAgent(MockAgent agent) {
@@ -85,29 +89,30 @@ public class ResilienceTest {
         this.resultsReader = new CsvExpectedResultsReader(getExpectedResultsFile(testID, suffix));
 
         this.marketBasis = resultsReader.getMarketBasis();
-        this.auctioneer = new AuctioneerWrapper();
-        Map<String, Object> auctioneerProperties = new HashMap<>();
-        auctioneerProperties.put("id", MATCHERNAME);
-        auctioneerProperties.put("matcherId", MATCHERNAME);
-        auctioneerProperties.put("agentId", MATCHERNAME);
-        auctioneerProperties.put("commodity", "electricity");
-        auctioneerProperties.put("currency", "EUR");
-        auctioneerProperties.put("priceSteps", marketBasis.getPriceSteps());
-        auctioneerProperties.put("minimumPrice", marketBasis.getMinimumPrice());
-        auctioneerProperties.put("maximumPrice", marketBasis.getMaximumPrice());
-        auctioneerProperties.put("bidTimeout", "600");
-        auctioneerProperties.put("priceUpdateRate", "1");
-        auctioneerProperties.put("clusterId", "testCluster");
+        this.matcherAgent = new ConcentratorWrapper();
+        Map<String, Object> concentratorProperties = new HashMap<>();
+        concentratorProperties = new HashMap<String, Object>();
+        concentratorProperties.put("matcherId", CONCENTRATOR_NAME);
+        concentratorProperties.put("desiredParentId", MATCHERAGENTNAME);
+        concentratorProperties.put("bidTimeout", "600");
+        concentratorProperties.put("bidUpdateRate", "30");
+        concentratorProperties.put("agentId", CONCENTRATOR_NAME);
 
-        this.matchers.add(this.auctioneer);
+        this.matchers.add(this.matcherAgent);
 
-        auctioneer.setExecutorService(new ScheduledThreadPoolExecutor(10));
-        auctioneer.setTimeService(new SystemTimeService());
-        auctioneer.activate(auctioneerProperties);
+        matcherAgent.setExecutorService(new ScheduledThreadPoolExecutor(10));
+        matcherAgent.setTimeService(new SystemTimeService());
+        matcherAgent.activate(concentratorProperties);
+
+        matcher = new MockMatcherAgent(MATCHERAGENTNAME);
+        matcher.setMarketBasis(marketBasis);
+        this.matchers.add(matcher);
 
         // Session
         this.sessionManager = new SessionManager();
-        sessionManager.addMatcherEndpoint(auctioneer);
+        sessionManager.addMatcherEndpoint(matcher);
+        sessionManager.addMatcherEndpoint(matcherAgent);
+        sessionManager.addAgentEndpoint(matcherAgent);
         sessionManager.activate();
 
         // Create the bid reader
@@ -144,6 +149,7 @@ public class ResilienceTest {
                     for (int j = 0; j < demand.length; j++) {
                         aggregatedDemand[j] = aggregatedDemand[j] + demand[j];
                     }
+
                     if (agentList.size() > i) {
                         newAgent = this.agentList.get(i);
                     } else {
@@ -159,7 +165,7 @@ public class ResilienceTest {
                 bid = null;
             }
         } while (!stop);
-        //auctioneer.publishNewPrice();
+        matcherAgent.doBidUpdate();
         // Write aggregated demand array
         LOGGER.info("Aggregated demand: ");
         for (int j = 0; j < aggregatedDemand.length; j++) {
@@ -175,10 +181,9 @@ public class ResilienceTest {
         String agentId = "agent" + (i + 1);
         MockAgent newAgent = new MockAgent(agentId);
         this.agentList.add(i, newAgent);
-        
-        newAgent.setDesiredParentId(MATCHERNAME);
-        addAgent(newAgent);
 
+        newAgent.setDesiredParentId(CONCENTRATOR_NAME);
+        addAgent(newAgent);
         return newAgent;
     }
 
@@ -204,10 +209,6 @@ public class ResilienceTest {
 
     protected void checkEquilibriumPrice() {
         double expPrice = this.resultsReader.getEquilibriumPrice();
-
-        // TODO this is direct call for the Auctioneer to update its prices
-        // because the scheduler doesn't work properly. Remove this once it does
-        auctioneer.publishNewPrice();
 
         // Verify the price received by the agents
         for (MockAgent agent : agentList) {

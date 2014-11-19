@@ -1,18 +1,10 @@
 package net.powermatcher.integration.auctioneer;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.zip.DataFormatException;
 
-import net.powermatcher.api.data.MarketBasis;
-import net.powermatcher.core.auctioneer.Auctioneer;
-import net.powermatcher.core.sessions.SessionManager;
-import net.powermatcher.core.time.SystemTimeService;
 import net.powermatcher.integration.base.ResilienceTest;
 
-import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -63,7 +55,7 @@ public class AuctioneerResilienceAFPriceTests extends ResilienceTest {
     private void performEquilibriumTest(String testID, String suffix) throws IOException, DataFormatException {
         prepareTest(testID, suffix);
 
-        sendBidsToMatcher(this.matcherAgent);
+        sendBidsToMatcher(this.auctioneer);
 
         checkEquilibriumPrice();
     }

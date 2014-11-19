@@ -3,16 +3,18 @@ package net.powermatcher.mock;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.powermatcher.api.MatcherRole;
+import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
+import net.powermatcher.api.data.Price;
 
-public class MockMatcherAgent extends MockAgent implements MatcherRole {
+public class MockMatcherAgent extends MockAgent implements MatcherEndpoint {
 
     private Map<String, Object> matcherProperties;
     private Bid lastReceivedBid;
     private MarketBasis marketBasis;
+    private Session session;
 
     public MockMatcherAgent(String agentId) {
         super(agentId);
@@ -24,11 +26,13 @@ public class MockMatcherAgent extends MockAgent implements MatcherRole {
     public boolean connectToAgent(Session session) {
         session.setMarketBasis(this.marketBasis);
         session.setClusterId(this.matcherProperties.get("matcherId").toString());
+        this.session = session;
         return true;
     }
 
     @Override
-    public void agentRoleDisconnected(Session session) {
+    public void agentEndpointDisconnected(Session session) {
+        this.session = null;
     }
 
     @Override
@@ -50,6 +54,10 @@ public class MockMatcherAgent extends MockAgent implements MatcherRole {
 
     public void setMarketBasis(MarketBasis marketBasis) {
         this.marketBasis = marketBasis;
+    }
+    
+    public void publishPrice(Price price){
+        session.updatePrice(price);
     }
 
 }

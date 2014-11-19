@@ -8,7 +8,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import net.powermatcher.api.MatcherRole;
+import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
@@ -53,8 +53,8 @@ import aQute.bnd.annotation.metatype.Meta;
  * 
  */
 @Component(designateFactory = Auctioneer.Config.class, immediate = true, provide = { ObservableAgent.class,
-        MatcherRole.class })
-public class Auctioneer extends BaseAgent implements MatcherRole {
+        MatcherEndpoint.class })
+public class Auctioneer extends BaseAgent implements MatcherEndpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Auctioneer.class);
 
@@ -62,9 +62,6 @@ public class Auctioneer extends BaseAgent implements MatcherRole {
     public static interface Config {
         @Meta.AD(deflt = "auctioneer")
         String agentId();
-
-        @Meta.AD(deflt = "auctioneer")
-        String matcherId();
 
         @Meta.AD(deflt = "DefaultCluster")
         String clusterId();
@@ -138,7 +135,6 @@ public class Auctioneer extends BaseAgent implements MatcherRole {
 
         this.setClusterId(config.clusterId());
         this.setAgentId(config.agentId());
-        this.matcherId = config.matcherId();
 
         scheduledFuture = this.scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
@@ -174,7 +170,7 @@ public class Auctioneer extends BaseAgent implements MatcherRole {
     }
 
     @Override
-    public synchronized void agentRoleDisconnected(Session session) {
+    public synchronized void agentEndpointDisconnected(Session session) {
         // Find session
         if (!sessions.remove(session)) {
             return;
