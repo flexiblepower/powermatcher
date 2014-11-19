@@ -14,6 +14,9 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
 import aQute.bnd.annotation.component.Component;
 
 @Component(provide = Servlet.class, properties = { "felix.webconsole.title=Powermatcher cluster visualizer",
@@ -56,6 +59,29 @@ public class VisualisationPlugin extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         LOGGER.info("In POST");
+
+        // TODO For some reason, the frontend does a POST with res/icons.xml. Adding this for now to prevent json parser
+        // errors.
+        if (req.getPathInfo().endsWith("icons.xml")) {
+            return;
+        }
+
+        // TODO move load to doGet()
+
+        String incommingJson = req.getReader().readLine();
+
+        // TODO JsonSyntaxException? Send a errorMessage?
+        JsonObject jobject = new Gson().fromJson(incommingJson, JsonObject.class);
+
+        String requestKind = jobject.get("requestKind").getAsString();
+
+        if (requestKind.equals("saveState")) {
+            LOGGER.info("Saving state");
+
+        } else if (requestKind.equals("loadState")) {
+
+            LOGGER.info("Loading state");
+        }
 
         // PrintWriter w = resp.getWriter();
         //

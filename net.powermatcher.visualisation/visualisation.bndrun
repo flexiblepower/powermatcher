@@ -31,5 +31,6 @@
 	org.apache.felix.webconsole.plugins.ds;version='[1.0.0,1.0.1)',\
 	org.slf4j.osgi-over-slf4j;version='[1.7.7,1.7.8)',\
 	osgi.cmpn;version='[4.3.1,4.3.2)',\
-	slf4j.api;version='[1.7.7,1.7.8)'
+	slf4j.api;version='[1.7.7,1.7.8)',\
+	com.google.gson;version='[2.2.4,2.2.5)'
 -runvm: -Dorg.eclipse.jetty.LEVEL=INFO
