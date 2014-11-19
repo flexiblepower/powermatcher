@@ -23,7 +23,7 @@ import net.powermatcher.core.concentrator.Concentrator;
  * @version 1.0
  * 
  */
-class SessionImpl implements Session {
+public class SessionImpl implements Session {
 
     /**
      * The sessionmanager collects the connections in the cluster.
@@ -137,5 +137,13 @@ class SessionImpl implements Session {
         agentRole.matcherRoleDisconnected(this);
         matcherRole.agentRoleDisconnected(this);
         sessionManager.disconnected(this);
+    }
+
+    public AgentRole getAgentRole() {
+        return agentRole;
+    }
+
+    public MatcherRole getMatcherRole() {
+        return matcherRole;
     }
 }

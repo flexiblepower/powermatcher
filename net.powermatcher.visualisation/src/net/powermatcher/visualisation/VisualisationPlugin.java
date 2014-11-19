@@ -3,12 +3,20 @@ package net.powermatcher.visualisation;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import net.powermatcher.api.AgentRole;
+import net.powermatcher.api.MatcherRole;
+import net.powermatcher.api.Session;
+import net.powermatcher.core.sessions.SessionManager;
+import net.powermatcher.core.sessions.SessionImpl;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -20,12 +28,14 @@ import com.google.gson.JsonObject;
 import aQute.bnd.annotation.component.Component;
 
 @Component(provide = Servlet.class, properties = { "felix.webconsole.title=Powermatcher cluster visualizer",
-        "felix.webconsole.label=pm-cluster-visualizer" })
+        "felix.webconsole.label=pm-cluster-visualizer" }, immediate = true)
 public class VisualisationPlugin extends HttpServlet {
     private static final long serialVersionUID = 7146852312931261310L;
     private static final Logger LOGGER = LoggerFactory.getLogger(VisualisationPlugin.class);
 
     private static final String BASE_PATH = "/pm-cluster-visualizer";
+
+    private Map<String, VisualElement> activeElements = new HashMap<>();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -58,19 +68,17 @@ public class VisualisationPlugin extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-        LOGGER.info("In POST");
-
         // TODO For some reason, the frontend does a POST with res/icons.xml. Adding this for now to prevent json parser
         // errors.
         if (req.getPathInfo().endsWith("icons.xml")) {
             return;
         }
 
-        // TODO move load to doGet()
+        // TODO move load to doGet()?
 
         String incommingJson = req.getReader().readLine();
 
-        // TODO JsonSyntaxException? Send a errorMessage?
+        // TODO JsonSyntaxException? Send an errorMessage?
         JsonObject jobject = new Gson().fromJson(incommingJson, JsonObject.class);
 
         String requestKind = jobject.get("requestKind").getAsString();
@@ -79,89 +87,106 @@ public class VisualisationPlugin extends HttpServlet {
             LOGGER.info("Saving state");
 
         } else if (requestKind.equals("loadState")) {
-
             LOGGER.info("Loading state");
-        }
 
-        // PrintWriter w = resp.getWriter();
-        //
-        // String path = req.getPathInfo();
-        // if (path.startsWith("/fpai-connection-manager")) {
-        // path = path.substring(24);
-        // if (!path.isEmpty() && path.charAt(0) == '/') {
-        // path = path.substring(1);
-        // }
-        // }
-        // log.debug("path: " + path);
-        // if (path.endsWith(".json")) {
-        // resp.setContentType("application/json");
-        // }
-        // if (path.equals("autoconnect.json")) {
-        // log.debug("autoconnect called");
-        // connectionManager.autoConnect();
-        // w.print("{\"autoconnected\": true, \"class\": \"\"}");
-        // } else if (path.equals("connect.json")) {
-        // final String id = req.getParameter("id");
-        // if (connectionCache.containsKey(id)) {
-        // PotentialConnection connection = connectionCache.get(id);
-        // if (!connection.isConnected()) {
-        // log.debug("Calling connect for " + id);
-        // try {
-        // connection.connect();
-        // w.print("{\"status\": \"Connected " + id + "\", \"class\": \"\"}");
-        // } catch (IllegalStateException e) {
-        // log.error(e.getMessage());
-        // e.printStackTrace();
-        // w.print("{\"status\": \"Connect was called for " + id
-        // + ", but " + e.getMessage() + "\", \"class\": \"ui-state-error\"}");
-        // }
-        //
-        // } else {
-        // log.error("Connect was called for " + id + ", but it was already connected");
-        // w.print("{\"status\": \"Connect was called for " + id
-        // + ", but it was already connected\", \"class\": \"ui-state-error\"}");
-        // }
-        // } else {
-        // log.error("Connect was called for " + id + ", but it was not found in the cache");
-        // w.print("{\"status\": \"Connect was called for " + id
-        // + ", but it was not found in the cache\", \"class\": \"ui-state-error\"}");
-        // }
-        // } else if (path.equals("disconnect.json")) {
-        // final String id = req.getParameter("id");
-        // if (connectionCache.containsKey(id)) {
-        // PotentialConnection connection = connectionCache.get(id);
-        // if (connection.isConnected()) {
-        // log.debug("Calling disconnect for " + id);
-        // connection.disconnect();
-        // w.print("{\"status\": \"Disconnected " + id + "\", \"class\": \"\"}");
-        // } else {
-        // w.print("{\"status\": \"Disconnect was called for " + id
-        // + ", but it was already disconnected\", \"class\": \"ui-state-error\"}");
-        // log.error("Disconnect was called for " + id + ", but it was already disconnected");
-        // }
-        // } else {
-        // w.print("{\"status\": \"Disonnect was called for " + id
-        // + ", but it was not found in the cache\", \"class\": \"ui-state-error\"}");
-        // log.error("Disonnect was called for " + id + ", but it was not found in the cache");
-        // }
-        // } else {
-        // w.print("POST Not yet implemented: " + path);
-        // }
-        // w.close();
+            String output = handleLoadState();
+            resp.getWriter().write(output);
+        }
     }
 
-    // private void sendJson(HttpServletResponse resp, String graphJson) {
-    // LOGGER.debug("Sending nodes and edges as JSON");
-    // resp.setContentType("application/json");
-    // try {
-    // PrintWriter w = resp.getWriter();
-    // w.print(graphJson);
-    // w.close();
-    // } catch (IOException e) {
-    // e.printStackTrace();
-    // }
-    // }
+    private String handleLoadState() {
 
+        StringBuilder sb = new StringBuilder();
+
+        // Common first object
+        sb.append("{\"zoom\":1,\"fileName\":\"\",\"exportPath\":\"\",\"reference\":0,\"min\":0,\"max\":0.99,\"step\":100,\"significance\":2}ARRAYSPLIT[");
+
+        processSessions();
+        procssSeparate();
+
+        for (VisualElement v : activeElements.values()) {
+            sb.append(v.toString());
+            sb.append(",");
+        }
+
+        sb.deleteCharAt(sb.lastIndexOf(","));
+        sb.append("]");
+
+        // had to be cleared for next time, in case sessions are removed.
+        activeElements = new HashMap<>();
+
+        return sb.toString();
+    }
+
+    private void procssSeparate() {
+
+        // TODO copy off agentRoles and matcherRoles? Concurrency?
+        for (String s : SessionManager.getAgentRoles().keySet()) {
+
+            if (!activeElements.containsKey(s)) {
+                createAgentElement(SessionManager.getAgentRoles().get(s), s);
+            }
+        }
+
+        for (String s : SessionManager.getMatcherRoles().keySet()) {
+            if (!activeElements.containsKey(s)) {
+                createMatcherElement(SessionManager.getMatcherRoles().get(s), s);
+            }
+        }
+    }
+
+    private void processSessions() {
+
+        for (Session s : SessionManager.getActiveSessions().values()) {
+
+            if (s instanceof SessionImpl) {
+                SessionImpl temp = (SessionImpl) s;
+
+                VisualElement agentElement = createAgentElement(temp.getAgentRole(), temp.getAgentId());
+
+                VisualElement matcherElement = createMatcherElement(temp.getMatcherRole(), temp.getMatcherId());
+                matcherElement.addChild(agentElement);
+            }
+        }
+    }
+
+    private VisualElement createMatcherElement(MatcherRole matcherRole, String matcherId) {
+        Kind kind = null;
+
+        if (matcherRole instanceof AgentRole) {
+            kind = Kind.CONCENTRATOR;
+        } else {
+            kind = Kind.AUCTIONEER;
+        }
+
+        return createVisualElement(matcherId, kind);
+    }
+
+    private VisualElement createAgentElement(AgentRole agentRole, String agentId) {
+        Kind kind = null;
+
+        if (agentRole instanceof MatcherRole) {
+            kind = Kind.CONCENTRATOR;
+        } else {
+            kind = Kind.DEVICEAGENT;
+        }
+
+        return createVisualElement(agentId, kind);
+    }
+
+    private VisualElement createVisualElement(String id, Kind kind) {
+        VisualElement output = null;
+
+        if (activeElements.containsKey(id)) {
+            output = activeElements.get(id);
+        } else {
+            output = new VisualElement(kind, id);
+            activeElements.put(output.getName(), output);
+        }
+        return output;
+    }
+
+    @SuppressWarnings("unused")
     private URL getResource(String path) {
 
         // I know it's set to private and never used locally. But OSGi's AbstractWebConsole.doGet calls this method, so

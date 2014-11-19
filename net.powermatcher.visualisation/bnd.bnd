@@ -4,7 +4,8 @@ Bundle-Version: 1.0.0.${tstamp}
 	org.apache.felix.http.servlet-api,\
 		org.apache.commons.io,\
 	slf4j.api,\
-	com.google.gson
+	com.google.gson,\
+	net.powermatcher.core;version=latest
 Private-Package:  \
 net.powermatcher.visualisation
 

@@ -42,22 +42,22 @@ public class SessionManager {
     /**
      * Holds the agentRoles
      */
-    private ConcurrentMap<String, AgentRole> agentRoles = new ConcurrentHashMap<String, AgentRole>();
+    private static ConcurrentMap<String, AgentRole> agentRoles = new ConcurrentHashMap<String, AgentRole>();
 
     /**
      * Holds the matcherRoles
      */
-    private ConcurrentMap<String, MatcherRole> matcherRoles = new ConcurrentHashMap<String, MatcherRole>();
+    private static ConcurrentMap<String, MatcherRole> matcherRoles = new ConcurrentHashMap<String, MatcherRole>();
 
     /**
      * Holds the activeSessions
      */
-    private Map<String, Session> activeSessions = new ConcurrentHashMap<String, Session>();
+    private static Map<String, Session> activeSessions = new ConcurrentHashMap<String, Session>();
 
     /**
      * Holds the desiredConnections
      */
-    private Map<String, String> desiredConnections = new ConcurrentHashMap<String, String>();
+    private static Map<String, String> desiredConnections = new ConcurrentHashMap<String, String>();
 
     @Activate
     public synchronized void activate() {
@@ -167,5 +167,21 @@ public class SessionManager {
 
     void disconnected(SessionImpl sessionImpl) {
         activeSessions.remove(sessionImpl.getSessionId());
+    }
+    
+    public static Map<String, Session> getActiveSessions() {
+        return activeSessions;
+    }
+
+    public static Map<String, String> getDesiredConnections() {
+        return desiredConnections;
+    }
+
+    public static ConcurrentMap<String, AgentRole> getAgentRoles() {
+        return agentRoles;
+    }
+
+    public static ConcurrentMap<String, MatcherRole> getMatcherRoles() {
+        return matcherRoles;
     }
 }
