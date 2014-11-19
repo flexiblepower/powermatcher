@@ -94,7 +94,6 @@ public class SessionManagerTest {
         assertThat(session, is(notNullValue()));
 
         sessionManager.removeAgentEndpoint(testAgent);
-        System.out.println(testAgent.getSession().getMatcherId());
         assertThat(testAgent.getSession(), is(nullValue()));
     }
 

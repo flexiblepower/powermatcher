@@ -143,18 +143,6 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
     // deactivate? SessiontoMatcher is normally only set once, so maybe not.
     @Deactivate
     public void deactivate() {
-        for (Session session : sessionToAgents.toArray(new Session[sessionToAgents.size()])) {
-            session.disconnect();
-        }
-
-        if (sessionToMatcher != null) {
-            sessionToMatcher.disconnect();
-        }
-
-        if (!sessionToAgents.isEmpty()) {
-            LOGGER.warn("Could not disconnect all sessions. Left: {}", sessionToAgents);
-        }
-
         scheduledFuture.cancel(false);
 
         LOGGER.info("Agent [{}], deactivated", config.agentId());
