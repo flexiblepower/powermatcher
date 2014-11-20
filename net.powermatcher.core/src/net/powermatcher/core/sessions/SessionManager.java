@@ -1,12 +1,13 @@
 package net.powermatcher.core.sessions;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import net.powermatcher.api.Agent;
-import net.powermatcher.api.AgentRole;
-import net.powermatcher.api.MatcherRole;
+import net.powermatcher.api.AgentEndpoint;
+import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.concentrator.Concentrator;
@@ -22,42 +23,42 @@ import aQute.bnd.annotation.component.Reference;
 /**
  * <p>
  * This class represents a {@link SessionManager} component which will store the active sessions between an an
- * {@link AgentRole} and a {@link MatcherRole} object.
+ * {@link AgentEndpoint} and a {@link MatcherEndpoint} object.
  * </p>
  * 
  * <p>
  * It is responsible for connecting and disconnecting an {@link Auctioneer}, {@link Concentrator} and agents. In
  * <code>activeSessions</code> the {@link Session} will be stored. The {@link SessionManager} will connect a
- * {@link MatcherRole} to an agent and an {@link AgentRole} with a {@link MatcherRole}.
+ * {@link MatcherEndpoint} to an agent and an {@link AgentEndpoint} with a {@link MatcherEndpoint}.
  * 
  * @author FAN
  * @version 1.0
  * 
  */
 @Component(immediate = true)
-public class SessionManager {
+public class SessionManager implements SessionManagerInterface{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionManager.class);
 
     /**
-     * Holds the agentRoles
+     * Holds the agentEndpoints
      */
-    private static ConcurrentMap<String, AgentRole> agentRoles = new ConcurrentHashMap<String, AgentRole>();
+    private ConcurrentMap<String, AgentEndpoint> agentEndpoints = new ConcurrentHashMap<String, AgentEndpoint>();
 
     /**
-     * Holds the matcherRoles
+     * Holds the matcherEndpoints
      */
-    private static ConcurrentMap<String, MatcherRole> matcherRoles = new ConcurrentHashMap<String, MatcherRole>();
+    private ConcurrentMap<String, MatcherEndpoint> matcherEndpoints = new ConcurrentHashMap<String, MatcherEndpoint>();
 
     /**
      * Holds the activeSessions
      */
-    private static Map<String, Session> activeSessions = new ConcurrentHashMap<String, Session>();
+    private Map<String, Session> activeSessions = new ConcurrentHashMap<String, Session>();
 
     /**
      * Holds the desiredConnections
      */
-    private static Map<String, String> desiredConnections = new ConcurrentHashMap<String, String>();
+    private Map<String, String> desiredConnections = new ConcurrentHashMap<String, String>();
 
     @Activate
     public synchronized void activate() {
@@ -65,8 +66,8 @@ public class SessionManager {
     }
 
     @Reference(dynamic = true, multiple = true, optional = true)
-    public void addAgentRole(AgentRole agentRole) {
-        Agent agent = (Agent) agentRole;
+    public void addAgentEndpoint(AgentEndpoint agentEndpoint) {
+        Agent agent = (Agent) agentEndpoint;
         String agentId = agent.getAgentId();
 
         // Modified agent
@@ -78,8 +79,8 @@ public class SessionManager {
         LOGGER.debug("Added new wanted connection: [{}]", agentId + ":" + agent.getDesiredParentId());
 
         if (agentId == null) {
-            LOGGER.warn("Registered an agent with no agentId: " + agentRole);
-        } else if (agentRoles.putIfAbsent(agentId, agentRole) != null) {
+            LOGGER.warn("Registered an agent with no agentId: " + agentEndpoint);
+        } else if (agentEndpoints.putIfAbsent(agentId, agentEndpoint) != null) {
             LOGGER.warn("An agent with the id " + agentId + " was already registered");
         } else {
             updateConnections();
@@ -87,25 +88,14 @@ public class SessionManager {
     }
 
     @Reference(dynamic = true, multiple = true, optional = true)
-    public void addMatcherRole(MatcherRole matcherRole) {
-        Agent agent = (Agent) matcherRole;
-        String matcherId = agent.getAgentId();
+    public void addMatcherEndpoint(MatcherEndpoint matcherEndpoint) {
+        Agent agent = (Agent) matcherEndpoint;
+        String agentId = agent.getAgentId();
 
-        // Modified matcher
-        if (desiredConnections.containsKey(matcherId)) {
-            desiredConnections.remove(matcherId);
-        }
-
-        // check if auctioneer
-        if (agent.getDesiredParentId() != null) {
-            desiredConnections.put(matcherId, agent.getDesiredParentId());
-            LOGGER.debug("Added new wanted connection: [{}]", matcherId + ":" + agent.getDesiredParentId());
-        }
-
-        if (matcherId == null) {
-            LOGGER.warn("Registered an matcher with no matcherId: " + matcherRole);
-        } else if (matcherRoles.putIfAbsent(matcherId, matcherRole) != null) {
-            LOGGER.warn("An matcher with the id " + matcherId + " was already registered");
+        if (agentId == null) {
+            LOGGER.warn("Registered an matcher with no matcherId: " + matcherEndpoint);
+        } else if (matcherEndpoints.putIfAbsent(agentId, matcherEndpoint) != null) {
+            LOGGER.warn("An matcher with the id " + agentId + " was already registered");
         } else {
             updateConnections();
         }
@@ -116,47 +106,50 @@ public class SessionManager {
             String agentId = desiredAgentId;
             String matcherId = desiredConnections.get(desiredAgentId);
 
-            AgentRole agentRole = agentRoles.get(desiredAgentId);
-            MatcherRole matcherRole = matcherRoles.get(matcherId);
+            AgentEndpoint agentEndpoint = agentEndpoints.get(desiredAgentId);
+            MatcherEndpoint matcherEndpoint = matcherEndpoints.get(matcherId);
 
-            if (agentRole != null && matcherRole != null) {
+            if (agentEndpoint != null && matcherEndpoint != null) {
                 final String sessionId = agentId + ":" + matcherId;
                 if (activeSessions.containsKey(sessionId)) {
                     // session already exists
                     continue;
                 }
                 LOGGER.info("Connecting session: [{}]", agentId + ":" + matcherId);
-                Session session = new SessionImpl(this, agentRole, agentId, matcherRole, matcherId, sessionId);
-                if (matcherRole.connectToAgent(session)) {
-                    agentRole.connectToMatcher(session);
+                Session session = new SessionImpl(this, agentEndpoint, agentId, matcherEndpoint, matcherId, sessionId);
+                if (matcherEndpoint.connectToAgent(session)) {
+                    agentEndpoint.connectToMatcher(session);
                     activeSessions.put(sessionId, session);
                     LOGGER.info("Added new active session: {}", sessionId);
+                }
+            } else {
+                final String removeSessionId = desiredAgentId + ":" + matcherId;
+                if (activeSessions.containsKey(removeSessionId)) {
+                    Session session = activeSessions.remove(removeSessionId);
+                    session.disconnect();
                 }
             }
         }
     }
 
-    public void removeAgentRole(AgentRole agentRole) {
-        Agent agent = (Agent) agentRole;
+    public void removeAgentEndpoint(AgentEndpoint agentEndpoint) {
+        Agent agent = (Agent) agentEndpoint;
         String agentId = agent.getAgentId();
-        if (agentId != null && agentRoles.get(agentId) == agentRole) {
-            agentRoles.remove(agentId);
+        if (agentId != null && agentEndpoints.get(agentId) == agentEndpoint) {
+            agentEndpoints.remove(agentId);
+            updateConnections();
             desiredConnections.remove(agentId);
-            LOGGER.info("Removed agentRole: {}", agentId);
+            LOGGER.info("Removed agentEndpoint: {}", agentId);
         }
     }
 
-    public void removeMatcherRole(MatcherRole matcherRole) {
-        Agent agent = (Agent) matcherRole;
+    public void removeMatcherEndpoint(MatcherEndpoint matcherEndpoint) {
+        Agent agent = (Agent) matcherEndpoint;
         String matcherId = agent.getAgentId();
 
-        if (matcherId != null && matcherRoles.get(matcherId) == matcherRole) {
-            matcherRoles.remove(matcherId);
-            // check if auctioneer
-            if (agent.getDesiredParentId() != null) {
-                desiredConnections.remove(matcherId);
-                LOGGER.info("Removed matcherRole: {}", matcherId);
-            }
+        if (matcherId != null && matcherEndpoints.get(matcherId) == matcherEndpoint) {
+            matcherEndpoints.remove(matcherId);
+            updateConnections();
         }
     }
 
@@ -168,20 +161,24 @@ public class SessionManager {
     void disconnected(SessionImpl sessionImpl) {
         activeSessions.remove(sessionImpl.getSessionId());
     }
+
+    @Override
+    public Map<String, AgentEndpoint> getAgentEndpoints() {
+        return new HashMap<String, AgentEndpoint>(agentEndpoints);
+    }
     
-    public static Map<String, Session> getActiveSessions() {
-        return activeSessions;
+    @Override
+    public Map<String, MatcherEndpoint> getMatcherEndpoints() {
+        return new HashMap<String, MatcherEndpoint>(matcherEndpoints);
     }
-
-    public static Map<String, String> getDesiredConnections() {
-        return desiredConnections;
-    }
-
-    public static ConcurrentMap<String, AgentRole> getAgentRoles() {
-        return agentRoles;
-    }
-
-    public static ConcurrentMap<String, MatcherRole> getMatcherRoles() {
-        return matcherRoles;
+    
+    /**
+     * Returns the active sessions from the SessionManager.
+     * 
+     * @return {@link Session}
+     */
+    @Override
+    public Map<String, Session> getActiveSessions() {
+       return new HashMap<String, Session>(activeSessions);
     }
 }

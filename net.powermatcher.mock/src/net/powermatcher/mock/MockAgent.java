@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import net.powermatcher.api.Agent;
-import net.powermatcher.api.AgentRole;
+import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
@@ -15,7 +15,7 @@ import net.powermatcher.api.monitoring.AgentEvent;
 import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.ObservableAgent;
 
-public class MockAgent implements Agent, AgentRole, ObservableAgent {
+public class MockAgent implements Agent, AgentEndpoint, ObservableAgent {
 
     private Map<String, Object> agentProperties;
     private Price lastPriceUpdate;
@@ -39,7 +39,7 @@ public class MockAgent implements Agent, AgentRole, ObservableAgent {
     }
 
     @Override
-    public void matcherRoleDisconnected(Session session) {
+    public void matcherEndpointDisconnected(Session session) {
         this.session = null;
     }
 
@@ -92,6 +92,10 @@ public class MockAgent implements Agent, AgentRole, ObservableAgent {
     @Override
     public void removeObserver(AgentObserver observer) {
         observers.remove(observer);
+    }
+    
+    public Session getSession(){
+        return this.session;
     }
 
     public void publishEvent(AgentEvent event) {

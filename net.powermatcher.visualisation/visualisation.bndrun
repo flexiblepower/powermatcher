@@ -1,5 +1,5 @@
 -runfw: org.apache.felix.framework;version='[4.4.0,4.4.0]'
--runee: JavaSE/compact2-1.8
+-runee: JavaSE-1.7
 -runrequires:  \
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.visualisation)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.examples)',\

@@ -12,11 +12,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.powermatcher.api.AgentRole;
-import net.powermatcher.api.MatcherRole;
+import net.powermatcher.api.AgentEndpoint;
+import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
-import net.powermatcher.core.sessions.SessionManager;
 import net.powermatcher.core.sessions.SessionImpl;
+import net.powermatcher.core.sessions.SessionManagerInterface;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -26,6 +26,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import aQute.bnd.annotation.component.Component;
+import aQute.bnd.annotation.component.Reference;
 
 @Component(provide = Servlet.class, properties = { "felix.webconsole.title=Powermatcher cluster visualizer",
         "felix.webconsole.label=pm-cluster-visualizer" }, immediate = true)
@@ -36,6 +37,14 @@ public class VisualisationPlugin extends HttpServlet {
     private static final String BASE_PATH = "/pm-cluster-visualizer";
 
     private Map<String, VisualElement> activeElements = new HashMap<>();
+    
+    @Reference
+    public void setSessionManager(SessionManagerInterface sessionManager) {
+        this.sessionManager = sessionManager;
+    }
+
+    private SessionManagerInterface sessionManager;
+    
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -120,40 +129,40 @@ public class VisualisationPlugin extends HttpServlet {
 
     private void procssSeparate() {
 
-        // TODO copy off agentRoles and matcherRoles? Concurrency?
-        for (String s : SessionManager.getAgentRoles().keySet()) {
+        // TODO copy off agentEndpoints and matcherEndpoints? Concurrency?
+        for (String s : sessionManager.getAgentEndpoints().keySet()) {
 
             if (!activeElements.containsKey(s)) {
-                createAgentElement(SessionManager.getAgentRoles().get(s), s);
+                createAgentElement(sessionManager.getAgentEndpoints().get(s), s);
             }
         }
 
-        for (String s : SessionManager.getMatcherRoles().keySet()) {
+        for (String s : sessionManager.getMatcherEndpoints().keySet()) {
             if (!activeElements.containsKey(s)) {
-                createMatcherElement(SessionManager.getMatcherRoles().get(s), s);
+                createMatcherElement(sessionManager.getMatcherEndpoints().get(s), s);
             }
         }
     }
 
     private void processSessions() {
 
-        for (Session s : SessionManager.getActiveSessions().values()) {
+        for (Session s : sessionManager.getActiveSessions().values()) {
 
             if (s instanceof SessionImpl) {
                 SessionImpl temp = (SessionImpl) s;
 
-                VisualElement agentElement = createAgentElement(temp.getAgentRole(), temp.getAgentId());
+                VisualElement agentElement = createAgentElement(temp.getAgentEndpoint(), temp.getAgentId());
 
-                VisualElement matcherElement = createMatcherElement(temp.getMatcherRole(), temp.getMatcherId());
+                VisualElement matcherElement = createMatcherElement(temp.getMatcherEndpoint(), temp.getMatcherId());
                 matcherElement.addChild(agentElement);
             }
         }
     }
 
-    private VisualElement createMatcherElement(MatcherRole matcherRole, String matcherId) {
+    private VisualElement createMatcherElement(MatcherEndpoint matcherEndpoint, String matcherId) {
         Kind kind = null;
 
-        if (matcherRole instanceof AgentRole) {
+        if (matcherEndpoint instanceof AgentEndpoint) {
             kind = Kind.CONCENTRATOR;
         } else {
             kind = Kind.AUCTIONEER;
@@ -162,10 +171,10 @@ public class VisualisationPlugin extends HttpServlet {
         return createVisualElement(matcherId, kind);
     }
 
-    private VisualElement createAgentElement(AgentRole agentRole, String agentId) {
+    private VisualElement createAgentElement(AgentEndpoint agentEndpoint, String agentId) {
         Kind kind = null;
 
-        if (agentRole instanceof MatcherRole) {
+        if (agentEndpoint instanceof MatcherEndpoint) {
             kind = Kind.CONCENTRATOR;
         } else {
             kind = Kind.DEVICEAGENT;
