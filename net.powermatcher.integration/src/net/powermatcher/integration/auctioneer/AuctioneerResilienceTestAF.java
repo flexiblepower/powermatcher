@@ -3,11 +3,11 @@ package net.powermatcher.integration.auctioneer;
 import java.io.IOException;
 import java.util.zip.DataFormatException;
 
-import net.powermatcher.integration.base.ResilienceTest;
+import net.powermatcher.integration.base.AuctioneerResilienceTest;
 
 import org.junit.Test;
 
-public class AuctioneerResilienceTestAF extends ResilienceTest {
+public class AuctioneerResilienceTestAF extends AuctioneerResilienceTest {
 
     /**
      * No equilibrium (demand side). Agents send series of bids with no-equilibrium price.

@@ -70,19 +70,19 @@ public class AuctioneerTest {
 
         // Session
         sessionManager = new SessionManager();
-        sessionManager.addMatcherRole(auctioneer);
+        sessionManager.addMatcherEndpoint(auctioneer);
         sessionManager.activate();
     }
 
     private void addAgents(int number) {
         for (int i = 0; i < number; i++) {
-            this.sessionManager.addAgentRole(agents[i]);
+            this.sessionManager.addAgentEndpoint(agents[i]);
         }
     }
 
     private void removeAgents(int number) {
         for (int i = 0; i < number; i++) {
-            this.sessionManager.removeAgentRole(agents[i]);
+            this.sessionManager.removeAgentEndpoint(agents[i]);
         }
     }
 

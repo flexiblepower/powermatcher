@@ -5,7 +5,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import net.powermatcher.api.AgentRole;
+import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
@@ -28,8 +28,8 @@ import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
 @Component(designateFactory = PVPanelAgent3.Config.class, immediate = true, provide = { ObservableAgent.class,
-        AgentRole.class })
-public class PVPanelAgent3 extends BaseAgent implements AgentRole {
+    AgentEndpoint.class })
+public class PVPanelAgent3 extends BaseAgent implements AgentEndpoint {
     private static final Logger LOGGER = LoggerFactory.getLogger(PVPanelAgent3.class);
 
     public static interface Config {
@@ -102,7 +102,7 @@ public class PVPanelAgent3 extends BaseAgent implements AgentRole {
     }
 
     @Override
-    public void matcherRoleDisconnected(Session session) {
+    public void matcherEndpointDisconnected(Session session) {
         this.session = null;
     }
 

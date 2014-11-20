@@ -69,9 +69,9 @@ public class ConcentratorTest {
         matcher.setMarketBasis(marketBasis);
 
         sessionManager = new SessionManager();
-        sessionManager.addMatcherRole(matcher);
-        sessionManager.addMatcherRole(concentrator);
-        sessionManager.addAgentRole(concentrator);
+        sessionManager.addMatcherEndpoint(matcher);
+        sessionManager.addMatcherEndpoint(concentrator);
+        sessionManager.addAgentEndpoint(concentrator);
         activeConnections.add("concentrator::matcher");
 
         // Init MockAgents
@@ -90,19 +90,19 @@ public class ConcentratorTest {
 
     @After
     public void tearDown() throws Exception {
-        sessionManager.removeAgentRole(concentrator);
-        sessionManager.removeMatcherRole(matcher);
+        sessionManager.removeAgentEndpoint(concentrator);
+        sessionManager.removeMatcherEndpoint(matcher);
     }
 
     private void addAgents(int number) {
         for (int i = 0; i < number; i++) {
-            this.sessionManager.addAgentRole(agents[i]);
+            this.sessionManager.addAgentEndpoint(agents[i]);
         }
     }
 
     private void removeAgents(int number) {
         for (int i = 0; i < number; i++) {
-            this.sessionManager.removeAgentRole(agents[i]);
+            this.sessionManager.removeAgentEndpoint(agents[i]);
         }
     }
 

@@ -8,7 +8,8 @@ import net.powermatcher.core.auctioneer.Auctioneer;
 public class AuctioneerWrapper extends Auctioneer {
 
     public Price getLastPublishedPrice() {
-        return this.getLastPublishedPrice();
+        //TODO needs to be implemented.
+        return null;
     }
 
     public Bid getAggregatedBid(MarketBasis marketBasis) {
