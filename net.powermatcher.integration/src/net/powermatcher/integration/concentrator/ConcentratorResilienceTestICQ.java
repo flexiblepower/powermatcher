@@ -9,9 +9,6 @@ import org.junit.Test;
 
 /**
  * Concentrator quality test with focus on scalability.
- * 
- * @author NL34937
- *
  */
 public class ConcentratorResilienceTestICQ extends ConcentratorResilienceTest {
 
@@ -36,8 +33,8 @@ public class ConcentratorResilienceTestICQ extends ConcentratorResilienceTest {
     private void performAggregatedBidTest(String testID, String suffix) throws IOException, DataFormatException {
         prepareTest(testID, suffix);
 
-        sendBidsToMatcher(this.matcherAgent);
+        sendBidsToMatcher(this.concentrator);
 
-        checkAggregatedBid(this.matcher.getLastReceivedBid());
+        checkAggregatedBid(this.auctioneer.getLastReceivedBid());
     }
 }

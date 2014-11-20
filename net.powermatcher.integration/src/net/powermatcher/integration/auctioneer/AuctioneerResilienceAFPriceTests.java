@@ -3,7 +3,7 @@ package net.powermatcher.integration.auctioneer;
 import java.io.IOException;
 import java.util.zip.DataFormatException;
 
-import net.powermatcher.integration.base.ResilienceTest;
+import net.powermatcher.integration.base.AuctioneerResilienceTest;
 
 import org.junit.Test;
 
@@ -11,7 +11,7 @@ import org.junit.Test;
  * JUnit test for the Auctioneer
  * 
  */
-public class AuctioneerResilienceAFPriceTests extends ResilienceTest {
+public class AuctioneerResilienceAFPriceTests extends AuctioneerResilienceTest {
 
     @Test
     public void testEquilibriumRoundingIAF6() throws IOException, DataFormatException {

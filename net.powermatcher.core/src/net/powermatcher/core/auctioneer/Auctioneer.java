@@ -146,15 +146,6 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
 
     @Deactivate
     public void deactivate() {
-        for (Session session : sessions.toArray(new Session[sessions.size()])) {
-            session.disconnect();
-            LOGGER.info("Session {} closed", session);
-        }
-
-        if (!sessions.isEmpty()) {
-            LOGGER.warn("Could not disconnect all sessions. Left: {}", sessions);
-        }
-
         scheduledFuture.cancel(false);
     }
 

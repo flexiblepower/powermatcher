@@ -53,9 +53,10 @@ public class SessionManager {
      * Holds the activeSessions
      */
     private Map<String, Session> activeSessions = new ConcurrentHashMap<String, Session>();
-    
+
     /**
      * Returns the active sessions from the SessionManager.
+     * 
      * @return {@link Session}
      */
     public Map<String, Session> getActiveSessions() {
@@ -112,7 +113,7 @@ public class SessionManager {
         for (String desiredAgentId : desiredConnections.keySet()) {
             String agentId = desiredAgentId;
             String matcherId = desiredConnections.get(desiredAgentId);
-            
+
             AgentEndpoint agentEndpoint = agentEndpoints.get(desiredAgentId);
             MatcherEndpoint matcherEndpoint = matcherEndpoints.get(matcherId);
 
@@ -130,9 +131,10 @@ public class SessionManager {
                     LOGGER.info("Added new active session: {}", sessionId);
                 }
             } else {
-                if (activeSessions.containsKey(desiredAgentId)) {
-                    Session session = activeSessions.get(desiredAgentId);
-                    disconnected((SessionImpl) session);
+                final String removeSessionId = desiredAgentId + ":" + matcherId;
+                if (activeSessions.containsKey(removeSessionId)) {
+                    Session session = activeSessions.remove(removeSessionId);
+                    session.disconnect();
                 }
             }
         }
@@ -155,11 +157,6 @@ public class SessionManager {
 
         if (matcherId != null && matcherEndpoints.get(matcherId) == matcherEndpoint) {
             matcherEndpoints.remove(matcherId);
-            // check if auctioneer
-            if (agent.getDesiredParentId() != null) {
-                desiredConnections.remove(matcherId);
-                LOGGER.info("Removed matcherEndpoint: {}", matcherId);
-            }
             updateConnections();
         }
     }

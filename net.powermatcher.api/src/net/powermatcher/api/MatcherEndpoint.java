@@ -37,7 +37,7 @@ public interface MatcherEndpoint {
      * 
      * @param session
      *            The session linking this {@link MatcherEndpoint} with a specific {@link AgentEndpoint} instance.
-     * @param newPrice
+     * @param newBid
      *            The new {@link Bid}
      */
     void updateBid(Session session, Bid newBid);
