@@ -1,11 +1,18 @@
 Bundle-Version: 1.0.0.${tstamp}
 Service-Component:  *
-Export-Package: net.powermatcher.core*
+Export-Package:  \
+	net.powermatcher.core,\
+	net.powermatcher.core.auctioneer,\
+	net.powermatcher.core.concentrator,\
+	net.powermatcher.core.connectivity,\
+	net.powermatcher.core.monitoring,\
+	net.powermatcher.core.sessions,\
+	net.powermatcher.core.time
 -buildpath:  \
 	net.powermatcher.api;version=latest,\
 	biz.aQute.bnd.annotation,\
 	slf4j.api,\
 	${junit},\
 	slf4j.simple,\
-	net.powermatcher.mock;version=latest
-
+	net.powermatcher.mock;version=latest,\
+	javax.websocket-api;version=1.0

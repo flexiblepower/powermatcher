@@ -4,13 +4,12 @@
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.examples)',\
 	osgi.identity;filter:='(osgi.identity=org.apache.felix.webconsole)',\
 	osgi.identity;filter:='(osgi.identity=org.apache.felix.webconsole.plugins.ds)',\
-	osgi.identity;filter:='(osgi.identity=org.apache.felix.http.jetty)',\
 	osgi.identity;filter:='(osgi.identity=org.apache.felix.scr)',\
 	osgi.identity;filter:='(osgi.identity=org.apache.felix.metatype)',\
 	osgi.identity;filter:='(osgi.identity=org.apache.felix.configadmin)',\
 	osgi.identity;filter:='(osgi.identity=ch.qos.logback.classic)',\
 	osgi.identity;filter:='(osgi.identity=ch.qos.logback.core)',\
-	osgi.identity;filter:='(osgi.identity=net.powermatcher.core)'
+	osgi.identity;filter:='(osgi.identity=net.powermatcher.examples)'
 -runbundles:  \
 	biz.aQute.bnd.annotation;version='[2.4.0,2.4.1)',\
 	ch.qos.logback.classic;version='[1.1.2,1.1.3)',\

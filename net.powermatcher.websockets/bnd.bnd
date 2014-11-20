@@ -1,0 +1,35 @@
+Bundle-Version: 1.0.0.${tstamp}
+-buildpath:  \
+	net.powermatcher.api;version=latest,\
+	slf4j.api,\
+	biz.aQute.bnd.annotation,\
+	net.powermatcher.core;version=latest,\
+	org.eclipse.jetty.websocket.api,\
+	org.eclipse.jetty.websocket.client,\
+	org.eclipse.jetty.websocket.common,\
+	org.eclipse.jetty.websocket.javax.websocket,\
+	org.eclipse.jetty.websocket.javax.websocket.server,\
+	org.eclipse.jetty.websocket.server,\
+	org.eclipse.jetty.websocket.servlet,\
+	org.eclipse.jetty.http,\
+	org.eclipse.jetty.deploy,\
+	org.eclipse.jetty.io,\
+	javax.servlet-api,\
+	org.eclipse.jetty.util,\
+	com.google.gson
+    org.eclipse.jetty.security,\
+    org.eclipse.jetty.server,\
+    org.eclipse.jetty.servlet,\
+    org.eclipse.jetty.util,\
+    org.eclipse.jetty.webapp,\
+    org.eclipse.jetty.xml,\
+    javax.servlet-api
+
+Service-Component:  \
+	*
+	
+-includeresource: WEB-INF/web.xml=${project}/web.xml
+Export-Package:  \
+	net.powermatcher.websockets,\
+	net.powermatcher.websockets.data
+Web-ContextPath: /powermatcher/websockets
