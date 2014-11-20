@@ -56,9 +56,13 @@ public class BidCache {
     	
     	private Bid aggregatedBid;
     	
-    	private Map<String, Bid> bidCacheSnapshot;
+    	private Map<String, Integer> bidNumbers;
 
 		private int count;
+		
+		public BidCacheSnapshot() {
+			this.bidNumbers = new HashMap<>();
+		}
 
 		public Bid getAggregatedBid() {
 			return aggregatedBid;
@@ -68,12 +72,12 @@ public class BidCache {
 			this.aggregatedBid = aggregatedBid;
 		}
 
-		public Map<String, Bid> getBidCacheSnapshot() {
-			return bidCacheSnapshot;
+		public Map<String, Integer> getBidNumbers() {
+			return bidNumbers;
 		}
 
-		public void setBidCacheSnapshot(Map<String, Bid> bidCacheSnapshot) {
-			this.bidCacheSnapshot = bidCacheSnapshot;
+		public void setBidNumbers(Map<String, Integer> bidNumbers) {
+			this.bidNumbers = bidNumbers;
 		}
 
 		public void setCount(int snapshotCounter) {
@@ -114,11 +118,11 @@ public class BidCache {
      */
     
     public int getSnapshotCounter() {
-		return snapshotCounter;
+		return this.snapshotCounter;
 	}
     
-    public int incrSnapshotCounter() {
-		return snapshotCounter =+ 1;
+    private void incrSnapshotCounter() {
+    	this.snapshotCounter += 1;
 	}
 
 	public void setSnapshotCounter(int snapshotCounter) {
@@ -208,28 +212,36 @@ public class BidCache {
      */
     public synchronized Bid getAggregatedBid(final MarketBasis marketBasis) {
         if (marketBasis != null) {
-        	        	
+        	
+        	BidCacheSnapshot bidCacheSnapshot = new BidCacheSnapshot();
+        	
             if (this.aggregatedBid == null || !this.aggregatedBid.getMarketBasis().equals(marketBasis)) {
-            	
-            	BidCacheSnapshot bidCacheSnapshot = new BidCacheSnapshot();
-            	
+            	 	
                 Bid newAggregatedBid = new Bid(marketBasis);
                 Set<String> idSet = this.bidCache.keySet();
                 for (String agentId : idSet) {
-                    Bid bid = getLastBid(agentId);
-                    bidCacheSnapshot.getBidCacheSnapshot().put(agentId, bid);
-                    
+                    Bid bid = getLastBid(agentId);                   
                     newAggregatedBid = newAggregatedBid.aggregate(bid);
                 }
-                
-                //Increment the counter to create a unique bidNumber for the aggregatedBid. Save it with the BidCacheSnapshot (not used). Update the aggregatedBid with the new Bidnumber.  
-                incrSnapshotCounter();
-                Bid newBidNr = new Bid(newAggregatedBid, getSnapshotCounter());
-                this.aggregatedBid = newBidNr;            
-               
-                bidCacheSnapshot.setCount(getSnapshotCounter());           
-                bidCacheHistory.put(getSnapshotCounter(), bidCacheSnapshot);
+                this.aggregatedBid = newAggregatedBid;
             }
+            
+            //Make a blueprint of the bidCache storing agentID - bidNumber pairs
+            
+            Set<String> idSet = this.bidCache.keySet();
+            for (String agentId : idSet) {
+                Bid bid = getLastBid(agentId);                   
+                bidCacheSnapshot.getBidNumbers().put(agentId, bid.getBidNumber());  
+            }
+
+            //Increment the counter to create a unique bidNumber for the aggregatedBid. Save it with the BidCacheSnapshot (not used). Update the aggregatedBid with the new Bidnumber.  
+            incrSnapshotCounter();
+            Bid newBidNr = new Bid(this.aggregatedBid, getSnapshotCounter());
+            this.aggregatedBid = newBidNr;            
+           
+            bidCacheSnapshot.setCount(getSnapshotCounter());           
+            bidCacheHistory.put(getSnapshotCounter(), bidCacheSnapshot);
+            
                         
             return this.aggregatedBid;
         }

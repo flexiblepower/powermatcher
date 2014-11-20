@@ -12,10 +12,10 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.core.concentrator.Concentrator;
-import net.powermatcher.core.mock.MockAgent;
-import net.powermatcher.core.mock.MockMatcherAgent;
 import net.powermatcher.core.sessions.SessionManager;
 import net.powermatcher.core.time.SystemTimeService;
+import net.powermatcher.mock.MockAgent;
+import net.powermatcher.mock.MockMatcherAgent;
 
 import org.junit.After;
 import org.junit.Before;
@@ -44,29 +44,34 @@ public class ConcentratorTest {
     private MockMatcherAgent matcher;
     private MockAgent[] agents;
 
+    private static final String AUCTIONEER_NAME = "auctioneer";
+
+    private static final String CONCENTRATOR_NAME = "concentrator";
+
     @Before
     public void setUp() throws Exception {
         List<String> activeConnections = new ArrayList<String>();
         // Concentrator to be tested
         concentrator = new Concentrator();
         concentratorProperties = new HashMap<String, Object>();
-        concentratorProperties.put("matcherId", "concentrator");
+        concentratorProperties.put("matcherId", CONCENTRATOR_NAME);
+        concentratorProperties.put("desiredParentId", AUCTIONEER_NAME);
         concentratorProperties.put("bidTimeout", "600");
         concentratorProperties.put("bidUpdateRate", "30");
-        concentratorProperties.put("agentId", "concentrator");
+        concentratorProperties.put("agentId", CONCENTRATOR_NAME);
 
         concentrator.setExecutorService(new ScheduledThreadPoolExecutor(10));
         concentrator.setTimeService(new SystemTimeService());
         concentrator.activate(concentratorProperties);
 
         // Matcher
-        matcher = new MockMatcherAgent("matcher");
+        matcher = new MockMatcherAgent(AUCTIONEER_NAME);
         matcher.setMarketBasis(marketBasis);
 
         sessionManager = new SessionManager();
-        sessionManager.addMatcherRole(matcher, matcher.getMatcherProperties());
-        sessionManager.addMatcherRole(concentrator, concentratorProperties);
-        sessionManager.addAgentRole(concentrator, concentratorProperties);
+        sessionManager.addMatcherRole(matcher);
+        sessionManager.addMatcherRole(concentrator);
+        sessionManager.addAgentRole(concentrator);
         activeConnections.add("concentrator::matcher");
 
         // Init MockAgents
@@ -74,31 +79,30 @@ public class ConcentratorTest {
         for (int i = 0; i < NR_AGENTS; i++) {
             String agentId = "agent" + (i + 1);
             MockAgent newAgent = new MockAgent(agentId);
+            newAgent.setDesiredParentId(CONCENTRATOR_NAME);
             agents[i] = newAgent;
             activeConnections.add(agentId + "::" + "concentrator");
         }
 
-        Map<String, Object> sessionProperties = new HashMap<String, Object>();
-        sessionProperties.put("activeConnections", activeConnections);
-        sessionManager.activate(sessionProperties);
+        sessionManager.activate();
 
     }
 
     @After
     public void tearDown() throws Exception {
-        sessionManager.removeAgentRole(concentrator, concentratorProperties);
-        sessionManager.removeMatcherRole(matcher, matcher.getMatcherProperties());
+        sessionManager.removeAgentRole(concentrator);
+        sessionManager.removeMatcherRole(matcher);
     }
 
     private void addAgents(int number) {
         for (int i = 0; i < number; i++) {
-            this.sessionManager.addAgentRole(agents[i], agents[i].getAgentProperties());
+            this.sessionManager.addAgentRole(agents[i]);
         }
     }
 
     private void removeAgents(int number) {
         for (int i = 0; i < number; i++) {
-            this.sessionManager.removeAgentRole(agents[i], agents[i].getAgentProperties());
+            this.sessionManager.removeAgentRole(agents[i]);
         }
     }
 

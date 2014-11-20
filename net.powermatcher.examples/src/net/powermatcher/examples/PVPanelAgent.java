@@ -11,10 +11,11 @@ import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PricePoint;
-import net.powermatcher.api.monitoring.IncomingPriceUpdateEvent;
-import net.powermatcher.api.monitoring.Observable;
-import net.powermatcher.api.monitoring.OutgoingBidUpdateEvent;
-import net.powermatcher.core.monitoring.BaseObservable;
+import net.powermatcher.api.monitoring.IncomingPriceEvent;
+import net.powermatcher.api.monitoring.ObservableAgent;
+import net.powermatcher.api.monitoring.OutgoingBidEvent;
+import net.powermatcher.api.monitoring.Qualifier;
+import net.powermatcher.core.BaseAgent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,13 +27,15 @@ import aQute.bnd.annotation.component.Reference;
 import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
-@Component(designateFactory = PVPanelAgent.Config.class, immediate = true, provide = { Observable.class,
+@Component(designateFactory = PVPanelAgent.Config.class, immediate = true, provide = { ObservableAgent.class,
         AgentRole.class })
-public class PVPanelAgent extends BaseObservable implements AgentRole {
-
+public class PVPanelAgent extends BaseAgent implements AgentRole {
     private static final Logger LOGGER = LoggerFactory.getLogger(PVPanelAgent.class);
 
     public static interface Config {
+        @Meta.AD(deflt = "concentrator")
+        String desiredParentId();
+
         @Meta.AD(deflt = "pvpanel")
         String agentId();
 
@@ -41,27 +44,21 @@ public class PVPanelAgent extends BaseObservable implements AgentRole {
     }
 
     private ScheduledFuture<?> scheduledFuture;
-
     private ScheduledExecutorService scheduler;
-
     private Session session;
-
     private TimeService timeService;
-
-    private String agentId;
 
     @Activate
     public void activate(Map<String, Object> properties) {
         Config config = Configurable.createConfigurable(Config.class, properties);
-        agentId = config.agentId();
-
+        this.setAgentId(config.agentId());
+        this.setDesiredParentId(config.desiredParentId());
         scheduledFuture = scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 doBidUpdate();
             }
         }, 0, config.bidUpdateRate(), TimeUnit.SECONDS);
-
         LOGGER.info("Agent [{}], activated", config.agentId());
     }
 
@@ -70,27 +67,27 @@ public class PVPanelAgent extends BaseObservable implements AgentRole {
         if (session != null) {
             session.disconnect();
         }
-
         scheduledFuture.cancel(false);
-
-        LOGGER.info("Agent [{}], deactivated", agentId);
+        LOGGER.info("Agent [{}], deactivated", this.getAgentId());
     }
 
     protected void doBidUpdate() {
         if (session != null) {
-            Bid newBid = new Bid(session.getMarketBasis(), new PricePoint(0, -700));
-            LOGGER.debug("updateBid({})", newBid);
-            session.updateBid(newBid);
-            this.publishEvent(new OutgoingBidUpdateEvent(agentId, session.getSessionId(), timeService.currentDate(),
-                    newBid));
+            if (session.getMarketBasis() != null) {
+                Bid newBid = new Bid(session.getMarketBasis(), new PricePoint(0, 700), new PricePoint(100,-700));
+                LOGGER.debug("updateBid({})", newBid);
+                session.updateBid(newBid);
+                this.publishEvent(new OutgoingBidEvent(session.getClusterId(),this.getAgentId(), session.getSessionId(),
+                        timeService.currentDate(), newBid, Qualifier.AGENT));
+            }
         }
     }
 
     @Override
     public void updatePrice(Price newPrice) {
         LOGGER.debug("updatePrice({})", newPrice);
-        publishEvent(new IncomingPriceUpdateEvent(agentId, session.getSessionId(), timeService.currentDate(), newPrice));
-
+        publishEvent(new IncomingPriceEvent(session.getClusterId(), this.getAgentId(), session.getSessionId(), timeService.currentDate(),
+                newPrice, Qualifier.AGENT));
         LOGGER.debug("Received price update [{}]", newPrice);
     }
 
@@ -100,7 +97,7 @@ public class PVPanelAgent extends BaseObservable implements AgentRole {
     }
 
     @Override
-    public void disconnectFromMatcher(Session session) {
+    public void matcherRoleDisconnected(Session session) {
         this.session = null;
     }
 
@@ -112,10 +109,5 @@ public class PVPanelAgent extends BaseObservable implements AgentRole {
     @Reference
     public void setTimeService(TimeService timeService) {
         this.timeService = timeService;
-    }
-
-    @Override
-    public String getObserverId() {
-        return this.agentId;
     }
 }
