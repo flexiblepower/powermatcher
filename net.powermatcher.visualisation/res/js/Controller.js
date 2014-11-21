@@ -82,6 +82,14 @@
 					significance:2};
 		
 		Render.createMenuButtons();
+		loadFile({requestKind:"loadState"}, loadState, "database.php");
+		
+		var millisecondsToWait = 100;
+		setTimeout(function() {
+			organizeNodes(false);
+		}, millisecondsToWait);
+		
+		
 		
 	};
 	
@@ -416,6 +424,10 @@
 				if (kind == "Load") {
 					
 					loadFile({requestKind:"loadState"}, loadState, "database.php");
+					var millisecondsToWait = 100;
+					setTimeout(function() {
+						organizeNodes(false);
+					}, millisecondsToWait);
 					
 				}
 				

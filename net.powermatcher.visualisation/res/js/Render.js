@@ -4,8 +4,6 @@
 	
 	Render = function () {
 		
-		
-		
 	};
 	
 	// global settings
@@ -232,84 +230,92 @@
 		
 		// agents
 		
-		var y = 10;
+		var y = 15;
 		
+		var step = 6;
+		
+		//line 1
 		button = DOM.placeElement("button", {id:"aucButton", className:"menuButton"}, menu);
-		DOM.style(button, {top:y + "px", left:10 + "px"});
+		DOM.style(button, {top:y + "%", left:10 + "px"});
 		DOM.placeText("Auctioneer", button);
 		
-		y += 50;
-		button = DOM.placeElement("button", {id:"objButton", className:"menuButton"}, menu);
-		DOM.style(button, {top:y + "px", left:10 + "px"});
-		DOM.placeText("Objective", button);
-		
-		y += 50;
-		button = DOM.placeElement("button", {id:"conButton", className:"menuButton"}, menu);
-		DOM.style(button, {top:y + "px", left:10 + "px"});
-		DOM.placeText("Concentrator", button);
-		
-		y += 50;
-		button = DOM.placeElement("button", {id:"devButton", className:"menuButton"}, menu);
-		DOM.style(button, {top:y + "px", left:10 + "px"});
-		DOM.placeText("Device", button);
-		
-		// server
-		
-		y = 10;
-		button = DOM.placeElement("button", {id:"exportButton", className:"menuButton"}, menu);
-		DOM.style(button, {bottom:y + "px", left:10 + "px"});
-		DOM.placeText("Export", button);
-		
-		y += 50;
-		button = DOM.placeElement("button", {id:"settingsButton", className:"menuButton"}, menu);
-		DOM.style(button, {bottom:y + "px", left:10 + "px"});
-		DOM.placeText("Settings", button);
-		
-		y += 50;
-		button = DOM.placeElement("button", {id:"saveButton", className:"menuButton"}, menu);
-		DOM.style(button, {bottom:y + "px", left:10 + "px"});
-		DOM.placeText("Save", button);
-		
-		y += 50;
-		button = DOM.placeElement("button", {id:"loadButton", className:"menuButton"}, menu);
-		DOM.style(button, {bottom:y + "px", left:10 + "px"});
-		DOM.placeText("Load", button);
-		
-		// interface
-		
-		y = 10;
 		button = DOM.placeElement("button", {id:"zoomInButton", className:"menuButton"}, menu);
-		DOM.style(button, {top:y + "px", right:10 + "px"});
+		DOM.style(button, {top:y + "%", right:10 + "px"});
 		DOM.placeText("Zoom in", button);
 		
-		y += 50;
+		button = DOM.placeElement("button", {id:"panUpButton", className:"menuButton panningButton"}, menu);
+		DOM.style(button, {top:y + "%", left:50 + "%"});
+		DOM.placeText("▲", button);
+		
+		
+		//line 2
+		y += step;
+		button = DOM.placeElement("button", {id:"objButton", className:"menuButton"}, menu);
+		DOM.style(button, {top:y + "%", left:10 + "px"});
+		DOM.placeText("Objective", button);
+		
 		button = DOM.placeElement("button", {id:"zoomOutButton", className:"menuButton"}, menu);
-		DOM.style(button, {top:y + "px", right:10 + "px"});
+		DOM.style(button, {top:y + "%", right:10 + "px"});
 		DOM.placeText("Zoom out", button);
 		
-		y += 50;
+		//line 3
+		
+		y += step;
+		button = DOM.placeElement("button", {id:"conButton", className:"menuButton"}, menu);
+		DOM.style(button, {top:y + "%", left:10 + "px"});
+		DOM.placeText("Concentrator", button);
+		
 		button = DOM.placeElement("button", {id:"organizeButton", className:"menuButton"}, menu);
-		DOM.style(button, {top:y + "px", right:10 + "px"});
+		DOM.style(button, {top:y + "%", right:10 + "px"});
 		DOM.placeText("Organize", button);
 		
-		// panning arrows
+		//line 4
 		
+		y += step;
+		button = DOM.placeElement("button", {id:"devButton", className:"menuButton"}, menu);
+		DOM.style(button, {top:y + "%", left:10 + "px"});
+		DOM.placeText("Device", button);
+		
+		//line 5
+		y += step*3;
 		button = DOM.placeElement("button", {id:"panLeftButton", className:"menuButton panningButton"}, menu);
-		DOM.style(button, {top:50 + "%", left:10 + "px"});
+		DOM.style(button, {top:y + "%", left:10 + "px"});
 		DOM.placeText("◀", button);
 		
 		button = DOM.placeElement("button", {id:"panRightButton", className:"menuButton panningButton"}, menu);
-		DOM.style(button, {top:50 + "%", right:10 + "px"});
+		DOM.style(button, {top:y + "%", right:10 + "px"});
 		DOM.placeText("▶", button);
 		
-		button = DOM.placeElement("button", {id:"panLeftButton", className:"menuButton panningButton"}, menu);
-		DOM.style(button, {top:10 + "px", left:50 + "%"});
-		DOM.placeText("▲", button);
+		//line 9
+		y  = 5;
+		button = DOM.placeElement("button", {id:"settingsButton", className:"menuButton"}, menu);
+		DOM.style(button, {bottom:y + "%", left:10 + "px"});
+		DOM.placeText("Settings", button);
 		
-		button = DOM.placeElement("button", {id:"panRightButton", className:"menuButton panningButton"}, menu);
-		DOM.style(button, {bottom:10 + "px", left:50 + "%"});
+		button = DOM.placeElement("button", {id:"panDownButton", className:"menuButton panningButton"}, menu);
+		DOM.style(button, {bottom:y + "%", left:50 + "%"});
 		DOM.placeText("▼", button);
 		
+		
+		//line 8
+		y += step;
+		button = DOM.placeElement("button", {id:"exportButton", className:"menuButton"}, menu);
+		DOM.style(button, {bottom:y + "%", left:10 + "px"});
+		DOM.placeText("Export", button);
+		
+		
+		//line 7
+		y += step;
+		button = DOM.placeElement("button", {id:"saveButton", className:"menuButton"}, menu);
+		DOM.style(button, {bottom:y + "%", left:10 + "px"});
+		DOM.placeText("Save", button);
+		
+		//line 6
+		y += step;
+		button = DOM.placeElement("button", {id:"loadButton", className:"menuButton"}, menu);
+		DOM.style(button, {bottom:y + "%", left:10 + "px"});
+		DOM.placeText("Load", button);
+
 	};
 	
 	// the connections are drawn on a canvas behind the agent container div
@@ -399,7 +405,7 @@
 		
 		for (var a = 0; a < agentList.length; a++) {
 			
-			DOM.style(agentList[a], {left:agentList[a].x + "px", top:agentList[a].y + "px"});
+			DOM.style(agentList[a], {left:agentList[a].x + "px", top:agentList[a].y + DOM.topMarging + "px"});
 			
 		}
 		

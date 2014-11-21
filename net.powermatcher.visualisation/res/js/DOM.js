@@ -6,8 +6,9 @@
 	};
 	
 	DOM.width = window.innerWidth;
-	DOM.height = window.innerHeight;
+	DOM.height = window.innerHeight * 0.75;
 	DOM.resize = new Function();
+	DOM.topMarging =  window.innerHeight * 0.15;
 	
 	function fResize (e) {
 		
@@ -98,7 +99,7 @@
 								"margin":"0",
 								"padding":"0",
 								"left":"0",
-								"top":"0"});
+								"top":"15%"});
 		
 		return layer;
 		
