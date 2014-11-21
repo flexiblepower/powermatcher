@@ -1,5 +1,6 @@
 package net.powermatcher.core.sessions;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -35,7 +36,7 @@ import aQute.bnd.annotation.component.Reference;
  * 
  */
 @Component(immediate = true)
-public class SessionManager {
+public class SessionManager implements SessionManagerInterface{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionManager.class);
 
@@ -53,15 +54,6 @@ public class SessionManager {
      * Holds the activeSessions
      */
     private Map<String, Session> activeSessions = new ConcurrentHashMap<String, Session>();
-
-    /**
-     * Returns the active sessions from the SessionManager.
-     * 
-     * @return {@link Session}
-     */
-    public Map<String, Session> getActiveSessions() {
-        return activeSessions;
-    }
 
     /**
      * Holds the desiredConnections
@@ -168,5 +160,25 @@ public class SessionManager {
 
     void disconnected(SessionImpl sessionImpl) {
         activeSessions.remove(sessionImpl.getSessionId());
+    }
+
+    @Override
+    public Map<String, AgentEndpoint> getAgentEndpoints() {
+        return new HashMap<String, AgentEndpoint>(agentEndpoints);
+    }
+    
+    @Override
+    public Map<String, MatcherEndpoint> getMatcherEndpoints() {
+        return new HashMap<String, MatcherEndpoint>(matcherEndpoints);
+    }
+    
+    /**
+     * Returns the active sessions from the SessionManager.
+     * 
+     * @return {@link Session}
+     */
+    @Override
+    public Map<String, Session> getActiveSessions() {
+       return new HashMap<String, Session>(activeSessions);
     }
 }
