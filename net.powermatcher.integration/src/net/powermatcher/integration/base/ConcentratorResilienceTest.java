@@ -79,7 +79,7 @@ public class ConcentratorResilienceTest extends ResilienceTest{
         this.bidReader = new CsvBidReader(getBidInputFile(testID, suffix), this.marketBasis);
     }
 
-    protected void sendBidsToMatcher(MatcherEndpoint matcher) throws IOException, DataFormatException {
+    protected void sendBidsToMatcher() throws IOException, DataFormatException {
 
         Bid bid = null;
         MockAgent newAgent;

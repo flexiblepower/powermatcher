@@ -33,7 +33,7 @@ public class ConcentratorResilienceTestICQ extends ConcentratorResilienceTest {
     private void performAggregatedBidTest(String testID, String suffix) throws IOException, DataFormatException {
         prepareTest(testID, suffix);
 
-        sendBidsToMatcher(this.concentrator);
+        sendBidsToMatcher();
 
         checkAggregatedBid(this.auctioneer.getLastReceivedBid());
     }

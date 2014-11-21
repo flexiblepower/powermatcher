@@ -67,7 +67,7 @@ public class ResilienceTest {
         return bid;
     }
 
-    protected void sendBidsToMatcher(MatcherEndpoint matcher) throws IOException, DataFormatException {
+    protected void sendBidsToMatcher() throws IOException, DataFormatException {
         Bid bid = null;
         MockAgent newAgent;
 
