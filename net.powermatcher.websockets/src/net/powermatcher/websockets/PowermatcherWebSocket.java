@@ -1,8 +1,12 @@
 package net.powermatcher.websockets;
 
 
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URLDecoder;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -38,8 +42,8 @@ public class PowermatcherWebSocket {
 	private static final Map<org.eclipse.jetty.websocket.api.Session, AgentEndpointProxy> REMOTE_LOCAL_LINK = 
 			Collections.synchronizedMap(new HashMap<org.eclipse.jetty.websocket.api.Session, AgentEndpointProxy>());
 	
-	private String agentId = "agentendpointproxy";
-	private String matcherEndpointProxyId = "matcherendpointproxy";
+	private String desiredConnectionId;
+	private String remoteMatcherEndpointId;
 	
 	@Deactivate
 	public synchronized void deactivate() {
@@ -64,22 +68,42 @@ public class PowermatcherWebSocket {
     
 	@OnWebSocketConnect
 	public synchronized void onOpen(final org.eclipse.jetty.websocket.api.Session remoteSession) {
-		// TODO how to handle desiredParentId?? maybe using querystring param during connect?
-		// TODO add identification in querystring
+		Map<String, String> queryString = null;
+		try {
+			 queryString = splitQuery(remoteSession.getUpgradeRequest().getRequestURI());
+		} catch (UnsupportedEncodingException e1) {
+			remoteSession.close();
+			LOGGER.warn("Rejecting connection from remote agent [{}], URL is not complete (missing querystring)", this.remoteMatcherEndpointId);
+			return;
+		}
+		
+		this.desiredConnectionId = queryString.get("desiredConnectionId");
+		if (this.desiredConnectionId == null || this.desiredConnectionId.length() == 0) {
+			remoteSession.close();
+			LOGGER.warn("Rejecting connection from remote agent [{}], desiredConnectionId is missing from querystring", this.remoteMatcherEndpointId);
+			return;
+		}
+		
+		this.remoteMatcherEndpointId = queryString.get("agentId");
+		if (this.remoteMatcherEndpointId == null || this.remoteMatcherEndpointId.length() == 0) {
+			remoteSession.close();
+			LOGGER.warn("Rejecting connection from remote agent [{}], agentId is missing from querystring", this.remoteMatcherEndpointId);
+			return;
+		}
 		
 		// Search for existing agentEndpointProxy
-		if (!AGENT_ENDPOINT_PROXIES.containsKey(agentId)) {
+		if (!AGENT_ENDPOINT_PROXIES.containsKey(desiredConnectionId)) {
 			// TODO (fase 2) Create new agentRoleProxy, supplying websocketSession.
 
 			// TODO throw correct exception to deny connection
-			LOGGER.info("Rejecting connection from remote agent [{}] for non-existing local agent: [{}]", this.matcherEndpointProxyId, this.agentId);
+			LOGGER.warn("Rejecting connection from remote agent [{}] for non-existing local agent: [{}]", this.remoteMatcherEndpointId, this.desiredConnectionId);
 			
 			remoteSession.close();
 			return;
 		}
 
 		// Associate session with agentendpoint proxy
-		AgentEndpointProxy proxy = AGENT_ENDPOINT_PROXIES.get(agentId);
+		AgentEndpointProxy proxy = AGENT_ENDPOINT_PROXIES.get(desiredConnectionId);
 		try {
 			proxy.remoteAgentConnected(remoteSession);
 		} catch (OperationNotSupportedException e) {
@@ -94,7 +118,7 @@ public class PowermatcherWebSocket {
 		
 		// TODO send marketbasis and clusterid back to remote agent as a response to connect?
 
-		LOGGER.info("Remote agent [{}] connected to local agent [{}]", this.matcherEndpointProxyId, this.agentId);
+		LOGGER.info("Remote agent [{}] connected to local agent [{}]", this.remoteMatcherEndpointId, this.desiredConnectionId);
 	}
 
 	@OnWebSocketClose
@@ -164,5 +188,16 @@ public class PowermatcherWebSocket {
 
 		// Relay bid update to local agent
 		proxy.relayBid(newBid);
+	}
+	
+	private static Map<String, String> splitQuery(URI url) throws UnsupportedEncodingException {
+	    Map<String, String> query_pairs = new LinkedHashMap<String, String>();
+	    String query = url.getQuery();
+	    String[] pairs = query.split("&");
+	    for (String pair : pairs) {
+	        int idx = pair.indexOf("=");
+	        query_pairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"), URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+	    }
+	    return query_pairs;
 	}
 }

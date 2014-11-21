@@ -49,7 +49,7 @@ public class MatcherEndpointProxy extends BaseAgent implements MatcherEndpoint {
 	@Meta.OCD
     public static interface Config {
         @Meta.AD(deflt = "", description = "remote agent endpoint proxy to connect to.")
-        String remoteAgentEndpointId();
+        String desiredConnectionId();
 
         @Meta.AD(deflt = "matcherendpointproxy", description = "local agent identification")
         String agentId();
@@ -82,7 +82,7 @@ public class MatcherEndpointProxy extends BaseAgent implements MatcherEndpoint {
         this.setAgentId(config.agentId());
         
 		try {
-			this.powermatcherUrl = new URI(config.powermatcherUrl());
+			this.powermatcherUrl = new URI(config.powermatcherUrl() + "?agentId=" + this.getAgentId() + "&desiredConnectionId=" + config.desiredConnectionId());
 		} catch (URISyntaxException e) {
 			LOGGER.error("Malformed URL for powermatcher websocket endpoint. Reason {}", e);
 			return;
@@ -125,6 +125,7 @@ public class MatcherEndpointProxy extends BaseAgent implements MatcherEndpoint {
 		// Try to setup a new websocket connection.		
         client = new WebSocketClient();
         ClientUpgradeRequest request = new ClientUpgradeRequest();
+        
         try {
         	client.start();
 	        Future<org.eclipse.jetty.websocket.api.Session> connectFuture =
@@ -177,11 +178,6 @@ public class MatcherEndpointProxy extends BaseAgent implements MatcherEndpoint {
 	
 	@Override
 	public boolean connectToAgent(Session session) {
-		// TODO how to handle local / remote agentId?
-		// TODO how to handle local / remote desiredParentId?
-		// TODO maybe via querystring during connection?
-		// TODO how to handle security (HTTPS and identity)?
-		
         this.localSession = session;
         LOGGER.info("Agent connected with session [{}]", session.getSessionId());
 
