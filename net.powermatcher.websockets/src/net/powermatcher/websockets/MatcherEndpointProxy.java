@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
-import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PricePoint;
 import net.powermatcher.api.monitoring.ObservableAgent;
@@ -49,25 +48,22 @@ public class MatcherEndpointProxy extends BaseAgent implements MatcherEndpoint {
     
 	@Meta.OCD
     public static interface Config {
-        @Meta.AD(deflt = "")
-        String desiredParentId();
+        @Meta.AD(deflt = "", description = "remote agent endpoint proxy to connect to.")
+        String remoteAgentEndpointId();
 
-        @Meta.AD(deflt = "matcherendpointproxy")
+        @Meta.AD(deflt = "matcherendpointproxy", description = "local agent identification")
         String agentId();
 
-        @Meta.AD(deflt = "matcherendpointproxy")
-        String matcherEndpointProxy();
+        @Meta.AD(deflt = "ws://localhost:8080/powermatcher/websockets/agentendpoint", description = "URL of powermatcher websocket endpoint.")
+        String powermatcherUrl();
     }
     
-    // TODO make this configurable
-    private final String uri = "ws://localhost:8080/powermatcher/websockets/agentendpoint"; 
+    private URI powermatcherUrl; 
 	
     private Session localSession;
 	private org.eclipse.jetty.websocket.api.Session remoteSession;
-	private WebSocketClient client;
 
-	private MarketBasis marketBasis;
-	private Bid lastBid;
+	private WebSocketClient client;
 	
     /**
      * Scheduler that can schedule commands to run after a given delay, or to execute periodically.
@@ -83,8 +79,14 @@ public class MatcherEndpointProxy extends BaseAgent implements MatcherEndpoint {
 	public synchronized void activate(Map<String, Object> properties) {
 		// Read configuration properties
         Config config = Configurable.createConfigurable(Config.class, properties);
-        this.setDesiredParentId(config.desiredParentId());
         this.setAgentId(config.agentId());
+        
+		try {
+			this.powermatcherUrl = new URI(config.powermatcherUrl());
+		} catch (URISyntaxException e) {
+			LOGGER.error("Malformed URL for powermatcher websocket endpoint. Reason {}", e);
+			return;
+		}
 
         // Start connector thread
         scheduledFuture = this.scheduler.scheduleAtFixedRate(new Runnable() {
@@ -122,20 +124,11 @@ public class MatcherEndpointProxy extends BaseAgent implements MatcherEndpoint {
 		
 		// Try to setup a new websocket connection.		
         client = new WebSocketClient();
-        URI powermatcherUri;
-		try {
-			powermatcherUri = new URI(this.uri);
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			LOGGER.error("Malformed URL for powermatcher websocket endpoint. Reason {}", e);
-			return false;
-		}
-
         ClientUpgradeRequest request = new ClientUpgradeRequest();
         try {
         	client.start();
 	        Future<org.eclipse.jetty.websocket.api.Session> connectFuture =
-	        		client.connect(this, powermatcherUri, request);
+	        		client.connect(this, this.powermatcherUrl, request);
 	        LOGGER.info("Connecting to : {}", request);
 
 	        // Wait TODO configurable for connection time
@@ -151,9 +144,7 @@ public class MatcherEndpointProxy extends BaseAgent implements MatcherEndpoint {
 			
         	return false;
         }
-		
-		// TODO Wait for marketbasis response?
-		// TODO Synchronization        
+
         return true;
 	}
 	
@@ -186,26 +177,11 @@ public class MatcherEndpointProxy extends BaseAgent implements MatcherEndpoint {
 	
 	@Override
 	public boolean connectToAgent(Session session) {
-        // TODO how to receive remote marketBasis? session.setMarketBasis(marketBasis); -> response of server after connect
-		// TODO how to receive remote clusterId? session.setClusterId(this.getClusterId()); -> response of server after connect
 		// TODO how to handle local / remote agentId?
 		// TODO how to handle local / remote desiredParentId?
 		// TODO maybe via querystring during connection?
 		// TODO how to handle security (HTTPS and identity)?
-
 		
-		// TODO always connect to agentRole? Check status of remote agent connection
-		/*
-		if (this.remoteSession == null || !this.remoteSession.isOpen()) {
-	        LOGGER.warn("Remote agent is not connected, unable to connect local agent with session [{}]", session.getSessionId());
-			return false;
-		}
-		*/
-		
-		// Provide remote matcher information (if available)
-		session.setClusterId(this.getClusterId());
-		session.setMarketBasis(this.marketBasis);
-
         this.localSession = session;
         LOGGER.info("Agent connected with session [{}]", session.getSessionId());
 
@@ -268,19 +244,16 @@ public class MatcherEndpointProxy extends BaseAgent implements MatcherEndpoint {
     @OnWebSocketConnect
     public void onConnect(org.eclipse.jetty.websocket.api.Session session) {
         LOGGER.info("Connected: {}", session);
-    	
-        // TODO handle this?
     }
 	
     @OnWebSocketClose
     public void onDisconnect(int statusCode, String reason) {    	
         LOGGER.info("Connection closed: {} - {}", statusCode, reason);
 
-        // TODO handle this?
+        this.remoteSession = null;
     }
     
 	@OnWebSocketMessage
-	// public void onMessage(Price newPrice) {
 	public void onMessage(String message) {
 		try {
 			Gson gson = new Gson();
@@ -291,8 +264,9 @@ public class MatcherEndpointProxy extends BaseAgent implements MatcherEndpoint {
 			Price newPrice = new Price(MarketBasisModel.fromMarketBasisModel(newPriceModel.getMarketBasis()), 
 					newPriceModel.getCurrentPrice());
 			
-			// TODO move to different location (on handshake)
+			// Sync marketbasis and clusterid with local session, for new connections
 			if (this.localSession.getMarketBasis() == null) {
+				this.localSession.setClusterId(newPriceModel.getClusterId());
 				this.localSession.setMarketBasis(newPrice.getMarketBasis());			
 			}
 			

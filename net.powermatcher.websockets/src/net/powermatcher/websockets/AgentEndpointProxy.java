@@ -8,7 +8,6 @@ import javax.naming.OperationNotSupportedException;
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
-import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.core.BaseAgent;
@@ -35,19 +34,17 @@ public class AgentEndpointProxy extends BaseAgent implements AgentEndpoint {
 	private org.eclipse.jetty.websocket.api.Session remoteSession;
 	
 	private Session localSession;
-
-	private MarketBasis marketBasis;
 	
 	@Meta.OCD
     public static interface Config {
-        @Meta.AD(deflt = "concentrator")
+        @Meta.AD(deflt = "concentrator", description = "desired parent to connect to")
         String desiredParentId();
 
-        @Meta.AD(deflt = "agentendpointproxy")
+        @Meta.AD(deflt = "agentendpointproxy", description = "local agent identification")
         String agentId();
 
-        @Meta.AD(deflt = "matcherendpointproxy")
-        String matcherEndpointProxy();
+        @Meta.AD(deflt = "matcherendpointproxy", description = "Remote matcher endpoint proxy")
+        String remoteAgentEndpointId();
     }
 
 	@Activate
@@ -56,7 +53,7 @@ public class AgentEndpointProxy extends BaseAgent implements AgentEndpoint {
 
         this.setDesiredParentId(config.desiredParentId());
         this.setAgentId(config.agentId());
-        this.matcherEndpointProxyId = config.matcherEndpointProxy();
+        this.matcherEndpointProxyId = config.remoteAgentEndpointId();
 	}
 	
 	public void remoteAgentConnected(org.eclipse.jetty.websocket.api.Session session) 
@@ -74,7 +71,7 @@ public class AgentEndpointProxy extends BaseAgent implements AgentEndpoint {
 	
 	public void relayBid(Bid newBid) {
 		if (this.localSession == null) {
-			// TODO check local connected session.
+			LOGGER.warn("Desired parent agent not connected, skip sendingg bid update");
 			return;
 		}
 
@@ -87,10 +84,8 @@ public class AgentEndpointProxy extends BaseAgent implements AgentEndpoint {
 	
 	@Override
 	public void connectToMatcher(Session session) {
-		this.localSession = localSession;
-
         this.setClusterId(session.getClusterId());
-        this.marketBasis = session.getMarketBasis();
+        this.localSession = session;
 	}
 
 	@Override
@@ -103,7 +98,9 @@ public class AgentEndpointProxy extends BaseAgent implements AgentEndpoint {
 		LOGGER.info("Sending price update to remote agent {}", newPrice);
 		try 
 		{
+			// Create price update message and include marketbasis and clusterid
 			PriceModel newPriceModel = new PriceModel();
+			newPriceModel.setClusterId(this.getClusterId());
 			newPriceModel.setCurrentPrice(newPrice.getCurrentPrice());
 			newPriceModel.setMarketBasis(MarketBasisModel.fromMarketBasis(newPrice.getMarketBasis()));
 			
@@ -120,7 +117,5 @@ public class AgentEndpointProxy extends BaseAgent implements AgentEndpoint {
 	@Override
 	public void matcherEndpointDisconnected(Session session) {
 		this.localSession = null;
-		// TODO disconnect remote associated agent.
-	    // this.remoteSessions.remove(session);
 	}
 }
