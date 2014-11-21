@@ -28,10 +28,10 @@ import aQute.bnd.annotation.component.Reference;
 import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
-@Component(designateFactory = PVPanelAgent.Config.class, immediate = true, provide = { ObservableAgent.class,
+@Component(designateFactory = Freezer.Config.class, immediate = true, provide = { ObservableAgent.class,
         AgentEndpoint.class })
-public class PVPanelAgent extends BaseAgent implements AgentEndpoint {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PVPanelAgent.class);
+public class Freezer extends BaseAgent implements AgentEndpoint {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Freezer.class);
 
     private static Random generator;
     
@@ -39,7 +39,7 @@ public class PVPanelAgent extends BaseAgent implements AgentEndpoint {
         @Meta.AD(deflt = "concentrator")
         String desiredParentId();
 
-        @Meta.AD(deflt = "pvpanel")
+        @Meta.AD(deflt = "freezer")
         String agentId();
 
         @Meta.AD(deflt = "30", description = "Number of seconds between bid updates")
@@ -79,8 +79,8 @@ public class PVPanelAgent extends BaseAgent implements AgentEndpoint {
         if (session != null) {
             if (session.getMarketBasis() != null) {
                 
-                //TODO random demand between -600 and -700
-                double demand = generator.nextInt(100) - 700;
+                //TODO random demand between 100 and 120
+                double demand = generator.nextInt(21) + 100;
                 
                 Bid newBid = new Bid(session.getMarketBasis(), new PricePoint(0, demand));
                 LOGGER.debug("updateBid({})", newBid);
