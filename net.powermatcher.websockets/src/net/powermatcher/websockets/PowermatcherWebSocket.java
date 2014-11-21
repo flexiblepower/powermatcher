@@ -4,12 +4,15 @@ package net.powermatcher.websockets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.naming.OperationNotSupportedException;
 
 import net.powermatcher.api.data.Bid;
+import net.powermatcher.api.data.PricePoint;
 import net.powermatcher.websockets.data.BidModel;
 import net.powermatcher.websockets.data.MarketBasisModel;
+import net.powermatcher.websockets.data.PricePointModel;
 
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
@@ -19,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import aQute.bnd.annotation.component.Component;
+import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
 
 import com.google.gson.Gson;
@@ -37,6 +41,14 @@ public class PowermatcherWebSocket {
 	private String agentId = "agentendpointproxy";
 	private String matcherEndpointProxyId = "matcherendpointproxy";
 	
+	@Deactivate
+	public synchronized void deactivate() {
+		// Disconnect every connected agent
+		for(Entry<org.eclipse.jetty.websocket.api.Session, AgentEndpointProxy> link : REMOTE_LOCAL_LINK.entrySet()) {
+			link.getKey().close();
+		}
+	}
+	
 	@Reference(dynamic = true, multiple = true, optional = true)
 	public synchronized void addProxy(AgentEndpointProxy proxy) {
 		LOGGER.info("Registered AgentEndpointProxy: [{}]", proxy.getAgentId());
@@ -52,8 +64,6 @@ public class PowermatcherWebSocket {
     
 	@OnWebSocketConnect
 	public synchronized void onOpen(final org.eclipse.jetty.websocket.api.Session remoteSession) {
-		LOGGER.info("Agent connection detected remote agent: [{}], local agent", this.matcherEndpointProxyId, this.agentId);
-		
 		// TODO how to handle desiredParentId?? maybe using querystring param during connect?
 		// TODO add identification in querystring
 		
@@ -62,6 +72,9 @@ public class PowermatcherWebSocket {
 			// TODO (fase 2) Create new agentRoleProxy, supplying websocketSession.
 
 			// TODO throw correct exception to deny connection
+			LOGGER.info("Rejecting connection from remote agent [{}] for non-existing local agent: [{}]", this.matcherEndpointProxyId, this.agentId);
+			
+			remoteSession.close();
 			return;
 		}
 
@@ -80,6 +93,8 @@ public class PowermatcherWebSocket {
 		// this.remoteSessions.add(remoteSession);
 		
 		// TODO send marketbasis and clusterid back to remote agent as a response to connect?
+
+		LOGGER.info("Remote agent [{}] connected to local agent [{}]", this.matcherEndpointProxyId, this.agentId);
 	}
 
 	@OnWebSocketClose
@@ -123,10 +138,29 @@ public class PowermatcherWebSocket {
 		Gson gson = new Gson();
 		BidModel newBidModel = gson.fromJson(message, BidModel.class);
 		
-		Bid newBid = new Bid(MarketBasisModel.fromMarketBasisModel(
+		Bid newBid = null;
+		
+		// Caution, include either pricepoints or demand and not both.
+		PricePointModel[] pricePointsModel  = newBidModel.getPricePoints();
+		if (pricePointsModel == null || pricePointsModel.length == 0) {
+			 newBid = new Bid(MarketBasisModel.fromMarketBasisModel(
+						newBidModel.getMarketBasis()), 
+						newBidModel.getBidNumber(), 
+						newBidModel.getDemand());
+		} else {
+			// Convert price points
+			PricePoint[] pricePoints = new PricePoint[pricePointsModel.length];
+			for (int i = 0; i < pricePoints.length; i++) {
+				pricePoints[i] = new PricePoint(); 
+				pricePoints[i].setDemand(pricePointsModel[i].getDemand());
+				pricePoints[i].setNormalizedPrice(pricePointsModel[i].getNormalizedPrice());
+			}
+			
+			newBid = new Bid(MarketBasisModel.fromMarketBasisModel(
 				newBidModel.getMarketBasis()), 
 				newBidModel.getBidNumber(), 
-				newBidModel.getDemand());
+				pricePoints);
+		}
 
 		// Relay bid update to local agent
 		proxy.relayBid(newBid);

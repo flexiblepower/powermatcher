@@ -63,4 +63,4 @@
 
 ## Uncomment if you need to change the HTTP port
 #-runproperties: org.osgi.service.http.port=8080
--runvm: -Djetty.home.bundle=org.eclipse.jetty.osgi.boot -Dorg.osgi.service.http.port=8181
+-runvm: -Djetty.home.bundle=org.eclipse.jetty.osgi.boot -Dorg.osgi.service.http.port=8181 -Dlogback.configurationFile=${workspace}/cnf/conf-local/logback.xml

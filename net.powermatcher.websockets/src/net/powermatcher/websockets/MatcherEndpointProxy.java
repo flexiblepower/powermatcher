@@ -3,6 +3,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import net.powermatcher.api.MatcherEndpoint;
@@ -10,6 +12,7 @@ import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
+import net.powermatcher.api.data.PricePoint;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.core.BaseAgent;
 import net.powermatcher.websockets.data.BidModel;
@@ -29,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
+import aQute.bnd.annotation.component.Reference;
 import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
@@ -41,6 +45,8 @@ import com.google.gson.JsonSyntaxException;
 public class MatcherEndpointProxy extends BaseAgent implements MatcherEndpoint {
     private static final Logger LOGGER = LoggerFactory.getLogger(MatcherEndpointProxy.class);
 
+    private static final int RECONNECT_TIMER = 30;
+    
 	@Meta.OCD
     public static interface Config {
         @Meta.AD(deflt = "")
@@ -63,17 +69,58 @@ public class MatcherEndpointProxy extends BaseAgent implements MatcherEndpoint {
 	private MarketBasis marketBasis;
 	private Bid lastBid;
 	
+    /**
+     * Scheduler that can schedule commands to run after a given delay, or to execute periodically.
+     */
+    private ScheduledExecutorService scheduler;
+
+    /**
+     * A delayed result-bearing action that can be cancelled.
+     */
+    private ScheduledFuture<?> scheduledFuture;
+	
 	@Activate
 	public synchronized void activate(Map<String, Object> properties) {
+		// Read configuration properties
         Config config = Configurable.createConfigurable(Config.class, properties);
-
         this.setDesiredParentId(config.desiredParentId());
         this.setAgentId(config.agentId());
-        
-        connect();
+
+        // Start connector thread
+        scheduledFuture = this.scheduler.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                connectRemote();
+            }
+        }, 0, RECONNECT_TIMER, TimeUnit.SECONDS);
+	}
+	
+	@Deactivate
+	public synchronized void deactivate() {
+		// Stop connector thread
+		this.scheduledFuture.cancel(false);
+
+		// Disconnect the agent
+		this.disconnectRemote();
 	}
 
-	private synchronized void connect() {
+    @Reference
+    public void setExecutorService(ScheduledExecutorService scheduler) {
+        this.scheduler = scheduler;
+    }
+    
+	private synchronized boolean connectRemote() {
+		if (!this.isLocalConnected()) {
+			// Don't connect when no agentRole is connected
+			return true;
+		}
+	
+		if (this.isRemoteConnected()) {
+			// Already connected, skip connection
+			return true;
+		}
+		
+		// Try to setup a new websocket connection.		
         client = new WebSocketClient();
         URI powermatcherUri;
 		try {
@@ -81,7 +128,7 @@ public class MatcherEndpointProxy extends BaseAgent implements MatcherEndpoint {
 		} catch (URISyntaxException e) {
 			// TODO Auto-generated catch block
 			LOGGER.error("Malformed URL for powermatcher websocket endpoint. Reason {}", e);
-			return;
+			return false;
 		}
 
         ClientUpgradeRequest request = new ClientUpgradeRequest();
@@ -91,10 +138,10 @@ public class MatcherEndpointProxy extends BaseAgent implements MatcherEndpoint {
 	        		client.connect(this, powermatcherUri, request);
 	        LOGGER.info("Connecting to : {}", request);
 
-        // Wait TODO configurable for connection time
+	        // Wait TODO configurable for connection time
             org.eclipse.jetty.websocket.api.Session newRemoteSession = 
             		connectFuture.get(60, TimeUnit.SECONDS);
-
+            
             this.remoteSession = newRemoteSession;
         } catch (Throwable t) {
             // TODO handle errors on failed connections
@@ -102,21 +149,23 @@ public class MatcherEndpointProxy extends BaseAgent implements MatcherEndpoint {
 
 			this.remoteSession = null;
 			
-        	return;
+        	return false;
         }
 		
-        
 		// TODO Wait for marketbasis response?
-		// TODO Synchronization
+		// TODO Synchronization        
+        return true;
 	}
 	
-	@Deactivate
-	public synchronized void deactivate() {
-		// TODO ( ( ClientContainer )container ).stop();?
-		if (this.remoteSession != null && this.remoteSession.isOpen()) {
+	private synchronized void disconnectRemote() {
+		// Terminate remote session (if any)
+		if (this.isRemoteConnected()) {
 			this.remoteSession.close(new CloseStatus(0, "Normal disconnect"));
 		}
-		
+
+		this.remoteSession = null;		
+
+		// Stop the client
 		if (this.client != null && !this.client.isStopped()) {
 			try {
 				this.client.stop();
@@ -125,8 +174,14 @@ public class MatcherEndpointProxy extends BaseAgent implements MatcherEndpoint {
 				e.printStackTrace();
 			}
 		}
-		
-		this.remoteSession = null;		
+	}
+
+	private boolean isLocalConnected() {
+		return this.localSession != null;
+	}
+
+	private boolean isRemoteConnected() {
+		return this.remoteSession != null && this.remoteSession.isOpen();
 	}
 	
 	@Override
@@ -139,33 +194,35 @@ public class MatcherEndpointProxy extends BaseAgent implements MatcherEndpoint {
 		// TODO how to handle security (HTTPS and identity)?
 
 		
-		// Check status of remote agent connection
+		// TODO always connect to agentRole? Check status of remote agent connection
+		/*
 		if (this.remoteSession == null || !this.remoteSession.isOpen()) {
 	        LOGGER.warn("Remote agent is not connected, unable to connect local agent with session [{}]", session.getSessionId());
 			return false;
 		}
+		*/
 		
-		// Connect to matcher
+		// Provide remote matcher information (if available)
 		session.setClusterId(this.getClusterId());
 		session.setMarketBasis(this.marketBasis);
-		
+
         this.localSession = session;
         LOGGER.info("Agent connected with session [{}]", session.getSessionId());
-		
+
+        // Initiate a remote connection
+		connectRemote();
+
 		return true;
 	}
 
 	@Override
 	public void agentEndpointDisconnected(Session session) {
-		// TODO is this correct approach?
-
-		if (this.remoteSession != null && this.remoteSession.isOpen()) {
-			this.remoteSession.close();
-			this.remoteSession = null;
-		}
-
+		// Disconnect local agent
 		this.localSession = null;
         LOGGER.info("Agent disconnected with session [{}]", session.getSessionId());
+
+        // Disconnect remote agent
+		this.disconnectRemote();
 	}
 
 	@Override
@@ -177,13 +234,25 @@ public class MatcherEndpointProxy extends BaseAgent implements MatcherEndpoint {
 			return;
 		}
 		
+		if (!isRemoteConnected()) {
+			LOGGER.warn("Received bid update, but remote agent is not connected.");
+			return;
+		}
+		
 		// Relay bid to remote agent
 		try {
 			// Convert to JSON and send
 			BidModel newBidModel = new BidModel();
 			newBidModel.setBidNumber(newBid.getBidNumber());
-			newBidModel.setDemand(newBid.getDemand());
-			newBidModel.convertPricePoints(newBid.getPricePoints());
+			
+			// Caution, include either pricepoints or demand, not both!
+			PricePoint[] pricePoints = newBid.getPricePoints();
+			if (pricePoints == null || pricePoints.length == 0) {
+				newBidModel.setDemand(newBid.getDemand());
+			} else  {
+				newBidModel.convertPricePoints(pricePoints);
+			}
+			
 			newBidModel.setMarketBasis(MarketBasisModel.fromMarketBasis(newBid.getMarketBasis()));
 			
 			Gson gson = new Gson();
