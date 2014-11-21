@@ -185,7 +185,7 @@ public class AuctioneerResilienceTestAF extends AuctioneerResilienceTest {
     private void performEquilibriumTest(String testID, String suffix) throws IOException, DataFormatException {
         prepareTest(testID, suffix);
 
-        sendBidsToMatcher(this.auctioneer);
+        sendBidsToMatcher();
 
         checkEquilibriumPrice();
     }
@@ -193,7 +193,7 @@ public class AuctioneerResilienceTestAF extends AuctioneerResilienceTest {
     private void performAggregatedBidTest(String testID, String suffix) throws IOException, DataFormatException {
         prepareTest(testID, suffix);
 
-        sendBidsToMatcher(this.auctioneer);
+        sendBidsToMatcher();
 
         checkAggregatedBid(this.auctioneer.getAggregatedBid(this.marketBasis));
     }

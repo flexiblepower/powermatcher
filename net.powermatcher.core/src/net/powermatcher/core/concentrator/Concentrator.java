@@ -139,8 +139,6 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
         LOGGER.info("Agent [{}], activated", config.agentId());
     }
 
-    // TODO sessionToMatcher is used in synchronized methods. Do we have do synchronize
-    // deactivate? SessiontoMatcher is normally only set once, so maybe not.
     @Deactivate
     public void deactivate() {
         scheduledFuture.cancel(false);
@@ -210,8 +208,12 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
 
     @Override
     public void updatePrice(Price newPrice) {
-        LOGGER.debug("Received price update [{}]", newPrice);
+        if (newPrice == null) {
+            LOGGER.error("Price cannot be null");
+            return;
+        }
 
+        LOGGER.debug("Received price update [{}]", newPrice);
         this.publishEvent(new IncomingPriceEvent(sessionToMatcher.getClusterId(), this.config.agentId(),
                 this.sessionToMatcher.getSessionId(), timeService.currentDate(), newPrice, Qualifier.AGENT));
 
