@@ -4,3 +4,9 @@ bin/
 generated/
 .svn/
 cnf/cache/
+.gradle/
+.sonar/
+build/
+sonar-runner.properties
+RemoteSystemsTempFiles/.project
+*/bin_test/*
