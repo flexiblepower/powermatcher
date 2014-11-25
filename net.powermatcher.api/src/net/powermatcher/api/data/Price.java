@@ -16,6 +16,9 @@ public class Price {
      * Define the current price (double) field.
      */
     private double currentPrice;
+    
+
+	private int bidNumber;
 
     /**
      * Constructs an instance of this class from the specified market basis and current price parameters.
@@ -24,12 +27,20 @@ public class Price {
      *            The market basis (<code>MarketBasis</code>) parameter.
      * @param currentPrice
      *            The current price (<code>double</code>) parameter.
+     * @param bidNumber
+     *            The bidNumber that has resulted in this priceUpdate.
      */
+    public Price(final MarketBasis marketBasis, final double currentPrice, final int bidNumber) {
+        this.marketBasis = marketBasis;
+        this.currentPrice = currentPrice;
+        this.bidNumber = bidNumber;
+    }
+
     public Price(final MarketBasis marketBasis, final double currentPrice) {
         this.marketBasis = marketBasis;
         this.currentPrice = currentPrice;
+        this.bidNumber = 0;
     }
-
     /**
      * To market basis with the specified new market basis parameter and return the Bid result.
      * 
@@ -42,7 +53,7 @@ public class Price {
         if (this.marketBasis.equals(newMarketBasis)) {
             return this;
         } else {
-            return new Price(newMarketBasis, this.currentPrice);
+            return new Price(newMarketBasis, this.currentPrice, this.bidNumber);
         }
     }
 
@@ -81,6 +92,15 @@ public class Price {
      *            The obj (<code>Object</code>) parameter.
      * @return Results of the equals (<code>boolean</code>) value.
      */
+    
+    public int getBidNumber() {
+		return bidNumber;
+	}
+
+	public void setBidNumber(int bidNumber) {
+		this.bidNumber = bidNumber;
+	}
+
     @Override
     public boolean equals(final Object obj) {
         Price other = (Price) ((obj instanceof Price) ? obj : null);

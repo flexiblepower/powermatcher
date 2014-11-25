@@ -322,7 +322,7 @@ public class Bid {
             }
         }
         double intersectionPrice = this.marketBasis.toPrice(this.marketBasis.boundPriceStep(priceStep));
-        return new Price(this.marketBasis, intersectionPrice);
+        return new Price(this.marketBasis, intersectionPrice, this.bidNumber);
     }
 
     /**
