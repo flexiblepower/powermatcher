@@ -17,7 +17,7 @@ public class ConcentratorResilienceTestICF extends ConcentratorResilienceTest {
     private void performAggregatedBidTest(String testID, String suffix) throws IOException, DataFormatException {
         prepareTest(testID, suffix);
 
-        sendBidsToMatcher(this.concentrator);
+        sendBidsToMatcher();
 
         checkAggregatedBid(this.auctioneer.getLastReceivedBid());
     }
@@ -73,7 +73,7 @@ public class ConcentratorResilienceTestICF extends ConcentratorResilienceTest {
     public void receiveAndForwardPriceICF3() throws IOException, DataFormatException {
         prepareTest("ICF/ICF3", null);
 
-        sendBidsToMatcher(this.concentrator);
+        sendBidsToMatcher();
 
         // Send price
         Price equilibrium = new Price(this.marketBasis, this.resultsReader.getEquilibriumPrice());

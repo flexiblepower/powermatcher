@@ -1,0 +1,295 @@
+/* Fjodor van Veen 2014*/
+
+body {
+	
+	position: absolute;
+	
+	top: 0;
+	left: 0;
+	
+	width: 100%;
+	height: 100%;
+	
+	margin: 0;
+	padding: 0;
+	
+	background-color: #fff;
+	
+	color: #333;
+	
+	overflow: hidden;
+	
+}
+
+/*agent container*/
+
+div#agents {
+	
+	font-size: 10px;
+	
+	overflow: hidden;
+	
+}
+
+/*agent div*/
+
+div.agent {
+	
+	font-family: Arial;
+	font-size: 100%;
+	text-align: center;
+	
+	position: absolute;
+	display: block;
+	
+	background-color: rgba(210, 210, 210, 1);
+	background-position: 3em 4em;
+	background-size: 6em;
+	background-repeat: no-repeat;
+	
+	outline: none;
+	border-radius: 0.5em;
+	border: none;
+	
+	width: 10em;
+	height: 10em;
+	padding: 1em;
+	
+	-webkit-transition: all 0.1s linear;
+	-webkit-transition-property: background-color, background-image, color;
+	-ms-transition: all 0.1s linear;
+	-ms-transition-property: background-color, background-image, color;
+	-moz-transition: all 0.1s linear;
+	-moz-transition-property: background-color, background-image, color;
+	-o-transition: all 0.1s linear;
+	-o-transition-property: background-color, background-image, color;
+	transition: all 0.1s linear;
+	transition-property: background-color, background-image, color;
+	
+}
+
+div.agent span {
+	
+	font-size: 150%;
+	
+}
+
+/*generic buttons*/
+
+button.menuButton {
+	
+	font-family: Arial;
+	font-size: 16px;
+	position: absolute;
+	display: block;
+	
+	background-color: rgba(210, 210, 210, 1);
+	
+	outline: none;
+	border-radius: 5px;
+	border: none;
+	
+	width: 130px;
+	height: 40px;
+	padding: 10px 20px;
+	
+}
+
+/*buttons for moving around*/
+
+button.menuButton.panningButton {
+	
+	background-color: rgba(0, 0, 0, 0.2);
+	width: 60px;
+	
+}
+
+input#textInput {
+	
+	position: absolute;
+	top: -50px;
+	
+}
+
+/*when the mouse is on top of it*/
+
+button.mouse, div.mouse {
+	
+	background-color: rgba(130, 130, 130, 1);
+	color: #000;
+	
+	cursor: pointer;
+	
+}
+
+/*when it is selected*/
+
+button.selection, div.selection {
+	
+	background-color: rgba(0, 0, 0, 1);
+	color: #fff;
+	
+	cursor: move;
+	
+}
+
+/*actually settings window*/
+
+div#exportWindow button {
+	
+	position: absolute;
+	background-color: rgba(255, 255, 255, 1);
+	bottom: 20px;
+	
+}
+
+div#exportWindow button.mouse {
+	
+	background-color: rgba(130, 130, 130, 1);
+	
+}
+
+button#cancelFinalButton {
+	
+	left: 160px;
+	
+}
+
+/*functionality buttons on top of each agent*/
+
+div.miniButtonBar button.miniFunction {
+	
+	position: absolute;
+	min-width: 2.4em;
+	min-height: 3em;
+	padding: 0;
+	margin: 0;
+	width: 2.4em;
+	height: 3em;
+	border-radius: 0;
+	color: rgba(0, 0, 0, 0);
+	background: none;
+	
+	font-size: inherit;
+	
+}
+
+div.miniButtonBar button.miniFunction.mouse {
+	
+	background-color: rgba(255, 255, 255, 0.5);
+	
+}
+
+button.miniFunction#connect {
+	
+	left: 0em;
+	
+}
+
+button.miniFunction#disconnect {
+	
+	left: 2.4em;
+	
+}
+
+button.miniFunction#cycle {
+	
+	left: 4.8em;
+	
+}
+
+button.miniFunction#rename {
+	
+	left: 7.2em;
+	
+}
+
+button.miniFunction#delete {
+	
+	left: 9.6em;
+	
+}
+
+div.miniButtonBar {
+	
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 3em;
+	background-image: url(icons/minibar.png);
+	background-size: 100%;
+	
+	font-size: inherit;
+	
+}
+
+div#exportWindow {
+	
+	position: absolute;
+	
+	width: 400px;
+	height: 500px;
+	top: 50%;
+	left: 50%;
+	margin-left: -230px;
+	margin-top: -280px;
+	padding: 30px;
+	
+	border-radius: 5px;
+	background-color: rgba(210, 210, 210, 1);
+	color: #000;
+	
+	font: 16px Arial;
+	
+}
+
+input {
+	
+	border: none;
+	outline: none;
+	padding: 5px;
+	margin: 10px 0;
+	width: 380px;
+	
+	border-radius: 5px;
+	
+	color: #333;
+	
+	font: 16px Arial;
+	
+}
+
+/*errors*/
+
+span#feedback {
+	
+	font: 16px Arial;
+	position: absolute;
+	display: block;
+	top: 20px;
+	color: #900;
+	left: 180px;
+	
+}
+
+span.agentName {
+	
+	word-wrap: break-word;
+	
+}
+
+span.typing {
+	
+	color: #000;
+	background-color: rgba(255, 255, 255, 1);
+	
+}
+
+span.typing::after {
+	
+	content: "|";
+	
+}

@@ -1,6 +1,7 @@
 package net.powermatcher.examples;
 
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -32,6 +33,8 @@ import aQute.bnd.annotation.metatype.Meta;
 public class PVPanelAgent extends BaseAgent implements AgentEndpoint {
     private static final Logger LOGGER = LoggerFactory.getLogger(PVPanelAgent.class);
 
+    private static Random generator;
+    
     public static interface Config {
         @Meta.AD(deflt = "concentrator")
         String desiredParentId();
@@ -50,6 +53,7 @@ public class PVPanelAgent extends BaseAgent implements AgentEndpoint {
 
     @Activate
     public void activate(Map<String, Object> properties) {
+        generator = new Random();
         Config config = Configurable.createConfigurable(Config.class, properties);
         this.setAgentId(config.agentId());
         this.setDesiredParentId(config.desiredParentId());
@@ -74,7 +78,9 @@ public class PVPanelAgent extends BaseAgent implements AgentEndpoint {
     protected void doBidUpdate() {
         if (session != null) {
             if (session.getMarketBasis() != null) {
-                Bid newBid = new Bid(session.getMarketBasis(), new PricePoint(0, 700), new PricePoint(100,-700));
+                // random demand between -600 and -700
+                double demand = generator.nextInt(100) - 700;
+                Bid newBid = new Bid(session.getMarketBasis(), new PricePoint(0, demand));
                 LOGGER.debug("updateBid({})", newBid);
                 session.updateBid(newBid);
                 this.publishEvent(new OutgoingBidEvent(session.getClusterId(),this.getAgentId(), session.getSessionId(),
