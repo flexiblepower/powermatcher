@@ -255,10 +255,17 @@ public class CSVLogger extends BaseObserver {
     private void writeLineToCSV(String[] line, File outputFile) {
 
         try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(outputFile, true)))) {
+            
+            StringBuilder sb = new StringBuilder();
+
             for (String s : line) {
-                out.print(s + separator);
+                if (sb.length() > 0) {
+                    sb.append(separator);
+                }
+                sb.append(s);
             }
-            out.println();
+            
+            out.println(sb.toString());
 
         } catch (IOException e) {
             // TODO do something with this exception
