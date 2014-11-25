@@ -16,11 +16,9 @@ import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
-import net.powermatcher.api.monitoring.IncomingBidEvent;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.OutgoingPriceEvent;
 import net.powermatcher.api.monitoring.Qualifier;
-import net.powermatcher.core.BaseAgent;
 import net.powermatcher.core.BidCache;
 import net.powermatcher.core.concentrator.Concentrator;
 
@@ -59,7 +57,7 @@ import aQute.bnd.annotation.metatype.Meta;
  */
 @Component(designateFactory = ObjectiveAuctioneer.Config.class, immediate = true, provide = { ObservableAgent.class,
         MatcherEndpoint.class })
-public class ObjectiveAuctioneer extends BaseAgent implements MatcherEndpoint {
+public class ObjectiveAuctioneer extends Auctioneer implements MatcherEndpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ObjectiveAuctioneer.class);
 
@@ -124,16 +122,12 @@ public class ObjectiveAuctioneer extends BaseAgent implements MatcherEndpoint {
     private Set<Session> sessions = new HashSet<Session>();
 
     /**
-     * Id of the {@link Auctioneer}.
-     */
-    private String matcherId;
-
-    /**
      * Holds the objective agent
      */
     private ObjectiveEndpoint objectiveEndpoint;
 
     @Activate
+    @Override
     public void activate(final Map<String, Object> properties) {
         Config config = Configurable.createConfigurable(Config.class, properties);
         this.marketBasis = new MarketBasis(config.commodity(), config.currency(), config.priceSteps(),
@@ -200,67 +194,38 @@ public class ObjectiveAuctioneer extends BaseAgent implements MatcherEndpoint {
         LOGGER.info("Agent disconnected with session [{}]", session.getSessionId());
     }
 
-    @Override
-    public synchronized void updateBid(Session session, Bid newBid) {
-        if (!sessions.contains(session)) {
-            throw new IllegalStateException("No session found");
-        }
-
-        if (!newBid.getMarketBasis().equals(this.marketBasis)) {
-            throw new InvalidParameterException("Marketbasis new bid differs from marketbasis auctioneer");
-        }
-
-        // Update agent in aggregatedBids
-        this.aggregatedBids.updateBid(session.getSessionId(), newBid);
-
-        LOGGER.debug("Received bid update [{}] from session [{}]", newBid, session.getSessionId());
-
-        this.publishEvent(new IncomingBidEvent(session.getClusterId(), matcherId, session.getSessionId(), timeService
-                .currentDate(), session.getAgentId(), newBid, Qualifier.AGENT));
-    }
-
     /**
      * Generates the new price out of the aggregated bids and sends this to all listeners. The listeners can be device
      * agents and objective agents. TODO This is temporarily made public instead of default to test some things. This
      * should be fixed as soon as possible.
      */
+    @Override
     public synchronized void publishNewPrice() {
         // aggregate bid device agents
         Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis);
 
+        Price newPrice;
         // check if objective agent is active
         if (this.objectiveEndpoint != null) {
             // receive the aggregate bid from the objective agent
             Bid aggregatedObjectiveBid = this.objectiveEndpoint.handleAggregateBid(aggregatedBid);
-
             // aggregate again with device agent bid.
             Bid finalAggregatedBid = aggregatedBid.aggregate(aggregatedObjectiveBid);
 
-            Price newPrice = determinePrice(finalAggregatedBid);
-
+            newPrice = determinePrice(finalAggregatedBid);
             // send price update to objective agent
             objectiveEndpoint.notifyPriceUpdate(newPrice);
-
-            // send price updates to device agents
-            for (Session session : this.sessions) {
-                this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), matcherId, session.getSessionId(),
-                        timeService.currentDate(), newPrice, Qualifier.MATCHER));
-
-                session.updatePrice(newPrice);
-                LOGGER.debug("New price: {}, session {}", newPrice, session.getSessionId());
-            }
-
         } else {
-            Price newPrice = determinePrice(aggregatedBid);
+            newPrice = determinePrice(aggregatedBid);
+        }
 
-            // send price updates to device agents
-            for (Session session : this.sessions) {
-                this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), matcherId, session.getSessionId(),
-                        timeService.currentDate(), newPrice, Qualifier.MATCHER));
+        // send price updates to device agents
+        for (Session session : this.sessions) {
+            this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), getAgentId(), session.getSessionId(),
+                    timeService.currentDate(), newPrice, Qualifier.MATCHER));
 
-                session.updatePrice(newPrice);
-                LOGGER.debug("New price: {}, session {}", newPrice, session.getSessionId());
-            }
+            session.updatePrice(newPrice);
+            LOGGER.debug("New price: {}, session {}", newPrice, session.getSessionId());
         }
     }
 
