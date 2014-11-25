@@ -49,7 +49,7 @@ public class CSVLogger extends BaseObserver {
      */
     private static final String[] BID_HEADER_ROW = new String[] { "logTime", "clusterId", "id", "qualifier",
             "commodity", "currency", "minimumPrice", "maximumPrice", "minimumDemand", "maximumDemand",
-            "effectiveDemand", "effectivePrice", "lastUpdateTime", "bid" };
+            "effectiveDemand", "effectivePrice", "lastUpdateTime", "bidNumber", "demand", "pricePoints" };
 
     /**
      * The header for the pricelog file
@@ -153,7 +153,6 @@ public class CSVLogger extends BaseObserver {
                     dateFormat);
             priceLogRecords.add(priceLogRecord);
         }
-
     }
 
     private void writeLogs(BlockingQueue<? extends LogRecord> records, File outputFile) {
