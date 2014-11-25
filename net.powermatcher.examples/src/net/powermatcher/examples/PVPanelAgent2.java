@@ -1,7 +1,6 @@
 package net.powermatcher.examples;
 
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -28,13 +27,11 @@ import aQute.bnd.annotation.component.Reference;
 import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
-@Component(designateFactory = PVPanelAgent.Config.class, immediate = true, provide = { ObservableAgent.class,
-        AgentEndpoint.class })
-public class PVPanelAgent extends BaseAgent implements AgentEndpoint {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PVPanelAgent.class);
+@Component(designateFactory = PVPanelAgent2.Config.class, immediate = true, provide = { ObservableAgent.class,
+    AgentEndpoint.class })
+public class PVPanelAgent2 extends BaseAgent implements AgentEndpoint {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PVPanelAgent2.class);
 
-    private static Random generator;
-    
     public static interface Config {
         @Meta.AD(deflt = "concentrator")
         String desiredParentId();
@@ -50,10 +47,10 @@ public class PVPanelAgent extends BaseAgent implements AgentEndpoint {
     private ScheduledExecutorService scheduler;
     private Session session;
     private TimeService timeService;
+    private int	bidNumber;
 
-    @Activate
+	@Activate
     public void activate(Map<String, Object> properties) {
-        generator = new Random();
         Config config = Configurable.createConfigurable(Config.class, properties);
         this.setAgentId(config.agentId());
         this.setDesiredParentId(config.desiredParentId());
@@ -78,13 +75,13 @@ public class PVPanelAgent extends BaseAgent implements AgentEndpoint {
     protected void doBidUpdate() {
         if (session != null) {
             if (session.getMarketBasis() != null) {
-                // random demand between -600 and -700
-                double demand = generator.nextInt(100) - 700;
-                Bid newBid = new Bid(session.getMarketBasis(), new PricePoint(0, demand));
-                LOGGER.debug("updateBid({})", newBid);
-                session.updateBid(newBid);
+                Bid newBid = new Bid(session.getMarketBasis(), new PricePoint(0, 700), new PricePoint(100,-700));
+                incrBidNumber();
+                Bid newBidNr = new Bid(newBid, getBidNumber());
+                LOGGER.debug("updateBid({})", newBidNr);
+                session.updateBid(newBidNr);
                 this.publishEvent(new OutgoingBidEvent(session.getClusterId(),this.getAgentId(), session.getSessionId(),
-                        timeService.currentDate(), newBid, Qualifier.AGENT));
+                        timeService.currentDate(), newBidNr, Qualifier.AGENT));
             }
         }
     }
@@ -95,6 +92,8 @@ public class PVPanelAgent extends BaseAgent implements AgentEndpoint {
         publishEvent(new IncomingPriceEvent(session.getClusterId(), this.getAgentId(), session.getSessionId(), timeService.currentDate(),
                 newPrice, Qualifier.AGENT));
         LOGGER.debug("Received price update [{}]", newPrice);
+        LOGGER.debug("Received for bidNumber [{}]", newPrice.getBidNumber());
+        LOGGER.debug("While current bidNumber is [{}]", getBidNumber());
     }
 
     @Override
@@ -116,4 +115,17 @@ public class PVPanelAgent extends BaseAgent implements AgentEndpoint {
     public void setTimeService(TimeService timeService) {
         this.timeService = timeService;
     }
+    
+
+    public int getBidNumber() {
+		return bidNumber;
+	}
+
+	public void setBidNumber(int bidNumber) {
+		this.bidNumber = bidNumber;
+	}
+
+	private void incrBidNumber() {
+		this.bidNumber += 1;
+	}
 }

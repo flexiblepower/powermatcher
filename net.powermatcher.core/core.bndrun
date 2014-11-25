@@ -31,7 +31,8 @@
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core)',\
 	osgi.identity;filter:='(osgi.identity=org.apache.felix.webconsole.plugins.ds)',\
 	osgi.identity;filter:='(osgi.identity=ch.qos.logback.classic)',\
-	osgi.identity;filter:='(osgi.identity=ch.qos.logback.core)'
+	osgi.identity;filter:='(osgi.identity=ch.qos.logback.core)',\
+	osgi.identity;filter:='(osgi.identity=net.powermatcher.examples)'
 
 ## Uncomment if you need to change the HTTP port
 #-runproperties: org.osgi.service.http.port=8080
