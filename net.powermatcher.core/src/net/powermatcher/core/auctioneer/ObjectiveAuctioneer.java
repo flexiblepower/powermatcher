@@ -57,7 +57,7 @@ import aQute.bnd.annotation.metatype.Meta;
  */
 @Component(designateFactory = ObjectiveAuctioneer.Config.class, immediate = true, provide = { ObservableAgent.class,
         MatcherEndpoint.class })
-public class ObjectiveAuctioneer extends Auctioneer implements MatcherEndpoint {
+public class ObjectiveAuctioneer extends Auctioneer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ObjectiveAuctioneer.class);
 
