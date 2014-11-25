@@ -661,6 +661,9 @@ public class Bid {
      * @return Results of the get scale factor (<code>double</code>) value.
      */
     public double getScaleFactor(final int maxValue) {
+        if(maxValue == 0){
+            throw new IllegalArgumentException("value cannot be zero");
+        }
         return Math.max(getMaximumDemand(), -getMinimumDemand()) / maxValue;
     }
 
@@ -757,6 +760,7 @@ public class Bid {
         if (unclonedPricePoints == null) {
             // TODO this should return new PricePoint[0], not null.
             // getCalculatedPricePoints might will have to be refactored
+            //When this is fixed update the unit test to test for PrincePoint[0]. 
 
             return null;
         }
