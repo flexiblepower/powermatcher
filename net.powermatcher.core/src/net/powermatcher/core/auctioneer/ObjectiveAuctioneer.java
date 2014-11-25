@@ -1,19 +1,14 @@
 package net.powermatcher.core.auctioneer;
 
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import net.powermatcher.api.Agent;
-import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.ObjectiveEndpoint;
 import net.powermatcher.api.Session;
@@ -27,7 +22,6 @@ import net.powermatcher.api.monitoring.OutgoingPriceEvent;
 import net.powermatcher.api.monitoring.Qualifier;
 import net.powermatcher.core.BaseAgent;
 import net.powermatcher.core.BidCache;
-import net.powermatcher.core.auctioneer.Auctioneer.Config;
 import net.powermatcher.core.concentrator.Concentrator;
 
 import org.slf4j.Logger;
@@ -42,18 +36,21 @@ import aQute.bnd.annotation.metatype.Meta;
 
 /**
  * <p>
- * This class represents an {@link Auctioneer} component which will receive all {@link Bid} of other agents as a single
- * {@link Bid} or as an aggregate {@link Bid} via one or more {@link Concentrator}.
+ * This class represents an {@link ObjectiveAuctioneer} component which will receive all {@link Bid} of other agents as
+ * a single {@link Bid} or as an aggregate {@link Bid} via one or more {@link Concentrator}. If {@link ObjectiveAgent}
+ * are active, the {@link ObjectiveAuctioneer} will also receive a {@link Bid} from the {@link ObjectiveAgent} as a
+ * single {@link Bid}.
  * </p>
  * 
  * <p>
  * It is responsible for defining and sending the {@link MarketBasis} and calculating the equilibrium based on the
- * {@link Bid} from the different agents in the topology. This equilibrium is communicated to the agents down the
- * hierarchy in the form of price update messages.
+ * {@link Bid} from the different agents in the topology and the objective agent. This equilibrium is communicated to
+ * the agents down the hierarchy in the form of price update messages and to the objective agent.
  * 
- * The {@link Price} that is communicated contains a {@link Price} and a {@link MarketBasis} which enables the
- * conversion to a normalized {@link Price} or to any other {@link MarketBasis} for other financial calculation
- * purposes.
+ * In order of aggregation the {@link Bid} from the device agents and objective agents, the {@link ObjectiveAuctioneer}
+ * will first aggregate the device agents bid and secondly aggregate the {@link Bid} from the objective agent. After the
+ * aggregation the {@link ObjectiveAuctioneer} will determine the price and sends it to the {@link Concentrator} /
+ * device agents and the objective agent.
  * </p>
  * 
  * @author FAN
@@ -64,7 +61,7 @@ import aQute.bnd.annotation.metatype.Meta;
         MatcherEndpoint.class })
 public class ObjectiveAuctioneer extends BaseAgent implements MatcherEndpoint {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Auctioneer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ObjectiveAuctioneer.class);
 
     @Meta.OCD
     public static interface Config {
@@ -131,13 +128,11 @@ public class ObjectiveAuctioneer extends BaseAgent implements MatcherEndpoint {
      */
     private String matcherId;
 
-    private List<ObjectiveEndpoint> objectiveEndpoints = new ArrayList<ObjectiveEndpoint>();
-    
-//    private ObjectiveEndpoint objectiveEndpoint;
-    
-    // TODO marketBasis, aggregatedBids and
-    // matcherId are used in synchronized methods. Do we have do synchronize
-    // activate? It's only called once, so maybe not.
+    /**
+     * Holds the objective agent
+     */
+    private ObjectiveEndpoint objectiveEndpoint;
+
     @Activate
     public void activate(final Map<String, Object> properties) {
         Config config = Configurable.createConfigurable(Config.class, properties);
@@ -161,26 +156,32 @@ public class ObjectiveAuctioneer extends BaseAgent implements MatcherEndpoint {
         scheduledFuture.cancel(false);
     }
 
-    
     @Reference(dynamic = true, multiple = true, optional = true)
     public void addObjectiveEndpoint(ObjectiveEndpoint objectiveEndpoint) {
-        
-        objectiveEndpoints.add(objectiveEndpoint);
-        
-        LOGGER.debug("add hier");
+        Agent agent = (Agent) objectiveEndpoint;
+
+        if (agent.getAgentId() != null) {
+            this.objectiveEndpoint = objectiveEndpoint;
+            LOGGER.debug("Added new objective agent [{}]: ", agent.getAgentId());
+        } else {
+            throw new IllegalStateException("Only one objective agent can be added to the cluster");
+        }
     }
-    
+
     public void removeObjectiveEndpoint(ObjectiveEndpoint objectiveEndpoint) {
-    
-        objectiveEndpoints.remove(objectiveEndpoint);    
+        if (this.objectiveEndpoint == objectiveEndpoint) {
+            this.objectiveEndpoint = null;
+            LOGGER.debug("Removed objective agent");
+        } else {
+            throw new IllegalStateException("This objective agent is not active and can't be removed");
+        }
     }
-    
-    
+
     @Override
     public synchronized boolean connectToAgent(Session session) {
         session.setMarketBasis(marketBasis);
         session.setClusterId(this.getClusterId());
-        
+
         this.sessions.add(session);
         this.aggregatedBids.updateBid(session.getSessionId(), new Bid(this.marketBasis));
         LOGGER.info("Agent connected with session [{}]", session.getSessionId());
@@ -214,49 +215,52 @@ public class ObjectiveAuctioneer extends BaseAgent implements MatcherEndpoint {
 
         LOGGER.debug("Received bid update [{}] from session [{}]", newBid, session.getSessionId());
 
-        this.publishEvent(new IncomingBidEvent(session.getClusterId(), matcherId, session.getSessionId(), timeService.currentDate(),
-                session.getAgentId(), newBid, Qualifier.AGENT));
+        this.publishEvent(new IncomingBidEvent(session.getClusterId(), matcherId, session.getSessionId(), timeService
+                .currentDate(), session.getAgentId(), newBid, Qualifier.AGENT));
     }
 
     /**
-     * Generates the new price out of the aggregated bids and sends this to all listeners TODO This is temporarily made
-     * public instead of default to test some things. This should be fixed as soon as possible.
+     * Generates the new price out of the aggregated bids and sends this to all listeners. The listeners can be device
+     * agents and objective agents. TODO This is temporarily made public instead of default to test some things. This
+     * should be fixed as soon as possible.
      */
     public synchronized void publishNewPrice() {
+        // aggregate bid device agents
         Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis);
-        
-        List<Bid> objectiveBids = new ArrayList<Bid>(); 
-        
-        // Hier moet die aanroep komen naar handleAggregatedBid();
-        for (ObjectiveEndpoint objectiveEndpoint : objectiveEndpoints) {
-            
-            objectiveBids.add(objectiveEndpoint.handleAggregateBid(aggregatedBid));
-            
-//            objectiveAggregatedBid.aggregate(objectiveAggregatedBid);
-//            Bid newAggregatedBid = aggregatedBid.aggregate(objectiveAggregatedBid);
-        }
-        
-        Bid newAggregatedBid = null;
-        for (Bid objectiveBid : objectiveBids) {
-            newAggregatedBid = aggregatedBid.aggregate(objectiveBid);
-        }
-        
-//      Update agent in aggregatedBids
-        //this.aggregatedBids.updateBid(session.getSessionId(), newBid);
-        
-        Price newPrice = determinePrice(newAggregatedBid);
-        
-        for (Session session : this.sessions) {
-            this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), matcherId, session.getSessionId(),
-                    timeService.currentDate(), newPrice, Qualifier.MATCHER));
 
-            session.updatePrice(newPrice);
-            LOGGER.debug("New price: {}, session {}", newPrice, session.getSessionId());
-        }
-        
-        // send price updates to objectiveAgents
-        for (ObjectiveEndpoint objectiveEndpoint : objectiveEndpoints) {
-            objectiveEndpoint.notifyPriceUpdate(newPrice);            
+        // check if objective agent is active
+        if (this.objectiveEndpoint != null) {
+            // receive the aggregate bid from the objective agent
+            Bid aggregatedObjectiveBid = this.objectiveEndpoint.handleAggregateBid(aggregatedBid);
+
+            // aggregate again with device agent bid.
+            Bid finalAggregatedBid = aggregatedBid.aggregate(aggregatedObjectiveBid);
+
+            Price newPrice = determinePrice(finalAggregatedBid);
+
+            // send price update to objective agent
+            objectiveEndpoint.notifyPriceUpdate(newPrice);
+
+            // send price updates to device agents
+            for (Session session : this.sessions) {
+                this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), matcherId, session.getSessionId(),
+                        timeService.currentDate(), newPrice, Qualifier.MATCHER));
+
+                session.updatePrice(newPrice);
+                LOGGER.debug("New price: {}, session {}", newPrice, session.getSessionId());
+            }
+
+        } else {
+            Price newPrice = determinePrice(aggregatedBid);
+
+            // send price updates to device agents
+            for (Session session : this.sessions) {
+                this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), matcherId, session.getSessionId(),
+                        timeService.currentDate(), newPrice, Qualifier.MATCHER));
+
+                session.updatePrice(newPrice);
+                LOGGER.debug("New price: {}, session {}", newPrice, session.getSessionId());
+            }
         }
     }
 
@@ -273,8 +277,8 @@ public class ObjectiveAuctioneer extends BaseAgent implements MatcherEndpoint {
     public void setExecutorService(ScheduledExecutorService scheduler) {
         this.scheduler = scheduler;
     }
-    
-    protected BidCache getAggregatedBids(){
+
+    protected BidCache getAggregatedBids() {
         return this.aggregatedBids;
     }
 }

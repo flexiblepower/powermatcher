@@ -118,11 +118,6 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
      */
     private Set<Session> sessions = new HashSet<Session>();
 
-    /**
-     * Id of the {@link Auctioneer}.
-     */
-    private String matcherId;
-
     // TODO marketBasis, aggregatedBids and
     // matcherId are used in synchronized methods. Do we have do synchronize
     // activate? It's only called once, so maybe not.
@@ -153,7 +148,7 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
     public synchronized boolean connectToAgent(Session session) {
         session.setMarketBasis(marketBasis);
         session.setClusterId(this.getClusterId());
-        
+
         this.sessions.add(session);
         this.aggregatedBids.updateBid(session.getSessionId(), new Bid(this.marketBasis));
         LOGGER.info("Agent connected with session [{}]", session.getSessionId());
@@ -187,8 +182,8 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
 
         LOGGER.debug("Received bid update [{}] from session [{}]", newBid, session.getSessionId());
 
-        this.publishEvent(new IncomingBidEvent(session.getClusterId(), matcherId, session.getSessionId(), timeService.currentDate(),
-                session.getAgentId(), newBid, Qualifier.AGENT));
+        this.publishEvent(new IncomingBidEvent(session.getClusterId(), getAgentId(), session.getSessionId(), timeService
+                .currentDate(), session.getAgentId(), newBid, Qualifier.AGENT));
     }
 
     /**
@@ -200,7 +195,7 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
         Price newPrice = determinePrice(aggregatedBid);
 
         for (Session session : this.sessions) {
-            this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), matcherId, session.getSessionId(),
+            this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), getAgentId(), session.getSessionId(),
                     timeService.currentDate(), newPrice, Qualifier.MATCHER));
 
             session.updatePrice(newPrice);
@@ -221,8 +216,8 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
     public void setExecutorService(ScheduledExecutorService scheduler) {
         this.scheduler = scheduler;
     }
-    
-    protected BidCache getAggregatedBids(){
+
+    protected BidCache getAggregatedBids() {
         return this.aggregatedBids;
     }
 }

@@ -4,7 +4,7 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
 
 /**
- * A {@link MatcherEndpoint} defines the inteface for classes that can receive a {@link Bid} and send a {@link Price}, based
+ * A {@link MatcherEndpoint} defines the interface for classes that can receive a {@link Bid} and send a {@link Price}, based
  * on that {@link Bid}. A {@link MatcherEndpoint} can be linked with zero of more {@link AgentEndpoint} instances. These are
  * linked by a {@link Session}.
  * 
