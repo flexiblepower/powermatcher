@@ -15,6 +15,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.powermatcher.api.TimeService;
 import net.powermatcher.api.monitoring.BidEvent;
@@ -65,12 +67,12 @@ public class CSVLogger extends BaseObserver {
         List<String> filter();
 
         @Meta.AD(
-                deflt = "agent_bid_log_'yyyyMMdd'.csv",
-                description = "The pattern for the file name of the bid log file.")
+                deflt = "agent_bid_log_::yyyyMMdd::.csv",
+                description = "The pattern for the file name of the bid log file. Dataformat strings are placed between the delimeter '::'")
         String bidlogFilenamePattern();
 
         @Meta.AD(
-                deflt = "agent_price_log_'yyyyMMdd'.csv",
+                deflt = "agent_price_log_::yyyyMMdd::.csv",
                 description = "The pattern for the file name of the price log file.")
         String pricelogFilenamePattern();
 
@@ -80,7 +82,7 @@ public class CSVLogger extends BaseObserver {
         @Meta.AD(deflt = ";", description = "The field separator the logger will use.")
         String separator();
 
-        @Meta.AD(required= true, description = "The location of the log files.")
+        @Meta.AD(required = true, description = "The location of the log files.")
         String logLocation();
 
         @Meta.AD(deflt = "30", description = "Time in seconds between file dumps.")
@@ -237,14 +239,12 @@ public class CSVLogger extends BaseObserver {
 
         this.dateFormat = new SimpleDateFormat(config.dateFormat());
 
-        this.priceLogFile = new File(config.logLocation() + File.separator + config.pricelogFilenamePattern());
-
+        this.priceLogFile = createLogFile(config.pricelogFilenamePattern(), config.logLocation());
         if (!priceLogFile.exists()) {
             writeLineToCSV(PRICE_HEADER_ROW, priceLogFile);
         }
 
-        this.bidlogFile = new File(config.logLocation() + File.separator + config.bidlogFilenamePattern());
-
+        this.bidlogFile = createLogFile(config.bidlogFilenamePattern(), config.logLocation());
         if (!bidlogFile.exists()) {
             writeLineToCSV(BID_HEADER_ROW, bidlogFile);
         }
@@ -252,10 +252,27 @@ public class CSVLogger extends BaseObserver {
         updateObservables();
     }
 
+    private File createLogFile(String fileName, String logLocation) {
+
+        String newFileName = fileName;
+
+        if (fileName.matches("\\S*::\\w*::*.csv")) {
+
+            String logDateFormat = fileName.substring(fileName.indexOf("::") + 2, fileName.lastIndexOf("::"));
+            String date = new SimpleDateFormat(logDateFormat).format(timeService.currentDate());
+
+            Pattern pattern = Pattern.compile("::\\w*::");
+            Matcher matcher = pattern.matcher(fileName);
+            newFileName = matcher.replaceAll(date);
+        }
+
+        return new File(logLocation + File.separator + newFileName);
+    }
+
     private void writeLineToCSV(String[] line, File outputFile) {
 
         try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(outputFile, true)))) {
-            
+
             StringBuilder sb = new StringBuilder();
 
             for (String s : line) {
@@ -264,7 +281,7 @@ public class CSVLogger extends BaseObserver {
                 }
                 sb.append(s);
             }
-            
+
             out.println(sb.toString());
 
         } catch (IOException e) {
