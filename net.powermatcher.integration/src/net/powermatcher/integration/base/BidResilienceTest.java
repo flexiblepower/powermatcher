@@ -14,27 +14,27 @@ import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.core.sessions.SessionManager;
 import net.powermatcher.core.time.SystemTimeService;
+import net.powermatcher.integration.util.AuctioneerWrapper;
 import net.powermatcher.integration.util.ConcentratorWrapper;
 import net.powermatcher.integration.util.CsvBidReader;
 import net.powermatcher.integration.util.CsvExpectedResultsReader;
 import net.powermatcher.mock.MockAgent;
-import net.powermatcher.mock.MockMatcherAgent;
 
 import org.junit.After;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConcentratorResilienceTest extends ResilienceTest{
+public class BidResilienceTest extends ResilienceTest {
 
-    private static final String MATCHERAGENTNAME = "auctioneer";
+    private static final String AUCTIONEER_NAME = "auctioneer";
     private static final String CONCENTRATOR_NAME = "concentrator";
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConcentratorResilienceTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BidResilienceTest.class);
 
     // The direct upstream matcher for the agents
     protected ConcentratorWrapper concentrator;
 
-    //mock auctioneer
-    protected MockMatcherAgent auctioneer;
+    // mock auctioneer
+    protected AuctioneerWrapper auctioneer;
 
     protected void prepareTest(String testID, String suffix) throws IOException, DataFormatException {
         // Create agent list
@@ -47,11 +47,34 @@ public class ConcentratorResilienceTest extends ResilienceTest{
         this.resultsReader = new CsvExpectedResultsReader(getExpectedResultsFile(testID, suffix));
 
         this.marketBasis = resultsReader.getMarketBasis();
+
+        this.auctioneer = new AuctioneerWrapper();
+        Map<String, Object> auctioneerProperties = new HashMap<>();
+        auctioneerProperties.put("id", MATCHERNAME);
+        auctioneerProperties.put("matcherId", MATCHERNAME);
+        auctioneerProperties.put("agentId", MATCHERNAME);
+        auctioneerProperties.put("commodity", "electricity");
+        auctioneerProperties.put("currency", "EUR");
+        auctioneerProperties.put("priceSteps", marketBasis.getPriceSteps());
+        auctioneerProperties.put("minimumPrice", marketBasis.getMinimumPrice());
+        auctioneerProperties.put("maximumPrice", marketBasis.getMaximumPrice());
+        auctioneerProperties.put("bidTimeout", "600");
+        auctioneerProperties.put("priceUpdateRate", "1");
+        auctioneerProperties.put("clusterId", "testCluster");
+        
+        auctioneer.setMarketBasis(marketBasis);
+        
+        this.matchers.add(this.auctioneer);
+
+        auctioneer.setExecutorService(new ScheduledThreadPoolExecutor(10));
+        auctioneer.setTimeService(new SystemTimeService());
+        auctioneer.activate(auctioneerProperties);
+
         this.concentrator = new ConcentratorWrapper();
         Map<String, Object> concentratorProperties = new HashMap<>();
         concentratorProperties = new HashMap<String, Object>();
         concentratorProperties.put("matcherId", CONCENTRATOR_NAME);
-        concentratorProperties.put("desiredParentId", MATCHERAGENTNAME);
+        concentratorProperties.put("desiredParentId", AUCTIONEER_NAME);
         concentratorProperties.put("bidTimeout", "600");
         concentratorProperties.put("bidUpdateRate", "30");
         concentratorProperties.put("agentId", CONCENTRATOR_NAME);
@@ -62,25 +85,19 @@ public class ConcentratorResilienceTest extends ResilienceTest{
         concentrator.setTimeService(new SystemTimeService());
         concentrator.activate(concentratorProperties);
 
-        auctioneer = new MockMatcherAgent(MATCHERAGENTNAME);
-        auctioneer.setMarketBasis(marketBasis);
-        this.matchers.add(auctioneer);
-
         // Session
         this.sessionManager = new SessionManager();
-
         sessionManager.addMatcherEndpoint(auctioneer);
         sessionManager.addMatcherEndpoint(concentrator);
         sessionManager.addAgentEndpoint(concentrator);
-
         sessionManager.activate();
 
         // Create the bid reader
         this.bidReader = new CsvBidReader(getBidInputFile(testID, suffix), this.marketBasis);
     }
 
+    @Override
     protected void sendBidsToMatcher() throws IOException, DataFormatException {
-
         Bid bid = null;
         MockAgent newAgent;
 
@@ -124,6 +141,20 @@ public class ConcentratorResilienceTest extends ResilienceTest{
                 LOGGER.info(String.valueOf((aggregatedDemand[j] + ",")));
             }
         }
+        
+    }
+
+    @Override
+    protected Bid nextBidToMatcher(int id) throws IOException, DataFormatException {
+        MockAgent newAgent;
+        Bid bid = this.bidReader.nextBid();
+
+        if (bid != null) {
+            newAgent = createAgent(id);
+            newAgent.sendBid(bid);
+        }
+
+        return bid;
     }
 
     private MockAgent createAgent(int i) {
@@ -144,7 +175,7 @@ public class ConcentratorResilienceTest extends ResilienceTest{
             assertEquals(expPrice, agent.getLastPriceUpdate().getCurrentPrice(), 0);
         }
     }
-    
+
     @After
     public void tearDown() throws IOException {
         if (this.bidReader != null) {
