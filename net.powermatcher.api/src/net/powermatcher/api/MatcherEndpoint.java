@@ -12,7 +12,7 @@ import net.powermatcher.api.data.Price;
  * @version 1.0
  * 
  */
-public interface MatcherEndpoint {
+public interface MatcherEndpoint extends Agent {
 
     /**
      * Connects this {@link MatcherEndpoint} instance as {@link AgentEndpoint}.
