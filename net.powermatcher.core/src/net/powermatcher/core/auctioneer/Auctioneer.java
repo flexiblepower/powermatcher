@@ -155,7 +155,7 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
         session.setClusterId(this.getClusterId());
         
         this.sessions.add(session);
-        this.aggregatedBids.updateBid(session.getSessionId(), new Bid(this.marketBasis));
+        this.aggregatedBids.updateBid(session.getAgentId(), new Bid(this.marketBasis));
         LOGGER.info("Agent connected with session [{}]", session.getSessionId());
         return true;
     }
@@ -183,9 +183,9 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
         }
 
         // Update agent in aggregatedBids
-        this.aggregatedBids.updateBid(session.getSessionId(), newBid);
+        this.aggregatedBids.updateBid(session.getAgentId(), newBid);
 
-        LOGGER.debug("Received bid update [{}] from session [{}]", newBid, session.getSessionId());
+        LOGGER.debug("Received from session [{}] bid update [{}] ", session.getSessionId(), newBid);
 
         this.publishEvent(new IncomingBidEvent(session.getClusterId(), matcherId, session.getSessionId(), timeService.currentDate(),
                 session.getAgentId(), newBid, Qualifier.AGENT));
@@ -196,10 +196,14 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
      * public instead of default to test some things. This should be fixed as soon as possible.
      */
     public synchronized void publishNewPrice() {
+    	   	
         Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis);
         Price newPrice = determinePrice(aggregatedBid);
 
         for (Session session : this.sessions) {
+
+        	newPrice.setBidNumber(this.aggregatedBids.getLastBid(session.getAgentId()).getBidNumber());
+
             this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), matcherId, session.getSessionId(),
                     timeService.currentDate(), newPrice, Qualifier.MATCHER));
 
