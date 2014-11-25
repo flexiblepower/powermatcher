@@ -1,10 +1,8 @@
 package net.powermatcher.core;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -51,43 +49,6 @@ public class BidCache {
     private Bid aggregatedBid;
     
     private int snapshotCounter;
-
-	public class BidCacheSnapshot {
-    	
-    	private Bid aggregatedBid;
-    	
-    	private Map<String, Integer> bidNumbers;
-
-		private int count;
-		
-		public BidCacheSnapshot() {
-			this.bidNumbers = new HashMap<>();
-		}
-
-		public Bid getAggregatedBid() {
-			return aggregatedBid;
-		}
-
-		public void setAggregatedBid(Bid aggregatedBid) {
-			this.aggregatedBid = aggregatedBid;
-		}
-
-		public Map<String, Integer> getBidNumbers() {
-			return bidNumbers;
-		}
-
-		public void setBidNumbers(Map<String, Integer> bidNumbers) {
-			this.bidNumbers = bidNumbers;
-		}
-
-		public void setCount(int snapshotCounter) {
-			this.count = snapshotCounter;			
-		}    	
-		
-		public int getCount() {
-			return this.count;			
-		}  
-    }
     
     private Map<Integer, BidCacheSnapshot> bidCacheHistory = new HashMap<Integer, BidCacheSnapshot>();
     
@@ -104,18 +65,6 @@ public class BidCache {
         this.bidCache = new HashMap<String, BidCacheElement>();
         this.timeService = timeService;
     }
-
-    /**
-     * Update bid with the specified agent ID and new bid parameters and return the Bid result.
-     * 
-     * @param agentId
-     *            The agent ID (<code>String</code>) parameter.
-     * @param newBid
-     *            The new bid (<code>Bid</code>) parameter.
-     * @return Returns the old bid (<code>Bid</code>), or null if the agent is new.
-     * @see #getAggregatedBid(MarketBasis)
-     * @see #getLastBid(String)
-     */
     
     public int getSnapshotCounter() {
 		return this.snapshotCounter;
@@ -129,6 +78,17 @@ public class BidCache {
 		this.snapshotCounter = snapshotCounter;
 	}
 	
+	/**
+     * Update bid with the specified agent ID and new bid parameters and return the Bid result.
+     * 
+     * @param agentId
+     *            The agent ID (<code>String</code>) parameter.
+     * @param newBid
+     *            The new bid (<code>Bid</code>) parameter.
+     * @return Returns the old bid (<code>Bid</code>), or null if the agent is new.
+     * @see #getAggregatedBid(MarketBasis)
+     * @see #getLastBid(String)
+     */
     public synchronized Bid updateBid(final String agentId, final Bid newBid) {
         assert newBid != null;
         TimeService timeSource = this.timeService;
@@ -227,29 +187,30 @@ public class BidCache {
             }
             
             //Make a blueprint of the bidCache storing agentID - bidNumber pairs
-            
             Set<String> idSet = this.bidCache.keySet();
             for (String agentId : idSet) {
                 Bid bid = getLastBid(agentId);                   
                 bidCacheSnapshot.getBidNumbers().put(agentId, bid.getBidNumber());  
             }
 
-            //Increment the counter to create a unique bidNumber for the aggregatedBid. Save it with the BidCacheSnapshot (not used). Update the aggregatedBid with the new Bidnumber.  
+            //Increment the counter to create a unique bidNumber for the aggregatedBid. 
+            //Save it with the BidCacheSnapshot (not used).
+            //Update the aggregatedBid with the new Bidnumber.  
             incrSnapshotCounter();
             Bid newBidNr = new Bid(this.aggregatedBid, getSnapshotCounter());
             this.aggregatedBid = newBidNr;            
            
-            bidCacheSnapshot.setCount(getSnapshotCounter());           
+            bidCacheSnapshot.setCount(getSnapshotCounter());
+            bidCacheSnapshot.setAggregatedBid(newBidNr);
             bidCacheHistory.put(getSnapshotCounter(), bidCacheSnapshot);
-            
                         
             return this.aggregatedBid;
         }
         return null;
     }
     
-    public synchronized BidCacheSnapshot getMatchingSnapshot(int BidNumber) {
-    	return this.bidCacheHistory.get((Integer)BidNumber);
+    public synchronized BidCacheSnapshot getMatchingSnapshot(int bidNumber) {
+    	return this.bidCacheHistory.remove(bidNumber);
     }
 
     /**

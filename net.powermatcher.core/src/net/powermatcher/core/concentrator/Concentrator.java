@@ -22,7 +22,7 @@ import net.powermatcher.api.monitoring.OutgoingPriceEvent;
 import net.powermatcher.api.monitoring.Qualifier;
 import net.powermatcher.core.BaseAgent;
 import net.powermatcher.core.BidCache;
-import net.powermatcher.core.BidCache.BidCacheSnapshot;
+import net.powermatcher.core.BidCacheSnapshot;
 import net.powermatcher.core.auctioneer.Auctioneer;
 
 import org.slf4j.Logger;
