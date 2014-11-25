@@ -16,6 +16,7 @@ import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
+import net.powermatcher.api.monitoring.IncomingBidEvent;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.OutgoingPriceEvent;
 import net.powermatcher.api.monitoring.Qualifier;
@@ -194,6 +195,25 @@ public class ObjectiveAuctioneer extends Auctioneer {
         LOGGER.info("Agent disconnected with session [{}]", session.getSessionId());
     }
 
+    @Override
+    public synchronized void updateBid(Session session, Bid newBid) {
+        if (!sessions.contains(session)) {
+            throw new IllegalStateException("No session found");
+        }
+
+        if (!newBid.getMarketBasis().equals(this.marketBasis)) {
+            throw new InvalidParameterException("Marketbasis new bid differs from marketbasis auctioneer");
+        }
+
+        // Update agent in aggregatedBids
+        this.aggregatedBids.updateBid(session.getAgentId(), newBid);
+
+        LOGGER.debug("Received from session [{}] bid update [{}] ", session.getSessionId(), newBid);
+
+        this.publishEvent(new IncomingBidEvent(session.getClusterId(), getAgentId(), session.getSessionId(), timeService
+                .currentDate(), session.getAgentId(), newBid, Qualifier.AGENT));
+    }
+    
     /**
      * Generates the new price out of the aggregated bids and sends this to all listeners. The listeners can be device
      * agents and objective agents. TODO This is temporarily made public instead of default to test some things. This
