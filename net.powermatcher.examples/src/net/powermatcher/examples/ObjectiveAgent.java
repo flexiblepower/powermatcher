@@ -58,7 +58,7 @@ public class ObjectiveAgent extends BaseObjectiveAgent {
         Bid objectiveBid = new Bid(marketBasis, demand);
 
         Bid aggregatedObjectiveBid = objectiveBid.aggregate(aggregatedBid);
-        
+
         LOGGER.info("ObjectiveAgent: new aggregated bid: [{}] ", aggregatedObjectiveBid.getDemand());
         return aggregatedObjectiveBid;
     }
