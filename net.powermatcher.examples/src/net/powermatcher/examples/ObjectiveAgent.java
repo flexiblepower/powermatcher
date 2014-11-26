@@ -48,6 +48,7 @@ public class ObjectiveAgent extends BaseObjectiveAgent {
     @Deactivate
     public void deactivate() {
         LOGGER.info("Objective agent deactivated");
+        this.setAgentId(null);
     }
 
     @Override
