@@ -24,7 +24,7 @@ import aQute.bnd.annotation.metatype.Meta;
 @Component(immediate = true, designateFactory = SimpleObserver.Config.class)
 public class SimpleObserver extends BaseObserver {
 
-    private static final Logger logger = LoggerFactory.getLogger(SimpleObserver.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleObserver.class);
 
     private List<String> filter;
 
@@ -64,12 +64,6 @@ public class SimpleObserver extends BaseObserver {
         super.addObservable(observable, properties);
     }
 
-    //TODO this method only calls the superclass. is it missing an annotation?
-    @Override
-    public void removeObservable(ObservableAgent observable, Map<String, Object> properties) {
-        super.removeObservable(observable, properties);
-    }
-
     @Override
     protected List<String> filter() {
         return this.filter;
@@ -77,7 +71,7 @@ public class SimpleObserver extends BaseObserver {
 
     @Override
     public void update(AgentEvent event) {
-        logger.info("Received event: {}", event);
+        LOGGER.info("Received event: {}", event);
     }
 
     private void processConfig(Map<String, Object> properties) {

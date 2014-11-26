@@ -6,8 +6,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import javax.swing.text.html.MinimalHTMLWriter;
-
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
@@ -36,7 +34,7 @@ public class Freezer extends BaseAgent implements AgentEndpoint {
     private static final Logger LOGGER = LoggerFactory.getLogger(Freezer.class);
 
     private static Random generator = new Random();
-    
+
     public static interface Config {
         @Meta.AD(deflt = "concentrator")
         String desiredParentId();
@@ -46,10 +44,10 @@ public class Freezer extends BaseAgent implements AgentEndpoint {
 
         @Meta.AD(deflt = "30", description = "Number of seconds between bid updates")
         long bidUpdateRate();
-        
+
         @Meta.AD(deflt = "100", description = "The mimimum value of the random demand.")
         double minimumDemand();
-        
+
         @Meta.AD(deflt = "121", description = "The maximum value the random demand.")
         double maximumDemand();
     }
@@ -88,26 +86,23 @@ public class Freezer extends BaseAgent implements AgentEndpoint {
     }
 
     protected void doBidUpdate() {
-        if (session != null) {
-            if (session.getMarketBasis() != null) {
-                //This is a producing agent, so it's -maximumDemand
-                double demand = minimumDemand + (maximumDemand - minimumDemand) * generator.nextDouble();
-                Bid newBid = new Bid(session.getMarketBasis(), new PricePoint(0, demand));
-                incrBidNumber();
-                Bid newBidNr = new Bid(newBid, getBidNumber());
-                LOGGER.debug("updateBid({})", newBidNr);
-                session.updateBid(newBidNr);
-                this.publishEvent(new OutgoingBidEvent(session.getClusterId(),this.getAgentId(), session.getSessionId(),
-                        timeService.currentDate(), newBidNr, Qualifier.AGENT));
-            }
+        if (session != null && session.getMarketBasis() != null) {
+            double demand = minimumDemand + (maximumDemand - minimumDemand) * generator.nextDouble();
+            Bid newBid = new Bid(session.getMarketBasis(), new PricePoint(0, demand));
+            incrBidNumber();
+            Bid newBidNr = new Bid(newBid, getBidNumber());
+            LOGGER.debug("updateBid({})", newBidNr);
+            session.updateBid(newBidNr);
+            this.publishEvent(new OutgoingBidEvent(session.getClusterId(), this.getAgentId(), session.getSessionId(),
+                    timeService.currentDate(), newBidNr, Qualifier.AGENT));
         }
     }
 
     @Override
     public void updatePrice(Price newPrice) {
         LOGGER.debug("updatePrice({})", newPrice);
-        publishEvent(new IncomingPriceEvent(session.getClusterId(), this.getAgentId(), session.getSessionId(), timeService.currentDate(),
-                newPrice, Qualifier.AGENT));
+        publishEvent(new IncomingPriceEvent(session.getClusterId(), this.getAgentId(), session.getSessionId(),
+                timeService.currentDate(), newPrice, Qualifier.AGENT));
         LOGGER.debug("Received price update [{}]", newPrice);
     }
 
@@ -130,7 +125,7 @@ public class Freezer extends BaseAgent implements AgentEndpoint {
     public void setTimeService(TimeService timeService) {
         this.timeService = timeService;
     }
-    
+
     public int getBidNumber() {
         return bidNumber;
     }
