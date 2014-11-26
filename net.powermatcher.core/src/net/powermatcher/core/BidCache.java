@@ -74,7 +74,9 @@ public class BidCache {
      * @see #getLastBid(String)
      */
     public synchronized Bid updateBid(final String agentId, final Bid newBid) {
-        assert newBid != null;
+        if (newBid == null) {
+            throw new IllegalArgumentException();
+        }
         TimeService timeSource = this.timeService;
         long currentTime = (timeSource == null) ? 0 : timeSource.currentTimeMillis();
         BidCacheElement element = new BidCacheElement(newBid, currentTime);
@@ -122,7 +124,7 @@ public class BidCache {
             String agentId = iterator.next();
             BidCacheElement element = this.bidCache.get(agentId);
             long timeStamp = element.getTimestamp();
-            /* Only remove bids if the age is know */
+            /* Only remove bids if the age is known */
             if (timeStamp != 0 && currentTime - timeStamp >= this.expirationTimeMillis) {
                 removedAgents.add(agentId);
                 iterator.remove();

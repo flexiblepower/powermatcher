@@ -6,7 +6,6 @@ import static org.hamcrest.core.IsEqual.*;
 
 import java.security.InvalidParameterException;
 
-import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 
