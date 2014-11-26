@@ -8,7 +8,7 @@ plugindir: ${workspace}/cnf/plugins
             locations=https://raw.githubusercontent.com/flexiblepower/bundle-hub/master/index.xml.gz;\
             cache=${workspace}/cnf/cache,\
 	aQute.lib.deployer.FileRepo;name=Build;\
-			location=${workspace}/cnf/buildrepo,\            
+			location=${workspace}/cnf/buildrepo,\
 	aQute.bnd.deployer.repository.LocalIndexedRepo;\
 			name=Release;\
 			local=${workspace}/cnf/releaserepo;\
