@@ -100,7 +100,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
     /**
      * OSGI configuration meta type with info about the concentrator.
      */
-    private Config config;
+    protected Config config;
 
     @Reference
     public void setTimeService(TimeService timeService) {
@@ -144,13 +144,13 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
     }
 
     @Override
-    public final synchronized void connectToMatcher(Session session) {
+    public synchronized void connectToMatcher(Session session) {
         this.sessionToMatcher = session;
         setClusterId(session.getClusterId());
     }
 
     @Override
-    public final synchronized void matcherEndpointDisconnected(Session session) {
+    public synchronized void matcherEndpointDisconnected(Session session) {
         for (Session agentSession : sessionToAgents.toArray(new Session[sessionToAgents.size()])) {
             agentSession.disconnect();
         }
@@ -159,7 +159,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
     }
 
     @Override
-    public final synchronized boolean connectToAgent(Session session) {
+    public synchronized boolean connectToAgent(Session session) {
         if (this.sessionToMatcher == null) {
             return false;
         }
@@ -174,7 +174,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
     }
 
     @Override
-    public final synchronized void agentEndpointDisconnected(Session session) {
+    public synchronized void agentEndpointDisconnected(Session session) {
         // Find session
         if (!sessionToAgents.remove(session)) {
             return;
@@ -212,8 +212,6 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
             return;
         }
         
-        newPrice = transformPrice(newPrice);
-
         LOGGER.debug("Received price update [{}]", newPrice);
         this.publishEvent(new IncomingPriceEvent(sessionToMatcher.getClusterId(), this.config.agentId(),
                 this.sessionToMatcher.getSessionId(), timeService.currentDate(), newPrice, Qualifier.AGENT));
@@ -225,6 +223,8 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
         	LOGGER.warn("Received a price update for a bid that I never sent, id: {}", newPrice.getBidNumber());
         	return;
         }
+        
+        newPrice = transformPrice(newPrice, bidCacheSnapshot.getAggregatedBid());
         
         // Publish new price to connected agents
         for (Session session : this.sessionToAgents) {
@@ -248,10 +248,11 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
      * This method should be overridden when the price that will be sent has to be changed.
      * 
      * @param price The (input) price as received from the connected matcher.
+     * @param bid The aggregated bid on which this price was based.
      * @return The price that will be sent to all the agents that are connected to this {@link Concentrator}. 
      *         The bidNumber of this price is irrelevant, since this will be changed for each agent.
      */
-    protected Price transformPrice(Price price) {
+    protected Price transformPrice(Price price, Bid bid) {
     	return price;
     }
 
