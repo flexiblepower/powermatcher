@@ -51,7 +51,6 @@ import aQute.bnd.annotation.metatype.Meta;
 @Component(designateFactory = Concentrator.Config.class, immediate = true, provide = { ObservableAgent.class,
         MatcherEndpoint.class, AgentEndpoint.class })
 public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEndpoint {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(Concentrator.class);
 
     @Meta.OCD
@@ -67,9 +66,6 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
 
         @Meta.AD(deflt = "concentrator")
         String agentId();
-
-        @Meta.AD(deflt = "concentrator")
-        String matcherId();
     }
 
     /**
@@ -153,6 +149,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
     @Override
     public synchronized void connectToMatcher(Session session) {
         this.sessionToMatcher = session;
+        setClusterId(session.getClusterId());
     }
 
     @Override
@@ -160,6 +157,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
         for (Session agentSession : sessionToAgents.toArray(new Session[sessionToAgents.size()])) {
             agentSession.disconnect();
         }
+        setClusterId(null);
         this.sessionToMatcher = null;
     }
 
@@ -225,6 +223,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
         BidCacheSnapshot bidCacheSnapshot = this.aggregatedBids.getMatchingSnapshot(newPrice.getBidNumber());
         if (bidCacheSnapshot == null) {
         	// ignore price and log warning
+        	LOGGER.warn("Received a price update for a bid that I never sent, id: {}", newPrice.getBidNumber());
         	return;
         }
         
