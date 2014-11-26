@@ -17,7 +17,7 @@ import net.powermatcher.api.monitoring.ObservableAgent;
  * @author FAN
  * @version 1.0
  */
-public abstract class BaseAgent implements Agent, ObservableAgent {
+public abstract class BaseAgent implements ObservableAgent {
 
     private String agentId;
 
@@ -29,12 +29,6 @@ public abstract class BaseAgent implements Agent, ObservableAgent {
      * Collection of {@link Observer} services.
      */
     private final Set<AgentObserver> observers = new CopyOnWriteArraySet<AgentObserver>();
-    
-	@Override
-	public String getObserverId() {
-		// TODO remove this, no longer needed when agentId is available.
-		return this.getAgentId();
-	}
 
 	@Override
 	public void addObserver(AgentObserver observer) {

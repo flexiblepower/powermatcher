@@ -74,14 +74,14 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
     private TimeService timeService;
 
     /**
-     * Scheduler that can schedule commands to run after a given delay, or to execute periodically.
+     * The scheduler that is used to schedule the bid updates during activation and thus must be set before activation.
      */
     private ScheduledExecutorService scheduler;
 
     /**
-     * A delayed result-bearing action that can be cancelled.
+     * The schedule that is running the bid updates. This is created in the {@link #activate(Map)} method and cancelled in the {@link #deactivate()} method.
      */
-    private ScheduledFuture<?> scheduledFuture;
+    private ScheduledFuture<?> bidUpdateSchedule;
 
     /**
      * {@link Session} object for connecting to matcher
@@ -125,7 +125,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
 
         this.aggregatedBids = new BidCache(this.timeService, config.bidTimeout());
 
-        scheduledFuture = this.scheduler.scheduleAtFixedRate(new Runnable() {
+        bidUpdateSchedule = this.scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -141,7 +141,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
 
     @Deactivate
     public void deactivate() {
-        scheduledFuture.cancel(false);
+        bidUpdateSchedule.cancel(false);
 
         LOGGER.info("Agent [{}], deactivated", config.agentId());
     }
