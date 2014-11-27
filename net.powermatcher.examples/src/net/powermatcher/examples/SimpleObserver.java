@@ -65,7 +65,7 @@ public class SimpleObserver extends BaseObserver {
     }
 
     @Override
-    protected List<String> filter() {
+    protected List<String> getFilter() {
         return this.filter;
     }
 

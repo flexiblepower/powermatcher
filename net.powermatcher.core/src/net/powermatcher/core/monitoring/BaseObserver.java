@@ -35,7 +35,7 @@ public abstract class BaseObserver implements AgentObserver {
     /**
      * Filter containing all observableId's which must be observed.
      */
-    protected abstract List<String> filter();
+    protected abstract List<String> getFilter();
 
     /**
      * Add an {@link ObservableAgent} to the list of available {@link ObservableAgent} services
@@ -83,7 +83,7 @@ public abstract class BaseObserver implements AgentObserver {
     public void updateObservables() {
         for (String observableId : this.observables.keySet()) {
             // Check against filter whether observable should be observed
-            if (this.filter() != null && !this.filter().isEmpty() && !this.filter().contains(observableId)) {
+            if (this.getFilter() != null && !this.getFilter().isEmpty() && !this.getFilter().contains(observableId)) {
                 // Remove observer when still observing
                 if (this.observing.containsKey(observableId)) {
                     ObservableAgent toRemove = this.observing.remove(observableId);
