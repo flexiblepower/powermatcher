@@ -2,8 +2,11 @@ package net.powermatcher.visualisation;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.Servlet;
@@ -19,10 +22,13 @@ import net.powermatcher.core.sessions.SessionImpl;
 import net.powermatcher.core.sessions.SessionManagerInterface;
 
 import org.apache.commons.io.IOUtils;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import aQute.bnd.annotation.component.Component;
@@ -52,11 +58,20 @@ public class VisualisationPlugin extends HttpServlet {
 
     private SessionManagerInterface sessionManager;
 
+    private ConfigurationAdmin configurationAdmin;
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         String path = req.getPathInfo();
 
+        // check for "post" requests from previous versions
+        if (path.endsWith("/data")) {
+            this.doPost(req, resp);
+            return;
+        }
+
+        // System.out.println("hello");
         if (path.equals(BASE_PATH)) {
             resp.sendRedirect(BASE_PATH.substring(1) + "/index.html");
             return;
@@ -64,12 +79,15 @@ public class VisualisationPlugin extends HttpServlet {
 
         // html pages have to be sent here with a Stream because the getResource would only return the html page, not
         // the rest.
-        else if (path.endsWith(".html")) {
+        if (path.endsWith(".html")) {
             resp.setContentType("text/html");
 
-            path = path.substring(path.lastIndexOf("/") + 1);
+            // path = path.substring(path.lastIndexOf("/") + 1);
 
-            InputStream input = getClass().getClassLoader().getResourceAsStream(path);
+            String newPath = path.replaceAll(BASE_PATH + "/", "");
+            // return getClass().getClassLoader().getResource(newPath);
+
+            InputStream input = getClass().getClassLoader().getResourceAsStream(newPath);
             if (input == null) {
                 LOGGER.debug("Could not find file {}", path);
                 resp.sendError(404, "Resource \"" + path + "\" not found.");
@@ -77,31 +95,27 @@ public class VisualisationPlugin extends HttpServlet {
                 LOGGER.debug("Serving file {}", path);
                 IOUtils.copy(input, resp.getWriter());
             }
+        } else if (path.endsWith("data")) {
+            LOGGER.info("Loading state");
+            // updateData();
+            resp.setContentType("application/json");
+            // PrintWriter out = resp.getWriter();
+            JsonObject output = handleLoadState();
+            resp.getWriter().print(output.toString());
+
+            return;
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-        if (req.getPathInfo().endsWith("icons.xml")) {
-            return;
-        }
-
-        String incommingJson = req.getReader().readLine();
-
-        JsonObject jobject = new Gson().fromJson(incommingJson, JsonObject.class);
-
-        String requestKind = jobject.get("requestKind").getAsString();
-
-        if ("saveState".equals(requestKind)) {
-            LOGGER.info("Saving state");
-
-        } else if ("loadState".equals(requestKind)) {
-            LOGGER.info("Loading state");
-            updateData();
-            String output = handleLoadState();
-            resp.getWriter().write(output);
-        }
+        LOGGER.info("Loading state");
+        // updateData();
+        resp.setContentType("application/json");
+        PrintWriter out = resp.getWriter();
+        JsonObject output = handleLoadState();
+        out.print(output.toString());
     }
 
     private void updateData() {
@@ -111,28 +125,66 @@ public class VisualisationPlugin extends HttpServlet {
         activeElements = new HashMap<>();
     }
 
-    private String handleLoadState() {
+    private JsonObject handleLoadState() {
 
-        StringBuilder sb = new StringBuilder();
+        // TODO filter? Multiple defaults?
+        List<String> acceptedFpids = new ArrayList<>();
 
-        // Common first object
-        sb.append("{\"zoom\":1,\"fileName\":\"\",\"exportPath\":\"\",\"reference\":0,\"min\":0,\"max\":0.99,\"step\":100,\"significance\":2}ARRAYSPLIT[");
+        acceptedFpids.add("net.powermatcher.core.auctioneer.Auctioneer");
+        acceptedFpids.add("net.powermatcher.core.concentrator.Concentrator");
+        acceptedFpids.add("net.powermatcher.examples.Freezer");
+        acceptedFpids.add("net.powermatcher.examples.PVPanelAgent");
 
-        processSessions();
-        procssSeparate();
+        JsonObject output = new JsonObject();
 
-        for (VisualElement v : activeElements.values()) {
-            sb.append(v.toString());
-            sb.append(",");
+        JsonArray agents = new JsonArray();
+
+        JsonArray connections = new JsonArray();
+
+        JsonObject agent;
+        JsonObject connection;
+
+        // TODO no configurations means nullpointer for some reason
+        //you need this to work when you start with a black slate
+        try {
+            for (Configuration c : configurationAdmin.listConfigurations(null)) {
+                if (acceptedFpids.contains(c.getFactoryPid())) {
+
+                    agent = new JsonObject();
+                    connection = new JsonObject();
+
+                    String fpid = c.getFactoryPid();
+                    fpid = fpid.substring(fpid.lastIndexOf('.') + 1);
+
+                    String agentId = (String) c.getProperties().get("agentId");
+
+                    agent.addProperty("fpid", fpid);
+                    agent.addProperty("pid", c.getPid());
+                    agent.addProperty("agentId", agentId);
+
+                    agents.add(agent);
+                    
+                    String desiredParentId = (String) c.getProperties().get("desiredParentId");
+
+                    connection.addProperty("matcherRole", desiredParentId);
+                    connection.addProperty("agentRole", agentId);
+
+                    connections.add(connection);
+                }
+            }
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (InvalidSyntaxException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
 
-        sb.deleteCharAt(sb.lastIndexOf(","));
-        sb.append("]");
+        output.add("agents", agents);
+        output.add("connections", connections);
 
-        // had to be cleared for next time, in case sessions are removed.
-        activeElements = new HashMap<>();
+        return output;
 
-        return sb.toString();
     }
 
     private void procssSeparate() {
@@ -221,5 +273,10 @@ public class VisualisationPlugin extends HttpServlet {
     @Reference
     public void setSessionManager(SessionManagerInterface sessionManager) {
         this.sessionManager = sessionManager;
+    }
+
+    @Reference
+    protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
+        this.configurationAdmin = configurationAdmin;
     }
 }
