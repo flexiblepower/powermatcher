@@ -92,9 +92,10 @@ public class SessionImpl implements Session {
 
     @Override
     public String getClusterId() {
-        if (clusterId == null) {
-            throw new IllegalStateException("No clusterId has been defined");
-        }
+// TODO enable this again?
+//        if (clusterId == null) {
+//            throw new IllegalStateException("No clusterId has been defined");
+//        }
         return clusterId;
     }
 
