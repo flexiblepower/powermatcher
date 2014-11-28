@@ -82,7 +82,7 @@ public class Bid {
     public Bid(final MarketBasis marketBasis) {
         this(marketBasis, new PricePoint(0, 0.0d));
     }
-
+   
     /**
      * Constructs an instance of this class from the specified market basis and demand parameters. The demand array will
      * be cloned.
@@ -168,7 +168,7 @@ public class Bid {
      * @see #Bid(MarketBasis,PricePoint)
      * @see #Bid(MarketBasis,PricePoint,PricePoint)
      */
-    private Bid(final MarketBasis marketBasis, final int bidNumber, final PricePoint[] pricePoints) {
+    public Bid(final MarketBasis marketBasis, final int bidNumber, final PricePoint[] pricePoints) {
         this.marketBasis = marketBasis;
         this.bidNumber = bidNumber;
         this.pricePoints = clone(pricePoints);
@@ -218,7 +218,7 @@ public class Bid {
      * @param marketBasis
      *            The market basis (<code>MarketBasis</code>) parameter.
      * @param bidNumber
-     *            The bid number
+     *            The unique bid number
      * @param demand
      *            The demand (<code>double[]</code>) parameter.
      * @see #Bid()
@@ -228,7 +228,7 @@ public class Bid {
      * @see #Bid(MarketBasis,PricePoint,PricePoint)
      * @see #Bid(MarketBasis,PricePoint[])
      */
-    private Bid(MarketBasis marketBasis, final int bidNumber, double[] demand) {
+    public Bid(MarketBasis marketBasis, final int bidNumber, double[] demand) {
         this.marketBasis = marketBasis;
         this.bidNumber = bidNumber;
         this.demand = demand;
