@@ -226,11 +226,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
         }
     }
 
-    /**
-     * sends the aggregatedbids to the matcher this method has temporarily been made public due to issues with the
-     * scheduler. TODO fix this asap
-     */
-    public synchronized void doBidUpdate() {
+    protected synchronized void doBidUpdate() {
         if (sessionToMatcher != null) {
             Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.sessionToMatcher.getMarketBasis());
             this.sessionToMatcher.updateBid(aggregatedBid);

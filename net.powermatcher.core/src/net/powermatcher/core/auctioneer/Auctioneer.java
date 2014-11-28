@@ -153,7 +153,7 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
     public synchronized boolean connectToAgent(Session session) {
         session.setMarketBasis(marketBasis);
         session.setClusterId(this.getClusterId());
-        
+
         this.sessions.add(session);
         this.aggregatedBids.updateBid(session.getSessionId(), new Bid(this.marketBasis));
         LOGGER.info("Agent connected with session [{}]", session.getSessionId());
@@ -187,15 +187,14 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
 
         LOGGER.debug("Received bid update [{}] from session [{}]", newBid, session.getSessionId());
 
-        this.publishEvent(new IncomingBidEvent(session.getClusterId(), matcherId, session.getSessionId(), timeService.currentDate(),
-                session.getAgentId(), newBid, Qualifier.AGENT));
+        this.publishEvent(new IncomingBidEvent(session.getClusterId(), matcherId, session.getSessionId(), timeService
+                .currentDate(), session.getAgentId(), newBid, Qualifier.AGENT));
     }
 
     /**
-     * Generates the new price out of the aggregated bids and sends this to all listeners TODO This is temporarily made
-     * public instead of default to test some things. This should be fixed as soon as possible.
+     * Generates the new price out of the aggregated bids and sends this to all listeners
      */
-    public synchronized void publishNewPrice() {
+    protected synchronized void publishNewPrice() {
         Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis);
         Price newPrice = determinePrice(aggregatedBid);
 
@@ -221,8 +220,8 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
     public void setExecutorService(ScheduledExecutorService scheduler) {
         this.scheduler = scheduler;
     }
-    
-    protected BidCache getAggregatedBids(){
+
+    protected BidCache getAggregatedBids() {
         return this.aggregatedBids;
     }
 }

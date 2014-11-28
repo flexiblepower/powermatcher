@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.zip.DataFormatException;
 
 import org.junit.After;
@@ -18,11 +17,14 @@ import net.powermatcher.integration.util.AuctioneerWrapper;
 import net.powermatcher.integration.util.CsvBidReader;
 import net.powermatcher.integration.util.CsvExpectedResultsReader;
 import net.powermatcher.mock.MockAgent;
+import net.powermatcher.mock.MockScheduler;
 
 public class AuctioneerResilienceTest extends ResilienceTest {
 
     // The direct upstream matcher for the agents
     protected AuctioneerWrapper auctioneer;
+    
+    protected MockScheduler timer;
     
     protected void prepareTest(String testID, String suffix) throws IOException, DataFormatException {
         // Create agent list
@@ -33,7 +35,7 @@ public class AuctioneerResilienceTest extends ResilienceTest {
 
         // Get the expected results
         this.resultsReader = new CsvExpectedResultsReader(getExpectedResultsFile(testID, suffix));
-
+        
         this.marketBasis = resultsReader.getMarketBasis();
         this.auctioneer = new AuctioneerWrapper();
         Map<String, Object> auctioneerProperties = new HashMap<>();
@@ -50,8 +52,8 @@ public class AuctioneerResilienceTest extends ResilienceTest {
         auctioneerProperties.put("clusterId", "testCluster");
 
         this.matchers.add(this.auctioneer);
-
-        auctioneer.setExecutorService(new ScheduledThreadPoolExecutor(10));
+        timer = new MockScheduler();
+        auctioneer.setExecutorService(timer);
         auctioneer.setTimeService(new SystemTimeService());
         auctioneer.activate(auctioneerProperties);
 
@@ -67,9 +69,8 @@ public class AuctioneerResilienceTest extends ResilienceTest {
     protected void checkEquilibriumPrice() {
         double expPrice = this.resultsReader.getEquilibriumPrice();
 
-        // TODO this is direct call for the Auctioneer to update its prices
-        // because the scheduler doesn't work properly. Remove this once it does
-        auctioneer.publishNewPrice();
+        //Actual Scheduler does not work. Use MockScheduler to manually call timertask.
+        timer.doTaskOnce();
 
         // Verify the price received by the agents
         for (MockAgent agent : agentList) {
