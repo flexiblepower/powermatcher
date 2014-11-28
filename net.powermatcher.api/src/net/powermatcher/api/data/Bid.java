@@ -322,7 +322,7 @@ public class Bid {
             }
         }
         double intersectionPrice = this.marketBasis.toPrice(this.marketBasis.boundPriceStep(priceStep));
-        return new Price(this.marketBasis, intersectionPrice);
+        return new Price(this.marketBasis, intersectionPrice, this.bidNumber);
     }
 
     /**
@@ -354,8 +354,10 @@ public class Bid {
         if (this.marketBasis.equals(newMarketBasis)) {
             return this;
         } else {
-            assert this.marketBasis.getCommodity().equals(newMarketBasis.getCommodity());
-            assert this.marketBasis.getCurrency().equals(newMarketBasis.getCurrency());
+            if (!this.marketBasis.getCommodity().equals(newMarketBasis.getCommodity())
+                    || !this.marketBasis.getCurrency().equals(newMarketBasis.getCurrency())) {
+                throw new IllegalArgumentException("Commodity or Currency not equal");
+            }
             if (this.pricePoints == null) {
                 double[] oldDemand = getUnclonedDemand();
                 double[] newDemand = new double[newMarketBasis.getPriceSteps()];
@@ -567,7 +569,9 @@ public class Bid {
             calculatedPricePoints = this.pricePoints.clone();
         } else if (this.demand != null) {
             int priceSteps = this.marketBasis.getPriceSteps();
-            assert this.demand.length == priceSteps;
+            if(this.demand.length != priceSteps){
+                throw new IllegalStateException("demand length differs from nr of priceSteps");
+            }
             List<PricePoint> points = new ArrayList<PricePoint>(priceSteps);
             /*
              * Flag to indicate if the last price point is the start of a flat segment.
@@ -661,6 +665,9 @@ public class Bid {
      * @return Results of the get scale factor (<code>double</code>) value.
      */
     public double getScaleFactor(final int maxValue) {
+        if (maxValue == 0) {
+            throw new IllegalArgumentException("value cannot be zero");
+        }
         return Math.max(getMaximumDemand(), -getMinimumDemand()) / maxValue;
     }
 
@@ -757,6 +764,7 @@ public class Bid {
         if (unclonedPricePoints == null) {
             // TODO this should return new PricePoint[0], not null.
             // getCalculatedPricePoints might will have to be refactored
+            // When this is fixed update the unit test to test for PrincePoint[0].
 
             return null;
         }

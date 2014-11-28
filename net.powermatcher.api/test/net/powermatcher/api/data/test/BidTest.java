@@ -1,9 +1,11 @@
 package net.powermatcher.api.data.test;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 
 import java.security.InvalidParameterException;
 
@@ -13,7 +15,9 @@ import net.powermatcher.api.data.PricePoint;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 /**
  * @author IBM
@@ -23,6 +27,8 @@ public class BidTest {
 
     private static final String CURRENCY_EUR = "EUR";
     private static final String COMMODITY_ELECTRICITY = "electricity";
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     private static void assertArrayEquals(final double[] expected, final double[] actual) {
         assertEquals(expected.length, actual.length);
@@ -77,6 +83,108 @@ public class BidTest {
         this.bid10 = new Bid(this.marketBasis2, this.points10);
     }
 
+    @Test
+    public void testCopyConstructor() {
+        Bid bid = new Bid(bid1);
+        assertThat(bid.getMarketBasis(), is(equalTo(marketBasis0)));
+        assertThat(bid.getDemand(), is(equalTo(bid1.getDemand())));
+        assertThat(bid.getPricePoints(), is(equalTo(bid1.getPricePoints())));
+        assertThat(bid.getBidNumber(), is(equalTo(bid1.getBidNumber())));
+    }
+
+    @Test
+    public void testConstructorNewBidNumber() {
+        final int bidNumber = 2;
+        Bid bid = new Bid(bid1, bidNumber);
+        assertThat(bid.getMarketBasis(), is(equalTo(marketBasis0)));
+        assertThat(bid.getDemand(), is(equalTo(bid1.getDemand())));
+        assertThat(bid.getPricePoints(), is(equalTo(bid1.getPricePoints())));
+        assertThat(bid.getBidNumber(), is(equalTo(bidNumber)));
+    }
+
+    @Test
+    public void testConstructorNewMarketBasis() {
+        Bid bid = new Bid(marketBasis1);
+        assertThat(bid.getMarketBasis(), is(equalTo(marketBasis1)));
+        double[] expectedDemand = new double[10];
+        assertThat(bid.getDemand(), is(equalTo(expectedDemand)));
+
+        PricePoint[] expectedPricePoints = new PricePoint[] { new PricePoint() };
+        assertThat(bid.getPricePoints(), is(equalTo(expectedPricePoints)));
+        assertThat(bid.getBidNumber(), is(equalTo(0)));
+    }
+
+    @Test
+    public void testConstructorNewMarketBasisNullDemand() {
+        expectedException.expect(InvalidParameterException.class);
+        Bid bid = new Bid(marketBasis1, (double[]) null);
+    }
+
+    @Test
+    public void testConstructorNewMarketBasisAscendingBidDemand() {
+        expectedException.expect(InvalidParameterException.class);
+        double[] ascending = new double[] { 1, 2 };
+        Bid bid = new Bid(marketBasis1, ascending);
+    }
+
+    @Test
+    public void testConstructorNewMarketBasisNewDemand() {
+        Bid bid = new Bid(marketBasis0, demand1);
+        assertThat(bid.getMarketBasis(), is(equalTo(marketBasis0)));
+        assertThat(bid.getDemand(), is(equalTo(demand1)));
+        PricePoint[] expectedPricePoints = new PricePoint[] { new PricePoint() };
+
+        //assertThat(bid.getPricePoints(), is(equalTo(expectedPricePoints)));
+    }
+
+    @Test
+    public void testConstructorNewMarketBasisNewPricePoint() {
+        Bid bid = new Bid(marketBasis1, new PricePoint());
+        assertThat(bid.getMarketBasis(), is(equalTo(marketBasis1)));
+        assertThat(bid.getDemand(), is(equalTo(new double[10])));
+        PricePoint[] expectedPricePoints = new PricePoint[] { new PricePoint() };
+        assertThat(bid.getPricePoints(), is(equalTo(expectedPricePoints)));
+    }
+
+    @Test
+    public void testConstructorNewMarketBasisNewPricePointTwo() {
+        Bid bid = new Bid(marketBasis1, new PricePoint(), new PricePoint());
+        assertThat(bid.getMarketBasis(), is(equalTo(marketBasis1)));
+        assertThat(bid.getDemand(), is(equalTo(new double[10])));
+        PricePoint[] expectedPricePoints = new PricePoint[] { new PricePoint(), new PricePoint() };
+        assertThat(bid.getPricePoints(), is(equalTo(expectedPricePoints)));
+    }
+
+    @Test
+    public void testConstructorNewMarketBasisPricePointArrayNull() {
+        expectedException.expect(InvalidParameterException.class);
+        expectedException.expectMessage("Missing or incorrect number of price points.");
+        Bid bid = new Bid(marketBasis1, (PricePoint[]) null);
+    }
+
+    @Test
+    public void testConstructorNewMarketBasisPriceDescending() {
+        expectedException.expect(InvalidParameterException.class);
+        expectedException.expectMessage("Price must be strictly ascending.");
+        Bid bid = new Bid(marketBasis1, new PricePoint[] { new PricePoint(2, 2.0), new PricePoint(1, 1.0) });
+    }
+
+    @Test
+    public void testConstructorNewMarketBasisBidAscending() {
+        expectedException.expect(InvalidParameterException.class);
+        expectedException.expectMessage("Bid must be strictly descending.");
+        Bid bid = new Bid(marketBasis1, new PricePoint[] { new PricePoint(1, 1.0), new PricePoint(2, 2.0) });
+    }
+
+    @Test
+    public void testConstructorNewMarketBasisPricePointArray() {
+        Bid bid = new Bid(marketBasis1, new PricePoint[] { new PricePoint(1, 2.0), new PricePoint(2, 1.0) });
+        assertThat(bid.getMarketBasis(), is(equalTo(marketBasis1)));
+        //assertThat(bid.getDemand(), is(equalTo(new double[10])));
+        PricePoint[] expectedPricePoints = new PricePoint[] { new PricePoint(1, 2.0), new PricePoint(2, 1.0) };
+        assertThat(bid.getPricePoints(), is(equalTo(expectedPricePoints)));
+    }
+
     /**
 	 * 
 	 */
@@ -98,6 +206,24 @@ public class BidTest {
         assertEquals(150.0d, bid.getDemand()[2], 0.0d);
         assertEquals(100.0d, bid.getDemand()[3], 0.0d);
         assertEquals(100.0d, bid.getDemand()[3], 0.0d);
+    }
+
+    @Test
+    public void testSubtract() {
+        double[] expected = bid4.getDemand();
+        Bid aggregatedBid = bid3.aggregate(bid4);
+        Bid subtractedBid = aggregatedBid.subtract(bid3);
+        assertThat(subtractedBid.getDemand(), is(equalTo(expected)));
+
+        expected = bid5.getDemand();
+        aggregatedBid = bid6.aggregate(bid5);
+        subtractedBid = aggregatedBid.subtract(bid6);
+        assertThat(subtractedBid.getDemand(), is(equalTo(expected)));
+
+        expected = bid1.getDemand();
+        aggregatedBid = bid2.aggregate(bid1);
+        subtractedBid = aggregatedBid.subtract(bid2);
+        assertThat(subtractedBid.getDemand(), is(equalTo(expected)));
     }
 
     /**
@@ -133,20 +259,46 @@ public class BidTest {
         assertEquals(0.0d, this.bid4.getDemand()[4], 0.0d);
     }
 
+    @Test
+    public void testTranspose() {
+        double[] expected = bid3.getDemand();
+        Bid transposed = bid3.transpose(2.0);
+
+//        double[] transposedDemand = transposed.getDemand();
+//        for (int i = 0; i < transposedDemand.length; i++) {
+//            assertThat(transposedDemand[i], is(equalTo(expected[i] + 2)));
+//        }
+
+        Bid transposedBack = transposed.transpose(-2.0);
+        assertThat(transposedBack.getDemand(), is(equalTo(expected)));
+    }
+
     /**
 	 * 
 	 */
     @Test
-    public void testGetPricePoints() {
+    public void testGetCalculatedPricePoints() {
+        // bid0
         PricePoint[] pricePoints;
         pricePoints = this.bid0.getCalculatedPricePoints();
         assertEquals(1, pricePoints.length);
+        PricePoint[] expectedPricePoints = new PricePoint[] { new PricePoint() };
+        double[] expectedDemand = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0 };
+        assertThat(bid0.getCalculatedPricePoints(), is(equalTo(expectedPricePoints)));
+        assertThat(bid0.getPricePoints(), is(equalTo(expectedPricePoints)));
+        assertThat(bid0.getDemand(), is(equalTo(expectedDemand)));
 
+        // bid1
         pricePoints = this.bid1.getCalculatedPricePoints();
         assertEquals(4, pricePoints.length);
-        this.bid1 = new Bid(this.bid1.getMarketBasis(), pricePoints);
+        expectedPricePoints = new PricePoint[] { new PricePoint(-1, 100), new PricePoint(0, 50.0),
+                new PricePoint(2, 50.0), new PricePoint(2, 0.0) };
+        assertThat(bid1.getCalculatedPricePoints(), is(equalTo(expectedPricePoints)));
+        this.bid1 = new Bid(this.bid1.getMarketBasis(), expectedPricePoints);
+        // assertThat(bid1.getPricePoints(), is(new PricePoint[]{}));
         assertArrayEquals(this.demand1, this.bid1.getDemand());
 
+        // bid2
         pricePoints = this.bid2.getCalculatedPricePoints();
         assertEquals(1, pricePoints.length);
         this.bid2 = new Bid(this.bid2.getMarketBasis(), pricePoints);
@@ -209,6 +361,10 @@ public class BidTest {
         assertEquals(50.0d, bid.getDemand()[1], 0.0d);
         assertEquals(50.0d, bid.getDemand()[2], 0.0d);
         assertEquals(0.0d, bid.getDemand()[3], 0.0d);
+        
+        bid = this.bid3.toMarketBasis(this.marketBasis1);
+        pricePoints = bid.getCalculatedPricePoints();
+        assertThat(pricePoints[0].getDemand(), is(equalTo(50.0)));
     }
 
     /**
@@ -219,37 +375,97 @@ public class BidTest {
         assertEquals(-100.0d, this.bid10.getDemand(20.0), 0.0d);
     }
     
+    @Test
+    public void testMaximumDemand(){
+        double maxDemand = demand1[0];
+        assertThat(bid1.getMaximumDemand(), is(equalTo(maxDemand)));
+        maxDemand = demand2[0];
+        assertThat(bid2.getMaximumDemand(), is(equalTo(maxDemand)));
+        maxDemand = points3[0].getDemand();
+        assertThat(bid3.getMaximumDemand(), is(equalTo(maxDemand)));
+        maxDemand = points4[0].getDemand();
+        assertThat(bid4.getMaximumDemand(), is(equalTo(maxDemand)));
+    }
+    
+    @Test
+    public void testMinimumDemand(){
+        double minDemand = demand1[demand1.length - 1];
+        assertThat(bid1.getMinimumDemand(), is(equalTo(minDemand)));
+        minDemand = demand2[demand2.length - 1];
+        assertThat(bid2.getMinimumDemand(), is(equalTo(minDemand)));
+        minDemand = points3[points3.length - 1].getDemand();
+        assertThat(bid3.getMinimumDemand(), is(equalTo(minDemand)));
+        minDemand = points4[points4.length - 1].getDemand();
+        assertThat(bid4.getMinimumDemand(), is(equalTo(minDemand)));
+    }
+    
+    @Test
+    public void testScaleFactor(){
+        Bid testBid = new Bid(marketBasis0, new double[]{10,0,0,0,0});
+        assertThat(testBid.getScaleFactor(1), is(equalTo(10.0)));
+        assertThat(testBid.getScaleFactor(5), is(equalTo(2.0)));
+        assertThat(testBid.getScaleFactor(10), is(equalTo(1.0)));
+        
+        testBid = new Bid(marketBasis0, new double[]{10,0,0,0,-20});
+        assertThat(testBid.getScaleFactor(1), is(equalTo(20.0)));
+        assertThat(testBid.getScaleFactor(5), is(equalTo(4.0)));
+        assertThat(testBid.getScaleFactor(10), is(equalTo(2.0)));
+    }
+    
+    @Test
+    public void testScaleFactorNull(){
+        Bid testBid = new Bid(marketBasis0, new double[]{10,0,0,0,0});
+        expectedException.expect(IllegalArgumentException.class);
+        testBid.getScaleFactor(0);
+    }
+    
     /**
-     * Tests the equals method of the Bid class. An override equals method should be
-     * reflexive, transitive. symmetric and consistent 
+     * Tests the equals method of the Bid class. An override equals method should be reflexive, transitive. symmetric
+     * and consistent
      */
     @Test
-    public void testEquals(){
-        //check equals null
+    public void testEquals() {
+        // check equals null
         Assert.assertThat(bid0.equals(null), is(false));
-        
-        //check reflection
+
+        // check reflection
         Assert.assertThat(bid1.equals(bid1), is(true));
-        
+
         // check symmetry
         Assert.assertThat(bid3.equals(bid4), is(false));
         Assert.assertThat(bid4.equals(bid3), is(false));
-        
+
         Bid testBid = new Bid(marketBasis0, demand1);
         Assert.assertThat(bid1.equals(testBid), is(true));
         Assert.assertThat(testBid.equals(bid1), is(true));
-        
-        //check transition
+
+        // check transition
         MarketBasis equalsBasis = new MarketBasis(COMMODITY_ELECTRICITY, CURRENCY_EUR, 5, -1.0d, 7.0d);
-        double[] equalsArray = new double[]{100.0d, 50.0d, 50.0d, 0.0d, 0.0d};
+        double[] equalsArray = new double[] { 100.0d, 50.0d, 50.0d, 0.0d, 0.0d };
         Bid otherBid = new Bid(equalsBasis, equalsArray);
         Assert.assertThat(bid1.equals(otherBid), is(true));
         Assert.assertThat(testBid.equals(otherBid), is(true));
-        
-        //check consistency
+
+        // check consistency
         Assert.assertThat(bid0.equals(null), is(false));
         Assert.assertThat(bid2.equals(bid2), is(true));
         Assert.assertThat(otherBid.equals(testBid), is(true));
+    }
+
+    @Test
+    public void testToString() {
+        // expected output of bid4 to String
+        String expected = "Bid{bidNumber=0, demand[]{5E1,0E0,0E0,0E0,0E0}, "
+                + "MarketBasis{commodity=electricity, currency=EUR, minimumPrice=-1, maximumPrice=7, priceSteps=5}}";
+        assertThat(bid4.toString(), is(equalTo(expected)));
+    }
+    
+    @Test
+    public void testHashCode(){
+        Bid copy = new Bid(bid3);
+        assertThat(copy.equals(bid3), is(true));
+        assertThat(bid3.equals(copy), is(true));
+        assertThat(copy.hashCode(), is(equalTo(bid3.hashCode())));
     }
 
 }
