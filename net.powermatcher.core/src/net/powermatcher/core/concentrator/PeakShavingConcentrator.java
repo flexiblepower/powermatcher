@@ -42,8 +42,8 @@ import net.powermatcher.core.auctioneer.Auctioneer;
  * <p>
  * The {@link PeakShavingConcentrator} receives {@link Bid} from the agents and forwards this in an aggregate
  * {@link Bid} up in the hierarchy to a {@link PeakShavingConcentrator} or to the {@link Auctioneer}. It will receive
- * price updates from the {@link Auctioneer} and forward them to its connected agents. TODO: add PeakShavingConcentrator
- * comment
+ * price updates from the {@link Auctioneer} and forward them to its connected agents. 
+ * TODO: add PeakShavingConcentrator comment.
  * 
  * @author FAN
  * @version 1.0
@@ -72,10 +72,10 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         @Meta.AD(deflt = "peakshavingconcentrator")
         String matcherId();
 
-        @Meta.AD(deflt = "-10")
+        @Meta.AD(deflt = "-10", description = "The floor constraint")
         double floor();
 
-        @Meta.AD(deflt = "10")
+        @Meta.AD(deflt = "10", description = "The ceiling constraint")
         double ceiling();
     }
 
@@ -226,7 +226,6 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
 
     }
 
-    // call: sessionImpl.updateBid(Bid)
     @Override
     public void updateBid(Session session, Bid newBid) {
 
@@ -243,8 +242,6 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         // Update agent in aggregatedBids
         this.aggregatedBids.updateBid(session.getAgentId(), newBid);
 
-        // TODO: peakshaving call here? handleAggregatedBidUpdate(newBid)?
-
         LOGGER.info("Received from session [{}] bid update [{}] ", session.getSessionId(), newBid);
     }
 
@@ -252,7 +249,6 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
      * sends the aggregatedbids to the matcher this method has temporarily been made public due to issues with the
      * scheduler. TODO fix this asap
      */
-    // call: in run:activate()
     public synchronized void doBidUpdate() {
         if (sessionToMatcher != null) {
             Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.sessionToMatcher.getMarketBasis());
@@ -261,8 +257,6 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
             Bid transformedBid = transformAggregatedBid(aggregatedBid);
             this.sessionToMatcher.updateBid(transformedBid);
 
-            // old code
-            // this.sessionToMatcher.updateBid(aggregatedBid);
             publishEvent(new OutgoingBidEvent(sessionToMatcher.getClusterId(), config.agentId(),
                     sessionToMatcher.getSessionId(), timeService.currentDate(), aggregatedBid, Qualifier.MATCHER));
 
@@ -270,7 +264,6 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         }
     }
 
-    // sessionImpl.updatePrice(Price): dit is een methode die wordt aangeroepen door nieuwe code
     @Override
     public void updatePrice(Price newPrice) {
         if (newPrice == null) {
@@ -303,16 +296,13 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
             Price adjustedPrice = adjustPrice(agentPrice);
             session.updatePrice(adjustedPrice);
 
-            // session.updatePrice(agentPrice);
-
             this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), this.config.agentId(), session
                     .getSessionId(), timeService.currentDate(), newPrice, Qualifier.MATCHER));
 
         }
     }
 
-    // @Override
-    protected synchronized Price adjustPrice(final Price newPrice) {
+    private synchronized Price adjustPrice(final Price newPrice) {
         // if the given price is null, the price can't be adjusted, so we let
         // the framework handle the null price
         if (newPrice == null) {
@@ -363,8 +353,7 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         return this.priceOut = new Price(newPrice.getMarketBasis(), newPrice.getMarketBasis().toPrice(priceOutIndex));
     }
 
-    // @Override
-    protected synchronized Bid transformAggregatedBid(final Bid newAggregatedBid) {
+    private synchronized Bid transformAggregatedBid(final Bid newAggregatedBid) {
         // if the given bid is null, then there is nothing to transform, so we
         // let the next framework handle the null bid
         if (newAggregatedBid == null) {
@@ -395,42 +384,35 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         return this.aggregatedBidOut;
     }
 
-    // public synchronized void setFlowConstraints(final double newCeiling, final double newFloor) {
-    // if (Double.isNaN(newCeiling) || Double.isNaN(newFloor)) {
-    // throw new IllegalArgumentException("The floor and ceiling must be a number (and not NaN).");
-    // }
-    //
-    // if (newCeiling < newFloor) {
-    // throw new IllegalArgumentException("The floor constraint shouldn't be higher than the ceiling constraint!");
-    // }
-    //
-    // // store the new ceiling and floor
-    // // and if either or both of them are infinity, use the heighest or
-    // // lowest possible number in stead to ensure good results from the
-    // // algorithm
-    // this.ceiling = Double.isInfinite(newCeiling) ? Double.MAX_VALUE : newCeiling;
-    // this.floor = Double.isInfinite(newFloor) ? Double.MIN_VALUE : newFloor;
-    //
-    // if (this.immediateUpdate) {
-    // // do an update of the aggregated bid (clip with the new ceiling and
-    // // floor).
-    // if (this.aggregatedBidIn != null) {
-    // //this.handleAggregatedBidUpdate(this.aggregatedBidIn);
-    // transformAggregatedBid(this.aggregatedBidIn);
-    // }
-    //
-    // // and update the price towards the concentrator's children (ensuring
-    // // that the new constraints are met).
-    // if (this.priceIn != null) {
-    //
-    // // call peakshaving code.
-    // adjustPrice(this.priceIn);
-    //
-    // //this.updatePriceInfo(this.priceIn);
-    // }
-    // }
-    // }
+    /**
+     * Additional method about flow reduction or test purpose.
+     */
+    public synchronized double getFlowReduction() {
+        // retrieve the current allocation
+        double allocation = this.getAllocation();
 
+        // if allocation, aggregated bid in or price in is unknown, we can't
+        // calculate the flow reduction.
+        if (Double.isNaN(allocation) || this.aggregatedBidIn == null || this.priceIn == null) {
+            return Double.NaN;
+        }
+
+        // calculate the allocation which would have been the fact if no
+        // transformation would have been performed
+        double untransformedAllocation = this.aggregatedBidIn.getDemand(this.priceIn.getCurrentPrice());
+
+        LOGGER.debug("BID(IN)" + this.aggregatedBidIn);
+        LOGGER.debug("BID(OUT)" + this.aggregatedBidOut);
+        LOGGER.debug("CURRENTPRICE(OUT)=" + this.priceOut.getCurrentPrice());
+        LOGGER.debug("CURRENTPRICE(in)=" + this.priceIn.getCurrentPrice());
+        LOGGER.debug("ALLOCATION=" + allocation);
+        LOGGER.debug("UNTRANSFORMEDALLOC=" + untransformedAllocation);
+
+        // calculate and return the flow reduction as the absolute value of the
+        // difference between the allocation with and without transformation
+        return Math.abs(untransformedAllocation - allocation);
+    }
+    
     private synchronized double getUncontrolledFlow() {
         // the uncontrolled flow can only be calculated if the measured flow is
         // known
@@ -565,6 +547,11 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
     @Reference
     public void setTimeService(TimeService timeService) {
         this.timeService = timeService;
+    }
+
+    @Reference
+    public void setExecutorService(ScheduledExecutorService scheduler) {
+        this.scheduler = scheduler;
     }
 
     protected double getCeiling() {
