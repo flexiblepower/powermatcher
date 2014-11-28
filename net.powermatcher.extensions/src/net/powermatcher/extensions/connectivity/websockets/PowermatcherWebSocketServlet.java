@@ -1,4 +1,4 @@
-package net.powermatcher.websockets;
+package net.powermatcher.extensions.connectivity.websockets;
 
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;

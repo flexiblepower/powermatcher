@@ -1,4 +1,4 @@
-package net.powermatcher.websockets.data;
+package net.powermatcher.extensions.connectivity.websockets.data;
 
 public class PricePointModel {
     /**

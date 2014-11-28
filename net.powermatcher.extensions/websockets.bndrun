@@ -37,7 +37,7 @@
 	net.powermatcher.api;version=latest,\
 	net.powermatcher.core;version=latest,\
 	net.powermatcher.examples;version=latest,\
-	net.powermatcher.websockets;version=latest,\
+	net.powermatcher.extensions;version=latest,\
 	biz.aQute.bnd.annotation,\
 	slf4j.api,\
 	ch.qos.logback.classic,\
@@ -58,7 +58,7 @@
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.api)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.examples)',\
-	osgi.identity;filter:='(osgi.identity=net.powermatcher.websockets)',\
+	osgi.identity;filter:='(osgi.identity=net.powermatcher.extensions)',\
 	osgi.identity;filter:='(osgi.identity=biz.aQute.bnd.annotation)'
 
 ## Uncomment if you need to change the HTTP port

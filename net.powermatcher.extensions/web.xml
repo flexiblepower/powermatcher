@@ -5,7 +5,7 @@
 
     <servlet>
         <servlet-name>PowermatcherWebSocket</servlet-name>
-        <servlet-class>net.powermatcher.websockets.PowermatcherWebSocketServlet</servlet-class>
+        <servlet-class>net.powermatcher.extensions.connectivity.websockets.PowermatcherWebSocketServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>PowermatcherWebSocket</servlet-name>

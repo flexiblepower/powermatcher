@@ -1,6 +1,5 @@
-package net.powermatcher.websockets.data;
+package net.powermatcher.extensions.connectivity.websockets.data;
 
-import net.powermatcher.api.data.PricePoint;
 
 public class BidModel {
     /**
@@ -45,15 +44,6 @@ public class BidModel {
 
 	public void setPricePoints(PricePointModel[] pricePoints) {
 		this.pricePoints = pricePoints;
-	}
-
-	public void convertPricePoints(PricePoint[] pricePoints) {
-		this.pricePoints = new PricePointModel[pricePoints.length];
-		for (int i = 0; i < pricePoints.length; i++) {
-			this.pricePoints[i] = new PricePointModel(); 
-			this.pricePoints[i].setDemand(pricePoints[i].getDemand());
-			this.pricePoints[i].setNormalizedPrice(pricePoints[i].getNormalizedPrice());
-		}
 	}
 
 	public int getBidNumber() {

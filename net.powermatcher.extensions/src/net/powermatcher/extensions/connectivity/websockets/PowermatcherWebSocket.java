@@ -1,5 +1,4 @@
-package net.powermatcher.websockets;
-
+package net.powermatcher.extensions.connectivity.websockets;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -13,10 +12,9 @@ import java.util.Map.Entry;
 import javax.naming.OperationNotSupportedException;
 
 import net.powermatcher.api.data.Bid;
-import net.powermatcher.api.data.PricePoint;
-import net.powermatcher.websockets.data.BidModel;
-import net.powermatcher.websockets.data.MarketBasisModel;
-import net.powermatcher.websockets.data.PricePointModel;
+import net.powermatcher.extensions.connectivity.websockets.data.BidModel;
+import net.powermatcher.extensions.connectivity.websockets.data.PmMessage;
+import net.powermatcher.extensions.connectivity.websockets.data.PmMessageSerializer;
 
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
@@ -29,18 +27,16 @@ import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
 
-import com.google.gson.Gson;
-
 @WebSocket
 @Component(immediate = true)
 public class PowermatcherWebSocket {
     private static final Logger LOGGER = LoggerFactory.getLogger(PowermatcherWebSocket.class);
 
-	private static final Map<String, AgentEndpointProxy> AGENT_ENDPOINT_PROXIES = 
-			Collections.synchronizedMap(new HashMap<String, AgentEndpointProxy>());
+	private static final Map<String, AgentEndpointProxyWebsocket> AGENT_ENDPOINT_PROXIES = 
+			Collections.synchronizedMap(new HashMap<String, AgentEndpointProxyWebsocket>());
 
-	private static final Map<org.eclipse.jetty.websocket.api.Session, AgentEndpointProxy> REMOTE_LOCAL_LINK = 
-			Collections.synchronizedMap(new HashMap<org.eclipse.jetty.websocket.api.Session, AgentEndpointProxy>());
+	private static final Map<org.eclipse.jetty.websocket.api.Session, AgentEndpointProxyWebsocket> REMOTE_LOCAL_LINK = 
+			Collections.synchronizedMap(new HashMap<org.eclipse.jetty.websocket.api.Session, AgentEndpointProxyWebsocket>());
 	
 	private String desiredConnectionId;
 	private String remoteMatcherEndpointId;
@@ -48,21 +44,21 @@ public class PowermatcherWebSocket {
 	@Deactivate
 	public synchronized void deactivate() {
 		// Disconnect every connected agent
-		for(Entry<org.eclipse.jetty.websocket.api.Session, AgentEndpointProxy> link : REMOTE_LOCAL_LINK.entrySet()) {
+		for(Entry<org.eclipse.jetty.websocket.api.Session, AgentEndpointProxyWebsocket> link : REMOTE_LOCAL_LINK.entrySet()) {
 			link.getKey().close();
 		}
 	}
 	
 	@Reference(dynamic = true, multiple = true, optional = true)
-	public synchronized void addProxy(AgentEndpointProxy proxy) {
+	public synchronized void addProxy(AgentEndpointProxyWebsocket proxy) {
 		LOGGER.info("Registered AgentEndpointProxy: [{}]", proxy.getAgentId());
     	AGENT_ENDPOINT_PROXIES.put(proxy.getAgentId(), proxy);
 	}
     
-	public synchronized void removeProxy(AgentEndpointProxy proxy) {
+	public synchronized void removeProxy(AgentEndpointProxyWebsocket proxy) {
 		LOGGER.info("Deregistered AgentEndpointProxy: [{}]", proxy.getAgentId());
-
-		// TODO break connection with websocket?
+		
+		// Remote agent proxy from the list, sessions will be closed via normal websocket close.
     	AGENT_ENDPOINT_PROXIES.remove(proxy.getAgentId());
 	}
     
@@ -77,6 +73,7 @@ public class PowermatcherWebSocket {
 			return;
 		}
 		
+		// Read desired connection from the querystring
 		this.desiredConnectionId = queryString.get("desiredConnectionId");
 		if (this.desiredConnectionId == null || this.desiredConnectionId.length() == 0) {
 			remoteSession.close();
@@ -84,6 +81,7 @@ public class PowermatcherWebSocket {
 			return;
 		}
 		
+		// Read desired agentId from the querystring
 		this.remoteMatcherEndpointId = queryString.get("agentId");
 		if (this.remoteMatcherEndpointId == null || this.remoteMatcherEndpointId.length() == 0) {
 			remoteSession.close();
@@ -91,11 +89,8 @@ public class PowermatcherWebSocket {
 			return;
 		}
 		
-		// Search for existing agentEndpointProxy
+		// Search for existing agentEndpointProxy, in later stage automatic creation of agents proxies could be implemented 
 		if (!AGENT_ENDPOINT_PROXIES.containsKey(desiredConnectionId)) {
-			// TODO (fase 2) Create new agentRoleProxy, supplying websocketSession.
-
-			// TODO throw correct exception to deny connection
 			LOGGER.warn("Rejecting connection from remote agent [{}] for non-existing local agent: [{}]", this.remoteMatcherEndpointId, this.desiredConnectionId);
 			
 			remoteSession.close();
@@ -103,47 +98,32 @@ public class PowermatcherWebSocket {
 		}
 
 		// Associate session with agentendpoint proxy
-		AgentEndpointProxy proxy = AGENT_ENDPOINT_PROXIES.get(desiredConnectionId);
+		AgentEndpointProxyWebsocket proxy = AGENT_ENDPOINT_PROXIES.get(desiredConnectionId);
 		try {
 			proxy.remoteAgentConnected(remoteSession);
 		} catch (OperationNotSupportedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.warn("Rejecting connection from remote agent [{}], reason: [{}]", this.remoteMatcherEndpointId, e);
+			remoteSession.close();
 		}
 
 		// Store remote session with local proxy
 		REMOTE_LOCAL_LINK.put(remoteSession, proxy);
 		
-		// this.remoteSessions.add(remoteSession);
-		
-		// TODO send marketbasis and clusterid back to remote agent as a response to connect?
-
 		LOGGER.info("Remote agent [{}] connected to local agent [{}]", this.remoteMatcherEndpointId, this.desiredConnectionId);
 	}
 
 	@OnWebSocketClose
 	public synchronized void onClose(final org.eclipse.jetty.websocket.api.Session session, int statusCode, String reason) {
-		// this.remoteSessions.remove(session);
-		
 		// Find existing session
 		if (!REMOTE_LOCAL_LINK.containsKey(session)) {
 			LOGGER.warn("Received disconnect for non existing session.");
-			
-			// TODO validate this check whether it's correct.
 			return;
 		}
 
-		// Remove remote session from agent proxy
-		AgentEndpointProxy proxy = REMOTE_LOCAL_LINK.get(session);
+		// Remove remote session from agent proxy and local session collection
+		AgentEndpointProxyWebsocket proxy = REMOTE_LOCAL_LINK.remove(session);
 		LOGGER.info("Agent disconnect detected remote agent: [{}], local agent", proxy.getMatcherEndpointProxyId(), proxy.getAgentId());
-
 		proxy.remoteAgentDisconnected();
-
-		// Remove session and proxy association
-		REMOTE_LOCAL_LINK.remove(session);
-		
-		// TODO disconnect local agent as well 
-		// TODO and destroy it?
 	}
 
 	@OnWebSocketMessage
@@ -151,45 +131,22 @@ public class PowermatcherWebSocket {
 		// Find existing session
 		if (!REMOTE_LOCAL_LINK.containsKey(session)) {
 			LOGGER.warn("Received bid update for non existing session.");
-			
-			// TODO validate this check whether it's correct.
 			return;
 		}
 		
-		AgentEndpointProxy proxy = REMOTE_LOCAL_LINK.get(session);
+		// Find associated local agentproxy
+		AgentEndpointProxyWebsocket proxy = REMOTE_LOCAL_LINK.get(session);
 		LOGGER.info("Received bid update from remote agent [{}] for local agent [{}]", proxy.getMatcherEndpointProxyId(), proxy.getAgentId());
 		
-		Gson gson = new Gson();
-		BidModel newBidModel = gson.fromJson(message, BidModel.class);
+		// Decode the JSON data
+		PmMessageSerializer serializer = new PmMessageSerializer();
+		PmMessage pmMessage = serializer.deserialize(message);
+		Bid newBid = serializer.mapBid((BidModel)pmMessage.getPayload());
 		
-		Bid newBid = null;
-		
-		// Caution, include either pricepoints or demand and not both.
-		PricePointModel[] pricePointsModel  = newBidModel.getPricePoints();
-		if (pricePointsModel == null || pricePointsModel.length == 0) {
-			 newBid = new Bid(MarketBasisModel.fromMarketBasisModel(
-						newBidModel.getMarketBasis()), 
-						newBidModel.getBidNumber(), 
-						newBidModel.getDemand());
-		} else {
-			// Convert price points
-			PricePoint[] pricePoints = new PricePoint[pricePointsModel.length];
-			for (int i = 0; i < pricePoints.length; i++) {
-				pricePoints[i] = new PricePoint(); 
-				pricePoints[i].setDemand(pricePointsModel[i].getDemand());
-				pricePoints[i].setNormalizedPrice(pricePointsModel[i].getNormalizedPrice());
-			}
-			
-			newBid = new Bid(MarketBasisModel.fromMarketBasisModel(
-				newBidModel.getMarketBasis()), 
-				newBidModel.getBidNumber(), 
-				pricePoints);
-		}
-
 		// Relay bid update to local agent
-		proxy.relayBid(newBid);
+		proxy.updateLocalBid(newBid);
 	}
-	
+
 	private static Map<String, String> splitQuery(URI url) throws UnsupportedEncodingException {
 	    Map<String, String> query_pairs = new LinkedHashMap<String, String>();
 	    String query = url.getQuery();

@@ -1,6 +1,4 @@
-package net.powermatcher.websockets.data;
-
-import net.powermatcher.api.data.MarketBasis;
+package net.powermatcher.extensions.connectivity.websockets.data;
 
 public class MarketBasisModel {
 	/**
@@ -28,27 +26,7 @@ public class MarketBasisModel {
      */
     private double maximumPrice;
 
-    public static MarketBasisModel fromMarketBasis(MarketBasis marketBasis) {
-		MarketBasisModel newMarketBasisModel = new MarketBasisModel();
-		newMarketBasisModel.setCommodity(marketBasis.getCommodity());
-		newMarketBasisModel.setCurrency(marketBasis.getCurrency());
-		newMarketBasisModel.setMaximumPrice(marketBasis.getMaximumPrice());
-		newMarketBasisModel.setMinimumPrice(marketBasis.getMinimumPrice());
-		newMarketBasisModel.setPriceSteps(marketBasis.getPriceSteps());
-    	return newMarketBasisModel;
-    }
-    
-    public static MarketBasis fromMarketBasisModel(MarketBasisModel marketBasis) {
-		MarketBasis newMarketBasis = new MarketBasis(
-				marketBasis.getCommodity(), 
-				marketBasis.getCurrency(), 
-				marketBasis.getPriceSteps(), 
-				marketBasis.getMinimumPrice(), 
-				marketBasis.getMaximumPrice()); 
-    	return newMarketBasis;
-    }
-    
-	public String getCommodity() {
+ 	public String getCommodity() {
 		return commodity;
 	}
 

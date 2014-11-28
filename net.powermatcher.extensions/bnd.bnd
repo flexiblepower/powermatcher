@@ -30,6 +30,6 @@ Service-Component:  \
 	
 -includeresource: WEB-INF/web.xml=${project}/web.xml
 Export-Package:  \
-	net.powermatcher.websockets,\
-	net.powermatcher.websockets.data
+	net.powermatcher.extensions.connectivity.websockets.data,\
+	net.powermatcher.extensions.connectivity.websockets
 Web-ContextPath: /powermatcher/websockets
