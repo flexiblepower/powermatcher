@@ -15,7 +15,8 @@ public class VisualElement {
     public VisualElement(Kind kind, String name) {
         this.kind = kind;
         this.name = name;
-        this.id = Integer.toString(counter++);
+        increaseCount();
+        this.id = Integer.toString(counter);
         this.children = new ArrayList<>();
     }
 
@@ -49,6 +50,10 @@ public class VisualElement {
 
     public List<VisualElement> getChildren() {
         return children;
+    }
+
+    private static void increaseCount() {
+        counter++;
     }
 
     @Override

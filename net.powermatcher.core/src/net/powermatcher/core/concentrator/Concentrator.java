@@ -1,5 +1,6 @@
 package net.powermatcher.core.concentrator;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -21,6 +22,7 @@ import net.powermatcher.api.monitoring.OutgoingPriceEvent;
 import net.powermatcher.api.monitoring.Qualifier;
 import net.powermatcher.core.BaseAgent;
 import net.powermatcher.core.BidCache;
+import net.powermatcher.core.BidCacheSnapshot;
 import net.powermatcher.core.auctioneer.Auctioneer;
 
 import org.slf4j.Logger;
@@ -96,10 +98,12 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
      */
     private BidCache aggregatedBids;
 
+
     /**
      * Holds the sessions from the agents.
      */
     private Set<Session> sessionToAgents = new HashSet<Session>();
+    
 
     /**
      * OSGI configuration meta type with info about the concentrator.
@@ -121,6 +125,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
         config = Configurable.createConfigurable(Config.class, properties);
 
         this.setAgentId(config.agentId());
+
         this.setDesiredParentId(config.desiredParentId());
 
         this.aggregatedBids = new BidCache(this.timeService, config.bidTimeout());
@@ -169,7 +174,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
         session.setMarketBasis(this.sessionToMatcher.getMarketBasis());
         session.setClusterId(this.sessionToMatcher.getClusterId());
 
-        this.aggregatedBids.updateBid(session.getSessionId(), new Bid(this.sessionToMatcher.getMarketBasis()));
+        this.aggregatedBids.updateBid(session.getAgentId(), new Bid(this.sessionToMatcher.getMarketBasis()));
         LOGGER.info("Agent connected with session [{}]", session.getSessionId());
         return true;
     }
@@ -201,9 +206,9 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
                 timeService.currentDate(), "agentId", newBid, Qualifier.AGENT));
 
         // Update agent in aggregatedBids
-        this.aggregatedBids.updateBid(session.getSessionId(), newBid);
+        this.aggregatedBids.updateBid(session.getAgentId(), newBid);
 
-        LOGGER.info("Received bid update [{}] from session [{}]", newBid, session.getSessionId());
+        LOGGER.info("Received from session [{}] bid update [{}] ", session.getSessionId(), newBid);
     }
 
     @Override
@@ -217,18 +222,35 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
         this.publishEvent(new IncomingPriceEvent(sessionToMatcher.getClusterId(), this.config.agentId(),
                 this.sessionToMatcher.getSessionId(), timeService.currentDate(), newPrice, Qualifier.AGENT));
 
+        // Find bidCacheSnapshot belonging to the newly received price update
+        BidCacheSnapshot bidCacheSnapshot = this.aggregatedBids.getMatchingSnapshot(newPrice.getBidNumber());
+        if (bidCacheSnapshot == null) {
+        	// ignore price and log warning
+        	return;
+        }
+        
         // Publish new price to connected agents
         for (Session session : this.sessionToAgents) {
-            session.updatePrice(newPrice);
+        	Integer originalAgentBid = bidCacheSnapshot.getBidNumbers().get(session.getAgentId());    
+        	if (originalAgentBid == null) {
+        		// ignore price for this agent and log warning
+        		continue;
+        	} 
 
-            this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), this.config.agentId(), session
-                    .getSessionId(), timeService.currentDate(), newPrice, Qualifier.MATCHER));
+        	Price agentPrice = new Price(newPrice.getMarketBasis(), newPrice.getCurrentPrice(), originalAgentBid);
+        	
+            session.updatePrice(agentPrice);
+
+            this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), this.config.agentId(), session.getSessionId(), timeService
+                    .currentDate(), newPrice, Qualifier.MATCHER));
+
         }
     }
 
     protected synchronized void doBidUpdate() {
         if (sessionToMatcher != null) {
             Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.sessionToMatcher.getMarketBasis());
+
             this.sessionToMatcher.updateBid(aggregatedBid);
             publishEvent(new OutgoingBidEvent(sessionToMatcher.getClusterId(), config.agentId(),
                     sessionToMatcher.getSessionId(), timeService.currentDate(), aggregatedBid, Qualifier.MATCHER));

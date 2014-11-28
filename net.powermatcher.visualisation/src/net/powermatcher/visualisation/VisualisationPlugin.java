@@ -36,15 +36,21 @@ public class VisualisationPlugin extends HttpServlet {
 
     private static final String BASE_PATH = "/pm-cluster-visualizer";
 
-    private Map<String, VisualElement> activeElements = new HashMap<>();
-    
-    @Reference
-    public void setSessionManager(SessionManagerInterface sessionManager) {
-        this.sessionManager = sessionManager;
-    }
+    private Map<String, VisualElement> activeElements;
+
+    private Map<String, AgentEndpoint> agentEndpoints;
+
+    /**
+     * Holds the matcherEndpoints
+     */
+    private Map<String, MatcherEndpoint> matcherEndpoints;
+
+    /**
+     * Holds the activeSessions
+     */
+    private Map<String, Session> activeSessions;
 
     private SessionManagerInterface sessionManager;
-    
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -77,30 +83,32 @@ public class VisualisationPlugin extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-        // TODO For some reason, the frontend does a POST with res/icons.xml. Adding this for now to prevent json parser
-        // errors.
         if (req.getPathInfo().endsWith("icons.xml")) {
             return;
         }
 
-        // TODO move load to doGet()?
-
         String incommingJson = req.getReader().readLine();
 
-        // TODO JsonSyntaxException? Send an errorMessage?
         JsonObject jobject = new Gson().fromJson(incommingJson, JsonObject.class);
 
         String requestKind = jobject.get("requestKind").getAsString();
 
-        if (requestKind.equals("saveState")) {
+        if ("saveState".equals(requestKind)) {
             LOGGER.info("Saving state");
 
-        } else if (requestKind.equals("loadState")) {
+        } else if ("loadState".equals(requestKind)) {
             LOGGER.info("Loading state");
-
+            updateData();
             String output = handleLoadState();
             resp.getWriter().write(output);
         }
+    }
+
+    private void updateData() {
+        this.agentEndpoints = sessionManager.getAgentEndpoints();
+        this.matcherEndpoints = sessionManager.getMatcherEndpoints();
+        this.activeSessions = sessionManager.getActiveSessions();
+        activeElements = new HashMap<>();
     }
 
     private String handleLoadState() {
@@ -129,24 +137,23 @@ public class VisualisationPlugin extends HttpServlet {
 
     private void procssSeparate() {
 
-        // TODO copy off agentEndpoints and matcherEndpoints? Concurrency?
-        for (String s : sessionManager.getAgentEndpoints().keySet()) {
+        for (String s : agentEndpoints.keySet()) {
 
             if (!activeElements.containsKey(s)) {
-                createAgentElement(sessionManager.getAgentEndpoints().get(s), s);
+                createAgentElement(agentEndpoints.get(s), s);
             }
         }
 
-        for (String s : sessionManager.getMatcherEndpoints().keySet()) {
+        for (String s : matcherEndpoints.keySet()) {
             if (!activeElements.containsKey(s)) {
-                createMatcherElement(sessionManager.getMatcherEndpoints().get(s), s);
+                createMatcherElement(matcherEndpoints.get(s), s);
             }
         }
     }
 
     private void processSessions() {
 
-        for (Session s : sessionManager.getActiveSessions().values()) {
+        for (Session s : activeSessions.values()) {
 
             if (s instanceof SessionImpl) {
                 SessionImpl temp = (SessionImpl) s;
@@ -195,21 +202,24 @@ public class VisualisationPlugin extends HttpServlet {
         return output;
     }
 
-    @SuppressWarnings("unused")
-    private URL getResource(String path) {
+    protected URL getResource(String path) {
 
-        // I know it's set to private and never used locally. But OSGi's AbstractWebConsole.doGet calls this method, so
+        // OSGi's AbstractWebConsole.doGet calls this method, so
         // don't remove it!
         // if you return null, it'll continue with AbstractWebConsole.doGet and return the resource. If you return null,
         // it calls this.doGet()
 
         if (path.endsWith(".js") || path.endsWith(".png") || path.endsWith(".css")) {
-            path = path.replaceAll(BASE_PATH + "/", "");
-            URL url = getClass().getClassLoader().getResource(path);
-            return url;
+            String newPath = path.replaceAll(BASE_PATH + "/", "");
+            return getClass().getClassLoader().getResource(newPath);
         } else {
             // if you return null, it calls to doGet
             return null;
         }
+    }
+
+    @Reference
+    public void setSessionManager(SessionManagerInterface sessionManager) {
+        this.sessionManager = sessionManager;
     }
 }
