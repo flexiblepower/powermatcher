@@ -11,23 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.powermatcher.api.TimeService;
-import net.powermatcher.api.monitoring.BidEvent;
 import net.powermatcher.api.monitoring.ObservableAgent;
-import net.powermatcher.api.monitoring.AgentEvent;
-import net.powermatcher.api.monitoring.PriceEvent;
-import net.powermatcher.core.monitoring.BaseObserver;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
@@ -40,9 +29,7 @@ import aQute.bnd.annotation.metatype.Meta;
  * Example Observer which simply writes log entries of received events.
  */
 @Component(immediate = true, designateFactory = CSVLogger.Config.class)
-public class CSVLogger extends BaseObserver {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(CSVLogger.class);
+public class CSVLogger extends AgentEventLogger {
 
     /**
      * The header for the bidlog file
@@ -92,12 +79,10 @@ public class CSVLogger extends BaseObserver {
         String loggerId();
     }
 
-    private List<String> filter;
-
     /**
-     * The id of this logger instance
+     * The filter containing the {@link ObservableAgent}s that have to be monitored
      */
-    private String loggerId;
+    private List<String> filter;
 
     /**
      * The log file {@link BidLogRecord} will be written to.
@@ -110,120 +95,57 @@ public class CSVLogger extends BaseObserver {
     private File priceLogFile;
 
     /**
-     * The date format for the timestamps in the log.
-     */
-    private DateFormat dateFormat;
-
-    /**
      * The field separator the logger will use.
      */
     private String separator;
 
     /**
-     * A set containing all {@link BidLogRecord} instances that haven't been written to file yet.
-     */
-    private BlockingQueue<BidLogRecord> bidLogRecords = new LinkedBlockingQueue<>();
-
-    /**
-     * A set containing all {@link PriceLogRecord} instances that haven't been written to file yet.
-     */
-    private BlockingQueue<PriceLogRecord> priceLogRecords = new LinkedBlockingQueue<>();
-
-    /**
-     * Keeps the thread alive that performs the writeLog() at a set interval
-     */
-    private ScheduledFuture<?> scheduledFuture;
-
-    /**
-     * Used to create a {@link ScheduledExecutorService}
-     */
-    private ScheduledExecutorService scheduler;
-
-    private TimeService timeService;
-
-    @Override
-    public void update(AgentEvent event) {
-        LOGGER.info("Received event: {}", event);
-
-        if (event instanceof BidEvent) {
-            BidLogRecord bidLogRecord = new BidLogRecord((BidEvent) event, timeService.currentDate(), dateFormat);
-            bidLogRecords.add(bidLogRecord);
-        } else if (event instanceof PriceEvent) {
-            PriceLogRecord priceLogRecord = new PriceLogRecord((PriceEvent) event, timeService.currentDate(),
-                    dateFormat);
-            priceLogRecords.add(priceLogRecord);
-        }
-    }
-
-    private void writeLogs(BlockingQueue<? extends LogRecord> records, File outputFile) {
-
-        // TODO concurrency issues
-        for (LogRecord l : records.toArray(new LogRecord[records.size()])) {
-            writeLineToCSV(l.getLine(), outputFile);
-            records.remove(l);
-        }
-
-        LOGGER.info("CSVLogger [{}] wrote to {}", loggerId, outputFile);
-    }
-
-    /**
-     * Activate the component.
+     * OSGi calls this method to activate a managed service.
      * 
      * @param properties
-     *            updated configuration properties
+     *            the configuration properties
      */
     @Activate
     public synchronized void activate(Map<String, Object> properties) {
-
-        Config config = Configurable.createConfigurable(Config.class, properties);
-        processConfig(properties);
-
-        scheduledFuture = scheduler.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                writeLogs(bidLogRecords, bidlogFile);
-                writeLogs(priceLogRecords, priceLogFile);
-            }
-        }, 0, config.logUpdateRate(), TimeUnit.SECONDS);
-
-        LOGGER.info("CSVLogger [{}], activated", loggerId);
+        super.baseActivate(properties);
     }
 
     /**
-     * Deactivates the component
+     * OSGi calls this method to deactivate a managed service.
+     * 
+     * @param properties
+     *            the configuration properties
      */
     @Deactivate
     public void deactivate() {
-
-        scheduledFuture.cancel(false);
-
-        LOGGER.info("CSVLogger [{}], deactivated", loggerId);
+        super.baseDeactivate();
     }
 
     /**
-     * Handle configuration modifications.
+     * OSGi calls this method to modify a managed service.
      * 
      * @param properties
-     *            updated configuration properties
+     *            the configuration properties
      */
     @Modified
     public synchronized void modified(Map<String, Object> properties) {
-
-        processConfig(properties);
+        super.baseModified(properties);
     }
 
+    /**
+     * @see BaseObserver#addObservable(ObservableAgent, Map)
+     */
     @Override
     @Reference(dynamic = true, multiple = true, optional = true)
     public void addObservable(ObservableAgent observable, Map<String, Object> properties) {
         super.addObservable(observable, properties);
     }
 
+    /**
+     * @see AgentEventLogger#processConfig(Map)
+     */
     @Override
-    protected List<String> filter() {
-        return this.filter;
-    }
-
-    private void processConfig(Map<String, Object> properties) {
+    protected void processConfig(Map<String, Object> properties) {
         Config config = Configurable.createConfigurable(Config.class, properties);
 
         this.filter = config.filter();
@@ -233,10 +155,10 @@ public class CSVLogger extends BaseObserver {
             this.filter = new ArrayList<String>();
         }
 
+        setLogUpdateRate(config.logUpdateRate());
+        setLoggerId(config.loggerId());
+        setDateFormat(new SimpleDateFormat(config.dateFormat()));
         this.separator = config.separator();
-        this.loggerId = config.loggerId();
-
-        this.dateFormat = new SimpleDateFormat(config.dateFormat());
 
         this.priceLogFile = createLogFile(config.pricelogFilenamePattern(), config.logLocation());
         if (!priceLogFile.exists()) {
@@ -251,9 +173,23 @@ public class CSVLogger extends BaseObserver {
         updateObservables();
     }
 
+    /**
+     * Creates a new {@link File} to write the csv lines to. It also parses possible {@link DateFormat} strings in the
+     * fileName parameter.
+     * 
+     * @param fileName
+     *            the name of the {@link File} that has to be created
+     * @param logLocation
+     *            the location of the {@link File} that has to be created
+     * @return The {@link File} with the fileName name and the logLocation as location
+     */
     private File createLogFile(String fileName, String logLocation) {
-
         String newFileName = fileName;
+
+        // in case somebody forgets the extention
+        if (!fileName.endsWith(".csv")) {
+            newFileName = newFileName.concat(".csv");
+        }
 
         if (fileName.matches("\\S*::\\w*::*.csv")) {
 
@@ -268,10 +204,16 @@ public class CSVLogger extends BaseObserver {
         return new File(logLocation + File.separator + newFileName);
     }
 
+    /**
+     * Write a comma separated line to a specified file
+     * 
+     * @param line
+     *            the comma separated line that has to be written to the outputFile
+     * @param outputFile
+     *            the csv log file where to line has to be written to
+     */
     private void writeLineToCSV(String[] line, File outputFile) {
-
         try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(outputFile, true)))) {
-
             StringBuilder sb = new StringBuilder();
 
             for (String s : line) {
@@ -280,24 +222,66 @@ public class CSVLogger extends BaseObserver {
                 }
                 sb.append(s);
             }
-
             out.println(sb.toString());
 
         } catch (IOException e) {
-            // TODO do something with this exception
-            LOGGER.error(e.getMessage());
+            getLogger().error(e.getMessage());
         }
-
     }
 
+    /**
+     * OSGI calls this method to set the scheduler
+     * 
+     * @param scheduler
+     *            The {@link ScheduledExecutorService} implementation to be injected
+     */
     @Reference
     public void setScheduler(ScheduledExecutorService scheduler) {
-        this.scheduler = scheduler;
+        super.setScheduler(scheduler);
     }
 
+    /**
+     * OSGI calls this method to set the timeService
+     * 
+     * @param timeService
+     *            The {@link TimeService} implementation to be injected
+     */
     @Reference
     public void setTimeService(TimeService timeService) {
         this.timeService = timeService;
     }
 
+    /**
+     * This method goes over every {@link LogRecord} in records and calls {@link CSVLogger}
+     * {@link #writeLineToCSV(String[], File)}
+     * 
+     * @param records
+     *            the collection of {@link LogRecord}s
+     * @param outputFile
+     *            the {@link File} the csv lines will be written to.
+     */
+    private <E extends LogRecord> void writeLogs(BlockingQueue<E> records, File outputFile) {
+        for (LogRecord l : records.toArray(new LogRecord[records.size()])) {
+            writeLineToCSV(l.getLine(), outputFile);
+            records.remove(l);
+        }
+        getLogger().info("CSVLogger [{}] wrote to {}", getLoggerId(), outputFile);
+    }
+
+    /**
+     * @see AgentEventLogger#dumpLogs()
+     */
+    @Override
+    protected void dumpLogs() {
+        writeLogs(getBidLogRecords(), bidlogFile);
+        writeLogs(getPriceLogRecords(), priceLogFile);
+    }
+
+    /**
+     * @see BaseObserver#getFilter()
+     */
+    @Override
+    protected List<String> getFilter() {
+        return this.filter;
+    }
 }
