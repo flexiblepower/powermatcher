@@ -40,7 +40,9 @@ jsPlumb.ready(function() {
 	// suspend drawing and initialise.
 	instance.doWhileSuspended(function() {
 
-		$.post("data", function(data) {
+		$.post('', {
+			requestType : "nodes"
+		}, function(data) {
 
 			var jobject = data;
 

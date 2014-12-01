@@ -2,10 +2,7 @@ package net.powermatcher.visualisation;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,12 +11,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import net.powermatcher.api.AgentEndpoint;
-import net.powermatcher.api.MatcherEndpoint;
-import net.powermatcher.api.Session;
-import net.powermatcher.core.sessions.SessionImpl;
-import net.powermatcher.core.sessions.SessionManagerInterface;
 
 import org.apache.commons.io.IOUtils;
 import org.osgi.framework.InvalidSyntaxException;
@@ -31,47 +22,54 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
+import aQute.bnd.annotation.metatype.Configurable;
+import aQute.bnd.annotation.metatype.Meta;
 
-@Component(provide = Servlet.class, properties = { "felix.webconsole.title=Powermatcher cluster visualizer",
-        "felix.webconsole.label=pm-cluster-visualizer" }, immediate = true)
+@Component(
+        provide = Servlet.class,
+        properties = { "felix.webconsole.title=Powermatcher cluster visualizer",
+                "felix.webconsole.label=pm-cluster-visualizer" },
+        immediate = true,
+        designateFactory = VisualisationPlugin.Config.class)
 public class VisualisationPlugin extends HttpServlet {
-    private static final long serialVersionUID = 7146852312931261310L;
+    private static final long serialVersionUID = -3582669073153236495L;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(VisualisationPlugin.class);
 
     private static final String BASE_PATH = "/pm-cluster-visualizer";
 
-    private Map<String, VisualElement> activeElements;
-
-    private Map<String, AgentEndpoint> agentEndpoints;
-
     /**
-     * Holds the matcherEndpoints
+     * OSGI configuration of the {@link SimpleObserver}
      */
-    private Map<String, MatcherEndpoint> matcherEndpoints;
-
-    /**
-     * Holds the activeSessions
-     */
-    private Map<String, Session> activeSessions;
-
-    private SessionManagerInterface sessionManager;
+    public static interface Config {
+        @Meta.AD(
+                required = true,
+                deflt = "net.powermatcher.core.auctioneer.Auctioneer, net.powermatcher.core.concentrator.Concentrator,"
+                        + "net.powermatcher.examples.Freezer, net.powermatcher.examples.PVPanelAgent",
+                description = "A list of all the OSGi fpids that have to be used.")
+        List<String> filter();
+    }
 
     private ConfigurationAdmin configurationAdmin;
+
+    private List<String> filter;
+
+    @Activate
+    public void activate(Map<String, Object> properties) {
+        Config config = Configurable.createConfigurable(Config.class, properties);
+        filter = config.filter();
+
+        LOGGER.info("VisualisationPlugin [{}], activated");
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         String path = req.getPathInfo();
 
-        // check for "post" requests from previous versions
-        if (path.endsWith("/data")) {
-            this.doPost(req, resp);
-            return;
-        }
-
-        // System.out.println("hello");
         if (path.equals(BASE_PATH)) {
             resp.sendRedirect(BASE_PATH.substring(1) + "/index.html");
             return;
@@ -80,13 +78,8 @@ public class VisualisationPlugin extends HttpServlet {
         // html pages have to be sent here with a Stream because the getResource would only return the html page, not
         // the rest.
         if (path.endsWith(".html")) {
-            resp.setContentType("text/html");
-
-            // path = path.substring(path.lastIndexOf("/") + 1);
-
             String newPath = path.replaceAll(BASE_PATH + "/", "");
-            // return getClass().getClassLoader().getResource(newPath);
-
+            resp.setContentType("text/html");
             InputStream input = getClass().getClassLoader().getResourceAsStream(newPath);
             if (input == null) {
                 LOGGER.debug("Could not find file {}", path);
@@ -95,60 +88,39 @@ public class VisualisationPlugin extends HttpServlet {
                 LOGGER.debug("Serving file {}", path);
                 IOUtils.copy(input, resp.getWriter());
             }
-        } else if (path.endsWith("data")) {
-            LOGGER.info("Loading state");
-            // updateData();
-            resp.setContentType("application/json");
-            // PrintWriter out = resp.getWriter();
-            JsonObject output = handleLoadState();
-            resp.getWriter().print(output.toString());
-
-            return;
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-        LOGGER.info("Loading state");
-        // updateData();
-        resp.setContentType("application/json");
-        PrintWriter out = resp.getWriter();
-        JsonObject output = handleLoadState();
-        out.print(output.toString());
-    }
+        String requestType = req.getParameter("requestType");
 
-    private void updateData() {
-        this.agentEndpoints = sessionManager.getAgentEndpoints();
-        this.matcherEndpoints = sessionManager.getMatcherEndpoints();
-        this.activeSessions = sessionManager.getActiveSessions();
-        activeElements = new HashMap<>();
+        JsonObject output = null;
+        if ("nodes".equals(requestType)) {
+
+            LOGGER.info("Returning the Nodes");
+            resp.setContentType("application/json");
+            output = handleLoadState();
+        }
+
+        resp.getWriter().print(output.toString());
     }
 
     private JsonObject handleLoadState() {
-
-        // TODO filter? Multiple defaults?
-        List<String> acceptedFpids = new ArrayList<>();
-
-        acceptedFpids.add("net.powermatcher.core.auctioneer.Auctioneer");
-        acceptedFpids.add("net.powermatcher.core.concentrator.Concentrator");
-        acceptedFpids.add("net.powermatcher.examples.Freezer");
-        acceptedFpids.add("net.powermatcher.examples.PVPanelAgent");
-
         JsonObject output = new JsonObject();
 
         JsonArray agents = new JsonArray();
-
         JsonArray connections = new JsonArray();
 
         JsonObject agent;
         JsonObject connection;
 
         // TODO no configurations means nullpointer for some reason
-        //you need this to work when you start with a black slate
+        // you need this to work when you start with a black slate
         try {
             for (Configuration c : configurationAdmin.listConfigurations(null)) {
-                if (acceptedFpids.contains(c.getFactoryPid())) {
+                if (filter.contains(c.getFactoryPid())) {
 
                     agent = new JsonObject();
                     connection = new JsonObject();
@@ -163,7 +135,7 @@ public class VisualisationPlugin extends HttpServlet {
                     agent.addProperty("agentId", agentId);
 
                     agents.add(agent);
-                    
+
                     String desiredParentId = (String) c.getProperties().get("desiredParentId");
 
                     connection.addProperty("matcherRole", desiredParentId);
@@ -184,74 +156,6 @@ public class VisualisationPlugin extends HttpServlet {
         output.add("connections", connections);
 
         return output;
-
-    }
-
-    private void procssSeparate() {
-
-        for (String s : agentEndpoints.keySet()) {
-
-            if (!activeElements.containsKey(s)) {
-                createAgentElement(agentEndpoints.get(s), s);
-            }
-        }
-
-        for (String s : matcherEndpoints.keySet()) {
-            if (!activeElements.containsKey(s)) {
-                createMatcherElement(matcherEndpoints.get(s), s);
-            }
-        }
-    }
-
-    private void processSessions() {
-
-        for (Session s : activeSessions.values()) {
-
-            if (s instanceof SessionImpl) {
-                SessionImpl temp = (SessionImpl) s;
-
-                VisualElement agentElement = createAgentElement(temp.getAgentEndpoint(), temp.getAgentId());
-
-                VisualElement matcherElement = createMatcherElement(temp.getMatcherEndpoint(), temp.getMatcherId());
-                matcherElement.addChild(agentElement);
-            }
-        }
-    }
-
-    private VisualElement createMatcherElement(MatcherEndpoint matcherEndpoint, String matcherId) {
-        Kind kind = null;
-
-        if (matcherEndpoint instanceof AgentEndpoint) {
-            kind = Kind.CONCENTRATOR;
-        } else {
-            kind = Kind.AUCTIONEER;
-        }
-
-        return createVisualElement(matcherId, kind);
-    }
-
-    private VisualElement createAgentElement(AgentEndpoint agentEndpoint, String agentId) {
-        Kind kind = null;
-
-        if (agentEndpoint instanceof MatcherEndpoint) {
-            kind = Kind.CONCENTRATOR;
-        } else {
-            kind = Kind.DEVICEAGENT;
-        }
-
-        return createVisualElement(agentId, kind);
-    }
-
-    private VisualElement createVisualElement(String id, Kind kind) {
-        VisualElement output = null;
-
-        if (activeElements.containsKey(id)) {
-            output = activeElements.get(id);
-        } else {
-            output = new VisualElement(kind, id);
-            activeElements.put(output.getName(), output);
-        }
-        return output;
     }
 
     protected URL getResource(String path) {
@@ -268,11 +172,6 @@ public class VisualisationPlugin extends HttpServlet {
             // if you return null, it calls to doGet
             return null;
         }
-    }
-
-    @Reference
-    public void setSessionManager(SessionManagerInterface sessionManager) {
-        this.sessionManager = sessionManager;
     }
 
     @Reference
