@@ -1,6 +1,5 @@
 jsPlumb.ready(function() {
 
-	// TODO here
 	var color = "lightgreen";
 
 	var instance = jsPlumb.getInstance({
@@ -115,8 +114,14 @@ function createNodes(agentArray) {
 		append($("<span/>", {
 			class : "ui-icon ui-icon-pencil",
 			click : function() {
-				// TODO call json
-				alert("get json for " + obj.pid);
+				editNode(obj.pid);
+			},
+			hover : "hover",
+		})).
+		append($("<span/>", {
+			class : "ui-icon ui-icon-trash",
+			click : function() {
+				deleteNode(obj.pid);
 			},
 			hover : "hover",
 		})).
