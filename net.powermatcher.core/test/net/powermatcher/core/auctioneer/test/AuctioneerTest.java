@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
@@ -12,6 +11,7 @@ import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.sessions.SessionManager;
 import net.powermatcher.core.time.SystemTimeService;
 import net.powermatcher.mock.MockAgent;
+import net.powermatcher.mock.MockScheduler;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -30,6 +30,7 @@ public class AuctioneerTest {
     // This needs to be the same as the MarketBasis created in the Auctioneer
     private final MarketBasis marketBasis = new MarketBasis("electricity", "EUR", 11, 0, 10);
     private Map<String, Object> auctioneerProperties;
+    private MockScheduler timer;
 
     private Auctioneer auctioneer;
     private MockAgent[] agents;
@@ -54,8 +55,10 @@ public class AuctioneerTest {
         auctioneerProperties.put("maximumPrice", "10");
         auctioneerProperties.put("bidTimeout", "600");
         auctioneerProperties.put("priceUpdateRate", "1");
+        
+        timer = new MockScheduler();
 
-        auctioneer.setExecutorService(new ScheduledThreadPoolExecutor(10));
+        auctioneer.setExecutorService(timer);
         auctioneer.setTimeService(new SystemTimeService());
         auctioneer.activate(auctioneerProperties);
 
@@ -93,14 +96,14 @@ public class AuctioneerTest {
         agents[0].sendBid(new Bid(marketBasis, new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 }));
         agents[1].sendBid(new Bid(marketBasis, new double[] { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 }));
         agents[2].sendBid(new Bid(marketBasis, new double[] { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 }));
-        auctioneer.publishNewPrice();
+        timer.doTaskOnce();
         assertEquals(10, agents[0].getLastPriceUpdate().getCurrentPrice(), 0);
 
         // run 2
         agents[0].sendBid(new Bid(marketBasis, new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 }));
         agents[1].sendBid(new Bid(marketBasis, new double[] { 4, 4, 4, 4, 4, 2, 2, 2, 2, 2, 2 }));
         agents[2].sendBid(new Bid(marketBasis, new double[] { 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1 }));
-        auctioneer.publishNewPrice();
+        timer.doTaskOnce();
         assertEquals(10, agents[0].getLastPriceUpdate().getCurrentPrice(), 0);
         removeAgents(3);
     }
@@ -112,14 +115,14 @@ public class AuctioneerTest {
         agents[0].sendBid(new Bid(marketBasis, new double[] { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5 }));
         agents[1].sendBid(new Bid(marketBasis, new double[] { -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4 }));
         agents[2].sendBid(new Bid(marketBasis, new double[] { -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3 }));
-        auctioneer.publishNewPrice();
+        timer.doTaskOnce();
         assertEquals(0, agents[0].getLastPriceUpdate().getCurrentPrice(), 0);
 
         // run 2
         agents[0].sendBid(new Bid(marketBasis, new double[] { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5 }));
         agents[1].sendBid(new Bid(marketBasis, new double[] { -2, -2, -2, -2, -2, -4, -4, -4, -4, -4, -4 }));
         agents[2].sendBid(new Bid(marketBasis, new double[] { -1, -1, -1, -1, -1, -1, -1, -3, -3, -3, -3 }));
-        auctioneer.publishNewPrice();
+        timer.doTaskOnce();
         assertEquals(0, agents[0].getLastPriceUpdate().getCurrentPrice(), 0);
         removeAgents(3);
     }
@@ -131,14 +134,14 @@ public class AuctioneerTest {
         agents[0].sendBid(new Bid(marketBasis, new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 }));
         agents[1].sendBid(new Bid(marketBasis, new double[] { 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0 }));
         agents[2].sendBid(new Bid(marketBasis, new double[] { 0, 0, 0, 0, 0, -5, -5, -5, -5, -5, -5 }));
-        auctioneer.publishNewPrice();
+        timer.doTaskOnce();
         assertEquals(5, agents[0].getLastPriceUpdate().getCurrentPrice(), 0);
 
         // run 2
         agents[0].sendBid(new Bid(marketBasis, new double[] { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5 }));
         agents[1].sendBid(new Bid(marketBasis, new double[] { 0, 0, 0, 0, 0, 0, 0, -4, -4, -4, -4 }));
         agents[2].sendBid(new Bid(marketBasis, new double[] { 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9 }));
-        auctioneer.publishNewPrice();
+        timer.doTaskOnce();
         assertEquals(7, agents[0].getLastPriceUpdate().getCurrentPrice(), 0);
         removeAgents(3);
     }
@@ -167,7 +170,7 @@ public class AuctioneerTest {
         agents[17].sendBid(new Bid(marketBasis, new double[] { 2, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0 }));
         agents[18].sendBid(new Bid(marketBasis, new double[] { -1, -1, -1, -1, -2, -2, -2, -2, -3, -3, -3 }));
         agents[19].sendBid(new Bid(marketBasis, new double[] { 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0 }));
-        auctioneer.publishNewPrice();
+        timer.doTaskOnce();
 
         assertEquals(6, agents[0].getLastPriceUpdate().getCurrentPrice(), 0);
         removeAgents(20);
@@ -197,7 +200,7 @@ public class AuctioneerTest {
         agents[18].sendBid(new Bid(marketBasis, new double[] { -1, -1, -1, -1, -2, -2, -2, -2, -3, -3, -3 }));
         agents[19].sendBid(new Bid(marketBasis, new double[] { 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0 }));
         agents[20].sendBid(new Bid(marketBasis, new double[] { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 }));
-        auctioneer.publishNewPrice();
+        timer.doTaskOnce();
         assertEquals(7, agents[0].getLastPriceUpdate().getCurrentPrice(), 0);
         removeAgents(21);
     }
