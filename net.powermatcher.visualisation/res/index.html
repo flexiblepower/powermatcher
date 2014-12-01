@@ -1,35 +1,46 @@
 
-<!-- <?xml version="1.0" encoding="UTF-8" xml:lang="en" ?> -->
-<!-- <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> -->
-<!-- <!-- Fjodor van Veen 2014 --> 
-<!-- <html> -->
-<!-- <head> -->
-<!-- <title>Power Configuration Tool</title> -->
+<link rel="stylesheet" href="css/jsplumb.css">
+<link rel="stylesheet" href="css/visualizer.css">
 
-<!-- <meta http-equiv="Content-Type" -->
-<!-- 	content="application/xhtml+xml; charset=UTF-8" /> -->
-<!-- <meta http-equiv="Content-Script-Type" content="text/javascript" /> -->
-<!-- <meta http-equiv="Content-Style-Type" content="text/css" /> -->
+<script src="js/external/jquery-ui-1.9.2.min.js"></script>
 
-<!-- <link href="style.css" type="text/css" rel="stylesheet" /> -->
+<!-- JS -->
+<!-- support lib for bezier stuff -->
+<script src="js/lib/jsBezier-0.6.js"></script>
+<!-- event adapter -->
+<script src="js/lib/mottle-0.4.js"></script>
+<!-- geom functions -->
+<script src="js/lib/biltong-0.2.js"></script>
+<!-- jsplumb util -->
+<script src="js/src/util.js"></script>
+<script src="js/src/browser-util.js"></script>
+<!-- base DOM adapter -->
+<script src="js/src/dom-adapter.js"></script>
+<!-- main jsplumb engine -->
+<script src="js/src/jsPlumb.js"></script>
+<!-- endpoint -->
+<script src="js/src/endpoint.js"></script>
+<!-- connection -->
+<script src="js/src/connection.js"></script>
+<!-- anchors -->
+<script src="js/src/anchors.js"></script>
+<!-- connectors, endpoint and overlays  -->
+<script src="js/src/defaults.js"></script>
 
-<!-- <script src="js/DOM.js" type="text/javascript"></script> -->
-<!-- <script src="js/Mouse.js" type="text/javascript"></script> -->
-<!-- <script src="js/Keyboard.js" type="text/javascript"></script> -->
-<!-- <script src="js/Render.js" type="text/javascript"></script> -->
-<!-- <script src="js/Controller.js" type="text/javascript"></script> -->
-<!-- <script src="js/main.js" type="text/javascript"></script> -->
-<!-- </head> -->
-<!-- <body> -->
+<!-- bezier connectors -->
+<script src="js/src/connectors-bezier.js"></script>
+<script src="js/src/renderers-svg.js"></script>
 
-<link href="style.css" type="text/css" rel="stylesheet" />
+<!-- vml renderer -->
+<script src="js/src/renderers-vml.js"></script>
 
-<script src="js/DOM.js" type="text/javascript"></script>
-<script src="js/Mouse.js" type="text/javascript"></script>
-<script src="js/Keyboard.js" type="text/javascript"></script>
-<script src="js/Render.js" type="text/javascript"></script>
-<script src="js/Controller.js" type="text/javascript"></script>
-<script src="js/main.js" type="text/javascript"></script>
+<!-- common adapter -->
+<script src="js/src/base-library-adapter.js"></script>
+<!-- jquery jsPlumb adapter -->
+<script src="js/src/jquery.jsPlumb.js"></script>
+<!-- /JS -->
 
-<!-- </body> -->
-<!-- </html> -->
+<!--  canvas code -->
+<script src="js/powermatcher/visualizer.js"></script>
+
+<div class="canvas container" id="container"></div>
