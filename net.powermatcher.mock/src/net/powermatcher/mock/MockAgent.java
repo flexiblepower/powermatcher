@@ -80,11 +80,6 @@ public class MockAgent implements Agent, AgentEndpoint, ObservableAgent {
     }
 
     @Override
-    public String getObserverId() {
-        return this.getAgentId();
-    }
-
-    @Override
     public void addObserver(AgentObserver observer) {
         observers.add(observer);
     }
