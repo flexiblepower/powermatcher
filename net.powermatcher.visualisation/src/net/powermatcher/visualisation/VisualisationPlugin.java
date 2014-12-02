@@ -126,7 +126,7 @@ public class VisualisationPlugin extends HttpServlet {
                     connection = new JsonObject();
 
                     String fpid = c.getFactoryPid();
-                    fpid = fpid.substring(fpid.lastIndexOf('.') + 1);
+                   //fpid = fpid.substring(fpid.lastIndexOf('.') + 1);
 
                     String agentId = (String) c.getProperties().get("agentId");
 
