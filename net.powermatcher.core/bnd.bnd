@@ -8,7 +8,7 @@ Export-Package:  \
 	net.powermatcher.core.monitoring,\
 	net.powermatcher.core.sessions,\
 	net.powermatcher.core.time,\
-	net.powermatcher.core.objectiveagent
+	net.powermatcher.core.objectiveagent	
 -buildpath:  \
 	net.powermatcher.api;version=latest,\
 	biz.aQute.bnd.annotation,\
@@ -16,4 +16,6 @@ Export-Package:  \
 	${junit},\
 	slf4j.simple,\
 	net.powermatcher.mock;version=latest,\
-	javax.websocket-api;version=1.0
+	javax.websocket-api;version=1.0,\
+	osgi.cmpn,\
+	osgi.core

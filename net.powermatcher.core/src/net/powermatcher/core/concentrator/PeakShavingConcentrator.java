@@ -1,5 +1,6 @@
 package net.powermatcher.core.concentrator;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -8,6 +9,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,8 +46,8 @@ import net.powermatcher.core.auctioneer.Auctioneer;
  * <p>
  * The {@link PeakShavingConcentrator} receives {@link Bid} from the agents and forwards this in an aggregate
  * {@link Bid} up in the hierarchy to a {@link PeakShavingConcentrator} or to the {@link Auctioneer}. It will receive
- * price updates from the {@link Auctioneer} and forward them to its connected agents. 
- * TODO: add PeakShavingConcentrator comment.
+ * price updates from the {@link Auctioneer} and forward them to its connected agents. TODO: add PeakShavingConcentrator
+ * comment.
  * 
  * @author FAN
  * @version 1.0
@@ -149,19 +153,12 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
      */
     protected Price priceOut = null;
 
+    private ConfigurationAdmin configurationAdmin;
+
     @Activate
     public void activate(final Map<String, Object> properties) {
-        config = Configurable.createConfigurable(Config.class, properties);
-
-        this.setAgentId(config.agentId());
-        this.setDesiredParentId(config.desiredParentId());
-        this.setCeiling(config.ceiling());
-        this.setFloor(config.floor());
-
-        if (this.ceiling < this.floor) {
-            throw new IllegalArgumentException("The floor constraint shouldn't be higher than the ceiling constraint");
-        }
-
+        this.processConfig(properties);
+        
         this.aggregatedBids = new BidCache(this.timeService, config.bidTimeout());
 
         scheduledFuture = this.scheduler.scheduleAtFixedRate(new Runnable() {
@@ -180,11 +177,42 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
 
     @Deactivate
     public void deactivate() {
-        scheduledFuture.cancel(false);
-
+        if (scheduledFuture != null) {
+            scheduledFuture.cancel(false);
+        }
+        
         LOGGER.info("Agent [{}], deactivated", config.agentId());
     }
 
+    protected void processConfig(Map<String, Object> properties) {
+        config = Configurable.createConfigurable(Config.class, properties);
+
+        this.setAgentId(config.agentId());
+        this.setDesiredParentId(config.desiredParentId());
+        this.setCeiling(config.ceiling());
+        this.setFloor(config.floor());
+
+        if (this.ceiling > this.floor) {
+            try {
+                for (Configuration c : configurationAdmin.listConfigurations(null)) {
+
+                    String agentId = (String) c.getProperties().get("agentId");
+                    if (agentId.equals(this.getAgentId())) {
+                        c.delete();
+                    }
+                }
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (InvalidSyntaxException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            
+            throw new IllegalArgumentException("The floor constraint shouldn't be higher than the ceiling constraint");
+        }
+    }
+    
     @Override
     public synchronized boolean connectToAgent(Session session) {
         if (this.sessionToMatcher == null) {
@@ -412,7 +440,7 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         // difference between the allocation with and without transformation
         return Math.abs(untransformedAllocation - allocation);
     }
-    
+
     private synchronized double getUncontrolledFlow() {
         // the uncontrolled flow can only be calculated if the measured flow is
         // known
@@ -552,6 +580,11 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
     @Reference
     public void setExecutorService(ScheduledExecutorService scheduler) {
         this.scheduler = scheduler;
+    }
+
+    @Reference
+    protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
+        this.configurationAdmin = configurationAdmin;
     }
 
     protected double getCeiling() {
