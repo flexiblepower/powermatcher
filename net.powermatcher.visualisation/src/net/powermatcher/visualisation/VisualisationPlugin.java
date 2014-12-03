@@ -3,6 +3,8 @@ package net.powermatcher.visualisation;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,20 +49,40 @@ public class VisualisationPlugin extends HttpServlet {
     public static interface Config {
         @Meta.AD(
                 required = true,
-                deflt = "net.powermatcher.core.auctioneer.Auctioneer, net.powermatcher.core.concentrator.Concentrator,"
-                        + "net.powermatcher.examples.Freezer, net.powermatcher.examples.PVPanelAgent",
-                description = "A list of all the OSGi fpids that have to be used.")
-        List<String> filter();
+                deflt = "Auctioneer::net.powermatcher.core.auctioneer.Auctioneer, Concentrator::net.powermatcher.core.concentrator.Concentrator,"
+                        + "DeviceAgent::net.powermatcher.examples.Freezer, DeviceAgent::net.powermatcher.examples.PVPanelAgent",
+                description = "A list of all the OSGi Menu items that have to be used. It's menu::submenu")
+        List<String> menu();
     }
 
     private ConfigurationAdmin configurationAdmin;
 
-    private List<String> filter;
+    private List<String> filter = new ArrayList<>();
+
+    private Map<String, List<String>> menu = new HashMap<>();
 
     @Activate
     public void activate(Map<String, Object> properties) {
         Config config = Configurable.createConfigurable(Config.class, properties);
-        filter = config.filter();
+
+        List<String> tempList;
+
+        for (String s : config.menu()) {
+            String[] temp = s.split("::");
+            filter.add(temp[1]);
+
+            if (!menu.containsKey(temp[0])) {
+                tempList = new ArrayList<>();
+                tempList.add(temp[1]);
+
+                menu.put(temp[0], tempList);
+            } else {
+                tempList = menu.get(temp[0]);
+                tempList.add(temp[1]);
+
+                menu.put(temp[0], tempList);
+            }
+        }
 
         LOGGER.info("VisualisationPlugin [{}], activated");
     }
@@ -101,13 +123,53 @@ public class VisualisationPlugin extends HttpServlet {
 
             LOGGER.info("Returning the Nodes");
             resp.setContentType("application/json");
-            output = handleLoadState();
+            output = getNodesAsJson();
+        }
+
+        if ("menu".endsWith(requestType)) {
+            LOGGER.info("Returning the menu");
+            resp.setContentType("application/json");
+            output = getMenuAsJson();
         }
 
         resp.getWriter().print(output.toString());
     }
 
-    private JsonObject handleLoadState() {
+    private JsonObject getMenuAsJson() {
+
+        JsonObject output = new JsonObject();
+
+        JsonArray jarray = new JsonArray();
+
+        JsonObject tempObject;
+        JsonObject tempInnerObject;
+        JsonArray tempArray;
+
+        for (String s : menu.keySet()) {
+
+            tempObject = new JsonObject();
+            tempArray = new JsonArray();
+
+            tempObject.addProperty("title", s);
+
+            for (String str : menu.get(s)) {
+                tempInnerObject = new JsonObject();
+                tempInnerObject.addProperty("title", str.substring(str.lastIndexOf(".") + 1));
+                tempInnerObject.addProperty("fpid", str);
+                tempArray.add(tempInnerObject);
+            }
+
+            tempObject.add("items", tempArray);
+
+            jarray.add(tempObject);
+        }
+
+        output.add("menu", jarray);
+
+        return output;
+    }
+
+    private JsonObject getNodesAsJson() {
         JsonObject output = new JsonObject();
 
         JsonArray agents = new JsonArray();
@@ -121,13 +183,10 @@ public class VisualisationPlugin extends HttpServlet {
         try {
             for (Configuration c : configurationAdmin.listConfigurations(null)) {
                 if (filter.contains(c.getFactoryPid())) {
-
                     agent = new JsonObject();
                     connection = new JsonObject();
 
                     String fpid = c.getFactoryPid();
-                   //fpid = fpid.substring(fpid.lastIndexOf('.') + 1);
-
                     String agentId = (String) c.getProperties().get("agentId");
 
                     agent.addProperty("fpid", fpid);

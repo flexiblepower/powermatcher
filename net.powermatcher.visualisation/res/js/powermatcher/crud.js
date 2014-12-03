@@ -1,8 +1,19 @@
+
+function createNode(fpid)
+{
+    var url = "/system/console/configMgr/";// + fpid;
+    
+    generateForm(url + "[Temporary PID replaced by real PID upon save]");
+    
+    url = url + fpid;
+    
+    fillForm(url, fpid);
+}
+
 function editNode(pid, fpid) {
 	
 	var url = "/system/console/configMgr/" + pid;
 	
-	// this is the EditNode, so newNode = false
 	generateForm(url);
 	
 	fillForm(url, fpid);
@@ -32,14 +43,16 @@ function generateForm(url){
 	 dialog = $( "#dialog-form" ).dialog({
 		 buttons: {
 			 Ok: function() {
-				 $.post( url, $("#dialog-form").serialize(), function(){dialog.dialog( "close" );} );
+				 $.post( url, $("#dialog-form").serialize(), function(){location.reload(); dialog.dialog( "close" );} );
 				 },
 		 Cancel: function() {
+		 dialog.empty();
 		 dialog.dialog( "close" );
 		 }
 		 },
 		 close: function() {
-			 location.reload();
+		     dialog.empty();
+		     dialog.dialog( "close" );
 		 }
 		 });
 }
@@ -118,6 +131,6 @@ function initializeForm(){
 	
 	// setting up the edit-buttons on the nodes to open the form
 		$( ".edit-button" ).button().on( "click", function() {
-		dialog.dialog( "open" );
+		    dialog.dialog( "open" );
 		});
 }
