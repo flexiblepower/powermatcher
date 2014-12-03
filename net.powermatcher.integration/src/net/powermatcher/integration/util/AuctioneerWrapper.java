@@ -29,6 +29,7 @@ public class AuctioneerWrapper extends Auctioneer {
     }
 
     public void publishPrice() {
+        //copies the behavior of publishNewPrice to ascertain the price published
         Bid aggregatedBid = getAggregatedBids().getAggregatedBid(this.marketBasis);
         Price estimatedNewPrice = determinePrice(aggregatedBid);
         super.publishNewPrice();

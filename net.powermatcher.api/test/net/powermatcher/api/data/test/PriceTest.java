@@ -154,7 +154,7 @@ public class PriceTest {
     
     @Test
     public void testToString(){
-         final String expected = "Price{currentPrice=2}";
+         final String expected = "Price{currentPrice=2,bidReference=0}";
          assertThat(price.toString(), is(equalTo(expected)));
     }
 

@@ -1,8 +1,8 @@
 package net.powermatcher.api.monitoring;
 
-public interface ObservableAgent {
-    String getObserverId();
+import net.powermatcher.api.Agent;
 
+public interface ObservableAgent extends Agent {
     void addObserver(AgentObserver observer);
 
     void removeObserver(AgentObserver observer);

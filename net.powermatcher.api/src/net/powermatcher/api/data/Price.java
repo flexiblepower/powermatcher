@@ -134,6 +134,7 @@ public class Price {
     public String toString() {
         StringBuilder b = new StringBuilder();
         b.append("Price{currentPrice=").append(MarketBasis.PRICE_FORMAT.format(this.currentPrice));
+        b.append(",bidReference=").append(bidNumber);
         b.append('}');
         return b.toString();
     }

@@ -1,5 +1,6 @@
 package net.powermatcher.examples;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ScheduledExecutorService;
@@ -12,11 +13,8 @@ import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PricePoint;
-import net.powermatcher.api.monitoring.IncomingPriceEvent;
 import net.powermatcher.api.monitoring.ObservableAgent;
-import net.powermatcher.api.monitoring.OutgoingBidEvent;
-import net.powermatcher.api.monitoring.Qualifier;
-import net.powermatcher.core.BaseAgent;
+import net.powermatcher.core.BaseDeviceAgent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +28,7 @@ import aQute.bnd.annotation.metatype.Meta;
 
 @Component(designateFactory = PVPanelAgent.Config.class, immediate = true, provide = { ObservableAgent.class,
         AgentEndpoint.class })
-public class PVPanelAgent extends BaseAgent implements AgentEndpoint {
+public class PVPanelAgent extends BaseDeviceAgent implements AgentEndpoint {
     private static final Logger LOGGER = LoggerFactory.getLogger(PVPanelAgent.class);
 
     private static Random generator = new Random();
@@ -54,9 +52,7 @@ public class PVPanelAgent extends BaseAgent implements AgentEndpoint {
 
     private ScheduledFuture<?> scheduledFuture;
     private ScheduledExecutorService scheduler;
-    private Session session;
     private TimeService timeService;
-    private int bidNumber;
     private double minimumDemand;
     private double maximumDemand;
 
@@ -78,7 +74,8 @@ public class PVPanelAgent extends BaseAgent implements AgentEndpoint {
 
     @Deactivate
     public void deactivate() {
-        if (session != null) {
+        Session session = getSession();
+		if (session != null) {
             session.disconnect();
         }
         scheduledFuture.cancel(false);
@@ -86,36 +83,18 @@ public class PVPanelAgent extends BaseAgent implements AgentEndpoint {
     }
 
     protected void doBidUpdate() {
-        if (session != null && session.getMarketBasis() != null) {
+       	if (getSession() != null) {
             double demand = minimumDemand + (maximumDemand - minimumDemand) * generator.nextDouble();
-            Bid newBid = new Bid(session.getMarketBasis(), new PricePoint(0, demand));
-            incrBidNumber();
-            Bid newBidNr = new Bid(newBid, getBidNumber());
-            LOGGER.debug("updateBid({})", newBidNr);
-            session.updateBid(newBidNr);
-            this.publishEvent(new OutgoingBidEvent(session.getClusterId(), this.getAgentId(), session.getSessionId(),
-                    timeService.currentDate(), newBidNr, Qualifier.AGENT));
+            Bid newBid = createBid(new PricePoint(0, demand));
+            LOGGER.debug("publishBid({})", newBid);
+            publishBid(newBid);
         }
     }
 
     @Override
     public void updatePrice(Price newPrice) {
-        LOGGER.debug("updatePrice({})", newPrice);
-        publishEvent(new IncomingPriceEvent(session.getClusterId(), this.getAgentId(), session.getSessionId(),
-                timeService.currentDate(), newPrice, Qualifier.AGENT));
-        LOGGER.debug("Received price update [{}]", newPrice);
-        LOGGER.debug("Received for bidNumber [{}]", newPrice.getBidNumber());
-        LOGGER.debug("While current bidNumber is [{}]", getBidNumber());
-    }
-
-    @Override
-    public void connectToMatcher(Session session) {
-        this.session = session;
-    }
-
-    @Override
-    public void matcherEndpointDisconnected(Session session) {
-        this.session = null;
+    	LOGGER.debug("Received price update [{}], current bidNr = {}", newPrice, getCurrentBidNr());
+    	super.updatePrice(newPrice);
     }
 
     @Reference
@@ -128,15 +107,9 @@ public class PVPanelAgent extends BaseAgent implements AgentEndpoint {
         this.timeService = timeService;
     }
 
-    public int getBidNumber() {
-        return bidNumber;
-    }
-
-    public void setBidNumber(int bidNumber) {
-        this.bidNumber = bidNumber;
-    }
-
-    private void incrBidNumber() {
-        this.bidNumber++;
+    
+    @Override
+    protected Date now() {
+    	return timeService.currentDate();
     }
 }

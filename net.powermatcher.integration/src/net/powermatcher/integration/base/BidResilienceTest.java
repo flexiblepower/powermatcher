@@ -19,6 +19,7 @@ import net.powermatcher.integration.util.ConcentratorWrapper;
 import net.powermatcher.integration.util.CsvBidReader;
 import net.powermatcher.integration.util.CsvExpectedResultsReader;
 import net.powermatcher.mock.MockAgent;
+import net.powermatcher.mock.MockScheduler;
 
 import org.junit.After;
 import org.slf4j.Logger;
@@ -29,6 +30,8 @@ public class BidResilienceTest extends ResilienceTest {
     private static final String AUCTIONEER_NAME = "auctioneer";
     private static final String CONCENTRATOR_NAME = "concentrator";
     private static final Logger LOGGER = LoggerFactory.getLogger(BidResilienceTest.class);
+
+    protected MockScheduler timer;
 
     // The direct upstream matcher for the agents
     protected ConcentratorWrapper concentrator;
@@ -61,12 +64,12 @@ public class BidResilienceTest extends ResilienceTest {
         auctioneerProperties.put("bidTimeout", "600");
         auctioneerProperties.put("priceUpdateRate", "1");
         auctioneerProperties.put("clusterId", "testCluster");
-        
-        auctioneer.setMarketBasis(marketBasis);
-        
-        this.matchers.add(this.auctioneer);
 
-        auctioneer.setExecutorService(new ScheduledThreadPoolExecutor(10));
+        auctioneer.setMarketBasis(marketBasis);
+
+        this.matchers.add(this.auctioneer);
+        timer = new MockScheduler();
+        auctioneer.setExecutorService(timer);
         auctioneer.setTimeService(new SystemTimeService());
         auctioneer.activate(auctioneerProperties);
 
@@ -141,7 +144,7 @@ public class BidResilienceTest extends ResilienceTest {
                 LOGGER.info(String.valueOf((aggregatedDemand[j] + ",")));
             }
         }
-        
+
     }
 
     @Override

@@ -51,25 +51,18 @@ import aQute.bnd.annotation.metatype.Meta;
 @Component(designateFactory = Concentrator.Config.class, immediate = true, provide = { ObservableAgent.class,
         MatcherEndpoint.class, AgentEndpoint.class })
 public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEndpoint {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(Concentrator.class);
 
     @Meta.OCD
     public static interface Config {
+    	@Meta.AD(deflt = "concentrator")
+    	String agentId();
+    	
         @Meta.AD(deflt = "auctioneer")
         String desiredParentId();
 
-        @Meta.AD(deflt = "600", description = "Nr of seconds before a bid becomes invalidated")
-        int bidTimeout();
-
         @Meta.AD(deflt = "60", description = "Number of seconds between bid updates")
         long bidUpdateRate();
-
-        @Meta.AD(deflt = "concentrator")
-        String agentId();
-
-        @Meta.AD(deflt = "concentrator")
-        String matcherId();
     }
 
     /**
@@ -78,14 +71,14 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
     private TimeService timeService;
 
     /**
-     * Scheduler that can schedule commands to run after a given delay, or to execute periodically.
+     * The scheduler that is used to schedule the bid updates during activation and thus must be set before activation.
      */
     private ScheduledExecutorService scheduler;
 
     /**
-     * A delayed result-bearing action that can be cancelled.
+     * The schedule that is running the bid updates. This is created in the {@link #activate(Map)} method and cancelled in the {@link #deactivate()} method.
      */
-    private ScheduledFuture<?> scheduledFuture;
+    private ScheduledFuture<?> bidUpdateSchedule;
 
     /**
      * {@link Session} object for connecting to matcher
@@ -105,7 +98,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
     /**
      * OSGI configuration meta type with info about the concentrator.
      */
-    private Config config;
+    protected Config config;
 
     @Reference
     public void setTimeService(TimeService timeService) {
@@ -122,12 +115,12 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
         config = Configurable.createConfigurable(Config.class, properties);
 
         this.setAgentId(config.agentId());
-
         this.setDesiredParentId(config.desiredParentId());
+        // Since the cleanup is never called, the expiration time is useless
+        // TODO: how should we deal with this cleanup?
+        this.aggregatedBids = new BidCache(this.timeService, 0);
 
-        this.aggregatedBids = new BidCache(this.timeService, config.bidTimeout());
-
-        scheduledFuture = this.scheduler.scheduleAtFixedRate(new Runnable() {
+        bidUpdateSchedule = this.scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -143,7 +136,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
 
     @Deactivate
     public void deactivate() {
-        scheduledFuture.cancel(false);
+        bidUpdateSchedule.cancel(false);
 
         LOGGER.info("Agent [{}], deactivated", config.agentId());
     }
@@ -151,6 +144,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
     @Override
     public synchronized void connectToMatcher(Session session) {
         this.sessionToMatcher = session;
+        setClusterId(session.getClusterId());
     }
 
     @Override
@@ -158,6 +152,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
         for (Session agentSession : sessionToAgents.toArray(new Session[sessionToAgents.size()])) {
             agentSession.disconnect();
         }
+        setClusterId(null);
         this.sessionToMatcher = null;
     }
 
@@ -209,12 +204,12 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
     }
 
     @Override
-    public void updatePrice(Price newPrice) {
+    public synchronized void updatePrice(Price newPrice) {
         if (newPrice == null) {
             LOGGER.error("Price cannot be null");
             return;
         }
-
+        
         LOGGER.debug("Received price update [{}]", newPrice);
         this.publishEvent(new IncomingPriceEvent(sessionToMatcher.getClusterId(), this.config.agentId(),
                 this.sessionToMatcher.getSessionId(), timeService.currentDate(), newPrice, Qualifier.AGENT));
@@ -223,8 +218,11 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
         BidCacheSnapshot bidCacheSnapshot = this.aggregatedBids.getMatchingSnapshot(newPrice.getBidNumber());
         if (bidCacheSnapshot == null) {
         	// ignore price and log warning
+        	LOGGER.warn("Received a price update for a bid that I never sent, id: {}", newPrice.getBidNumber());
         	return;
         }
+        
+        newPrice = transformPrice(newPrice, bidCacheSnapshot.getAggregatedBid());
         
         // Publish new price to connected agents
         for (Session session : this.sessionToAgents) {
@@ -243,20 +241,40 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
 
         }
     }
-
+    
     /**
-     * sends the aggregatedbids to the matcher this method has temporarily been made public due to issues with the
-     * scheduler. TODO fix this asap
+     * This method should be overridden when the price that will be sent has to be changed.
+     * 
+     * @param price The (input) price as received from the connected matcher.
+     * @param bid The aggregated bid on which this price was based.
+     * @return The price that will be sent to all the agents that are connected to this {@link Concentrator}. 
+     *         The bidNumber of this price is irrelevant, since this will be changed for each agent.
      */
-    public synchronized void doBidUpdate() {
+    protected Price transformPrice(Price price, Bid bid) {
+    	return price;
+    }
+
+    protected synchronized void doBidUpdate() {
         if (sessionToMatcher != null) {
             Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.sessionToMatcher.getMarketBasis());
 
+            aggregatedBid = transformBid(aggregatedBid);
+            
             this.sessionToMatcher.updateBid(aggregatedBid);
             publishEvent(new OutgoingBidEvent(sessionToMatcher.getClusterId(), config.agentId(),
                     sessionToMatcher.getSessionId(), timeService.currentDate(), aggregatedBid, Qualifier.MATCHER));
 
             LOGGER.debug("Updating aggregated bid [{}]", aggregatedBid);
         }
+    }
+    
+    /**
+     * This method should be overridden when the bid that will be sent has to be changed.
+     * 
+     * @param aggregatedBid The (input) aggregated bid as calculated normally (the sum of all the bids of the agents).
+     * @return The bid that will be sent to the matcher that is connected to this {@link Concentrator}.
+     */
+    protected Bid transformBid(Bid aggregatedBid) {
+    	return aggregatedBid;
     }
 }
