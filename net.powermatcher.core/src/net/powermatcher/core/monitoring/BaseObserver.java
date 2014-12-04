@@ -46,9 +46,9 @@ public abstract class BaseObserver implements AgentObserver {
      *            configuration properties of {@link ObservableAgent} service
      */
     public void addObservable(ObservableAgent observable, Map<String, Object> properties) {
-        String observableId = observable.getObserverId();
-        if (observables.putIfAbsent(observableId, observable) != null) {
-            LOGGER.warn("An observable with the id " + observableId + " was already registered");
+        String agentId = observable.getAgentId();
+        if (observables.putIfAbsent(agentId, observable) != null) {
+            LOGGER.warn("An observable with the id {} was already registered", agentId);
         }
 
         updateObservables();
@@ -63,10 +63,10 @@ public abstract class BaseObserver implements AgentObserver {
      *            configuration properties of {@link ObservableAgent} service
      */
     public void removeObservable(ObservableAgent observable, Map<String, Object> properties) {
-        String observableId = observable.getObserverId();
+        String agentId = observable.getAgentId();
 
         // Check whether actually observing and remove
-        if (observing.get(observableId) == observable) {
+        if (observing.get(agentId) == observable) {
             observable.removeObserver(this);
         }
     }
