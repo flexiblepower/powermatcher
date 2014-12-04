@@ -13,6 +13,7 @@ import net.powermatcher.core.time.SystemTimeService;
 import net.powermatcher.mock.MockAgent;
 import net.powermatcher.mock.MockScheduler;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -205,6 +206,14 @@ public class AuctioneerTest {
         removeAgents(21);
     }
 
+//    @After
+//    public final void tearDown() throws Exception {
+//        //auctioneer.activate(auctioneerProperties);
+//        auctioneer.deactivate();
+//    }
+    
+    
+    
     /*
      * TODO: The behavior tested in this test is outside the scope of this version
      * 
