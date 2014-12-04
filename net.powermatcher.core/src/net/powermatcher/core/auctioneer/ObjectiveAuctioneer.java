@@ -234,7 +234,7 @@ public class ObjectiveAuctioneer extends Auctioneer {
 
             newPrice = determinePrice(finalAggregatedBid);
             // send price update to objective agent
-            objectiveEndpoint.notifyPriceUpdate(newPrice);
+            this.objectiveEndpoint.notifyPriceUpdate(newPrice);
         } else {
             newPrice = determinePrice(aggregatedBid);
         }

@@ -90,12 +90,10 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
      */
     private BidCache aggregatedBids;
 
-
     /**
      * Holds the sessions from the agents.
      */
     private Set<Session> sessionToAgents = new HashSet<Session>();
-    
 
     /**
      * OSGI configuration meta type with info about the concentrator.

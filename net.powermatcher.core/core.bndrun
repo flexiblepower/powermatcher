@@ -19,7 +19,8 @@
 	org.apache.felix.webconsole;version='[4.2.2,4.2.3)',\
 	org.apache.felix.webconsole.plugins.ds;version='[1.0.0,1.0.1)',\
 	osgi.cmpn;version='[4.3.1,4.3.2)',\
-	slf4j.api;version='[1.7.7,1.7.8)'
+	slf4j.api;version='[1.7.7,1.7.8)',\
+	osgi.cmpn;version=latest
 
 -runrequires:  \
 	osgi.identity;filter:='(osgi.identity=org.apache.felix.webconsole)',\
@@ -32,7 +33,8 @@
 	osgi.identity;filter:='(osgi.identity=org.apache.felix.webconsole.plugins.ds)',\
 	osgi.identity;filter:='(osgi.identity=ch.qos.logback.classic)',\
 	osgi.identity;filter:='(osgi.identity=ch.qos.logback.core)',\
-	osgi.identity;filter:='(osgi.identity=net.powermatcher.examples)'
+	osgi.identity;filter:='(osgi.identity=net.powermatcher.examples)',\
+	osgi.identity;filter:='(osgi.identity=osgi.cmpn)'
 
 ## Uncomment if you need to change the HTTP port
 #-runproperties: org.osgi.service.http.port=8080
