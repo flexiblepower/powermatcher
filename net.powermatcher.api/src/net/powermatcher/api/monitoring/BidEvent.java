@@ -49,6 +49,6 @@ public class BidEvent extends AgentEvent {
 
     @Override
     public String toString() {
-        return OutgoingBidEvent.class.getSimpleName() + " " + super.toString() + ", bid = " + bid.toString();
+        return BidEvent.class.getSimpleName() + " " + super.toString() + ", bid = " + bid.toString();
     }
 }
