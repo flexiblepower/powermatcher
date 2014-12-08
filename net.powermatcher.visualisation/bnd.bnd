@@ -6,7 +6,9 @@ Bundle-Version: 1.0.0.${tstamp}
 	slf4j.api,\
 	com.google.gson,\
 	net.powermatcher.core;version=latest,\
-	net.powermatcher.api;version=latest
+	net.powermatcher.api;version=latest,\
+	osgi.cmpn,\
+	osgi.core
 Private-Package:  \
 net.powermatcher.visualisation
 
