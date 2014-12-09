@@ -7,7 +7,7 @@ import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
-import net.powermatcher.api.data.Price;
+import net.powermatcher.api.data.PriceUpdate;
 
 public class MockMatcherAgent extends MockAgent implements MatcherEndpoint {
 
@@ -56,8 +56,8 @@ public class MockMatcherAgent extends MockAgent implements MatcherEndpoint {
         this.marketBasis = marketBasis;
     }
     
-    public void publishPrice(Price price){
-        session.updatePrice(price);
+    public void publishPrice(PriceUpdate priceUpdate){
+        session.updatePrice(priceUpdate);
     }
 
 }
