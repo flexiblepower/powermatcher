@@ -11,7 +11,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.zip.DataFormatException;
 
 import net.powermatcher.api.MatcherEndpoint;
-import net.powermatcher.api.data.Bid;
+import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.core.sessions.SessionManager;
 import net.powermatcher.core.time.SystemTimeService;
 import net.powermatcher.integration.util.ConcentratorWrapper;
@@ -81,7 +81,7 @@ public class ConcentratorResilienceTest extends ResilienceTest{
 
     protected void sendBidsToMatcher() throws IOException, DataFormatException {
 
-        Bid bid = null;
+        ArrayBid bid = null;
         MockAgent newAgent;
 
         double[] aggregatedDemand = new double[this.marketBasis.getPriceSteps()];
@@ -141,7 +141,7 @@ public class ConcentratorResilienceTest extends ResilienceTest{
 
         // Verify the price received by the agents
         for (MockAgent agent : agentList) {
-            assertEquals(expPrice, agent.getLastPriceUpdate().getPriceValue(), 0);
+            assertEquals(expPrice, agent.getLastPriceUpdate().getPrice().getPriceValue(), 0);
         }
     }
     

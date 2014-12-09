@@ -19,9 +19,8 @@ public class MockAgent implements Agent, AgentEndpoint, ObservableAgent {
 
     private Map<String, Object> agentProperties;
     private PriceUpdate lastPriceUpdate;
-    private Session session;
+    protected Session session;
     private String desiredParentId;
-    private String clusterId;
 
     /**
      * Collection of {@link Observer} services.
@@ -67,7 +66,7 @@ public class MockAgent implements Agent, AgentEndpoint, ObservableAgent {
 
     @Override
     public String getClusterId() {
-        return clusterId;
+        return session == null ? null : session.getClusterId();
     }
 
     @Override

@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.util.zip.DataFormatException;
 
-import net.powermatcher.api.data.Price;
+import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.integration.base.BidResilienceTest;
 import net.powermatcher.mock.MockAgent;
 
@@ -32,20 +32,20 @@ public class SendReceivePriceTestCPF1 extends BidResilienceTest {
 
         this.auctioneer.publishPrice();
         // Get the new price calculated and published by the auctioneer
-        Price priceValue = this.auctioneer.getLastPublishedPrice();
+        PriceUpdate priceUpdate = this.concentrator.getLastReceivedPriceUpdate();
 
         // Verify the equilibrium
-        assertEquals(this.resultsReader.getEquilibriumPrice(), this.concentrator.getLastPrice().getPriceValue(), 0.0);
+        assertEquals(this.resultsReader.getEquilibriumPrice(), this.concentrator.getLastPrice().getPrice().getPriceValue(), 0.0);
 
         // Check received price in concentrator
-        assertEquals(priceValue, this.concentrator.getLastPrice());
+        assertEquals(priceUpdate, this.concentrator.getLastPrice());
 
         // Check the published by the concentrator
-        assertEquals(this.concentrator.getLastPrice(), this.concentrator.getLastPublishedPrice());
+        assertEquals(this.concentrator.getLastPrice(), this.concentrator.getLastPublishedPriceUpdate());
 
         // Verify the price received by the agents
         for (MockAgent agent : agentList) {
-            assertEquals(priceValue, agent.getLastPriceUpdate());
+            assertEquals(priceUpdate, agent.getLastPriceUpdate());
         }
     }
 }

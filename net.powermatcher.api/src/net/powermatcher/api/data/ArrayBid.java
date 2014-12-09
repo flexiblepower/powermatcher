@@ -33,7 +33,7 @@ public class ArrayBid extends Bid {
             checkIndex(nextIndex);
             if (nextIndex > 0) {
                 if (demand > demandArray[nextIndex - 1]) {
-                    throw new IllegalArgumentException("The demand should always be descending");
+                    throw new IllegalArgumentException("The demand should always be descending" + demand);
                 }
             }
             demandArray[nextIndex++] = demand;
@@ -41,6 +41,7 @@ public class ArrayBid extends Bid {
         }
 
         public Builder setDemandArray(double[] demand) {
+            checkDescending(demand);
             this.demandArray = Arrays.copyOf(demand, demand.length);
             return this;
         }
@@ -314,7 +315,7 @@ public class ArrayBid extends Bid {
         super(bid.marketBasis, bidNumber);
         this.demandArray = Arrays.copyOf(bid.demandArray, bid.demandArray.length);
     }
-    
+
     public ArrayBid(ArrayBid bid) {
         super(bid.marketBasis, bid.bidNumber);
         this.demandArray = Arrays.copyOf(bid.demandArray, bid.demandArray.length);
@@ -333,19 +334,40 @@ public class ArrayBid extends Bid {
         }
         return new ArrayBid(this.marketBasis, this.bidNumber, newDemand);
     }
+
     /**
-    * Get demand with the specified price step parameter and return the double result.
-    *
-    * @param priceStep
-    * The price step (<code>int</code>) parameter.
-    * @return Results of the get demand (<code>double</code>) value.
-    * @see #getDemand()
-    * @see #getDemand(double)
-    * @see #getMaximumDemand()
-    * @see #getMinimumDemand()
-    */
+     * Get demand with the specified price step parameter and return the double result.
+     * 
+     * @param priceStep
+     *            The price step (<code>int</code>) parameter.
+     * @return Results of the get demand (<code>double</code>) value.
+     * @see #getDemand()
+     * @see #getDemand(double)
+     * @see #getMaximumDemand()
+     * @see #getMinimumDemand()
+     */
     public double getDemand(final PriceStep priceStep) {
-    double[] demand = getDemand();
-    return demand[this.marketBasis.boundPriceStep(priceStep)];
+        double[] demand = getDemand();
+        return demand[this.marketBasis.boundPriceStep(priceStep)];
+    }
+
+    @Override
+    public int hashCode() {
+        return 2011 * demandArray.hashCode() + 3557 * bidNumber;
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        ArrayBid other = (ArrayBid) ((obj instanceof ArrayBid) ? obj : null);
+        if (other == null) {
+            return false;
+        }
+
+        if (this == other) {
+            return true;
+        }
+        
+        return other.bidNumber == this.bidNumber && this.marketBasis.equals(other.marketBasis)
+                && Arrays.equals(other.getDemand(), this.getDemand());
     }
 }

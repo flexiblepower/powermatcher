@@ -56,9 +56,9 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
 
     @Meta.OCD
     public static interface Config {
-    	@Meta.AD(deflt = "concentrator")
-    	String agentId();
-    	
+        @Meta.AD(deflt = "concentrator")
+        String agentId();
+
         @Meta.AD(deflt = "auctioneer")
         String desiredParentId();
 
@@ -77,7 +77,8 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
     private ScheduledExecutorService scheduler;
 
     /**
-     * The schedule that is running the bid updates. This is created in the {@link #activate(Map)} method and cancelled in the {@link #deactivate()} method.
+     * The schedule that is running the bid updates. This is created in the {@link #activate(Map)} method and cancelled
+     * in the {@link #deactivate()} method.
      */
     private ScheduledFuture<?> bidUpdateSchedule;
 
@@ -207,8 +208,9 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
     @Override
     public synchronized void updatePrice(PriceUpdate priceUpdate) {
         if (priceUpdate == null) {
-            LOGGER.error("Price cannot be null");
-            return;
+            String message = "Price cannot be null";
+            LOGGER.error(message);
+            throw new IllegalArgumentException(message);
         }
         
         LOGGER.debug("Received price update [{}]", priceUpdate);
@@ -247,7 +249,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
             Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.sessionToMatcher.getMarketBasis());
 
             aggregatedBid = transformBid(aggregatedBid);
-            
+
             this.sessionToMatcher.updateBid(aggregatedBid);
             publishEvent(new OutgoingBidEvent(sessionToMatcher.getClusterId(), config.agentId(),
                     sessionToMatcher.getSessionId(), timeService.currentDate(), aggregatedBid, Qualifier.MATCHER));
@@ -255,14 +257,15 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
             LOGGER.debug("Updating aggregated bid [{}]", aggregatedBid);
         }
     }
-    
+
     /**
      * This method should be overridden when the bid that will be sent has to be changed.
      * 
-     * @param aggregatedBid The (input) aggregated bid as calculated normally (the sum of all the bids of the agents).
+     * @param aggregatedBid
+     *            The (input) aggregated bid as calculated normally (the sum of all the bids of the agents).
      * @return The bid that will be sent to the matcher that is connected to this {@link Concentrator}.
      */
     protected Bid transformBid(Bid aggregatedBid) {
-    	return aggregatedBid;
+        return aggregatedBid;
     }
 }

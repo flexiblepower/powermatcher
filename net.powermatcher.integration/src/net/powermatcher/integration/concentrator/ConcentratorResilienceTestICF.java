@@ -3,7 +3,9 @@ package net.powermatcher.integration.concentrator;
 import java.io.IOException;
 import java.util.zip.DataFormatException;
 
+import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Price;
+import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.integration.base.ConcentratorResilienceTest;
 
 import org.junit.Assert;
@@ -19,7 +21,7 @@ public class ConcentratorResilienceTestICF extends ConcentratorResilienceTest {
 
         sendBidsToMatcher();
 
-        checkAggregatedBid(this.auctioneer.getLastReceivedBid());
+        checkAggregatedBid((ArrayBid)this.auctioneer.getLastReceivedBid());
     }
 
     /**
@@ -74,16 +76,17 @@ public class ConcentratorResilienceTestICF extends ConcentratorResilienceTest {
         prepareTest("ICF/ICF3", null);
 
         sendBidsToMatcher();
-
+        this.concentrator.doBidUpdate();
         // Send price
-        Price equilibrium = new Price(this.marketBasis, this.resultsReader.getEquilibriumPrice());
-        this.auctioneer.publishPrice(equilibrium);
+        PriceUpdate equilibrium = new PriceUpdate(
+                new Price(this.marketBasis, this.resultsReader.getEquilibriumPrice()), 2);
 
+        this.auctioneer.publishPrice(equilibrium);
         // Check the received price
         Assert.assertEquals(equilibrium, this.concentrator.getLastPrice());
 
         // Check the forwarded price
-        Assert.assertEquals(this.concentrator.getLastPrice(), this.concentrator.getLastPublishedPrice());
+        Assert.assertEquals(this.concentrator.getLastPrice(), this.concentrator.getLastPublishedPriceUpdate());
 
         // Check the prices received by the agents
         checkEquilibriumPrice();

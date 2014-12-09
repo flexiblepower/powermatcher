@@ -3,12 +3,18 @@ package net.powermatcher.integration.auctioneer;
 import java.io.IOException;
 import java.util.zip.DataFormatException;
 
+import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.integration.base.AuctioneerResilienceTest;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class AuctioneerResilienceTestIAQ1 extends AuctioneerResilienceTest {
 
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
+    
     /**
      * No equilibrium (demand side). Agents send series of bids with no-equilibrium price.
      * 
@@ -164,6 +170,8 @@ public class AuctioneerResilienceTestIAQ1 extends AuctioneerResilienceTest {
      */
     @Test
     public void qualityTestIAQ1equilibriumWithBidRejection() throws IOException, DataFormatException {
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("The demandArray must be descending");
         performEquilibriumTest("IAQ/IAQ1/IAF5", null);
     }
 
@@ -181,6 +189,8 @@ public class AuctioneerResilienceTestIAQ1 extends AuctioneerResilienceTest {
      */
     @Test
     public void qualityAggregationTestIAQ1equilibriumWithBidRejection() throws IOException, DataFormatException {
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("The demandArray must be descending");
         performAggregatedBidTest("IAQ/IAQ1/IAF5", null);
     }
 
@@ -197,6 +207,6 @@ public class AuctioneerResilienceTestIAQ1 extends AuctioneerResilienceTest {
 
         sendBidsToMatcher();
 
-        checkAggregatedBid(this.auctioneer.getAggregatedBid(this.marketBasis));
+        checkAggregatedBid((ArrayBid)this.auctioneer.getAggregatedBid(this.marketBasis));
     }
 }
