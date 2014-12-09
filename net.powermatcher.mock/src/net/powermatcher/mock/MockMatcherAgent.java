@@ -14,7 +14,6 @@ public class MockMatcherAgent extends MockAgent implements MatcherEndpoint {
     private Map<String, Object> matcherProperties;
     private Bid lastReceivedBid;
     private MarketBasis marketBasis;
-    private Session session;
 
     public MockMatcherAgent(String agentId) {
         super(agentId);

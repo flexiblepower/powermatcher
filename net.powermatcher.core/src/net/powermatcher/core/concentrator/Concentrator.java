@@ -206,8 +206,9 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
     @Override
     public synchronized void updatePrice(Price newPrice) {
         if (newPrice == null) {
-            LOGGER.error("Price cannot be null");
-            return;
+            String message = "Price cannot be null";
+            LOGGER.error(message);
+            throw new IllegalArgumentException(message);
         }
         
         LOGGER.debug("Received price update [{}]", newPrice);
@@ -226,6 +227,9 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
         
         // Publish new price to connected agents
         for (Session session : this.sessionToAgents) {
+            Integer originalAgentBid = bidCacheSnapshot.getBidNumbers().get(session.getAgentId());
+            if (originalAgentBid == null) {
+                // ignore price for this agent and log warning
         	Integer originalAgentBid = bidCacheSnapshot.getBidNumbers().get(session.getAgentId());    
         	if (originalAgentBid == null) {
         		// ignore price for this agent and log warning
@@ -234,6 +238,9 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
 
         	Price agentPrice = new Price(newPrice.getMarketBasis(), newPrice.getCurrentPrice(), originalAgentBid);
         	
+                LOGGER.warn("Received a price update for a bid that I never sent, id: {}", session.getAgentId());
+                continue;
+            }
             session.updatePrice(agentPrice);
 
             this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), this.config.agentId(), session.getSessionId(), timeService
