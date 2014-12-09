@@ -7,6 +7,7 @@ import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
+import net.powermatcher.api.data.PointBid;
 import net.powermatcher.api.data.PricePoint;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.IncomingPriceEvent;
@@ -44,14 +45,13 @@ public abstract class BaseDeviceAgent extends BaseAgent implements AgentEndpoint
 		if(session == null) {
 			return null;
 		} else {
-			Bid bid = new Bid(session.getMarketBasis(), pricePoints);
-			return new Bid(bid, bidNumberGenerator.incrementAndGet());
+			return new PointBid(session.getMarketBasis(), bidNumberGenerator.incrementAndGet(), pricePoints);
 		}
 	}
 
 	@Override
 	public synchronized void updatePrice(PriceUpdate priceUpdate) {
-		publishEvent(new IncomingPriceEvent(getClusterId(), getAgentId(), session.getSessionId(), now(), priceUpdate, Qualifier.AGENT));
+		publishEvent(new IncomingPriceEvent(getClusterId(), getAgentId(), session.getSessionId(), now(), priceUpdate.getPrice(), Qualifier.AGENT));
 	}
 
 	private Bid lastBid;

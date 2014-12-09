@@ -5,110 +5,109 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ArrayBid extends Bid {
-	public static final class Builder {
-		private final MarketBasis marketBasis;
-		private int bidNumber;
-		private int nextIndex;
-		private double[] demandArray;
-		
-		public Builder(MarketBasis marketBasis) {
-			this.marketBasis = marketBasis;
-			bidNumber = 0;
-			nextIndex = 0;
-			demandArray = new double[marketBasis.getPriceSteps()];
-		}
-		
-		private void checkIndex(int ix) {
-			if(ix >= demandArray.length) {
-				throw new ArrayIndexOutOfBoundsException();
-			}
-		}
-		
-		public Builder setBidNumber(int bidNumber) {
-			this.bidNumber = bidNumber;
-			return this;
-		}
-		
-		public Builder setDemand(double demand) {
-			checkIndex(nextIndex);
-			if(nextIndex > 0) {
-				if(demand > demandArray[nextIndex - 1]) {
-					throw new IllegalArgumentException("The demand should always be descending");
-				}
-			}
-			demandArray[nextIndex++] = demand;
-			return this;
-		}
-		
-	      public Builder setDemandArray(double[] demand) {
-	           this.demandArray = Arrays.copyOf(demand, demand.length);
-	            return this;
-	        }
-		
-		
-		public Builder until(int priceStep) {
-			if(nextIndex == 0) {
-				throw new IllegalStateException("Start with a demand that can be extended until this value");
-			}
-			double demand = demandArray[nextIndex-1];
-			while(nextIndex < priceStep) {
-				demandArray[nextIndex++] = demand;
-			}
-			return this;
-		}
-		
-		public ArrayBid build() {
-			// Make sure the whole array is filled
-			until(demandArray.length);
-			return new ArrayBid(marketBasis, bidNumber, demandArray);
-		}
-	}
-	
-	private static void checkDescending(double[] demandArray) {
-		double last = Double.POSITIVE_INFINITY;
-		for(double demand : demandArray) {
-			if(demand > last){
-				throw new IllegalArgumentException("The demandArray must be descending");
-			}
-			last = demand;
-		}
-	}
+    public static final class Builder {
+        private final MarketBasis marketBasis;
+        private int bidNumber;
+        private int nextIndex;
+        private double[] demandArray;
 
-	private final double[] demandArray;
-	
-	private transient PointBid pointBid;
-	
-	public ArrayBid(MarketBasis marketBasis, int bidNumber, double[] demandArray) {
-		super(marketBasis, bidNumber);
-		if(demandArray.length != marketBasis.getPriceSteps()) {
-			throw new IllegalArgumentException("Length of the demandArray is not equals to the number of price steps");
-		}
-		checkDescending(demandArray);
-		this.demandArray = Arrays.copyOf(demandArray, demandArray.length);
-	}
-	
-	ArrayBid(PointBid base) {
-		super(base.getMarketBasis(), base.getBidNumber());
-		this.demandArray = base.calculateDemandArray();
-		this.pointBid = base;
-   	}
-	
-	@Override
-	public Bid aggregate(Bid other) {
-		if(!other.marketBasis.equals(marketBasis)) {
-			throw new IllegalArgumentException("These 2 bids are not compatible");
-		}
-		ArrayBid otherBid = other.toArrayBid();
-		
-		double[] aggregatedDemand = otherBid.getDemand();
+        public Builder(MarketBasis marketBasis) {
+            this.marketBasis = marketBasis;
+            bidNumber = 0;
+            nextIndex = 0;
+            demandArray = new double[marketBasis.getPriceSteps()];
+        }
+
+        private void checkIndex(int ix) {
+            if (ix >= demandArray.length) {
+                throw new ArrayIndexOutOfBoundsException();
+            }
+        }
+
+        public Builder setBidNumber(int bidNumber) {
+            this.bidNumber = bidNumber;
+            return this;
+        }
+
+        public Builder setDemand(double demand) {
+            checkIndex(nextIndex);
+            if (nextIndex > 0) {
+                if (demand > demandArray[nextIndex - 1]) {
+                    throw new IllegalArgumentException("The demand should always be descending");
+                }
+            }
+            demandArray[nextIndex++] = demand;
+            return this;
+        }
+
+        public Builder setDemandArray(double[] demand) {
+            this.demandArray = Arrays.copyOf(demand, demand.length);
+            return this;
+        }
+
+        public Builder until(int priceStep) {
+            if (nextIndex == 0) {
+                throw new IllegalStateException("Start with a demand that can be extended until this value");
+            }
+            double demand = demandArray[nextIndex - 1];
+            while (nextIndex < priceStep) {
+                demandArray[nextIndex++] = demand;
+            }
+            return this;
+        }
+
+        public ArrayBid build() {
+            // Make sure the whole array is filled
+            until(demandArray.length);
+            return new ArrayBid(marketBasis, bidNumber, demandArray);
+        }
+    }
+
+    private static void checkDescending(double[] demandArray) {
+        double last = Double.POSITIVE_INFINITY;
+        for (double demand : demandArray) {
+            if (demand > last) {
+                throw new IllegalArgumentException("The demandArray must be descending");
+            }
+            last = demand;
+        }
+    }
+
+    private final double[] demandArray;
+
+    private transient PointBid pointBid;
+
+    public ArrayBid(MarketBasis marketBasis, int bidNumber, double[] demandArray) {
+        super(marketBasis, bidNumber);
+        if (demandArray.length != marketBasis.getPriceSteps()) {
+            throw new IllegalArgumentException("Length of the demandArray is not equals to the number of price steps");
+        }
+        checkDescending(demandArray);
+        this.demandArray = Arrays.copyOf(demandArray, demandArray.length);
+    }
+
+    ArrayBid(PointBid base) {
+        super(base.getMarketBasis(), base.getBidNumber());
+        this.demandArray = base.calculateDemandArray();
+        this.pointBid = base;
+    }
+
+    @Override
+    public ArrayBid aggregate(Bid other) {
+        if (!other.marketBasis.equals(marketBasis)) {
+            throw new IllegalArgumentException("These 2 bids are not compatible");
+        }
+        ArrayBid otherBid = other.toArrayBid();
+
+        double[] aggregatedDemand = otherBid.getDemand();
         for (int i = 0; i < aggregatedDemand.length; i++) {
             aggregatedDemand[i] += demandArray[i];
         }
         return new ArrayBid(this.marketBasis, 0, aggregatedDemand);
-	}
+    }
 
-	@Override
-	public PriceUpdate calculateIntersection(final double targetDemand) {
+    @Override
+    public PriceUpdate calculateIntersection(final double targetDemand) {
         int leftBound = 0;
         int rightBound = demandArray.length - 1;
         int middle = rightBound / 2;
@@ -169,45 +168,45 @@ public class ArrayBid extends Bid {
                 priceStep = demandArray[leftBound] <= targetDemand ? leftBound : leftBound + 1;
             }
         }
-        
+
         return new PriceUpdate(new PriceStep(marketBasis, priceStep).toPrice(), this.bidNumber);
-	}
+    }
 
-	@Override
-	public double getMaximumDemand() {
-		return demandArray[0];
-	}
+    @Override
+    public double getMaximumDemand() {
+        return demandArray[0];
+    }
 
-	@Override
-	public double getMinimumDemand() {
-		return demandArray[demandArray.length - 1];
-	}
-	
-	@Override
-	public ArrayBid toArrayBid() {
-		return this;
-	}
-	
-	public PointBid toPointBid() {
-		if(pointBid == null) {
-			pointBid = new PointBid(this);
-		}
-		return pointBid;
-	};
-	
-	public double[] getDemand() {
-		return Arrays.copyOf(demandArray, demandArray.length);
-	}
-	
-	public double getDemandAt(PriceStep priceStep) {
-		if(!priceStep.getMarketBasis().equals(marketBasis)) {
-			throw new IllegalArgumentException("The marketbasis of the pricestep does not equal this market basis");
-		}
-		return demandArray[priceStep.getPriceStep()];
-	}
-	
-	PricePoint[] calculatePricePoints() {
-		int priceSteps = this.marketBasis.getPriceSteps();
+    @Override
+    public double getMinimumDemand() {
+        return demandArray[demandArray.length - 1];
+    }
+
+    @Override
+    public ArrayBid toArrayBid() {
+        return this;
+    }
+
+    public PointBid toPointBid() {
+        if (pointBid == null) {
+            pointBid = new PointBid(this);
+        }
+        return pointBid;
+    };
+
+    public double[] getDemand() {
+        return Arrays.copyOf(demandArray, demandArray.length);
+    }
+
+    public double getDemandAt(PriceStep priceStep) {
+        if (!priceStep.getMarketBasis().equals(marketBasis)) {
+            throw new IllegalArgumentException("The marketbasis of the pricestep does not equal this market basis");
+        }
+        return demandArray[priceStep.getPriceStep()];
+    }
+
+    PricePoint[] calculatePricePoints() {
+        int priceSteps = this.marketBasis.getPriceSteps();
         List<PricePoint> points = new ArrayList<PricePoint>(priceSteps);
         /*
          * Flag to indicate if the last price point is the start of a flat segment.
@@ -231,8 +230,8 @@ public class ArrayBid extends Bid {
             }
             /*
              * Add a point at i for the following two cases: 1) If not at the end of the demand array, add the next
-             * point for i and remember that this point is the end of a flat segment. 2) Add a final point if past
-             * the end of the demand array, but the previous point was not the beginning of a flat segment.
+             * point for i and remember that this point is the end of a flat segment. 2) Add a final point if past the
+             * end of the demand array, but the previous point was not the beginning of a flat segment.
              */
             if (i < priceSteps - 1 || !flatStart) {
                 flatEndPoint = newPoint(i);
@@ -244,15 +243,14 @@ public class ArrayBid extends Bid {
             // TODO Refactor this code to not nest more than 3
             // if/for/while/switch/try statements.
             /*
-             * If not at the end of the demand array, check if the following segment is a step or an inclining
-             * segment.
+             * If not at the end of the demand array, check if the following segment is a step or an inclining segment.
              */
             if (i < priceSteps - 1) {
                 // TODO Test for floating point equality. Not just ==
                 if (this.demandArray[i] - this.demandArray[i + 1] == delta) {
                     /*
-                     * Here i is in a constantly inclining or declining segment. Search for the last price step in
-                     * the segment.
+                     * Here i is in a constantly inclining or declining segment. Search for the last price step in the
+                     * segment.
                      */
                     while (i < priceSteps - 1 && this.demandArray[i] - this.demandArray[i + 1] == delta) {
                         i += 1;
@@ -266,32 +264,88 @@ public class ArrayBid extends Bid {
                     }
                 } else if (flatEnd && flatEndPoint != null) {
                     /*
-                     * If i is not in a constantly inclining or declining segment, and the previous segment was
-                     * flat, then move the end point of the flat segment one price step forward to convert it to a
-                     * straight step.
+                     * If i is not in a constantly inclining or declining segment, and the previous segment was flat,
+                     * then move the end point of the flat segment one price step forward to convert it to a straight
+                     * step.
                      * 
-                     * This is to preserve the semantics of the straight step when converting between point and
-                     * vector representation and back.
+                     * This is to preserve the semantics of the straight step when converting between point and vector
+                     * representation and back.
                      */
-                	flatEndPoint = newPoint(i);
+                    flatEndPoint = newPoint(i);
                 }
             }
 
             /*
-             * Add a point at i for the following two cases: 1) Add a point for the start of the next flat segment
-             * and loop. 2) Add a final point if the last step of the demand array the end of an inclining or
-             * declining segment.
+             * Add a point at i for the following two cases: 1) Add a point for the start of the next flat segment and
+             * loop. 2) Add a final point if the last step of the demand array the end of an inclining or declining
+             * segment.
              */
             if (i == priceSteps - 1 || (i < priceSteps - 1 && this.demandArray[i] - this.demandArray[i + 1] == 0)) {
                 points.add(newPoint(i));
                 flatStart = true;
             }
         }
-        
-		return points.toArray(new PricePoint[points.size()]);
-	}
-	
-	private PricePoint newPoint(int priceStep) {
+
+        return points.toArray(new PricePoint[points.size()]);
+    }
+
+    private PricePoint newPoint(int priceStep) {
         return new PricePoint(new PriceStep(marketBasis, priceStep).toPrice(), this.demandArray[priceStep]);
+    }
+
+    /**
+     * Subtract the other bid curve from this bid curve. Subtract is the inverse of aggregate. The other bid does not
+     * have to be based on the same market basis.
+     * 
+     * @param other
+     *            The other (<code>Bid</code>) parameter.
+     * @return A copy of this bid with the other bid subtracted from it.
+     */
+    public ArrayBid subtract(final ArrayBid other) {
+        double[] otherDemand = other.getDemand();
+        double[] newDemand = this.getDemand();
+        for (int i = 0; i < newDemand.length; i++) {
+            newDemand[i] -= otherDemand[i];
+        }
+        return new ArrayBid(this.marketBasis, this.bidNumber, newDemand);
+    }
+
+    public ArrayBid(ArrayBid bid, int bidNumber) {
+        super(bid.marketBasis, bidNumber);
+        this.demandArray = Arrays.copyOf(bid.demandArray, bid.demandArray.length);
+    }
+    
+    public ArrayBid(ArrayBid bid) {
+        super(bid.marketBasis, bid.bidNumber);
+        this.demandArray = Arrays.copyOf(bid.demandArray, bid.demandArray.length);
+    }
+
+    /**
+     * Transpose the bid curve by adding an offset to the demand.
+     * 
+     * @param offset
+     *            The offset (<code>double</code>) parameter.
+     */
+    public ArrayBid transpose(final double offset) {
+        double[] newDemand = this.getDemand();
+        for (int i = 0; i < newDemand.length; i++) {
+            newDemand[i] += offset;
+        }
+        return new ArrayBid(this.marketBasis, this.bidNumber, newDemand);
+    }
+    /**
+    * Get demand with the specified price step parameter and return the double result.
+    *
+    * @param priceStep
+    * The price step (<code>int</code>) parameter.
+    * @return Results of the get demand (<code>double</code>) value.
+    * @see #getDemand()
+    * @see #getDemand(double)
+    * @see #getMaximumDemand()
+    * @see #getMinimumDemand()
+    */
+    public double getDemand(final PriceStep priceStep) {
+    double[] demand = getDemand();
+    return demand[this.marketBasis.boundPriceStep(priceStep)];
     }
 }

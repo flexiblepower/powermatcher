@@ -11,8 +11,8 @@ import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
+import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
-import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.IncomingBidEvent;
 import net.powermatcher.api.monitoring.IncomingPriceEvent;
@@ -167,7 +167,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
         session.setMarketBasis(this.sessionToMatcher.getMarketBasis());
         session.setClusterId(this.sessionToMatcher.getClusterId());
 
-        this.aggregatedBids.updateBid(session.getAgentId(), new Bid(this.sessionToMatcher.getMarketBasis()));
+        this.aggregatedBids.updateBid(session.getAgentId(), new ArrayBid.Builder(this.sessionToMatcher.getMarketBasis()).setDemand(0).build());
         LOGGER.info("Agent connected with session [{}]", session.getSessionId());
         return true;
     }
@@ -232,9 +232,9 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
         		continue;
         	} 
 
-        	PriceUpdate agentPrice = new PriceUpdate(priceUpdate.getPrice(), originalAgentBid);
+        	PriceUpdate agentPriceUpdate = new PriceUpdate(priceUpdate.getPrice(), originalAgentBid);
         	
-            session.updatePrice(agentPrice);
+            session.updatePrice(agentPriceUpdate);
 
             this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), this.config.agentId(), session.getSessionId(), timeService
                     .currentDate(), priceUpdate.getPrice(), Qualifier.MATCHER));

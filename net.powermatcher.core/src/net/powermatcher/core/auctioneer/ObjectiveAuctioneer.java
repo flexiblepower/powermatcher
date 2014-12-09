@@ -13,9 +13,10 @@ import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.ObjectiveEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
+import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
-import net.powermatcher.api.data.Price;
+import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.IncomingBidEvent;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.OutgoingPriceEvent;
@@ -113,7 +114,7 @@ public class ObjectiveAuctioneer extends Auctioneer {
     private BidCache aggregatedBids;
 
     /**
-     * The {@link MarketBasis} for {@link Bid} and {@link Price}.
+     * The {@link MarketBasis} for {@link Bid} and {@link PriceUpdate}.
      */
     private MarketBasis marketBasis;
 
@@ -178,7 +179,7 @@ public class ObjectiveAuctioneer extends Auctioneer {
         session.setClusterId(this.getClusterId());
 
         this.sessions.add(session);
-        this.aggregatedBids.updateBid(session.getSessionId(), new Bid(this.marketBasis));
+        this.aggregatedBids.updateBid(session.getSessionId(), new ArrayBid.Builder(this.marketBasis).setDemand(0).build());
         LOGGER.info("Agent connected with session [{}]", session.getSessionId());
         return true;
     }
@@ -224,7 +225,7 @@ public class ObjectiveAuctioneer extends Auctioneer {
         // aggregate bid device agents
         Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis);
 
-        Price newPrice;
+        PriceUpdate newPriceUpdate;
         // check if objective agent is active
         if (this.objectiveEndpoint != null) {
             // receive the aggregate bid from the objective agent
@@ -232,24 +233,24 @@ public class ObjectiveAuctioneer extends Auctioneer {
             // aggregate again with device agent bid.
             Bid finalAggregatedBid = aggregatedBid.aggregate(aggregatedObjectiveBid);
 
-            newPrice = determinePrice(finalAggregatedBid);
+            newPriceUpdate = determinePrice(finalAggregatedBid);
             // send price update to objective agent
-            this.objectiveEndpoint.notifyPriceUpdate(newPrice);
+            this.objectiveEndpoint.notifyPriceUpdate(newPriceUpdate);
         } else {
-            newPrice = determinePrice(aggregatedBid);
+            newPriceUpdate = determinePrice(aggregatedBid);
         }
 
         // send price updates to device agents
         for (Session session : this.sessions) {
             this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), getAgentId(), session.getSessionId(),
-                    timeService.currentDate(), newPrice, Qualifier.MATCHER));
+                    timeService.currentDate(), newPriceUpdate.getPrice(), Qualifier.MATCHER));
 
-            session.updatePrice(newPrice);
-            LOGGER.debug("New price: {}, session {}", newPrice, session.getSessionId());
+            session.updatePrice(newPriceUpdate);
+            LOGGER.debug("New price: {}, session {}", newPriceUpdate, session.getSessionId());
         }
     }
 
-    protected Price determinePrice(Bid aggregatedBid) {
+    protected PriceUpdate determinePrice(Bid aggregatedBid) {
         return aggregatedBid.calculateIntersection(0);
     }
 

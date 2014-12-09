@@ -1,6 +1,8 @@
 package net.powermatcher.core;
 
+import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
+import net.powermatcher.api.data.PointBid;
 import net.powermatcher.api.data.PricePoint;
 
 /**
@@ -16,7 +18,7 @@ public class BidCacheElement {
     /**
      * A {@link Bid} curve in either {@link PricePoint} or by an demand array representation.
      */
-    Bid bid;
+    ArrayBid arrayBid;
 
     /**
      * Time stamp for age of {@link Bid}.
@@ -26,24 +28,30 @@ public class BidCacheElement {
     /**
      * Constructs an instance of this class from the specified {@link Bid} and time stamp parameters.
      * 
-     * @param bid
+     * @param arrayBid
      *            The bid (<code>Bid</code>) parameter.
      * @param timestamp
      *            The time stamp (<code>long</code>) parameter.
      */
     public BidCacheElement(final Bid bid, final long timestamp) {
-        this.bid = bid;
+        
+        if(bid instanceof PointBid){
+            this.arrayBid = bid.toArrayBid();
+        }else{
+            this.arrayBid = (ArrayBid)bid;
+        }
+        
         this.timestamp = timestamp;
     }
-
+    
     /**
      * Gets the bid value.
      * 
      * @return The bid (<code>Bid</code>) value.
      * @see #setBid(Bid)
      */
-    public Bid getBid() {
-        return this.bid;
+    public ArrayBid getBid() {
+        return this.arrayBid;
     }
 
     /**
@@ -64,7 +72,12 @@ public class BidCacheElement {
      * @see #getBid()
      */
     public void setBid(final Bid bid) {
-        this.bid = bid;
+        
+        if(bid instanceof PointBid){
+            this.arrayBid = bid.toArrayBid();
+        }else{
+            this.arrayBid = (ArrayBid)bid;
+        }
     }
 
     /**

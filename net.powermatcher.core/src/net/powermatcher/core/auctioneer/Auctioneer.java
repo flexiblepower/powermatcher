@@ -11,9 +11,11 @@ import java.util.concurrent.TimeUnit;
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
+import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
+import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.IncomingBidEvent;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.OutgoingPriceEvent;
@@ -150,7 +152,7 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
         session.setClusterId(this.getClusterId());
 
         this.sessions.add(session);
-        this.aggregatedBids.updateBid(session.getAgentId(), new Bid(this.marketBasis));
+        this.aggregatedBids.updateBid(session.getAgentId(), new ArrayBid.Builder(this.marketBasis).setDemand(0).build());
         LOGGER.info("Agent connected with session [{}]", session.getSessionId());
         return true;
     }
@@ -191,18 +193,18 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
      */
     protected synchronized void publishNewPrice() {
         Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis);
-        Price newPrice = determinePrice(aggregatedBid);
+        PriceUpdate newPriceUpdate = determinePrice(aggregatedBid);
 
         for (Session session : this.sessions) {
             this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), getAgentId(), session.getSessionId(),
-                    timeService.currentDate(), newPrice, Qualifier.MATCHER));
+                    timeService.currentDate(), newPriceUpdate.getPrice(), Qualifier.MATCHER));
 
-            session.updatePrice(newPrice);
-            LOGGER.debug("New price: {}, session {}", newPrice, session.getSessionId());
+            session.updatePrice(newPriceUpdate);
+            LOGGER.debug("New price: {}, session {}", newPriceUpdate, session.getSessionId());
         }
     }
 
-    protected Price determinePrice(Bid aggregatedBid) {
+    protected PriceUpdate determinePrice(Bid aggregatedBid) {
         return aggregatedBid.calculateIntersection(0);
     }
 

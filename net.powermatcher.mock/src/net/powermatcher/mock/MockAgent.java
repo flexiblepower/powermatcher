@@ -10,7 +10,6 @@ import net.powermatcher.api.Agent;
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
-import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.AgentEvent;
 import net.powermatcher.api.monitoring.AgentObserver;
@@ -19,7 +18,7 @@ import net.powermatcher.api.monitoring.ObservableAgent;
 public class MockAgent implements Agent, AgentEndpoint, ObservableAgent {
 
     private Map<String, Object> agentProperties;
-    private Price lastPriceUpdate;
+    private PriceUpdate lastPriceUpdate;
     private Session session;
     private String desiredParentId;
     private String clusterId;
@@ -53,7 +52,7 @@ public class MockAgent implements Agent, AgentEndpoint, ObservableAgent {
         this.session.updateBid(newBid);
     }
 
-    public Price getLastPriceUpdate() {
+    public PriceUpdate getLastPriceUpdate() {
         return lastPriceUpdate;
     }
 

@@ -25,7 +25,9 @@ import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
+import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
+import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.IncomingBidEvent;
@@ -102,12 +104,12 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
     /**
      * The current aggregated bid, based on the bids received from the concentrator's children
      */
-    protected Bid aggregatedBidIn = null;
+    protected ArrayBid aggregatedBidIn = null;
 
     /**
      * The current aggregated bid propagated to the concentrator's parent
      */
-    protected Bid aggregatedBidOut = null;
+    protected ArrayBid aggregatedBidOut = null;
 
     /**
      * OSGI configuration meta type with info about the concentrator.
@@ -159,7 +161,7 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
     @Activate
     public void activate(final Map<String, Object> properties) {
         this.processConfig(properties);
-        
+
         this.aggregatedBids = new BidCache(this.timeService, config.bidTimeout());
 
         scheduledFuture = this.scheduler.scheduleAtFixedRate(new Runnable() {
@@ -181,7 +183,7 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         if (scheduledFuture != null) {
             scheduledFuture.cancel(false);
         }
-        
+
         LOGGER.info("Agent [{}], deactivated", config.agentId());
     }
 
@@ -209,11 +211,11 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            
+
             throw new IllegalArgumentException("The floor constraint shouldn't be higher than the ceiling constraint");
         }
     }
-    
+
     @Override
     public synchronized boolean connectToAgent(Session session) {
         if (this.sessionToMatcher == null) {
@@ -224,7 +226,8 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         session.setMarketBasis(this.sessionToMatcher.getMarketBasis());
         session.setClusterId(this.sessionToMatcher.getClusterId());
 
-        this.aggregatedBids.updateBid(session.getAgentId(), new Bid(this.sessionToMatcher.getMarketBasis()));
+        this.aggregatedBids.updateBid(session.getAgentId(),
+                new ArrayBid.Builder(this.sessionToMatcher.getMarketBasis()).setDemand(0).build());
         LOGGER.info("Agent connected with session [{}]", session.getSessionId());
         return true;
     }
@@ -280,10 +283,10 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
      */
     public synchronized void doBidUpdate() {
         if (sessionToMatcher != null) {
-            Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.sessionToMatcher.getMarketBasis());
+            ArrayBid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.sessionToMatcher.getMarketBasis());
 
             // Peakshaving call
-            Bid transformedBid = transformAggregatedBid(aggregatedBid);
+            ArrayBid transformedBid = transformAggregatedBid(aggregatedBid);
             this.sessionToMatcher.updateBid(transformedBid);
 
             publishEvent(new OutgoingBidEvent(sessionToMatcher.getClusterId(), config.agentId(),
@@ -302,7 +305,8 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
 
         LOGGER.debug("Received price update [{}]", priceUpdate);
         this.publishEvent(new IncomingPriceEvent(sessionToMatcher.getClusterId(), this.config.agentId(),
-                this.sessionToMatcher.getSessionId(), timeService.currentDate(), priceUpdate.getPrice(), Qualifier.AGENT));
+                this.sessionToMatcher.getSessionId(), timeService.currentDate(), priceUpdate.getPrice(),
+                Qualifier.AGENT));
 
         // Find bidCacheSnapshot belonging to the newly received price update
         BidCacheSnapshot bidCacheSnapshot = this.aggregatedBids.getMatchingSnapshot(priceUpdate.getBidNumber());
@@ -319,45 +323,48 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
                 continue;
             }
 
-            Price agentPrice = new Price(priceUpdate.getMarketBasis(), priceUpdate.getPriceValue(), originalAgentBid);
+            //PriceUpdate agentPrice = new Price(priceUpdate.getPrice().getMarketBasis(), priceUpdate.getPriceValue(), originalAgentBid);
+            
+            PriceUpdate agentPrice = new PriceUpdate(new Price(priceUpdate.getPrice().getMarketBasis(), priceUpdate.getPrice().getPriceValue()), priceUpdate.getBidNumber());
 
             // call peakshaving code.
-            Price adjustedPrice = adjustPrice(agentPrice);
+            PriceUpdate adjustedPrice = adjustPrice(agentPrice);
             session.updatePrice(adjustedPrice);
 
             this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), this.config.agentId(), session
-                    .getSessionId(), timeService.currentDate(), priceUpdate, Qualifier.MATCHER));
+                    .getSessionId(), timeService.currentDate(), priceUpdate.getPrice(), Qualifier.MATCHER));
 
         }
     }
 
-    private synchronized Price adjustPrice(final Price newPrice) {
+    private synchronized PriceUpdate adjustPrice(final PriceUpdate newPriceUpdate) {
         // if the given price is null, the price can't be adjusted, so we let
         // the framework handle the null price
-        if (newPrice == null) {
+        if (newPriceUpdate == null) {
             return null;
         }
 
         // we can only adjust if we know the aggregated bid curve
         if (this.aggregatedBidIn == null) {
-            this.priceIn = newPrice;
-            return this.priceOut = newPrice;
+            this.priceIn = newPriceUpdate.getPrice();
+            this.priceOut = newPriceUpdate.getPrice();
+            return newPriceUpdate;
         }
 
         // transform prices to indices
-        int priceInIndex = newPrice.getMarketBasis().toPriceStep(newPrice.getPriceValue());
+        int priceInIndex = newPriceUpdate.getPrice().toPriceStep().getPriceStep();
         int priceOutIndex = priceInIndex;
 
         // create a copy of the aggregated bid to calculate the demand function
         // and add the uncontrolled flow to the demand function
-        Bid demandFunction = new Bid(this.aggregatedBidIn);
+        ArrayBid demandFunction = new ArrayBid(this.aggregatedBidIn);
         double uncontrolledFlow = this.getUncontrolledFlow();
         if (!Double.isNaN(uncontrolledFlow)) {
             demandFunction = demandFunction.transpose(uncontrolledFlow);
         }
 
         // determine the expected allocation
-        double allocation = demandFunction.getDemand(newPrice.getPriceValue());
+        double allocation = demandFunction.getDemand(newPriceUpdate.getPrice().toPriceStep());
 
         // Adjust the price so that the allocation is within flow
         // constraints (taking uncontrolled flow into account)
@@ -378,11 +385,13 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         }
 
         // set the new price
-        this.priceIn = newPrice;
-        return this.priceOut = new Price(newPrice.getMarketBasis(), newPrice.getMarketBasis().toPrice(priceOutIndex));
+        this.priceIn = newPriceUpdate.getPrice();
+        this.priceOut = new Price(newPriceUpdate.getPrice().getMarketBasis(), newPriceUpdate.getPrice().getPriceValue());
+
+        return new PriceUpdate(priceOut, newPriceUpdate.getBidNumber());
     }
 
-    private synchronized Bid transformAggregatedBid(final Bid newAggregatedBid) {
+    private synchronized ArrayBid transformAggregatedBid(final ArrayBid newAggregatedBid) {
         // if the given bid is null, then there is nothing to transform, so we
         // let the next framework handle the null bid
         if (newAggregatedBid == null) {
@@ -390,7 +399,7 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         }
 
         // Copy the aggregated bid to transform into a new aggregated bid
-        Bid newAggregatedBidOut = new Bid(newAggregatedBid);
+        ArrayBid newAggregatedBidOut = new ArrayBid(newAggregatedBid);
 
         // add the uncontrolled flow
         if (!Double.isNaN(this.getUncontrolledFlow())) {
@@ -428,7 +437,7 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
 
         // calculate the allocation which would have been the fact if no
         // transformation would have been performed
-        double untransformedAllocation = this.aggregatedBidIn.getDemand(this.priceIn.getPriceValue());
+        double untransformedAllocation = this.aggregatedBidIn.getDemand(this.priceIn.toPriceStep());
 
         LOGGER.debug("BID(IN)" + this.aggregatedBidIn);
         LOGGER.debug("BID(OUT)" + this.aggregatedBidOut);
@@ -470,7 +479,7 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         }
 
         // use the framework to determine the allocation
-        return this.aggregatedBidIn.getDemand(this.priceOut.getPriceValue());
+        return this.aggregatedBidIn.getDemand(this.priceOut.toPriceStep());
     }
 
     /**
@@ -483,7 +492,7 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
      *            The ceiling to clip the bid to.
      * @return The clipped bid.
      */
-    private Bid clipAbove(final Bid bid, final double ceiling) {
+    private ArrayBid clipAbove(final ArrayBid bid, final double ceiling) {
         double[] demand = bid.getDemand();
 
         // find start of unclipped region
@@ -499,7 +508,8 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
                 demand[i] = firstUnclippedPoint;
             }
         }
-        return new Bid(bid.getMarketBasis(), demand);
+        return new ArrayBid.Builder(bid.getMarketBasis()).setBidNumber(bid.getBidNumber()).setDemandArray(demand)
+                .build();
     }
 
     /**
@@ -512,7 +522,7 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
      *            The floor to clip the bid to.
      * @return The clipped bid.
      */
-    private Bid clipBelow(final Bid bid, final double floor) {
+    private ArrayBid clipBelow(final ArrayBid bid, final double floor) {
         double[] demand = bid.getDemand();
 
         // find end of unclipped region
@@ -528,7 +538,9 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
                 demand[i] = lastUnclippedPoint;
             }
         }
-        return new Bid(bid.getMarketBasis(), demand);
+
+        return new ArrayBid.Builder(bid.getMarketBasis()).setBidNumber(bid.getBidNumber()).setDemandArray(demand)
+                .build();
     }
 
     /**

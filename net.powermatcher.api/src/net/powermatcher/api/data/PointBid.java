@@ -39,7 +39,7 @@ public class PointBid extends Bid implements Iterable<PricePoint> {
 	
 	private transient ArrayBid arrayBid;
 
-	PointBid(MarketBasis marketBasis, int bidNumber, PricePoint[] pricePoints) {
+	public PointBid(MarketBasis marketBasis, int bidNumber, PricePoint[] pricePoints) {
 		super(marketBasis, bidNumber);
 		this.pricePoints = pricePoints;
 	}
@@ -51,7 +51,7 @@ public class PointBid extends Bid implements Iterable<PricePoint> {
 	}
 	
 	@Override
-	public Bid aggregate(Bid other) {
+	public ArrayBid aggregate(Bid other) {
 		// TODO: this can also be done directly on a PointBid
 		return toArrayBid().aggregate(other);
 	}

@@ -6,7 +6,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
 /**
- * {@link MarketBasis} is an immutable type specifying the settings for the market. This includes the price range, the 
+ * {@link MarketBasis} is an immutable type specifying the settings for the market. This includes the price range, the
  * commodity being exchanges, the currency being used and the number of price steps used in the demand arrays.
  * 
  * @author FAN
@@ -32,25 +32,22 @@ public class MarketBasis {
     private final double minimumPrice;
     private final double maximumPrice;
 
-    public MarketBasis(final String commodity, 
-    				   final String currency, 
-    				   final int priceSteps, 
-    				   final double minimumPrice,
-    				   final double maximumPrice) {
-    	if(commodity == null) {
-    		throw new NullPointerException("commodity");
-    	} else if(currency == null) {
-    		throw new NullPointerException("currency");
-    	} else if (priceSteps <= 0) {
+    public MarketBasis(final String commodity, final String currency, final int priceSteps, final double minimumPrice,
+            final double maximumPrice) {
+        if (commodity == null) {
+            throw new NullPointerException("commodity");
+        } else if (currency == null) {
+            throw new NullPointerException("currency");
+        } else if (priceSteps <= 0) {
             throw new InvalidParameterException("Price steps must be > 0.");
-    	} else if(Double.isNaN(minimumPrice)) {
-    		throw new IllegalArgumentException("minimumPrice should not be NaN");
-    	} else if(Double.isNaN(maximumPrice)) {
-    		throw new IllegalArgumentException("maximumPrice should not be NaN");
+        } else if (Double.isNaN(minimumPrice)) {
+            throw new IllegalArgumentException("minimumPrice should not be NaN");
+        } else if (Double.isNaN(maximumPrice)) {
+            throw new IllegalArgumentException("maximumPrice should not be NaN");
         } else if (maximumPrice <= minimumPrice) {
             throw new InvalidParameterException("Maximum price must be > minimum price.");
         }
-    	
+
         this.commodity = commodity;
         this.currency = currency;
         this.priceSteps = priceSteps;
@@ -100,20 +97,34 @@ public class MarketBasis {
         return this.priceSteps;
     }
 
+    /**
+     * Bound price step with the specified price step parameter and return the int result.
+     * 
+     * @param priceStep
+     *            The price step (<code>int</code>) parameter.
+     * @return Results of the bound price step (<code>int</code>) value.
+     * @see #toPriceStep(double)
+     * @see #toPriceStep(int)
+     */
+    public int boundPriceStep(final PriceStep priceStep) {
+        int step = priceStep.getPriceStep();
+        int boundedPriceStep = Math.min(step, this.priceSteps - 1);
+        boundedPriceStep = Math.max(boundedPriceStep, 0);
+        return boundedPriceStep;
+    }
+
     @Override
     public boolean equals(final Object obj) {
-    	if(obj == this) {
-    		return true;
-    	} else if(obj == null || obj.getClass() != getClass()) {
-    		return false;
-    	} else {
-    		MarketBasis other = (MarketBasis) obj;
-    		return this.commodity.equals(other.commodity)
-    				&& this.currency.equals(other.currency)
-    				&& this.maximumPrice == other.maximumPrice
-    				&& this.minimumPrice == other.minimumPrice
-    				&& this.priceSteps == other.priceSteps;
-    	}
+        if (obj == this) {
+            return true;
+        } else if (obj == null || obj.getClass() != getClass()) {
+            return false;
+        } else {
+            MarketBasis other = (MarketBasis) obj;
+            return this.commodity.equals(other.commodity) && this.currency.equals(other.currency)
+                    && this.maximumPrice == other.maximumPrice && this.minimumPrice == other.minimumPrice
+                    && this.priceSteps == other.priceSteps;
+        }
     }
 
     @Override
