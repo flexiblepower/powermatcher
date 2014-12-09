@@ -7,7 +7,6 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.zip.DataFormatException;
 
 import net.powermatcher.api.MatcherEndpoint;
@@ -31,7 +30,8 @@ public class BidResilienceTest extends ResilienceTest {
     private static final String CONCENTRATOR_NAME = "concentrator";
     private static final Logger LOGGER = LoggerFactory.getLogger(BidResilienceTest.class);
 
-    protected MockScheduler timer;
+    protected MockScheduler auctioneerTimer;
+    protected MockScheduler concentratorTimer;
 
     // The direct upstream matcher for the agents
     protected ConcentratorWrapper concentrator;
@@ -65,11 +65,9 @@ public class BidResilienceTest extends ResilienceTest {
         auctioneerProperties.put("priceUpdateRate", "1");
         auctioneerProperties.put("clusterId", "testCluster");
 
-        auctioneer.setMarketBasis(marketBasis);
-
         this.matchers.add(this.auctioneer);
-        timer = new MockScheduler();
-        auctioneer.setExecutorService(timer);
+        auctioneerTimer = new MockScheduler();
+        auctioneer.setExecutorService(auctioneerTimer);
         auctioneer.setTimeService(new SystemTimeService());
         auctioneer.activate(auctioneerProperties);
 
@@ -83,8 +81,8 @@ public class BidResilienceTest extends ResilienceTest {
         concentratorProperties.put("agentId", CONCENTRATOR_NAME);
 
         this.matchers.add(this.concentrator);
-
-        concentrator.setExecutorService(new ScheduledThreadPoolExecutor(10));
+        this.concentratorTimer = new MockScheduler();
+        concentrator.setExecutorService(concentratorTimer);
         concentrator.setTimeService(new SystemTimeService());
         concentrator.activate(concentratorProperties);
 
@@ -134,7 +132,7 @@ public class BidResilienceTest extends ResilienceTest {
                 bid = null;
             }
         } while (!stop);
-        concentrator.doBidUpdate();
+        concentratorTimer.doTaskOnce();
         // Write aggregated demand array
         LOGGER.info("Aggregated demand: ");
         for (int j = 0; j < aggregatedDemand.length; j++) {

@@ -11,9 +11,7 @@ import net.powermatcher.core.auctioneer.Auctioneer;
 
 public class AuctioneerWrapper extends Auctioneer {
 
-    private Price lastPublishedPrice;
     private Bid lastReceivedBid;
-    private MarketBasis marketBasis;
     private Set<Session> shadowedSessions = new HashSet<>();
 
     @Override
@@ -29,40 +27,27 @@ public class AuctioneerWrapper extends Auctioneer {
     }
 
     public void publishPrice() {
-        //copies the behavior of publishNewPrice to ascertain the price published
-        Bid aggregatedBid = getAggregatedBids().getAggregatedBid(this.marketBasis);
-        Price estimatedNewPrice = determinePrice(aggregatedBid);
         super.publishNewPrice();
-        lastPublishedPrice = estimatedNewPrice;
     }
 
     public void publishPrice(Price newPrice) {
-        this.lastPublishedPrice = newPrice;
         for (Session session : shadowedSessions) {
             session.updatePrice(newPrice);
         }
     }
-    
+
     @Override
     public synchronized void updateBid(Session session, Bid newBid) {
         this.lastReceivedBid = newBid;
         super.updateBid(session, newBid);
     }
 
-    public void setMarketBasis(MarketBasis marketBasis) {
-        this.marketBasis = marketBasis;
-    }
-    
-    public Price getLastPublishedPrice() {
-        return lastPublishedPrice;
-    }
-
     public Bid getAggregatedBid(MarketBasis marketBasis) {
         return super.getAggregatedBids().getAggregatedBid(marketBasis);
     }
-    
-    public Bid getLastReceivedBid(){
+
+    public Bid getLastReceivedBid() {
         return this.lastReceivedBid;
     }
-   
+
 }

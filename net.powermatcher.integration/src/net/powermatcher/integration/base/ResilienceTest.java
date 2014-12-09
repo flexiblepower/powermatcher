@@ -100,7 +100,7 @@ public class ResilienceTest {
                 bid = null;
             }
         } while (!stop);
-        //auctioneer.publishNewPrice();
+
         // Write aggregated demand array
         LOGGER.info("Aggregated demand: ");
         for (int j = 0; j < aggregatedDemand.length; j++) {

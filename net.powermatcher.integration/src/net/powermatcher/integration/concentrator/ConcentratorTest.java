@@ -6,7 +6,6 @@ import java.security.InvalidParameterException;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.core.concentrator.Concentrator;

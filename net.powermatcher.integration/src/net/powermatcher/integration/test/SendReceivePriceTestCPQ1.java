@@ -1,6 +1,9 @@
 package net.powermatcher.integration.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsEqual.equalTo;
 
 import java.io.IOException;
 import java.util.zip.DataFormatException;
@@ -40,17 +43,22 @@ public class SendReceivePriceTestCPQ1 extends BidResilienceTest {
 
         // Send bids to the matcherAgent (concentrator)
         sendBidsToMatcher();
-        timer.doTaskOnce();
+        auctioneerTimer.doTaskOnce();
 
         // Validate if concentrator receives correct price
         assertEquals(this.resultsReader.getEquilibriumPrice(), this.concentrator.getLastPrice().getCurrentPrice(), 0);
 
         // Send null price
         Price nullPrice = null;
-        this.auctioneer.publishPrice(nullPrice);
+        try {
+            this.auctioneer.publishPrice(nullPrice);
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), is(equalTo("Price cannot be null")));
+        }
 
         // Validate if concentrator has rejected the incorrect price and retained the last correct price.
-        assertEquals(true, (this.auctioneer.getLastPublishedPrice() == null));
+        // Now uses concentrator.getLastReceived as auctioneer.getLastPublishedPrice is not reliable anymore
+        assertEquals(true, (this.concentrator.getLastReceivedPrice() == null));
 
         // Check the last received price. The auctioneer should not have published the null
         // price and the last price at the concentrator should be the price that was sent earlier.
@@ -74,7 +82,7 @@ public class SendReceivePriceTestCPQ1 extends BidResilienceTest {
 
         // Send bids to the matcherAgent (concentrator)
         sendBidsToMatcher();
-        timer.doTaskOnce();
+        auctioneerTimer.doTaskOnce();
         // Check if concentrator received correct price
         assertEquals(this.resultsReader.getEquilibriumPrice(), this.concentrator.getLastReceivedPrice()
                 .getCurrentPrice(), 0);
@@ -110,7 +118,7 @@ public class SendReceivePriceTestCPQ1 extends BidResilienceTest {
 
         // Send bids to the matcherAgent (concentrator)
         sendBidsToMatcher();
-        timer.doTaskOnce();
+        auctioneerTimer.doTaskOnce();
         // Validate if concentrator receives correct price
         assertEquals(this.resultsReader.getEquilibriumPrice(), this.concentrator.getLastPrice().getCurrentPrice(), 0);
 
@@ -119,7 +127,8 @@ public class SendReceivePriceTestCPQ1 extends BidResilienceTest {
         this.auctioneer.publishPrice(price);
 
         // Validate if concentrator has received the new price
-        assertEquals(price.getCurrentPrice(), this.auctioneer.getLastPublishedPrice().getCurrentPrice(), 0);
+        // Now uses concentrator.getLastReceived as auctioneer.getLastPublishedPrice is not reliable anymore
+        assertEquals(price.getCurrentPrice(), this.concentrator.getLastReceivedPrice().getCurrentPrice(), 0);
 
     }
 
@@ -141,7 +150,7 @@ public class SendReceivePriceTestCPQ1 extends BidResilienceTest {
 
         // Send bids to the matcherAgent (concentrator)
         sendBidsToMatcher();
-        timer.doTaskOnce();
+        auctioneerTimer.doTaskOnce();
         // Validate if concentrator receives correct price
         assertEquals(this.resultsReader.getEquilibriumPrice(), this.concentrator.getLastPrice().getCurrentPrice(), 0);
 
@@ -172,7 +181,7 @@ public class SendReceivePriceTestCPQ1 extends BidResilienceTest {
 
         // Send bids to the matcherAgent (concentrator)
         sendBidsToMatcher();
-        timer.doTaskOnce();
+        auctioneerTimer.doTaskOnce();
         // Validate if concentrator receives correct price
         assertEquals(this.resultsReader.getEquilibriumPrice(), this.concentrator.getLastPrice().getCurrentPrice(), 0);
 
@@ -202,12 +211,13 @@ public class SendReceivePriceTestCPQ1 extends BidResilienceTest {
 
         // Send bids to the matcherAgent (concentrator)
         sendBidsToMatcher();
-        timer.doTaskOnce();
+        auctioneerTimer.doTaskOnce();
         // Send incorrect price directly to the concentrator
         LOGGER.info("4. Sending incorrect price (null) by auctioneer");
         Price falsePrice = null;
         try {
-            this.concentrator.updatePrice(falsePrice);
+            // this.concentrator.updatePrice(falsePrice);
+            this.auctioneer.publishPrice(falsePrice);
         } catch (Exception e) {
             assertEquals(IllegalArgumentException.class, e.getClass());
         }
@@ -234,12 +244,11 @@ public class SendReceivePriceTestCPQ1 extends BidResilienceTest {
 
         // Send bids to the matcherAgent (concentrator)
         sendBidsToMatcher();
-        timer.doTaskOnce();
 
         // Send price outside range
-        Price price = new Price(this.marketBasis, 52.0d);
+        Price price = new Price(this.marketBasis, 52.0d, 1);
         this.auctioneer.publishPrice(price);
-        
+
         // Verify the price received by the agents
         for (MockAgent agent : agentList) {
             assertEquals(price.getCurrentPrice(), agent.getLastPriceUpdate().getCurrentPrice(), 0);

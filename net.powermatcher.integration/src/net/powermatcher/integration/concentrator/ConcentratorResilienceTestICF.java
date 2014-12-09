@@ -74,11 +74,11 @@ public class ConcentratorResilienceTestICF extends ConcentratorResilienceTest {
         prepareTest("ICF/ICF3", null);
 
         sendBidsToMatcher();
-
+        this.concentrator.doBidUpdate();
         // Send price
-        Price equilibrium = new Price(this.marketBasis, this.resultsReader.getEquilibriumPrice());
-        this.auctioneer.publishPrice(equilibrium);
+        Price equilibrium = new Price(this.marketBasis, this.resultsReader.getEquilibriumPrice(), 2);
 
+        this.auctioneer.publishPrice(equilibrium);
         // Check the received price
         Assert.assertEquals(equilibrium, this.concentrator.getLastPrice());
 

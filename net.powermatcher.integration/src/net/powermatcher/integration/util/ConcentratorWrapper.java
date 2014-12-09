@@ -15,6 +15,7 @@ public class ConcentratorWrapper extends Concentrator {
     private Price lastPublishedPrice;
     private Price lastReceivedPrice;
     private Bid lastReceivedBid;
+    private Bid lastPublishedBid;
 
     @Override
     public void updatePrice(Price newPrice) {
@@ -30,9 +31,10 @@ public class ConcentratorWrapper extends Concentrator {
     @Override
     public void updateBid(Session session, Bid newBid){
         try {
-            //Exceptions can be thrown in updateBid, if so, lastReceived bid is not set.
-            super.updateBid(session, newBid);
+            //Exceptions can be thrown in updateBid, if so, lastPublishedBid is not set.
             this.lastReceivedBid = newBid;
+            super.updateBid(session, newBid);
+            this.lastPublishedBid = newBid;
         } catch (IllegalArgumentException | IllegalStateException e) {
             LOGGER.error("Illegal argument or state in updateBid.", e);
             throw e;
@@ -57,5 +59,9 @@ public class ConcentratorWrapper extends Concentrator {
     
     public Bid getLastReceivedBid(){
         return this.lastReceivedBid;
+    }
+    
+    public Bid getLastPublishedBid(){
+        return this.lastPublishedBid;
     }
 }

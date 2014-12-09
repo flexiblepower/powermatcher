@@ -32,7 +32,7 @@ public class SendReceivePriceTestCPF1 extends BidResilienceTest {
 
         this.auctioneer.publishPrice();
         // Get the new price calculated and published by the auctioneer
-        Price currentPrice = this.auctioneer.getLastPublishedPrice();
+        Price currentPrice = this.concentrator.getLastReceivedPrice();
 
         // Verify the equilibrium
         assertEquals(this.resultsReader.getEquilibriumPrice(), this.concentrator.getLastPrice().getCurrentPrice(), 0.0);
