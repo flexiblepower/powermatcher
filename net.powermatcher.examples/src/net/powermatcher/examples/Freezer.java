@@ -1,5 +1,6 @@
 package net.powermatcher.examples;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ScheduledExecutorService;
@@ -10,13 +11,11 @@ import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
+import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PricePoint;
 import net.powermatcher.api.data.PriceUpdate;
-import net.powermatcher.api.monitoring.IncomingPriceEvent;
 import net.powermatcher.api.monitoring.ObservableAgent;
-import net.powermatcher.api.monitoring.OutgoingBidEvent;
-import net.powermatcher.api.monitoring.Qualifier;
-import net.powermatcher.core.BaseAgent;
+import net.powermatcher.core.BaseDeviceAgent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +29,7 @@ import aQute.bnd.annotation.metatype.Meta;
 
 @Component(designateFactory = Freezer.Config.class, immediate = true, provide = { ObservableAgent.class,
         AgentEndpoint.class })
-public class Freezer extends BaseAgent implements AgentEndpoint {
+public class Freezer extends BaseDeviceAgent implements AgentEndpoint {
     private static final Logger LOGGER = LoggerFactory.getLogger(Freezer.class);
 
     private static Random generator = new Random();
@@ -54,9 +53,7 @@ public class Freezer extends BaseAgent implements AgentEndpoint {
 
     private ScheduledFuture<?> scheduledFuture;
     private ScheduledExecutorService scheduler;
-    private Session session;
     private TimeService timeService;
-    private int bidNumber;
     private double minimumDemand;
     private double maximumDemand;
 
@@ -78,6 +75,7 @@ public class Freezer extends BaseAgent implements AgentEndpoint {
 
     @Deactivate
     public void deactivate() {
+        Session session = getSession();
         if (session != null) {
             session.disconnect();
         }
@@ -86,34 +84,24 @@ public class Freezer extends BaseAgent implements AgentEndpoint {
     }
 
     protected void doBidUpdate() {
-        if (session != null && session.getMarketBasis() != null) {
+        if (getSession() != null) {
             double demand = minimumDemand + (maximumDemand - minimumDemand) * generator.nextDouble();
-            Bid newBid = new Bid(session.getMarketBasis(), new PricePoint(0, demand));
-            incrBidNumber();
-            Bid newBidNr = new Bid(newBid, getBidNumber());
-            LOGGER.debug("updateBid({})", newBidNr);
-            session.updateBid(newBidNr);
-            this.publishEvent(new OutgoingBidEvent(session.getClusterId(), this.getAgentId(), session.getSessionId(),
-                    timeService.currentDate(), newBidNr, Qualifier.AGENT));
+
+            PricePoint pricePoint1 = new PricePoint(new Price(getSession().getMarketBasis(), getSession()
+                    .getMarketBasis().getMinimumPrice()), demand);
+            PricePoint pricePoint2 = new PricePoint(new Price(getSession().getMarketBasis(), getSession()
+                    .getMarketBasis().getMaximumPrice()), minimumDemand);
+
+            Bid newBid = createBid(pricePoint1, pricePoint2);
+            LOGGER.debug("updateBid({})", newBid);
+            publishBid(newBid);
         }
     }
 
     @Override
-    public void updatePrice(PriceUpdate priceUpdate) {
-        LOGGER.debug("updatePrice({})", priceUpdate);
-        publishEvent(new IncomingPriceEvent(session.getClusterId(), this.getAgentId(), session.getSessionId(),
-                timeService.currentDate(), priceUpdate, Qualifier.AGENT));
-        LOGGER.debug("Received price update [{}]", priceUpdate);
-    }
-
-    @Override
-    public void connectToMatcher(Session session) {
-        this.session = session;
-    }
-
-    @Override
-    public void matcherEndpointDisconnected(Session session) {
-        this.session = null;
+    public void updatePrice(PriceUpdate newPrice) {
+        LOGGER.debug("Received price update [{}], current bidNr = {}", newPrice, getCurrentBidNr());
+        super.updatePrice(newPrice);
     }
 
     @Reference
@@ -126,15 +114,8 @@ public class Freezer extends BaseAgent implements AgentEndpoint {
         this.timeService = timeService;
     }
 
-    public int getBidNumber() {
-        return bidNumber;
-    }
-
-    public void setBidNumber(int bidNumber) {
-        this.bidNumber = bidNumber;
-    }
-
-    private void incrBidNumber() {
-        this.bidNumber++;
+    @Override
+    protected Date now() {
+        return timeService.currentDate();
     }
 }

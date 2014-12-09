@@ -41,7 +41,7 @@ public abstract class BaseDeviceAgent extends BaseAgent implements AgentEndpoint
         }
     }
 	
-	protected synchronized final Bid createBid(PricePoint... pricePoints) {
+	protected synchronized final PointBid createBid(PricePoint... pricePoints) {
 		if(session == null) {
 			return null;
 		} else {
