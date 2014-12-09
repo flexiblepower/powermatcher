@@ -141,7 +141,7 @@ public class ConcentratorResilienceTest extends ResilienceTest{
 
         // Verify the price received by the agents
         for (MockAgent agent : agentList) {
-            assertEquals(expPrice, agent.getLastPriceUpdate().getCurrentPrice(), 0);
+            assertEquals(expPrice, agent.getLastPriceUpdate().getPriceValue(), 0);
         }
     }
     

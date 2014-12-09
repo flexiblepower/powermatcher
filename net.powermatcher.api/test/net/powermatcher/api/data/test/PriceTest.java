@@ -14,8 +14,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * @author IBM
- * @version 0.9.0
+ * @author FAN
+ * @version 1.0
  */
 public class PriceTest {
 
@@ -39,8 +39,8 @@ public class PriceTest {
 	 * 
 	 */
     @Test
-    public void testGetCurrentPrice() {
-        assertEquals(DEMAND, this.price.getCurrentPrice(), 0.0d);
+    public void testGetPriceValue() {
+        assertEquals(DEMAND, this.price.getPriceValue(), 0.0d);
     }
 
     /**
@@ -59,17 +59,9 @@ public class PriceTest {
 	 * 
 	 */
     @Test
-    public void testGetNormalizedPrice() {
-        assertEquals(2, this.price.getNormalizedPrice());
-    }
-
-    /**
-	 * 
-	 */
-    @Test
     public void testPrice() {
         Price price = new Price(this.marketBasis, 1.0d);
-        assertEquals(0.0d, price.getCurrentPrice(), 1.0d);
+        assertEquals(0.0d, price.getPriceValue(), 1.0d);
     }
 
     /**
@@ -84,35 +76,24 @@ public class PriceTest {
 	 * 
 	 */
     @Test
-    public void testSetCurrentPrice() {
+    public void testSetPriceValue() {
         this.price = new Price(this.marketBasis, 3.0d);
-        assertEquals(3.0d, this.price.getCurrentPrice(), 0.0d);
-        assertEquals(3, this.price.getNormalizedPrice());
+        assertEquals(3.0d, this.price.getPriceValue(), 0.0d);
         this.price = new Price(this.marketBasis, -1.0d);
-        assertEquals(-1.0d, this.price.getCurrentPrice(), 0.0d);
-        assertEquals(-1, this.price.getNormalizedPrice());
+        assertEquals(-1.0d, this.price.getPriceValue(), 0.0d);
         this.price = new Price(this.marketBasis, 8.0d);
-        assertEquals(8.0d, this.price.getCurrentPrice(), 0.0d);
-        assertEquals(8, this.price.getNormalizedPrice());
+        assertEquals(8.0d, this.price.getPriceValue(), 0.0d);
     }
 
     /**
 	 * 
 	 */
     @Test
-    public void testSetCurrentPriceStep() {
+    public void testSetPriceValueStep() {
         this.price = new Price(this.marketBasis, 3.0d);
-        assertEquals(3.0d, this.price.getCurrentPrice(), 0.0d);
-        assertEquals(3, this.price.getNormalizedPrice());
+        assertEquals(3.0d, this.price.getPriceValue(), 0.0d);
     }
     
-    @Test
-    public void testToMarketBasis(){
-        MarketBasis testBasis = new MarketBasis("electricity", "EURO", 5, 0.0, 10.0);
-        Price testPrice =  price.toMarketBasis(testBasis);
-        assertThat(testPrice.getCurrentPrice(), is(equalTo(price.getCurrentPrice())));
-        assertThat(testPrice.getMarketBasis(), is(equalTo(testBasis)));
-    }
     
     @Test
     public void testEquals(){
@@ -154,7 +135,7 @@ public class PriceTest {
     
     @Test
     public void testToString(){
-         final String expected = "Price{currentPrice=2,bidReference=0}";
+         final String expected = "Price{priceValue=2}";
          assertThat(price.toString(), is(equalTo(expected)));
     }
 

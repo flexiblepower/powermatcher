@@ -35,7 +35,7 @@ public class PricePoint implements Comparable<PricePoint> {
     
     @Override
     public int hashCode() {
-    	return 31 * price.hashCode() + Double.hashCode(demand);
+    	return 31 * price.hashCode() + Double.valueOf(demand).hashCode();
     }
 
     @Override

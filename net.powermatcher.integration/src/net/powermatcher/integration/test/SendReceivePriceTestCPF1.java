@@ -32,20 +32,20 @@ public class SendReceivePriceTestCPF1 extends BidResilienceTest {
 
         this.auctioneer.publishPrice();
         // Get the new price calculated and published by the auctioneer
-        Price currentPrice = this.auctioneer.getLastPublishedPrice();
+        Price priceValue = this.auctioneer.getLastPublishedPrice();
 
         // Verify the equilibrium
-        assertEquals(this.resultsReader.getEquilibriumPrice(), this.concentrator.getLastPrice().getCurrentPrice(), 0.0);
+        assertEquals(this.resultsReader.getEquilibriumPrice(), this.concentrator.getLastPrice().getPriceValue(), 0.0);
 
         // Check received price in concentrator
-        assertEquals(currentPrice, this.concentrator.getLastPrice());
+        assertEquals(priceValue, this.concentrator.getLastPrice());
 
         // Check the published by the concentrator
         assertEquals(this.concentrator.getLastPrice(), this.concentrator.getLastPublishedPrice());
 
         // Verify the price received by the agents
         for (MockAgent agent : agentList) {
-            assertEquals(currentPrice, agent.getLastPriceUpdate());
+            assertEquals(priceValue, agent.getLastPriceUpdate());
         }
     }
 }

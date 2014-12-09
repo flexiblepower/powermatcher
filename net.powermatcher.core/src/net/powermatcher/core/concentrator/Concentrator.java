@@ -13,6 +13,7 @@ import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
+import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.IncomingBidEvent;
 import net.powermatcher.api.monitoring.IncomingPriceEvent;
 import net.powermatcher.api.monitoring.ObservableAgent;
@@ -204,25 +205,24 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
     }
 
     @Override
-    public synchronized void updatePrice(Price newPrice) {
-        if (newPrice == null) {
+    public synchronized void updatePrice(PriceUpdate priceUpdate) {
+        if (priceUpdate == null) {
             LOGGER.error("Price cannot be null");
             return;
         }
         
-        LOGGER.debug("Received price update [{}]", newPrice);
+        LOGGER.debug("Received price update [{}]", priceUpdate);
         this.publishEvent(new IncomingPriceEvent(sessionToMatcher.getClusterId(), this.config.agentId(),
-                this.sessionToMatcher.getSessionId(), timeService.currentDate(), newPrice, Qualifier.AGENT));
+                this.sessionToMatcher.getSessionId(), timeService.currentDate(), priceUpdate.getPrice(), Qualifier.AGENT));
 
         // Find bidCacheSnapshot belonging to the newly received price update
-        BidCacheSnapshot bidCacheSnapshot = this.aggregatedBids.getMatchingSnapshot(newPrice.getBidNumber());
+        BidCacheSnapshot bidCacheSnapshot = this.aggregatedBids.getMatchingSnapshot(priceUpdate.getBidNumber());
         if (bidCacheSnapshot == null) {
         	// ignore price and log warning
-        	LOGGER.warn("Received a price update for a bid that I never sent, id: {}", newPrice.getBidNumber());
+        	LOGGER.warn("Received a price update for a bid that I never sent, id: {}", priceUpdate.getBidNumber());
         	return;
         }
         
-        newPrice = transformPrice(newPrice, bidCacheSnapshot.getAggregatedBid());
         
         // Publish new price to connected agents
         for (Session session : this.sessionToAgents) {
@@ -232,26 +232,14 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
         		continue;
         	} 
 
-        	Price agentPrice = new Price(newPrice.getMarketBasis(), newPrice.getCurrentPrice(), originalAgentBid);
+        	PriceUpdate agentPrice = new PriceUpdate(priceUpdate.getPrice(), originalAgentBid);
         	
             session.updatePrice(agentPrice);
 
             this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), this.config.agentId(), session.getSessionId(), timeService
-                    .currentDate(), newPrice, Qualifier.MATCHER));
+                    .currentDate(), priceUpdate.getPrice(), Qualifier.MATCHER));
 
         }
-    }
-    
-    /**
-     * This method should be overridden when the price that will be sent has to be changed.
-     * 
-     * @param price The (input) price as received from the connected matcher.
-     * @param bid The aggregated bid on which this price was based.
-     * @return The price that will be sent to all the agents that are connected to this {@link Concentrator}. 
-     *         The bidNumber of this price is irrelevant, since this will be changed for each agent.
-     */
-    protected Price transformPrice(Price price, Bid bid) {
-    	return price;
     }
 
     protected synchronized void doBidUpdate() {

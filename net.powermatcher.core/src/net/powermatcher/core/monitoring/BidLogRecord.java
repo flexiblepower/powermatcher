@@ -3,8 +3,10 @@ package net.powermatcher.core.monitoring;
 import java.text.DateFormat;
 import java.util.Date;
 
+import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
+import net.powermatcher.api.data.PointBid;
 import net.powermatcher.api.data.PricePoint;
 import net.powermatcher.api.monitoring.BidEvent;
 
@@ -20,29 +22,41 @@ public class BidLogRecord extends LogRecord {
 
     @Override
     public String[] getLine() {
+        
         MarketBasis marketBasis = bid.getMarketBasis();
 
         StringBuilder demandBuilder = new StringBuilder();
         StringBuilder pricePointBuiler = new StringBuilder();
 
-        for (Double d : this.bid.getDemand()) {
+        if(bid instanceof ArrayBid)
+        {
+            ArrayBid temp = (ArrayBid) bid;
+            
+        for (Double d : temp.getDemand()) {
             if (demandBuilder.length() > 0) {
                 demandBuilder.append("#");
             }
             demandBuilder.append(d);
         }
+        }
+        else if(bid instanceof PointBid)
+        {
+            
+            PointBid temp = (PointBid) bid;
 
-        if (bid.getPricePoints() != null) {
+        if (temp.getPricePoints() != null) {
 
-            for (PricePoint p : this.bid.getPricePoints()) {
+            for (PricePoint p : temp.getPricePoints()) {
                 if (pricePointBuiler.length() > 0) {
                     pricePointBuiler.append("|");
                 }
+                //TODO fix this refactor
 
-                int priceStep = marketBasis.toPriceStep(p.getNormalizedPrice());
-                pricePointBuiler.append(MarketBasis.PRICE_FORMAT.format(marketBasis.toPrice(priceStep)));
-                pricePointBuiler.append("|").append(MarketBasis.DEMAND_FORMAT.format(p.getDemand()));
+//                int priceStep = marketBasis.toPriceStep(p.getNormalizedPrice());
+//                pricePointBuiler.append(MarketBasis.PRICE_FORMAT.format(marketBasis.toPrice(priceStep)));
+//                pricePointBuiler.append("|").append(MarketBasis.DEMAND_FORMAT.format(p.getDemand()));
             }
+        }
         }
 
         return new String[] { getDateFormat().format(getLogTime()), getClusterId(), getAgentId(),

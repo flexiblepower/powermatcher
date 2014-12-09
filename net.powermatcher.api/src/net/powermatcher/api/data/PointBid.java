@@ -110,7 +110,7 @@ public class PointBid extends Bid implements Iterable<PricePoint> {
 		
 		// Now calculate the demand between the 2 points
 		// First the factor (between 0 and 1) of where the price is on the line
-		double factor = (price.getPrice() - lower.getPrice().getPrice()) / (higher.getPrice().getPrice() - lower.getPrice().getPrice());
+		double factor = (price.getPriceValue() - lower.getPrice().getPriceValue()) / (higher.getPrice().getPriceValue() - lower.getPrice().getPriceValue());
 		// Now calculate the demand
 		return (1 - factor) * lower.getDemand() + factor * higher.getDemand();
 	}
@@ -172,4 +172,8 @@ public class PointBid extends Bid implements Iterable<PricePoint> {
         }
         return newDemand;
 	}
+
+    public PricePoint[] getPricePoints() {
+        return pricePoints;
+    }
 }

@@ -15,6 +15,7 @@ import net.powermatcher.api.data.Price;
  */
 public abstract class PriceEvent extends AgentEvent {
 
+  //TODO use a PriceUpdate, not a Price
     /**
      * The received {@link Price}
      */

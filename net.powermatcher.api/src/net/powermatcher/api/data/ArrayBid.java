@@ -9,7 +9,7 @@ public class ArrayBid extends Bid {
 		private final MarketBasis marketBasis;
 		private int bidNumber;
 		private int nextIndex;
-		private final double[] demandArray;
+		private double[] demandArray;
 		
 		public Builder(MarketBasis marketBasis) {
 			this.marketBasis = marketBasis;
@@ -24,12 +24,12 @@ public class ArrayBid extends Bid {
 			}
 		}
 		
-		public Builder bidNumber(int bidNumber) {
+		public Builder setBidNumber(int bidNumber) {
 			this.bidNumber = bidNumber;
 			return this;
 		}
 		
-		public Builder demand(double demand) {
+		public Builder setDemand(double demand) {
 			checkIndex(nextIndex);
 			if(nextIndex > 0) {
 				if(demand > demandArray[nextIndex - 1]) {
@@ -39,6 +39,12 @@ public class ArrayBid extends Bid {
 			demandArray[nextIndex++] = demand;
 			return this;
 		}
+		
+	      public Builder setDemandArray(double[] demand) {
+	           this.demandArray = Arrays.copyOf(demand, demand.length);
+	            return this;
+	        }
+		
 		
 		public Builder until(int priceStep) {
 			if(nextIndex == 0) {

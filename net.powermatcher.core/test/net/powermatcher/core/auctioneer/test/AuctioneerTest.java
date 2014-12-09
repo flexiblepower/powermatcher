@@ -97,14 +97,14 @@ public class AuctioneerTest {
         agents[1].sendBid(new Bid(marketBasis, new double[] { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 }));
         agents[2].sendBid(new Bid(marketBasis, new double[] { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 }));
         timer.doTaskOnce();
-        assertEquals(10, agents[0].getLastPriceUpdate().getCurrentPrice(), 0);
+        assertEquals(10, agents[0].getLastPriceUpdate().getPriceValue(), 0);
 
         // run 2
         agents[0].sendBid(new Bid(marketBasis, new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 }));
         agents[1].sendBid(new Bid(marketBasis, new double[] { 4, 4, 4, 4, 4, 2, 2, 2, 2, 2, 2 }));
         agents[2].sendBid(new Bid(marketBasis, new double[] { 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1 }));
         timer.doTaskOnce();
-        assertEquals(10, agents[0].getLastPriceUpdate().getCurrentPrice(), 0);
+        assertEquals(10, agents[0].getLastPriceUpdate().getPriceValue(), 0);
         removeAgents(3);
     }
 
@@ -116,14 +116,14 @@ public class AuctioneerTest {
         agents[1].sendBid(new Bid(marketBasis, new double[] { -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4 }));
         agents[2].sendBid(new Bid(marketBasis, new double[] { -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3 }));
         timer.doTaskOnce();
-        assertEquals(0, agents[0].getLastPriceUpdate().getCurrentPrice(), 0);
+        assertEquals(0, agents[0].getLastPriceUpdate().getPriceValue(), 0);
 
         // run 2
         agents[0].sendBid(new Bid(marketBasis, new double[] { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5 }));
         agents[1].sendBid(new Bid(marketBasis, new double[] { -2, -2, -2, -2, -2, -4, -4, -4, -4, -4, -4 }));
         agents[2].sendBid(new Bid(marketBasis, new double[] { -1, -1, -1, -1, -1, -1, -1, -3, -3, -3, -3 }));
         timer.doTaskOnce();
-        assertEquals(0, agents[0].getLastPriceUpdate().getCurrentPrice(), 0);
+        assertEquals(0, agents[0].getLastPriceUpdate().getPriceValue(), 0);
         removeAgents(3);
     }
 
@@ -135,14 +135,14 @@ public class AuctioneerTest {
         agents[1].sendBid(new Bid(marketBasis, new double[] { 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0 }));
         agents[2].sendBid(new Bid(marketBasis, new double[] { 0, 0, 0, 0, 0, -5, -5, -5, -5, -5, -5 }));
         timer.doTaskOnce();
-        assertEquals(5, agents[0].getLastPriceUpdate().getCurrentPrice(), 0);
+        assertEquals(5, agents[0].getLastPriceUpdate().getPriceValue(), 0);
 
         // run 2
         agents[0].sendBid(new Bid(marketBasis, new double[] { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5 }));
         agents[1].sendBid(new Bid(marketBasis, new double[] { 0, 0, 0, 0, 0, 0, 0, -4, -4, -4, -4 }));
         agents[2].sendBid(new Bid(marketBasis, new double[] { 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9 }));
         timer.doTaskOnce();
-        assertEquals(7, agents[0].getLastPriceUpdate().getCurrentPrice(), 0);
+        assertEquals(7, agents[0].getLastPriceUpdate().getPriceValue(), 0);
         removeAgents(3);
     }
 
@@ -172,7 +172,7 @@ public class AuctioneerTest {
         agents[19].sendBid(new Bid(marketBasis, new double[] { 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0 }));
         timer.doTaskOnce();
 
-        assertEquals(6, agents[0].getLastPriceUpdate().getCurrentPrice(), 0);
+        assertEquals(6, agents[0].getLastPriceUpdate().getPriceValue(), 0);
         removeAgents(20);
     }
 
@@ -201,7 +201,7 @@ public class AuctioneerTest {
         agents[19].sendBid(new Bid(marketBasis, new double[] { 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0 }));
         agents[20].sendBid(new Bid(marketBasis, new double[] { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 }));
         timer.doTaskOnce();
-        assertEquals(7, agents[0].getLastPriceUpdate().getCurrentPrice(), 0);
+        assertEquals(7, agents[0].getLastPriceUpdate().getPriceValue(), 0);
         removeAgents(21);
     }
 
@@ -212,7 +212,7 @@ public class AuctioneerTest {
      * {5,5,5,5,5,5,5,5,5,5,5})); agents[1].sendBid(new Bid(marketBasis, new double[] {4,4,4,4,4,0,0,0,0,0,0}));
      * agents[2].sendBid(new Bid(marketBasis, new double[] {0,0,0,0,0,-5,-5,-5,-5,-5,-5})); agents[3].sendBid(new
      * Bid(marketBasis, new double[] {-9,-9,-9,-9, -9,1,1,1,1,1,1})); auctioneer.publishNewPrice(); assertEquals(5,
-     * agents[0].getLastPriceUpdate().getCurrentPrice(), 0); removeAgents(4); }
+     * agents[0].getLastPriceUpdate().getPriceValue(), 0); removeAgents(4); }
      */
 
 }

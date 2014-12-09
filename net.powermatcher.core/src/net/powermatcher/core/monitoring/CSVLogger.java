@@ -42,7 +42,7 @@ public class CSVLogger extends AgentEventLogger {
      * The header for the pricelog file
      */
     private static final String[] PRICE_HEADER_ROW = new String[] { "logTime", "clusterId", "id", "qualifier",
-            "commodity", "currency", "minimumPrice", "maximumPrice", "currentPrice", "lastUpdateTime" };
+            "commodity", "currency", "minimumPrice", "maximumPrice", "priceValue", "lastUpdateTime" };
 
     /**
      * OSGI configuration of the {@link CSVLogger}

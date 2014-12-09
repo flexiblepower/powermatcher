@@ -27,6 +27,7 @@ import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
+import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.IncomingBidEvent;
 import net.powermatcher.api.monitoring.IncomingPriceEvent;
 import net.powermatcher.api.monitoring.ObservableAgent;
@@ -293,18 +294,18 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
     }
 
     @Override
-    public void updatePrice(Price newPrice) {
-        if (newPrice == null) {
-            LOGGER.error("Price cannot be null");
+    public void updatePrice(PriceUpdate priceUpdate) {
+        if (priceUpdate == null) {
+            LOGGER.error("PriceUpdate cannot be null");
             return;
         }
 
-        LOGGER.debug("Received price update [{}]", newPrice);
+        LOGGER.debug("Received price update [{}]", priceUpdate);
         this.publishEvent(new IncomingPriceEvent(sessionToMatcher.getClusterId(), this.config.agentId(),
-                this.sessionToMatcher.getSessionId(), timeService.currentDate(), newPrice, Qualifier.AGENT));
+                this.sessionToMatcher.getSessionId(), timeService.currentDate(), priceUpdate.getPrice(), Qualifier.AGENT));
 
         // Find bidCacheSnapshot belonging to the newly received price update
-        BidCacheSnapshot bidCacheSnapshot = this.aggregatedBids.getMatchingSnapshot(newPrice.getBidNumber());
+        BidCacheSnapshot bidCacheSnapshot = this.aggregatedBids.getMatchingSnapshot(priceUpdate.getBidNumber());
         if (bidCacheSnapshot == null) {
             // ignore price and log warning
             return;
@@ -318,14 +319,14 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
                 continue;
             }
 
-            Price agentPrice = new Price(newPrice.getMarketBasis(), newPrice.getCurrentPrice(), originalAgentBid);
+            Price agentPrice = new Price(priceUpdate.getMarketBasis(), priceUpdate.getPriceValue(), originalAgentBid);
 
             // call peakshaving code.
             Price adjustedPrice = adjustPrice(agentPrice);
             session.updatePrice(adjustedPrice);
 
             this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), this.config.agentId(), session
-                    .getSessionId(), timeService.currentDate(), newPrice, Qualifier.MATCHER));
+                    .getSessionId(), timeService.currentDate(), priceUpdate, Qualifier.MATCHER));
 
         }
     }
@@ -344,7 +345,7 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         }
 
         // transform prices to indices
-        int priceInIndex = newPrice.getMarketBasis().toPriceStep(newPrice.getCurrentPrice());
+        int priceInIndex = newPrice.getMarketBasis().toPriceStep(newPrice.getPriceValue());
         int priceOutIndex = priceInIndex;
 
         // create a copy of the aggregated bid to calculate the demand function
@@ -356,7 +357,7 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         }
 
         // determine the expected allocation
-        double allocation = demandFunction.getDemand(newPrice.getCurrentPrice());
+        double allocation = demandFunction.getDemand(newPrice.getPriceValue());
 
         // Adjust the price so that the allocation is within flow
         // constraints (taking uncontrolled flow into account)
@@ -427,12 +428,12 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
 
         // calculate the allocation which would have been the fact if no
         // transformation would have been performed
-        double untransformedAllocation = this.aggregatedBidIn.getDemand(this.priceIn.getCurrentPrice());
+        double untransformedAllocation = this.aggregatedBidIn.getDemand(this.priceIn.getPriceValue());
 
         LOGGER.debug("BID(IN)" + this.aggregatedBidIn);
         LOGGER.debug("BID(OUT)" + this.aggregatedBidOut);
-        LOGGER.debug("CURRENTPRICE(OUT)=" + this.priceOut.getCurrentPrice());
-        LOGGER.debug("CURRENTPRICE(in)=" + this.priceIn.getCurrentPrice());
+        LOGGER.debug("CURRENTPRICE(OUT)=" + this.priceOut.getPriceValue());
+        LOGGER.debug("CURRENTPRICE(in)=" + this.priceIn.getPriceValue());
         LOGGER.debug("ALLOCATION=" + allocation);
         LOGGER.debug("UNTRANSFORMEDALLOC=" + untransformedAllocation);
 
@@ -469,7 +470,7 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         }
 
         // use the framework to determine the allocation
-        return this.aggregatedBidIn.getDemand(this.priceOut.getCurrentPrice());
+        return this.aggregatedBidIn.getDemand(this.priceOut.getPriceValue());
     }
 
     /**

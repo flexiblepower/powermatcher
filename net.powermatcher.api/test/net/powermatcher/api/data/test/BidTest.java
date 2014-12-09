@@ -231,16 +231,16 @@ public class BidTest {
 	 */
     @Test
     public void testEquilibrium() {
-        assertEquals(1.0d, this.bid0.calculateIntersection(0).getCurrentPrice(), 0.0d);
-        assertEquals(5.0d, this.bid1.calculateIntersection(0).getCurrentPrice(), 0.0d);
-        assertEquals(7.0d, this.bid2.calculateIntersection(0).getCurrentPrice(), 0.0d);
-        assertEquals(7.0d, this.bid3.calculateIntersection(0).getCurrentPrice(), 0.0d);
-        assertEquals(1.0d, this.bid4.calculateIntersection(0).getCurrentPrice(), 0.0d);
-        assertEquals(7.0d, this.bid5.calculateIntersection(0).getCurrentPrice(), 0.0d);
-        assertEquals(5.0d, this.bid6.calculateIntersection(0).getCurrentPrice(), 0.0d);
-        assertEquals(7.0d, this.bid7.calculateIntersection(0).getCurrentPrice(), 0.0d);
-        assertEquals(7.0d, this.bid8.calculateIntersection(0).getCurrentPrice(), 0.0d);
-        assertEquals(-1.0d, this.bid9.calculateIntersection(0).getCurrentPrice(), 0.0d);
+        assertEquals(1.0d, this.bid0.calculateIntersection(0).getPriceValue(), 0.0d);
+        assertEquals(5.0d, this.bid1.calculateIntersection(0).getPriceValue(), 0.0d);
+        assertEquals(7.0d, this.bid2.calculateIntersection(0).getPriceValue(), 0.0d);
+        assertEquals(7.0d, this.bid3.calculateIntersection(0).getPriceValue(), 0.0d);
+        assertEquals(1.0d, this.bid4.calculateIntersection(0).getPriceValue(), 0.0d);
+        assertEquals(7.0d, this.bid5.calculateIntersection(0).getPriceValue(), 0.0d);
+        assertEquals(5.0d, this.bid6.calculateIntersection(0).getPriceValue(), 0.0d);
+        assertEquals(7.0d, this.bid7.calculateIntersection(0).getPriceValue(), 0.0d);
+        assertEquals(7.0d, this.bid8.calculateIntersection(0).getPriceValue(), 0.0d);
+        assertEquals(-1.0d, this.bid9.calculateIntersection(0).getPriceValue(), 0.0d);
     }
 
     /**

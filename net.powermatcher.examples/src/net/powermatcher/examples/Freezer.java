@@ -10,8 +10,8 @@ import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
-import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PricePoint;
+import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.IncomingPriceEvent;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.OutgoingBidEvent;
@@ -99,11 +99,11 @@ public class Freezer extends BaseAgent implements AgentEndpoint {
     }
 
     @Override
-    public void updatePrice(Price newPrice) {
-        LOGGER.debug("updatePrice({})", newPrice);
+    public void updatePrice(PriceUpdate priceUpdate) {
+        LOGGER.debug("updatePrice({})", priceUpdate);
         publishEvent(new IncomingPriceEvent(session.getClusterId(), this.getAgentId(), session.getSessionId(),
-                timeService.currentDate(), newPrice, Qualifier.AGENT));
-        LOGGER.debug("Received price update [{}]", newPrice);
+                timeService.currentDate(), priceUpdate, Qualifier.AGENT));
+        LOGGER.debug("Received price update [{}]", priceUpdate);
     }
 
     @Override

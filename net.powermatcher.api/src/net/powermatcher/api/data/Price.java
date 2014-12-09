@@ -6,7 +6,7 @@ import java.util.Locale;
 
 public class Price implements Comparable<Price> {
 	private final MarketBasis marketBasis;
-	private final double price;
+	private final double priceValue;
 
 	public Price(MarketBasis marketBasis, double price) {
 		if(marketBasis == null) {
@@ -18,25 +18,25 @@ public class Price implements Comparable<Price> {
 												+ marketBasis.getMinimumPrice() + ", " + marketBasis.getMaximumPrice() +"]");
 		}
 		this.marketBasis = marketBasis;
-		this.price = price;
+		this.priceValue = price;
 	}
 
 	public MarketBasis getMarketBasis() {
 		return marketBasis;
 	}
 	
-	public double getPrice() {
-		return price;
+	public double getPriceValue() {
+		return priceValue;
 	}
 	
 	public PriceStep toPriceStep() {
-		double priceStep = (price - marketBasis.getMinimumPrice()) / marketBasis.getPriceIncrement();
+		double priceStep = (priceValue - marketBasis.getMinimumPrice()) / marketBasis.getPriceIncrement();
         return new PriceStep(marketBasis, Math.round((float) priceStep));
 	}
 
 	@Override
 	public int hashCode() {
-		return 83257 * marketBasis.hashCode() + 50723 * Double.hashCode(price); 
+		return 83257 * marketBasis.hashCode() + 50723 * Double.valueOf(priceValue).hashCode(); 
 	}
 
 	@Override
@@ -47,7 +47,7 @@ public class Price implements Comparable<Price> {
 			return false;
 		} else {
 			Price other = (Price) obj;
-			return marketBasis.equals(other.marketBasis) && price == other.price;
+			return marketBasis.equals(other.marketBasis) && priceValue == other.priceValue;
 		}
 	}
 	
@@ -55,16 +55,16 @@ public class Price implements Comparable<Price> {
 
     @Override
 	public String toString() {
-		return PRICE_FORMAT.format(price);
+		return "Price{priceValue="+ PRICE_FORMAT.format(priceValue) + "}";
 	}
     
     @Override
     public int compareTo(Price o) {
     	if(!marketBasis.equals(o.marketBasis)) {
     		throw new IllegalArgumentException("Non-equal market basis");
-    	} else if(price < o.price) {
+    	} else if(priceValue < o.priceValue) {
     		return -1;
-    	} else if(price > o.price) {
+    	} else if(priceValue > o.priceValue) {
     		return 1;
     	} else {
     		return 0;

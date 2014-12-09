@@ -14,7 +14,7 @@ public class PriceModel {
     /**
      * Define the current price (double) field.
      */
-    private double currentPrice;
+    private double priceValue;
 
 	public String getClusterId() {
 		return clusterId;
@@ -32,11 +32,11 @@ public class PriceModel {
 		this.marketBasis = marketBasis;
 	}
 
-	public double getCurrentPrice() {
-		return currentPrice;
+	public double getPriceValue() {
+		return priceValue;
 	}
 
-	public void setCurrentPrice(double currentPrice) {
-		this.currentPrice = currentPrice;
+	public void setPriceValue(double priceValue) {
+		this.priceValue = priceValue;
 	}
 }

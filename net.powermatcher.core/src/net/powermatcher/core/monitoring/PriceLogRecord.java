@@ -25,6 +25,6 @@ public class PriceLogRecord extends LogRecord {
                 marketbasis.getCommodity(), marketbasis.getCurrency(),
                 MarketBasis.PRICE_FORMAT.format(marketbasis.getMinimumPrice()),
                 MarketBasis.PRICE_FORMAT.format(marketbasis.getMaximumPrice()),
-                MarketBasis.PRICE_FORMAT.format(price.getCurrentPrice()), getDateFormat().format(getEventTimestamp()) };
+                MarketBasis.PRICE_FORMAT.format(price.getPriceValue()), getDateFormat().format(getEventTimestamp()) };
     }
 }

@@ -7,8 +7,8 @@ import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
-import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PricePoint;
+import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.IncomingPriceEvent;
 import net.powermatcher.api.monitoring.OutgoingBidEvent;
 import net.powermatcher.api.monitoring.Qualifier;
@@ -50,8 +50,8 @@ public abstract class BaseDeviceAgent extends BaseAgent implements AgentEndpoint
 	}
 
 	@Override
-	public synchronized void updatePrice(Price newPrice) {
-		publishEvent(new IncomingPriceEvent(getClusterId(), getAgentId(), session.getSessionId(), now(), newPrice, Qualifier.AGENT));
+	public synchronized void updatePrice(PriceUpdate priceUpdate) {
+		publishEvent(new IncomingPriceEvent(getClusterId(), getAgentId(), session.getSessionId(), now(), priceUpdate, Qualifier.AGENT));
 	}
 
 	private Bid lastBid;

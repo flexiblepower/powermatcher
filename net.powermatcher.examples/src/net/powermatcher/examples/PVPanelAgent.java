@@ -11,8 +11,8 @@ import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
-import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PricePoint;
+import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.core.BaseDeviceAgent;
 
@@ -92,9 +92,9 @@ public class PVPanelAgent extends BaseDeviceAgent implements AgentEndpoint {
     }
 
     @Override
-    public void updatePrice(Price newPrice) {
-    	LOGGER.debug("Received price update [{}], current bidNr = {}", newPrice, getCurrentBidNr());
-    	super.updatePrice(newPrice);
+    public void updatePrice(PriceUpdate priceUpdate) {
+    	LOGGER.debug("Received price update [{}], current bidNr = {}", priceUpdate, getCurrentBidNr());
+    	super.updatePrice(priceUpdate);
     }
 
     @Reference

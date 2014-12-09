@@ -35,7 +35,7 @@ public class PmMessageSerializer {
 	
 	public String serializePrice(Price price) {
 		PriceModel priceModel = new PriceModel();
-		priceModel.setCurrentPrice(price.getCurrentPrice());
+		priceModel.setPriceValue(price.getPriceValue());
 		priceModel.setMarketBasis(convertMarketBasis(price.getMarketBasis()));
 		
 		PmMessage message = new PmMessage();
@@ -84,7 +84,7 @@ public class PmMessageSerializer {
 	
 	public Price mapPrice(PriceModel priceModel) {
 		Price price = new Price(convertMarketBasis(priceModel.getMarketBasis()), 
-				priceModel.getCurrentPrice());
+				priceModel.getPriceValue());
 		return price;
 	}
 	
