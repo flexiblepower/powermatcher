@@ -1,10 +1,7 @@
 package net.powermatcher.core.sessions;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -18,11 +15,8 @@ import net.powermatcher.core.concentrator.Concentrator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
-import aQute.bnd.annotation.metatype.Configurable;
-import aQute.bnd.annotation.metatype.Meta;
 
 /**
  * <p>
@@ -63,8 +57,6 @@ public class SessionManager implements SessionManagerInterface {
      * Holds the desiredConnections
      */
     private Map<String, String> desiredConnections = new ConcurrentHashMap<String, String>();
-
-    private Set<String> listAgents;
 
     @Reference(dynamic = true, multiple = true, optional = true)
     public void addAgentEndpoint(AgentEndpoint agentEndpoint) {
@@ -111,17 +103,6 @@ public class SessionManager implements SessionManagerInterface {
             MatcherEndpoint matcherEndpoint = matcherEndpoints.get(matcherId);
 
             if (agentEndpoint != null && matcherEndpoint != null) {
-
-//                if (matcherEndpoint instanceof Concentrator) {
-//                    List<String> whiteListAgents = matcherEndpoint.getWhiteListAgents();
-//                    // check for whiteListAgent
-//                    if (whiteListAgents != null) {
-//                        if (!whiteListAgents.contains(agentEndpoint.getAgentId())) {
-//                            continue;
-//                        }
-//                    }
-//                }
-//                
                 final String sessionId = agentId + ":" + matcherId;
                 if (activeSessions.containsKey(sessionId)) {
                     // session already exists
