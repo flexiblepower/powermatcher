@@ -1,19 +1,25 @@
 package net.powermatcher.core.auctioneer.test;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
+import net.powermatcher.api.data.Price;
+import net.powermatcher.core.BidCache;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.auctioneer.ObjectiveAuctioneer;
 import net.powermatcher.core.sessions.SessionManager;
 import net.powermatcher.core.time.SystemTimeService;
 import net.powermatcher.mock.MockAgent;
+import net.powermatcher.mock.MockObjectiveAgent;
 import net.powermatcher.mock.MockScheduler;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -29,15 +35,26 @@ public class ObjectiveAuctioneerTest {
     private ObjectiveAuctioneer objectiveauctioneer;
     private MockAgent[] agents;
 
+    private MockObjectiveAgent mockObjectiveAgent;
+    
     private SessionManager sessionManager;
 
-    private static final String AUCTIONEER_NAME = "auctioneer";
+    private static final String AUCTIONEER_NAME = "objectiveauctioneer";
+    private static final String OBJECTIVE_AGENT_NAME = "objectiveagent";
+    
+    private BidCache aggregatedBids;
 
+    private TimeService timeService;
+    
     @Before
     public void setUp() throws Exception {
+        // Init Objective Agent
+        this.mockObjectiveAgent = new MockObjectiveAgent(OBJECTIVE_AGENT_NAME);
+        
         // Init Auctioneer
         this.objectiveauctioneer = new ObjectiveAuctioneer();
-
+        this.objectiveauctioneer.addObjectiveEndpoint(this.mockObjectiveAgent);
+        
         auctioneerProperties = new HashMap<String, Object>();
         auctioneerProperties.put("agentId", AUCTIONEER_NAME);
         auctioneerProperties.put("clusterId", "DefaultCluster");
@@ -48,10 +65,10 @@ public class ObjectiveAuctioneerTest {
         auctioneerProperties.put("minimumPrice", "0");
         auctioneerProperties.put("maximumPrice", "10");
         auctioneerProperties.put("bidTimeout", "600");
-        auctioneerProperties.put("priceUpdateRate", "1");
+        auctioneerProperties.put("priceUpdateRate", "30");
         
         timer = new MockScheduler();
-
+        
         objectiveauctioneer.setExecutorService(timer);
         objectiveauctioneer.setTimeService(new SystemTimeService());
         objectiveauctioneer.activate(auctioneerProperties);
@@ -64,11 +81,11 @@ public class ObjectiveAuctioneerTest {
             newAgent.setDesiredParentId(AUCTIONEER_NAME);
             agents[i] = newAgent;
         }
-
+        
         // Session
         sessionManager = new SessionManager();
         sessionManager.addMatcherEndpoint(objectiveauctioneer);
-        sessionManager.activate();
+ //       sessionManager.activate();
     }
 
     private void addAgents(int number) {
@@ -82,7 +99,6 @@ public class ObjectiveAuctioneerTest {
             this.sessionManager.removeAgentEndpoint(agents[i]);
         }
     }
-
 
     @Test
     public void noEquilibriumOnDemandSide() {
@@ -101,6 +117,52 @@ public class ObjectiveAuctioneerTest {
         timer.doTaskOnce();
         assertEquals(10, agents[0].getLastPriceUpdate().getCurrentPrice(), 0);
         removeAgents(3);
+    }
+    
+    @Test
+    public void objectiveAgentTest() {
+        addAgents(3);
+        agents[0].sendBid(new Bid(marketBasis, new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 }));
+        agents[1].sendBid(new Bid(marketBasis, new double[] { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 }));
+        agents[2].sendBid(new Bid(marketBasis, new double[] { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 }));
+        timer.doTaskOnce();
+        
+        this.objectiveauctioneer.addObjectiveEndpoint(this.mockObjectiveAgent);
+        
+//        this.aggregatedBids = new BidCache(this.timeService, config.bidTimeout());
+        this.aggregatedBids = new BidCache(this.timeService, 5);
+        
+        
+        Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis);
+        Bid bid = new Bid(new Bid(marketBasis, new double[] { -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4 }));
+        
+        Bid finalAggregatedBid = null;
+        if (this.mockObjectiveAgent != null) {
+            
+          Bid aggregatedObjectiveBid = this.mockObjectiveAgent.handleAggregateBid(aggregatedBid);
+            
+          finalAggregatedBid = aggregatedBid.aggregate(aggregatedObjectiveBid);
+
+          // aggregate again with device agent bid.
+          Price newPrice = determinePrice(finalAggregatedBid);
+          
+          
+          //[50.0, 50.0, 50.0, 50.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        }
+
+        assertArrayEquals(new double[] { 50.0, 50.0, 50.0, 50.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, finalAggregatedBid.getDemand(), 0);
+        
+        
+        //Bid aggregatedBid = this.mockObjectiveAgent.handleAggregateBid(new Bid(marketBasis, new double[] { -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4 }));
+        // 96.0, 46.0, 46.0, -4.0, -4.0
+        
+//        assertArrayEquals(new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, this.matcher.getLastReceivedBid()
+//                .getDemand(), 0);
+        
+    }
+    
+    protected Price determinePrice(Bid aggregatedBid) {
+        return aggregatedBid.calculateIntersection(0);
     }
     
     @Test
@@ -198,5 +260,10 @@ public class ObjectiveAuctioneerTest {
         timer.doTaskOnce();
         assertEquals(7, agents[0].getLastPriceUpdate().getCurrentPrice(), 0);
         removeAgents(21);
+    }
+    
+    @After
+    public void deactivateTest() {
+        this.objectiveauctioneer.removeObjectiveEndpoint(this.mockObjectiveAgent);
     }
 }

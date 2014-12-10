@@ -167,9 +167,7 @@ public class ObjectiveAuctioneer extends Auctioneer {
         if (this.objectiveEndpoint == objectiveEndpoint) {
             this.objectiveEndpoint = null;
             LOGGER.debug("Removed objective agent");
-        } else {
-            throw new IllegalStateException("This objective agent is not active and can't be removed");
-        }
+        } 
     }
 
     @Override

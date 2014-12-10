@@ -81,7 +81,7 @@ public class ConcentratorTest {
             agents[i] = newAgent;
         }
 
-        sessionManager.activate();
+     //   sessionManager.activate();
 
     }
 

@@ -1,5 +1,6 @@
 package net.powermatcher.core;
 
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
@@ -24,6 +25,8 @@ public abstract class BaseAgent implements ObservableAgent {
     private String clusterId;
     
     private String desiredParentId;
+    
+    private List<String> whiteListAgents;
     
     /**
      * Collection of {@link Observer} services.
@@ -67,6 +70,14 @@ public abstract class BaseAgent implements ObservableAgent {
 		this.desiredParentId = desiredParentId;
 	}
 
+	public List<String> getWhiteListAgents() {
+        return whiteListAgents;
+    }
+
+    protected void setWhiteListAgents(List<String> whiteListAgents) {
+        this.whiteListAgents = whiteListAgents;
+    }
+    
     /**
      * Publish an {@link UpdateEvent} to the attached {@link Observer} services.
      * 

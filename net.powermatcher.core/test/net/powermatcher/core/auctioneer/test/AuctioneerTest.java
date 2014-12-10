@@ -55,7 +55,7 @@ public class AuctioneerTest {
         auctioneerProperties.put("minimumPrice", "0");
         auctioneerProperties.put("maximumPrice", "10");
         auctioneerProperties.put("bidTimeout", "600");
-        auctioneerProperties.put("priceUpdateRate", "1");
+        auctioneerProperties.put("priceUpdateRate", "30");
         
         timer = new MockScheduler();
 
@@ -75,7 +75,7 @@ public class AuctioneerTest {
         // Session
         sessionManager = new SessionManager();
         sessionManager.addMatcherEndpoint(auctioneer);
-        sessionManager.activate();
+        //sessionManager.activate();
     }
 
     private void addAgents(int number) {

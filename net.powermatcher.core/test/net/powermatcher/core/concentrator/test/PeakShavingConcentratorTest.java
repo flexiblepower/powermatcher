@@ -59,7 +59,7 @@ public class PeakShavingConcentratorTest {
         concentratorProperties.put("agentId", CONCENTRATOR_NAME);
         
         concentratorProperties.put("floor", -10);
-        concentratorProperties.put("ceiling", -10);
+        concentratorProperties.put("ceiling", 10);
 
         timer = new MockScheduler();
         peakShavingConcentrator.setExecutorService(timer);
@@ -84,7 +84,7 @@ public class PeakShavingConcentratorTest {
             agents[i] = newAgent;
         }
 
-        sessionManager.activate();
+  //      sessionManager.activate();
     }
 
     @After
@@ -200,4 +200,8 @@ public class PeakShavingConcentratorTest {
         return aggregatedBid.calculateIntersection(0);
     }
     
+    @After
+    public void deactivatePeakshaver() {
+        this.peakShavingConcentrator.deactivate();
+    }
 }
