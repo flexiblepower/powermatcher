@@ -1,4 +1,4 @@
-package net.powermatcher.api.monitoring;
+package net.powermatcher.api.monitoring.events;
 
 import java.util.Date;
 
@@ -6,6 +6,7 @@ import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
+import net.powermatcher.api.monitoring.Qualifier;
 
 /**
  * An {@link IncomingBidEvent} is sent when an {@link AgentEndpoint} receives a new {@link Bid}.

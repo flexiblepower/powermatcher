@@ -11,9 +11,9 @@ import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.PriceUpdate;
-import net.powermatcher.api.monitoring.AgentEvent;
 import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.ObservableAgent;
+import net.powermatcher.api.monitoring.events.AgentEvent;
 
 public class MockAgent implements Agent, AgentEndpoint, ObservableAgent {
 
