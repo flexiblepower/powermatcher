@@ -1,7 +1,6 @@
 package net.powermatcher.integration.test;
 
 import java.io.IOException;
-import java.security.InvalidParameterException;
 import java.util.zip.DataFormatException;
 
 import net.powermatcher.integration.base.AuctioneerResilienceTest;
@@ -14,7 +13,7 @@ public class SendReceiveBidTestCBQ1 extends AuctioneerResilienceTest {
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
-    
+
     /**
      * Sending an invalid bid in an agent hierarchy is difficult because the creation of a bid info instance prohibits
      * this.
@@ -26,11 +25,12 @@ public class SendReceiveBidTestCBQ1 extends AuctioneerResilienceTest {
      * @throws IOException
      * @throws DataFormatException
      */
-    @Test(expected = InvalidParameterException.class)
+    @Test
     public void createInvalidBid1CPF1() throws IOException, DataFormatException {
         // Prepare the test for reading test input
         prepareTest("CBQ/CBQ1/Test1", null);
 
+        exception.expect(IllegalArgumentException.class);
         this.bidReader.nextBid();
     }
 
@@ -71,8 +71,8 @@ public class SendReceiveBidTestCBQ1 extends AuctioneerResilienceTest {
         // Prepare the test for reading test input
         prepareTest("CBQ/CBQ1/Test3", null);
 
-      exception.expect(IllegalArgumentException.class);
-      exception.expectMessage("Length of the demandArray is not equals to the number of price steps");
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("Length of the demandArray is not equals to the number of price steps");
         this.bidReader.nextBid();
     }
 }

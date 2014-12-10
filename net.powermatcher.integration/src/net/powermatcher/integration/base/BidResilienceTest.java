@@ -3,7 +3,6 @@ package net.powermatcher.integration.base;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -128,8 +127,8 @@ public class BidResilienceTest extends ResilienceTest {
                 } else {
                     stop = true;
                 }
-            } catch (InvalidParameterException e) {
-                LOGGER.error("Incorrect bid specification found: " + e.getMessage());
+            } catch (IllegalArgumentException e) {
+                LOGGER.error("Incorrect bid specification caught: " + e.getMessage());
                 bid = null;
             }
         } while (!stop);

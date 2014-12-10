@@ -158,8 +158,8 @@ public class AuctioneerResilienceTestAF extends AuctioneerResilienceTest {
     /**
      * Equilibrium including bid rejection.
      * 
-     * Series of bids with a guaranteed equilibrium price,including an ascending bid. Expected outcome is the difened
-     * expectedquilibrium price, with the ascending bid being rejected.
+     * Series of bids with a guaranteed equilibrium price,including an ascending bid. Expected outcome is the defined
+     * expected equilibrium price, with the ascending bid being rejected.
      * 
      * Check the equilibrium.
      * 
@@ -168,8 +168,6 @@ public class AuctioneerResilienceTestAF extends AuctioneerResilienceTest {
      */
     @Test
     public void equilibriumWithBidRejectionIAF5() throws IOException, DataFormatException {
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("The demandArray must be descending");
         performEquilibriumTest("IAF/IAF5", null);
     }
 
@@ -187,14 +185,11 @@ public class AuctioneerResilienceTestAF extends AuctioneerResilienceTest {
      */
     @Test
     public void equilibriumWithBidRejectionCheckAggregatedBidIAF5() throws IOException, DataFormatException {
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("The demandArray must be descending");
         performAggregatedBidTest("IAF/IAF5", null);
     }
 
     private void performEquilibriumTest(String testID, String suffix) throws IOException, DataFormatException {
         prepareTest(testID, suffix);
-        
 
         sendBidsToMatcher();
 

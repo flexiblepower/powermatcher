@@ -40,7 +40,7 @@ public class CsvBidReader {
 
         List<String> demandList = csvReader.nextLine();
         if (demandList != null) {
-            bid = new ArrayBid(marketBasis,0, demandFromList(demandList));
+            bid = new ArrayBid(marketBasis, 0, demandFromList(demandList));
         }
         return bid;
     }

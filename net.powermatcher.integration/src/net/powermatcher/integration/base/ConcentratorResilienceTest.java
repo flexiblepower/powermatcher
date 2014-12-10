@@ -3,7 +3,6 @@ package net.powermatcher.integration.base;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +23,7 @@ import org.junit.After;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConcentratorResilienceTest extends ResilienceTest{
+public class ConcentratorResilienceTest extends ResilienceTest {
 
     private static final String MATCHERAGENTNAME = "auctioneer";
     private static final String CONCENTRATOR_NAME = "concentrator";
@@ -33,7 +32,7 @@ public class ConcentratorResilienceTest extends ResilienceTest{
     // The direct upstream matcher for the agents
     protected ConcentratorWrapper concentrator;
 
-    //mock auctioneer
+    // mock auctioneer
     protected MockMatcherAgent auctioneer;
 
     protected void prepareTest(String testID, String suffix) throws IOException, DataFormatException {
@@ -109,8 +108,8 @@ public class ConcentratorResilienceTest extends ResilienceTest{
                 } else {
                     stop = true;
                 }
-            } catch (InvalidParameterException e) {
-                LOGGER.error("Incorrect bid specification found: " + e.getMessage());
+            } catch (IllegalArgumentException e) {
+                LOGGER.error("Incorrect bid specification caught: " + e.getMessage());
                 bid = null;
             }
         } while (!stop);
@@ -144,7 +143,7 @@ public class ConcentratorResilienceTest extends ResilienceTest{
             assertEquals(expPrice, agent.getLastPriceUpdate().getPrice().getPriceValue(), 0);
         }
     }
-    
+
     @After
     public void tearDown() throws IOException {
         if (this.bidReader != null) {

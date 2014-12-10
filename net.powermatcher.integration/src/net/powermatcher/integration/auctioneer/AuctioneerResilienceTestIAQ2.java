@@ -51,8 +51,6 @@ public class AuctioneerResilienceTestIAQ2 extends AuctioneerResilienceTest {
      */
     @Test
     public void qualityTestIAQ2NoEquilibriumOnSupplySide() throws IOException, DataFormatException {
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("Length of the demandArray is not equals to the number of price steps");
         performEquilibriumTest("IAQ/IAQ2/IAF2", null);
         
     }
@@ -67,8 +65,6 @@ public class AuctioneerResilienceTestIAQ2 extends AuctioneerResilienceTest {
      */
     @Test
     public void qualityAggregationTestIAQ2NoEquilibriumOnSupplySide() throws IOException, DataFormatException {
-      exception.expect(IllegalArgumentException.class);
-      exception.expectMessage("Length of the demandArray is not equals to the number of price steps");
         performAggregatedBidTest("IAQ/IAQ2/IAF2", null);
     }
 
@@ -173,16 +169,14 @@ public class AuctioneerResilienceTestIAQ2 extends AuctioneerResilienceTest {
      */
     @Test
     public void qualityTestIAQ2equilibriumWithBidRejection() throws IOException, DataFormatException {
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("The demandArray must be descending");
         performEquilibriumTest("IAQ/IAQ2/IAF5", null);
     }
 
     /**
      * Equilibrium including bid rejection.
      * 
-     * Series of bids with a guaranteed equilibrium price,including an ascending bid. Expected outcome is the difened
-     * expectedquilibrium price, with the ascending bid being rejected.
+     * Series of bids with a guaranteed equilibrium price,including an ascending bid. Expected outcome is the defined
+     * expected equilibrium price, with the ascending bid being rejected.
      * 
      * 
      * Check the aggregated bid.
@@ -192,8 +186,6 @@ public class AuctioneerResilienceTestIAQ2 extends AuctioneerResilienceTest {
      */
     @Test
     public void qualityAggregationTestIAQ2equilibriumWithBidRejection() throws IOException, DataFormatException {
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("The demandArray must be descending");
         performAggregatedBidTest("IAQ/IAQ2/IAF5", null);
     }
 
