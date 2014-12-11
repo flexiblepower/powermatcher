@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.powermatcher.api.monitoring.ObservableAgent;
-import net.powermatcher.api.monitoring.AgentEvent;
+import net.powermatcher.api.monitoring.events.AgentEvent;
 import net.powermatcher.core.monitoring.BaseObserver;
 
 import org.slf4j.Logger;

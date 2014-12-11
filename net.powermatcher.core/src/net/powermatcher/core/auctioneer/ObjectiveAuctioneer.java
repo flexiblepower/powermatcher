@@ -17,10 +17,10 @@ import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.PriceUpdate;
-import net.powermatcher.api.monitoring.IncomingBidEvent;
 import net.powermatcher.api.monitoring.ObservableAgent;
-import net.powermatcher.api.monitoring.OutgoingPriceEvent;
 import net.powermatcher.api.monitoring.Qualifier;
+import net.powermatcher.api.monitoring.events.IncomingBidEvent;
+import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.BidCache;
 import net.powermatcher.core.concentrator.Concentrator;
 
@@ -242,8 +242,8 @@ public class ObjectiveAuctioneer extends Auctioneer {
 
         // send price updates to device agents
         for (Session session : this.sessions) {
-            this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), getAgentId(), session.getSessionId(),
-                    timeService.currentDate(), newPriceUpdate.getPrice(), Qualifier.MATCHER));
+            this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), getAgentId(), session.getSessionId(),
+                    timeService.currentDate(), newPriceUpdate, Qualifier.MATCHER));
 
             session.updatePrice(newPriceUpdate);
             LOGGER.debug("New price: {}, session {}", newPriceUpdate, session.getSessionId());

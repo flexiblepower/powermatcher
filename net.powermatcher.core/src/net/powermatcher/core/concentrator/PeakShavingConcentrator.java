@@ -29,12 +29,12 @@ import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PriceUpdate;
-import net.powermatcher.api.monitoring.IncomingBidEvent;
-import net.powermatcher.api.monitoring.IncomingPriceEvent;
 import net.powermatcher.api.monitoring.ObservableAgent;
-import net.powermatcher.api.monitoring.OutgoingBidEvent;
-import net.powermatcher.api.monitoring.OutgoingPriceEvent;
 import net.powermatcher.api.monitoring.Qualifier;
+import net.powermatcher.api.monitoring.events.IncomingBidEvent;
+import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
+import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
+import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.BaseAgent;
 import net.powermatcher.core.BidCache;
 import net.powermatcher.core.BidCacheSnapshot;
@@ -303,8 +303,8 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         }
 
         LOGGER.debug("Received price update [{}]", priceUpdate);
-        this.publishEvent(new IncomingPriceEvent(sessionToMatcher.getClusterId(), this.config.agentId(),
-                this.sessionToMatcher.getSessionId(), timeService.currentDate(), priceUpdate.getPrice(),
+        this.publishEvent(new IncomingPriceUpdateEvent(sessionToMatcher.getClusterId(), this.config.agentId(),
+                this.sessionToMatcher.getSessionId(), timeService.currentDate(), priceUpdate,
                 Qualifier.AGENT));
 
         // Find bidCacheSnapshot belonging to the newly received price update
@@ -330,8 +330,8 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
             PriceUpdate adjustedPrice = adjustPrice(agentPrice);
             session.updatePrice(adjustedPrice);
 
-            this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), this.config.agentId(), session
-                    .getSessionId(), timeService.currentDate(), priceUpdate.getPrice(), Qualifier.MATCHER));
+            this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), this.config.agentId(), session
+                    .getSessionId(), timeService.currentDate(), priceUpdate, Qualifier.MATCHER));
 
         }
     }

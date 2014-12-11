@@ -10,12 +10,16 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.powermatcher.api.TimeService;
+import net.powermatcher.api.data.ArrayBid;
+import net.powermatcher.api.data.Bid;
+import net.powermatcher.api.data.MarketBasis;
+import net.powermatcher.api.data.PointBid;
+import net.powermatcher.api.data.PricePoint;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
@@ -54,14 +58,15 @@ public class CSVLogger extends AgentEventLogger {
         List<String> filter();
 
         @Meta.AD(
-                deflt = "agent_bid_log_::yyyyMMdd::.csv",
-                description = "The pattern for the file name of the bid log file. Dataformat strings are placed between the delimeter '::'")
-        String bidlogFilenamePattern();
+                name = "eventType",
+                optionLabels = { "BIDEVENT", "PRICEEVENT" },
+                description = "The AgentEventType this logger has to log.")
+        AgentEventType eventType();
 
         @Meta.AD(
-                deflt = "agent_price_log_::yyyyMMdd::.csv",
-                description = "The pattern for the file name of the price log file.")
-        String pricelogFilenamePattern();
+                deflt = "event_log_::yyyyMMdd::.csv",
+                description = "The pattern for the file name of the log file. Dataformat strings are placed between the delimeter '::'")
+        String logFilenamePattern();
 
         @Meta.AD(deflt = "yyyy-MM-dd HH:mm:ss", description = "The date format for the timestamps in the log.")
         String dateFormat();
@@ -87,12 +92,7 @@ public class CSVLogger extends AgentEventLogger {
     /**
      * The log file {@link BidLogRecord} will be written to.
      */
-    private File bidlogFile;
-
-    /**
-     * The log file {@link PriceLogRecord} will be written to
-     */
-    private File priceLogFile;
+    private File logFile;
 
     /**
      * The field separator the logger will use.
@@ -108,6 +108,7 @@ public class CSVLogger extends AgentEventLogger {
     @Activate
     public synchronized void activate(Map<String, Object> properties) {
         super.baseActivate(properties);
+        getLogger().info("CSVLogger [{}], actiaved", getLoggerId());
     }
 
     /**
@@ -119,6 +120,7 @@ public class CSVLogger extends AgentEventLogger {
     @Deactivate
     public void deactivate() {
         super.baseDeactivate();
+        getLogger().info("CSVLogger [{}], deactivated", getLoggerId());
     }
 
     /**
@@ -130,6 +132,7 @@ public class CSVLogger extends AgentEventLogger {
     @Modified
     public synchronized void modified(Map<String, Object> properties) {
         super.baseModified(properties);
+        getLogger().info("CSVLogger [{}], modified", getLoggerId());
     }
 
     /**
@@ -155,21 +158,22 @@ public class CSVLogger extends AgentEventLogger {
             this.filter = new ArrayList<String>();
         }
 
+        setEventType(config.eventType());
         setLogUpdateRate(config.logUpdateRate());
         setLoggerId(config.loggerId());
         setDateFormat(new SimpleDateFormat(config.dateFormat()));
         this.separator = config.separator();
 
-        this.priceLogFile = createLogFile(config.pricelogFilenamePattern(), config.logLocation());
-        if (!priceLogFile.exists()) {
-            writeLineToCSV(PRICE_HEADER_ROW, priceLogFile);
+        this.logFile = createLogFile(config.logFilenamePattern(), config.logLocation());
+        if (!logFile.exists()) {
+            String[] header = null;
+            if ("BidEvent".equals(getEventType().getDescription())) {
+                header = BID_HEADER_ROW;
+            } else if ("PriceEvent".equals(getEventType().getDescription())) {
+                header = PRICE_HEADER_ROW;
+            }
+            writeLineToCSV(header, logFile);
         }
-
-        this.bidlogFile = createLogFile(config.bidlogFilenamePattern(), config.logLocation());
-        if (!bidlogFile.exists()) {
-            writeLineToCSV(BID_HEADER_ROW, bidlogFile);
-        }
-
         updateObservables();
     }
 
@@ -252,29 +256,24 @@ public class CSVLogger extends AgentEventLogger {
     }
 
     /**
-     * This method goes over every {@link LogRecord} in records and calls {@link CSVLogger}
-     * {@link #writeLineToCSV(String[], File)}
-     * 
-     * @param records
-     *            the collection of {@link LogRecord}s
-     * @param outputFile
-     *            the {@link File} the csv lines will be written to.
-     */
-    private <E extends LogRecord> void writeLogs(BlockingQueue<E> records, File outputFile) {
-        for (LogRecord l : records.toArray(new LogRecord[records.size()])) {
-            writeLineToCSV(l.getLine(), outputFile);
-            records.remove(l);
-        }
-        getLogger().info("CSVLogger [{}] wrote to {}", getLoggerId(), outputFile);
-    }
-
-    /**
      * @see AgentEventLogger#dumpLogs()
      */
     @Override
     protected void dumpLogs() {
-        writeLogs(getBidLogRecords(), bidlogFile);
-        writeLogs(getPriceLogRecords(), priceLogFile);
+        for (LogRecord logRecord : getLogRecords().toArray(new LogRecord[getLogRecords().size()])) {
+
+            String[] output = null;
+
+            if (logRecord instanceof BidLogRecord) {
+                output = createLineForBidLogRecord((BidLogRecord) logRecord);
+            } else if (logRecord instanceof PriceUpdateLogRecord) {
+                output = createLineForPriceUpdateLog((PriceUpdateLogRecord) logRecord);
+            }
+
+            writeLineToCSV(output, logFile);
+            removeLogRecord(logRecord);
+        }
+        getLogger().info("CSVLogger [{}] wrote to {}", getLoggerId(), logFile);
     }
 
     /**
@@ -283,5 +282,68 @@ public class CSVLogger extends AgentEventLogger {
     @Override
     protected List<String> getFilter() {
         return this.filter;
+    }
+
+    private String[] createLineForBidLogRecord(BidLogRecord logRecord) {
+
+        Bid bid = logRecord.getBid();
+
+        MarketBasis marketBasis = bid.getMarketBasis();
+
+        StringBuilder demandBuilder = new StringBuilder();
+        StringBuilder pricePointBuiler = new StringBuilder();
+
+        if (bid instanceof ArrayBid) {
+            ArrayBid temp = (ArrayBid) bid;
+
+            for (Double d : temp.getDemand()) {
+                if (demandBuilder.length() > 0) {
+                    demandBuilder.append("#");
+                }
+                demandBuilder.append(d);
+            }
+        } else if (bid instanceof PointBid) {
+
+            PointBid temp = (PointBid) bid;
+
+            if (temp.getPricePoints() != null) {
+
+                for (PricePoint p : temp.getPricePoints()) {
+                    if (pricePointBuiler.length() > 0) {
+                        pricePointBuiler.append("|");
+                    }
+                    // TODO fix this refactor
+
+                    // int priceStep = marketBasis.toPriceStep(p.getNormalizedPrice());
+                    pricePointBuiler.append(MarketBasis.PRICE_FORMAT.format(0));
+                    // pricePointBuiler.append(MarketBasis.PRICE_FORMAT.format(marketBasis.toPrice(priceStep)));
+                    
+                     pricePointBuiler.append("|").append(MarketBasis.DEMAND_FORMAT.format(p.getDemand()));
+                }
+            }
+        }
+
+        return new String[] { getDateFormat().format(logRecord.getLogTime()), logRecord.getClusterId(),
+                logRecord.getAgentId(), logRecord.getQualifier().getDescription(), marketBasis.getCommodity(),
+                marketBasis.getCurrency(), MarketBasis.PRICE_FORMAT.format(marketBasis.getMinimumPrice()),
+                MarketBasis.PRICE_FORMAT.format(marketBasis.getMaximumPrice()),
+                MarketBasis.DEMAND_FORMAT.format(bid.getMinimumDemand()),
+                MarketBasis.DEMAND_FORMAT.format(bid.getMaximumDemand()),
+                // TODO where/what is the "effective demand"?
+                MarketBasis.DEMAND_FORMAT.format(0),
+                // TODO where/what is the "effective price"?
+                MarketBasis.PRICE_FORMAT.format(0), getDateFormat().format(logRecord.getEventTimestamp()),
+                String.valueOf(bid.getBidNumber()), demandBuilder.toString(), pricePointBuiler.toString() };
+    }
+
+    private String[] createLineForPriceUpdateLog(PriceUpdateLogRecord logRecord) {
+        MarketBasis marketbasis = logRecord.getPriceUpdate().getPrice().getMarketBasis();
+
+        return new String[] { getDateFormat().format(logRecord.getLogTime()), logRecord.getClusterId(),
+                logRecord.getAgentId(), logRecord.getQualifier().getDescription(), marketbasis.getCommodity(),
+                marketbasis.getCurrency(), MarketBasis.PRICE_FORMAT.format(marketbasis.getMinimumPrice()),
+                MarketBasis.PRICE_FORMAT.format(marketbasis.getMaximumPrice()),
+                MarketBasis.PRICE_FORMAT.format(logRecord.getPriceUpdate().getPrice().getPriceValue()),
+                getDateFormat().format(logRecord.getEventTimestamp()) };
     }
 }

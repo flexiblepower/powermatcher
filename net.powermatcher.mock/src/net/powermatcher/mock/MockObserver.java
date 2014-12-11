@@ -1,7 +1,7 @@
 package net.powermatcher.mock;
 
 import net.powermatcher.api.monitoring.AgentObserver;
-import net.powermatcher.api.monitoring.AgentEvent;
+import net.powermatcher.api.monitoring.events.AgentEvent;
 
 public class MockObserver implements AgentObserver {
 

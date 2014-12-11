@@ -10,9 +10,9 @@ import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.PointBid;
 import net.powermatcher.api.data.PricePoint;
 import net.powermatcher.api.data.PriceUpdate;
-import net.powermatcher.api.monitoring.IncomingPriceEvent;
-import net.powermatcher.api.monitoring.OutgoingBidEvent;
 import net.powermatcher.api.monitoring.Qualifier;
+import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
+import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
 
 public abstract class BaseDeviceAgent extends BaseAgent implements AgentEndpoint, Comparable<BaseDeviceAgent> {
 	private final AtomicInteger bidNumberGenerator = new AtomicInteger();
@@ -51,7 +51,7 @@ public abstract class BaseDeviceAgent extends BaseAgent implements AgentEndpoint
 
 	@Override
 	public synchronized void updatePrice(PriceUpdate priceUpdate) {
-		publishEvent(new IncomingPriceEvent(getClusterId(), getAgentId(), session.getSessionId(), now(), priceUpdate.getPrice(), Qualifier.AGENT));
+		publishEvent(new IncomingPriceUpdateEvent(getClusterId(), getAgentId(), session.getSessionId(), now(), priceUpdate, Qualifier.AGENT));
 	}
 
 	private Bid lastBid;

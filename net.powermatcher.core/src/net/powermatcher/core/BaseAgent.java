@@ -6,9 +6,9 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import net.powermatcher.api.Agent;
-import net.powermatcher.api.monitoring.AgentEvent;
 import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.ObservableAgent;
+import net.powermatcher.api.monitoring.events.AgentEvent;
 
 /**
  * Base implementation of an {@link Agent}. It provides basic functionality required in each {@link Agent}.
