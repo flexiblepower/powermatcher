@@ -1,5 +1,7 @@
 package net.powermatcher.core.concentrator;
 
+import java.io.IOException;
+import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +14,7 @@ import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
+import net.powermatcher.api.WhiteList;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.monitoring.IncomingBidEvent;
@@ -25,6 +28,8 @@ import net.powermatcher.core.BidCache;
 import net.powermatcher.core.BidCacheSnapshot;
 import net.powermatcher.core.auctioneer.Auctioneer;
 
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,8 +55,8 @@ import aQute.bnd.annotation.metatype.Meta;
  * 
  */
 @Component(designateFactory = Concentrator.Config.class, immediate = true, provide = { ObservableAgent.class,
-        MatcherEndpoint.class, AgentEndpoint.class })
-public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEndpoint {
+        MatcherEndpoint.class, AgentEndpoint.class, WhiteList.class })
+public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEndpoint, WhiteList {
     private static final Logger LOGGER = LoggerFactory.getLogger(Concentrator.class);
 
     @Meta.OCD
@@ -67,9 +72,6 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
 
         @Meta.AD(description = "Valid agents for a connection to the cluster")
         List<String> whiteListAgents();
-
-        @Meta.AD(deflt = "false", description = "Check white list agents")
-        boolean checkWhiteListAgents();
     }
 
     /**
@@ -108,19 +110,17 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
      */
     protected Config config;
 
-    @Reference
-    public void setTimeService(TimeService timeService) {
-        this.timeService = timeService;
-    }
+    private List<String> validAgents;
 
-    @Reference
-    public void setExecutorService(ScheduledExecutorService scheduler) {
-        this.scheduler = scheduler;
-    }
+    private static ConfigurationAdmin configurationAdmin;
+
+    private String servicePid;
 
     @Activate
     public void activate(final Map<String, Object> properties) {
         config = Configurable.createConfigurable(Config.class, properties);
+
+        this.servicePid = (String) properties.get("service.pid");
 
         this.setAgentId(config.agentId());
         this.setDesiredParentId(config.desiredParentId());
@@ -172,13 +172,17 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
             return false;
         }
 
-        this.sessionToAgents.add(session);
-        session.setMarketBasis(this.sessionToMatcher.getMarketBasis());
-        session.setClusterId(this.sessionToMatcher.getClusterId());
+        if (validAgents.size() == 0 || validAgents.contains(session.getAgentId())) {
+            this.sessionToAgents.add(session);
+            session.setMarketBasis(this.sessionToMatcher.getMarketBasis());
+            session.setClusterId(this.sessionToMatcher.getClusterId());
 
-        this.aggregatedBids.updateBid(session.getAgentId(), new Bid(this.sessionToMatcher.getMarketBasis()));
-        LOGGER.info("Agent connected with session [{}]", session.getSessionId());
-        return true;
+            this.aggregatedBids.updateBid(session.getAgentId(), new Bid(this.sessionToMatcher.getMarketBasis()));
+            LOGGER.info("Agent connected with session [{}]", session.getSessionId());
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -289,5 +293,73 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
      */
     protected Bid transformBid(Bid aggregatedBid) {
         return aggregatedBid;
+    }
+
+    @Override
+    public List<String> createWhiteList(List<String> whiteList) {
+        this.validAgents = whiteList;
+        this.updateConfigurationAdmin();
+        return this.validAgents;
+    }
+
+    @Override
+    public List<String> addWhiteList(List<String> whiteList) {
+        for (String agent : whiteList) {
+            this.validAgents.add(agent);
+        }
+        this.updateConfigurationAdmin();
+        return this.validAgents;
+    }
+
+    @Override
+    public List<String> removeWhiteList(List<String> whiteList) {
+        for (String agent : whiteList) {
+            if (this.validAgents.contains(agent)) {
+                this.validAgents.remove(agent);
+            }
+        }
+        this.updateConfigurationAdmin();
+        return this.validAgents;
+    }
+
+    private synchronized void updateConfigurationAdmin() {
+        try {
+            Configuration config = configurationAdmin.getConfiguration(this.servicePid);
+            Dictionary<String, Object> properties = config.getProperties();
+            properties.put("whiteListAgents", this.validAgents);
+
+            config.update(properties);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    @Reference
+    protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
+        this.configurationAdmin = configurationAdmin;
+    }
+
+    @Reference
+    public void setTimeService(TimeService timeService) {
+        this.timeService = timeService;
+    }
+
+    @Reference()
+    public void setExecutorService(ScheduledExecutorService scheduler) {
+        this.scheduler = scheduler;
+    }
+
+    protected List<String> getWhiteListAgents() {
+        return validAgents;
+    }
+
+    protected void setWhiteListAgents(List<String> whiteListAgents) {
+        this.validAgents = whiteListAgents;
+    }
+
+    @Override
+    public List<String> getWhiteList() {
+        return this.validAgents;
     }
 }
