@@ -363,7 +363,7 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         }
 
         // determine the expected allocation
-        double allocation = demandFunction.getDemand(newPriceUpdate.getPrice().toPriceStep());
+        double allocation = demandFunction.getDemandAt(newPriceUpdate.getPrice().toPriceStep());
 
         // Adjust the price so that the allocation is within flow
         // constraints (taking uncontrolled flow into account)
@@ -436,7 +436,7 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
 
         // calculate the allocation which would have been the fact if no
         // transformation would have been performed
-        double untransformedAllocation = this.aggregatedBidIn.getDemand(this.priceIn.toPriceStep());
+        double untransformedAllocation = this.aggregatedBidIn.getDemandAt(this.priceIn.toPriceStep());
 
         LOGGER.debug("BID(IN)" + this.aggregatedBidIn);
         LOGGER.debug("BID(OUT)" + this.aggregatedBidOut);
@@ -478,7 +478,7 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         }
 
         // use the framework to determine the allocation
-        return this.aggregatedBidIn.getDemand(this.priceOut.toPriceStep());
+        return this.aggregatedBidIn.getDemandAt(this.priceOut.toPriceStep());
     }
 
     /**
