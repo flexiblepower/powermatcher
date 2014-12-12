@@ -1,30 +1,30 @@
 package net.powermatcher.core.auctioneer.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.ArrayBid;
+import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
-import net.powermatcher.core.auctioneer.Auctioneer;
+import net.powermatcher.api.data.PriceUpdate;
+import net.powermatcher.core.BidCache;
+import net.powermatcher.core.auctioneer.ObjectiveAuctioneer;
 import net.powermatcher.core.sessions.SessionManager;
 import net.powermatcher.core.time.SystemTimeService;
 import net.powermatcher.mock.MockAgent;
+import net.powermatcher.mock.MockObjectiveAgent;
 import net.powermatcher.mock.MockScheduler;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-/**
- * JUnit test for the Auctioneer
- * 
- * Every test requires a different number agents. In setUp() NR_AGENTS are instantiated. Every test the desired number
- * of agents can be added and removed using the functions addAgents() and removeAgents().
- */
-public class AuctioneerTest {
-
+public class ObjectiveAuctioneerTest {
     private final static int NR_AGENTS = 21;
 
     // This needs to be the same as the MarketBasis created in the Auctioneer
@@ -32,18 +32,29 @@ public class AuctioneerTest {
     private Map<String, Object> auctioneerProperties;
     private MockScheduler timer;
 
-    private Auctioneer auctioneer;
+    private ObjectiveAuctioneer objectiveauctioneer;
     private MockAgent[] agents;
 
+    private MockObjectiveAgent mockObjectiveAgent;
+    
     private SessionManager sessionManager;
 
-    private static final String AUCTIONEER_NAME = "auctioneer";
+    private static final String AUCTIONEER_NAME = "objectiveauctioneer";
+    private static final String OBJECTIVE_AGENT_NAME = "objectiveagent";
+    
+    private BidCache aggregatedBids;
 
+    private TimeService timeService;
+    
     @Before
     public void setUp() throws Exception {
+        // Init Objective Agent
+        this.mockObjectiveAgent = new MockObjectiveAgent(OBJECTIVE_AGENT_NAME);
+        
         // Init Auctioneer
-        this.auctioneer = new Auctioneer();
-
+        this.objectiveauctioneer = new ObjectiveAuctioneer();
+        this.objectiveauctioneer.addObjectiveEndpoint(this.mockObjectiveAgent);
+        
         auctioneerProperties = new HashMap<String, Object>();
         auctioneerProperties.put("agentId", AUCTIONEER_NAME);
         auctioneerProperties.put("clusterId", "DefaultCluster");
@@ -57,10 +68,10 @@ public class AuctioneerTest {
         auctioneerProperties.put("priceUpdateRate", "30");
         
         timer = new MockScheduler();
-
-        auctioneer.setExecutorService(timer);
-        auctioneer.setTimeService(new SystemTimeService());
-        auctioneer.activate(auctioneerProperties);
+        
+        objectiveauctioneer.setExecutorService(timer);
+        objectiveauctioneer.setTimeService(new SystemTimeService());
+        objectiveauctioneer.activate(auctioneerProperties);
 
         // Init MockAgents
         this.agents = new MockAgent[NR_AGENTS];
@@ -70,11 +81,11 @@ public class AuctioneerTest {
             newAgent.setDesiredParentId(AUCTIONEER_NAME);
             agents[i] = newAgent;
         }
-
+        
         // Session
         sessionManager = new SessionManager();
-        sessionManager.addMatcherEndpoint(auctioneer);
-        //sessionManager.activate();
+        sessionManager.addMatcherEndpoint(objectiveauctioneer);
+ //       sessionManager.activate();
     }
 
     private void addAgents(int number) {
@@ -107,7 +118,42 @@ public class AuctioneerTest {
         assertEquals(10, agents[0].getLastPriceUpdate().getPrice().getPriceValue(), 0);
         removeAgents(3);
     }
+    
+    @Test
+    public void objectiveAgentTest() {
+        addAgents(3);
+        agents[0].sendBid(new ArrayBid(marketBasis, 0, new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 }));
+        agents[1].sendBid(new ArrayBid(marketBasis, 0, new double[] { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 }));
+        agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 }));
+        timer.doTaskOnce();
+        
+        this.objectiveauctioneer.addObjectiveEndpoint(this.mockObjectiveAgent);
+        
+//        this.aggregatedBids = new ArrayBidCache(this.timeService, config.bidTimeout());
+        this.aggregatedBids = new BidCache(this.timeService, 5);
+        
+        
+        Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis);
+        Bid bid = new ArrayBid(new ArrayBid(marketBasis, 0, new double[] { -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4 }));
+        
+        Bid finalAggregatedBid = null;
+        if (this.mockObjectiveAgent != null) {
+            
+          Bid aggregatedObjectiveBid = this.mockObjectiveAgent.handleAggregateBid(aggregatedBid);
+            
+          finalAggregatedBid = aggregatedBid.aggregate(aggregatedObjectiveBid);
 
+          // aggregate again with device agent bid.
+          PriceUpdate priceUpdate = determinePrice(finalAggregatedBid);
+        }
+        assertArrayEquals(new double[] { 50.0, 50.0, 50.0, 50.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, ((ArrayBid)finalAggregatedBid).getDemand(), 0);
+        
+    }
+    
+    protected PriceUpdate determinePrice(Bid aggregatedBid) {
+        return aggregatedBid.calculateIntersection(0);
+    }
+    
     @Test
     public void noEquilibriumOnSupplySide() {
         addAgents(3);
@@ -145,7 +191,7 @@ public class AuctioneerTest {
         assertEquals(7, agents[0].getLastPriceUpdate().getPrice().getPriceValue(), 0);
         removeAgents(3);
     }
-
+    
     @Test
     @Ignore("Check whether there is no issue here. Changed to 7 in order to fix the tests. Original test value was 6.")
     public void equilibriumLargeSet() {
@@ -203,5 +249,10 @@ public class AuctioneerTest {
         timer.doTaskOnce();
         assertEquals(7, agents[0].getLastPriceUpdate().getPrice().getPriceValue(), 0);
         removeAgents(21);
+    }
+    
+    @After
+    public void deactivateTest() {
+        this.objectiveauctioneer.removeObjectiveEndpoint(this.mockObjectiveAgent);
     }
 }
