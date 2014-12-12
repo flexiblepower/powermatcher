@@ -355,7 +355,7 @@ public class ArrayBid extends Bid {
     public int hashCode() {
         return 2011 * demandArray.hashCode() + 3557 * bidNumber;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         ArrayBid other = (ArrayBid) ((obj instanceof ArrayBid) ? obj : null);
@@ -366,8 +366,29 @@ public class ArrayBid extends Bid {
         if (this == other) {
             return true;
         }
-        
+
         return other.bidNumber == this.bidNumber && this.marketBasis.equals(other.marketBasis)
                 && Arrays.equals(other.getDemand(), this.getDemand());
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+        b.append("ArrayBid{bidNumber=").append(this.bidNumber);
+
+        double[] demand = getDemand();
+        if (demand != null) {
+            b.append(", demand[]{");
+            for (int i = 0; i < demand.length; i++) {
+                if (i > 0) {
+                    b.append(',');
+                }
+                b.append(MarketBasis.DEMAND_FORMAT.format(demand[i]));
+            }
+            b.append("}, ");
+        }
+        b.append(this.marketBasis);
+        b.append('}');
+        return b.toString();
     }
 }
