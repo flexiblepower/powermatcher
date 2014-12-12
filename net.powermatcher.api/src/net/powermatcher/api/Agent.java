@@ -1,5 +1,7 @@
 package net.powermatcher.api;
 
+import java.util.List;
+
 
 /**
  * A {@link Agent} defines the interface for classes which implement an Agent. 

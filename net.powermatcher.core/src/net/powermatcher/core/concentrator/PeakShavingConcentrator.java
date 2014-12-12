@@ -194,7 +194,7 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         this.setCeiling(config.ceiling());
         this.setFloor(config.floor());
 
-        if (this.ceiling > this.floor) {
+        if (this.ceiling < this.floor) {
             try {
                 for (Configuration c : configurationAdmin.listConfigurations(null)) {
 

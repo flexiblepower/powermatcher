@@ -46,7 +46,7 @@ public class SessionManagerTest {
         auctioneer.setTimeService(new SystemTimeService());
         auctioneer.activate(auctioneerProperties);
         this.sessionManager = new SessionManager();
-        sessionManager.activate();
+    //    sessionManager.activate();
 
         testAgent = new MockAgent(AGENT_ID);
         testAgent.setDesiredParentId("auctioneer");

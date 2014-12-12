@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
-import aQute.bnd.annotation.component.Modified;
 import aQute.bnd.annotation.component.Reference;
 
 /**
@@ -36,7 +35,7 @@ import aQute.bnd.annotation.component.Reference;
  * 
  */
 @Component(immediate = true)
-public class SessionManager implements SessionManagerInterface{
+public class SessionManager implements SessionManagerInterface {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionManager.class);
 
@@ -60,11 +59,6 @@ public class SessionManager implements SessionManagerInterface{
      */
     private Map<String, String> desiredConnections = new ConcurrentHashMap<String, String>();
 
-    @Activate
-    public synchronized void activate() {
-        updateConnections();
-    }
-
     @Reference(dynamic = true, multiple = true, optional = true)
     public void addAgentEndpoint(AgentEndpoint agentEndpoint) {
         Agent agent = (Agent) agentEndpoint;
@@ -85,6 +79,11 @@ public class SessionManager implements SessionManagerInterface{
         } else {
             updateConnections();
         }
+    }
+
+    @Activate
+    public synchronized void activate() {
+        updateConnections();
     }
 
     @Reference(dynamic = true, multiple = true, optional = true)
@@ -153,11 +152,6 @@ public class SessionManager implements SessionManagerInterface{
         }
     }
 
-    @Modified
-    public synchronized void modified() {
-        updateConnections();
-    }
-
     void disconnected(SessionImpl sessionImpl) {
         activeSessions.remove(sessionImpl.getSessionId());
     }
@@ -166,12 +160,12 @@ public class SessionManager implements SessionManagerInterface{
     public Map<String, AgentEndpoint> getAgentEndpoints() {
         return new HashMap<String, AgentEndpoint>(agentEndpoints);
     }
-    
+
     @Override
     public Map<String, MatcherEndpoint> getMatcherEndpoints() {
         return new HashMap<String, MatcherEndpoint>(matcherEndpoints);
     }
-    
+
     /**
      * Returns the active sessions from the SessionManager.
      * 
@@ -179,6 +173,6 @@ public class SessionManager implements SessionManagerInterface{
      */
     @Override
     public Map<String, Session> getActiveSessions() {
-       return new HashMap<String, Session>(activeSessions);
+        return new HashMap<String, Session>(activeSessions);
     }
 }

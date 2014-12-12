@@ -24,12 +24,12 @@ Bundle-Version: 1.0.0.${tstamp}
     org.eclipse.jetty.webapp,\
     org.eclipse.jetty.xml,\
     javax.servlet-api
-
 Service-Component:  \
 	*
 	
 -includeresource: WEB-INF/web.xml=${project}/web.xml
 Export-Package:  \
 	net.powermatcher.extensions.connectivity.websockets.data,\
-	net.powermatcher.extensions.connectivity.websockets
+	net.powermatcher.extensions.connectivity.websockets,\
+	net.powermatcher.extensions.connectivity.remote
 Web-ContextPath: /powermatcher/websockets
