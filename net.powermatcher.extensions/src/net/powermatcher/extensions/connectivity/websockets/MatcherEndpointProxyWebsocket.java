@@ -172,7 +172,7 @@ public class MatcherEndpointProxyWebsocket extends BaseMatcherEndpointProxy {
     
 	@OnWebSocketMessage
 	public void onMessage(String message) {
-		LOGGER.debug("Received price update from remote agent {}", message);
+		LOGGER.debug("Received message from remote agent {}", message);
 
 		try {
 			// Decode the JSON data

@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.naming.OperationNotSupportedException;
 
 import net.powermatcher.api.AgentEndpoint;
+import net.powermatcher.api.Session;
 import net.powermatcher.api.connectivity.AgentEndpointProxy;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
@@ -68,15 +69,8 @@ public class AgentEndpointProxyWebsocket extends BaseAgentEndpointProxy {
 		
 		this.remoteSession = session;
 		
-		// Send cluster info
-		try 
-		{
-			PmJsonSerializer serializer = new PmJsonSerializer();
-			String message = serializer.serializeClusterInfo(this.getClusterId(), this.getLocalMarketBasis());
-			this.remoteSession.getRemote().sendString(message);
-		} catch (IOException e) {
-			LOGGER.warn("Unable to send price update to remote agent, reason {}", e);
-		}
+		// Notify the remote agent about the cluster
+		sendCusterInformation();
 	}
 	
 	public void remoteAgentDisconnected() {
@@ -95,6 +89,30 @@ public class AgentEndpointProxyWebsocket extends BaseAgentEndpointProxy {
 			// Create price update message
 			PmJsonSerializer serializer = new PmJsonSerializer();
 			String message = serializer.serializePriceUpdate(newPrice);
+			this.remoteSession.getRemote().sendString(message);
+		} catch (IOException e) {
+			LOGGER.warn("Unable to send price update to remote agent, reason {}", e);
+		}
+	}
+
+	@Override
+	public void connectToMatcher(Session session) {
+		super.connectToMatcher(session);
+		
+		// Local matcher is connected, provide cluster information to remote agent.
+		sendCusterInformation();
+	}
+
+	private void sendCusterInformation() {
+		if (!isRemoteConnected() || this.getLocalMarketBasis() == null) {
+			// Skip sending information
+			return;
+		}
+		
+		try 
+		{
+			PmJsonSerializer serializer = new PmJsonSerializer();
+			String message = serializer.serializeClusterInfo(this.getClusterId(), this.getLocalMarketBasis());
 			this.remoteSession.getRemote().sendString(message);
 		} catch (IOException e) {
 			LOGGER.warn("Unable to send price update to remote agent, reason {}", e);
