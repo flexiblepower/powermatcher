@@ -9,16 +9,28 @@ import net.powermatcher.api.data.PricePoint;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.extensions.connectivity.websockets.data.BidModel;
 import net.powermatcher.extensions.connectivity.websockets.data.MarketBasisModel;
-import net.powermatcher.extensions.connectivity.websockets.data.PriceModel;
+import net.powermatcher.extensions.connectivity.websockets.data.PriceUpdateModel;
 import net.powermatcher.extensions.connectivity.websockets.data.PricePointModel;
 
+/**
+ * Helper class to mapp between net.powermatcher.api.data classes and model classed for wire transfer.
+ */
 public class ModelMapper {
+	
+	private ModelMapper() {		
+	}
+
+	/**
+	 * Map from {@link BidModel} to {@link Bid}
+	 * @param bidModel the bidmodel to map
+	 * @return a mapped {@link Bid}
+	 */
 	public static Bid mapBid(BidModel bidModel) {
 		Bid bid = null;
 
 		MarketBasis marketBasis = convertMarketBasis(bidModel.getMarketBasis());
 		
-		// Caution, include either pricepoints or demand and not both.
+		// Include either pricepoints or demand and not both.
 		PricePointModel[] pricePointsModel  = bidModel.getPricePoints();
 		if (pricePointsModel == null || pricePointsModel.length == 0) {
 			 bid = new ArrayBid(marketBasis, 
@@ -33,13 +45,24 @@ public class ModelMapper {
 		return bid;
 	}
 	
-	public static PriceUpdate mapPriceUpdate(PriceModel priceModel) {
-		Price price = new Price(convertMarketBasis(priceModel.getMarketBasis()), 
-				priceModel.getPriceValue());
-		PriceUpdate priceUpdate = new PriceUpdate(price, priceModel.getBidNumber());
+	/**
+	 * Map from {@link PriceUpdateModel} to {@link PriceUpdate}
+	 * @param priceUpdateModel the priceupdate to map
+	 * @return a mapped {@link PriceUpdate}
+	 */
+	public static PriceUpdate mapPriceUpdate(PriceUpdateModel priceUpdateModel) {
+		Price price = new Price(convertMarketBasis(priceUpdateModel.getMarketBasis()), 
+				priceUpdateModel.getPriceValue());
+		PriceUpdate priceUpdate = new PriceUpdate(price, priceUpdateModel.getBidNumber());
 		return priceUpdate;
 	}
 	
+	/**
+	 * Convert a list of {@link PricePointModel} to a list of {@link PricePoint}
+	 * @param marketBasis the marketbasis to use
+	 * @param pricePointsModel the list of pricepointmodels
+	 * @return a list of {@link PricePoint}
+	 */
 	public static PricePoint[] convertPricePoints(MarketBasis marketBasis, PricePointModel[] pricePointsModel) {
 		// Convert price points
 		PricePoint[] pricePoints = new PricePoint[pricePointsModel.length];
@@ -51,6 +74,11 @@ public class ModelMapper {
 		return pricePoints;
 	}
 
+	/**
+	 * Convert a list of {@link PricePoint} to a list of {@link PricePointModel}
+	 * @param pricePointsModel the list of pricepoint
+	 * @return a list of {@link PricePointModel}
+	 */
 	public static PricePointModel[] convertPricePoints(PricePoint[] pricePoints) {
 		PricePointModel[] pricePointsModel = new PricePointModel[pricePoints.length];
 		for (int i = 0; i < pricePoints.length; i++) {
@@ -62,6 +90,11 @@ public class ModelMapper {
 		return pricePointsModel;
 	}
 	
+	/**
+	 * Convert a {@link MarketBasis} to a {@link MarketBasisModel}
+	 * @param marketBasis the market basis
+	 * @return a {@link MarketBasisModel}
+	 */
 	public static MarketBasisModel convertMarketBasis(MarketBasis marketBasis) {
 		MarketBasisModel marketBasisModel = new MarketBasisModel();
 		marketBasisModel.setCommodity(marketBasis.getCommodity());
@@ -72,6 +105,11 @@ public class ModelMapper {
     	return marketBasisModel;
     }
     
+	/**
+	 * Convert a {@link MarketBasisModel} to a {@link MarketBasis}
+	 * @param marketBasisModel the market basis model
+	 * @return a {@link MarketBasis}
+	 */
    public static MarketBasis convertMarketBasis(MarketBasisModel marketBasisModel) {
 		MarketBasis marketBasis = new MarketBasis(
 				marketBasisModel.getCommodity(), 

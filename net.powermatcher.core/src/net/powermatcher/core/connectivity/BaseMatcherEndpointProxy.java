@@ -13,6 +13,10 @@ import net.powermatcher.core.BaseAgent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Base implementation for remote agents.
+ * This is the "sending end" of a remote communication pair.
+ */
 public abstract class BaseMatcherEndpointProxy extends BaseAgent implements MatcherEndpointProxy {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(BaseMatcherEndpointProxy.class);

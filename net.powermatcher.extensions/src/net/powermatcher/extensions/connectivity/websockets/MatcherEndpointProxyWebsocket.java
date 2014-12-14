@@ -16,7 +16,7 @@ import net.powermatcher.core.connectivity.BaseMatcherEndpointProxy;
 import net.powermatcher.extensions.connectivity.websockets.data.ClusterInfoModel;
 import net.powermatcher.extensions.connectivity.websockets.data.PmMessage;
 import net.powermatcher.extensions.connectivity.websockets.data.PmMessage.PayloadType;
-import net.powermatcher.extensions.connectivity.websockets.data.PriceModel;
+import net.powermatcher.extensions.connectivity.websockets.data.PriceUpdateModel;
 import net.powermatcher.extensions.connectivity.websockets.json.ModelMapper;
 import net.powermatcher.extensions.connectivity.websockets.json.PmJsonSerializer;
 
@@ -39,6 +39,10 @@ import aQute.bnd.annotation.metatype.Meta;
 
 import com.google.gson.JsonSyntaxException;
 
+/**
+ * WebSocket implementation of an {@link MatcherEndpointProxy}.
+ * Enabled two agents to communicate via WebSockets and JSON over a TCP connection.
+ */
 @WebSocket()
 @Component(designateFactory = MatcherEndpointProxyWebsocket.Config.class, immediate = true, 
 	provide = { ObservableAgent.class, MatcherEndpoint.class, MatcherEndpointProxy.class })
@@ -176,9 +180,9 @@ public class MatcherEndpointProxyWebsocket extends BaseMatcherEndpointProxy {
 			PmMessage pmMessage = serializer.deserialize(message);
 			
 			// Handle specific message
-			if (pmMessage.getPayloadType() == PayloadType.PRICE) {
+			if (pmMessage.getPayloadType() == PayloadType.PRICE_UPDATE) {
 				// Relay price update to local agent
-				PriceUpdate newPriceUpdate = ModelMapper.mapPriceUpdate((PriceModel)pmMessage.getPayload());
+				PriceUpdate newPriceUpdate = ModelMapper.mapPriceUpdate((PriceUpdateModel)pmMessage.getPayload());
 				this.updateLocalPrice(newPriceUpdate);
 			}
 			
@@ -186,7 +190,7 @@ public class MatcherEndpointProxyWebsocket extends BaseMatcherEndpointProxy {
 				// Sync marketbasis and clusterid with local session, for new connections
 				ClusterInfoModel clusterInfo = (ClusterInfoModel)pmMessage.getPayload();
 				this.updateRemoteClusterId(clusterInfo.getClusterId());
-				this.updateRemoteMarketBasis(clusterInfo.getMarketBasis());
+				this.updateRemoteMarketBasis(ModelMapper.convertMarketBasis(clusterInfo.getMarketBasis()));
 			}
 		} catch (JsonSyntaxException e) {
 			LOGGER.warn("Unable to understand message from remote agent: {}", message);

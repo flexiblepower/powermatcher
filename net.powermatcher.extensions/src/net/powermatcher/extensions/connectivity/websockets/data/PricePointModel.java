@@ -1,5 +1,8 @@
 package net.powermatcher.extensions.connectivity.websockets.data;
 
+/**
+ * PricePoint model class to transfer {@link PricePoint} data over the wire.
+ */
 public class PricePointModel {
     /**
      * Define the price (double) field.

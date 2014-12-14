@@ -1,6 +1,6 @@
 package net.powermatcher.extensions.connectivity.websockets.data;
 
-public class PriceModel {
+public class PriceUpdateModel {
 	
     /**
      * Define the market basis (MarketBasis) field.

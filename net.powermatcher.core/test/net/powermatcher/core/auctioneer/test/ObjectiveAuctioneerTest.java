@@ -10,7 +10,7 @@ import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
-import net.powermatcher.api.data.PriceUpdate;
+import net.powermatcher.api.data.Price;
 import net.powermatcher.core.BidCache;
 import net.powermatcher.core.auctioneer.ObjectiveAuctioneer;
 import net.powermatcher.core.sessions.SessionManager;
@@ -144,13 +144,13 @@ public class ObjectiveAuctioneerTest {
           finalAggregatedBid = aggregatedBid.aggregate(aggregatedObjectiveBid);
 
           // aggregate again with device agent bid.
-          PriceUpdate priceUpdate = determinePrice(finalAggregatedBid);
+          determinePrice(finalAggregatedBid);
         }
         assertArrayEquals(new double[] { 50.0, 50.0, 50.0, 50.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, ((ArrayBid)finalAggregatedBid).getDemand(), 0);
         
     }
     
-    protected PriceUpdate determinePrice(Bid aggregatedBid) {
+    protected Price determinePrice(Bid aggregatedBid) {
         return aggregatedBid.calculateIntersection(0);
     }
     

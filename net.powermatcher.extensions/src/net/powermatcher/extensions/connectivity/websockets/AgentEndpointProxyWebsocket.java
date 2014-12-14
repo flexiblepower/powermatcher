@@ -7,7 +7,6 @@ import javax.naming.OperationNotSupportedException;
 
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.connectivity.AgentEndpointProxy;
-import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.core.connectivity.BaseAgentEndpointProxy;
@@ -22,11 +21,15 @@ import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
+/**
+ * WebSocket implementation of an {@link AgentEndpointProxy}.
+ * Enabled two agents to communicate via WebSockets and JSON over a TCP connection.
+ */
 @Component(designateFactory = AgentEndpointProxyWebsocket.Config.class, immediate = true, 
 	provide = { ObservableAgent.class, AgentEndpoint.class, AgentEndpointProxy.class, AgentEndpointProxyWebsocket.class })
 public class AgentEndpointProxyWebsocket extends BaseAgentEndpointProxy {
     private static final Logger LOGGER = LoggerFactory.getLogger(AgentEndpointProxyWebsocket.class);
-	
+
 	@Meta.OCD
     public static interface Config {
         @Meta.AD(deflt = "concentrator", description = "desired parent to connect to")
@@ -65,25 +68,15 @@ public class AgentEndpointProxyWebsocket extends BaseAgentEndpointProxy {
 		
 		this.remoteSession = session;
 		
-		/* TODO
 		// Send cluster info
 		try 
 		{
-			// Create price update message
-			ClusterInfoModel clusterInfo = new ClusterInfoModel();
-			clusterInfo.setClusterId(this.getClusterId());
-			// TODO clusterInfo.setMarketBasis(this.getLocalMarketBasis());
-			PmMessage pmMessage = new PmMessage();
-			pmMessage.setPayload(clusterInfo);
-			pmMessage.setPayloadType(PayloadType.CLUSTERINFO);
-			
-			PmMessageSerializer serializer = new PmMessageSerializer();
-			String message = serializer.serializeClusterInfo(clusterInfo);
+			PmJsonSerializer serializer = new PmJsonSerializer();
+			String message = serializer.serializeClusterInfo(this.getClusterId(), this.getLocalMarketBasis());
 			this.remoteSession.getRemote().sendString(message);
 		} catch (IOException e) {
 			LOGGER.warn("Unable to send price update to remote agent, reason {}", e);
 		}
-		*/
 	}
 	
 	public void remoteAgentDisconnected() {

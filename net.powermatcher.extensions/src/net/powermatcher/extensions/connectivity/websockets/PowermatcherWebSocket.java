@@ -28,6 +28,9 @@ import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
 
+/**
+ * Receiving end of the WebSocket implementation for PowerMatcher.
+ */
 @WebSocket
 @Component(immediate = true)
 public class PowermatcherWebSocket {
@@ -50,12 +53,20 @@ public class PowermatcherWebSocket {
 		}
 	}
 	
+	/**
+	 * Register {@link AgentEndpointProxyWebsocket} within the OSGI runtime.
+	 * @param proxy
+	 */
 	@Reference(dynamic = true, multiple = true, optional = true)
 	public synchronized void addProxy(AgentEndpointProxyWebsocket proxy) {
 		LOGGER.info("Registered AgentEndpointProxy: [{}]", proxy.getAgentId());
     	AGENT_ENDPOINT_PROXIES.put(proxy.getAgentId(), proxy);
 	}
     
+	/**
+	 * Deregister {@link AgentEndpointProxyWebsocket} within the OSGI runtime.
+	 * @param proxy
+	 */
 	public synchronized void removeProxy(AgentEndpointProxyWebsocket proxy) {
 		LOGGER.info("Deregistered AgentEndpointProxy: [{}]", proxy.getAgentId());
 		
@@ -63,6 +74,10 @@ public class PowermatcherWebSocket {
     	AGENT_ENDPOINT_PROXIES.remove(proxy.getAgentId());
 	}
     
+	/**
+	 * Handle a new incoming WebSocket connection.
+	 * @param remoteSession the remote WebSocket session which wants to connect.
+	 */
 	@OnWebSocketConnect
 	public synchronized void onOpen(final org.eclipse.jetty.websocket.api.Session remoteSession) {
 		Map<String, String> queryString = null;
@@ -113,30 +128,48 @@ public class PowermatcherWebSocket {
 		LOGGER.info("Remote agent [{}] connected to local agent [{}]", this.remoteMatcherEndpointId, this.desiredConnectionId);
 	}
 
+	/**
+	 * 
+	 * @param session
+	 * @param statusCode
+	 * @param reason
+	 */
+    
+	/**
+	 * Handle WebSocket connection which disconnected.
+	 * @param remoteSession the remote WebSocket session which disconnected.
+	 * @param statusCode the statusCode indicating the reason.
+	 * @param reason the reason providing more information about disconnect.
+	 */
 	@OnWebSocketClose
-	public synchronized void onClose(final org.eclipse.jetty.websocket.api.Session session, int statusCode, String reason) {
+	public synchronized void onClose(final org.eclipse.jetty.websocket.api.Session remoteSession, int statusCode, String reason) {
 		// Find existing session
-		if (!REMOTE_LOCAL_LINK.containsKey(session)) {
+		if (!REMOTE_LOCAL_LINK.containsKey(remoteSession)) {
 			LOGGER.warn("Received disconnect for non existing session.");
 			return;
 		}
 
 		// Remove remote session from agent proxy and local session collection
-		AgentEndpointProxyWebsocket proxy = REMOTE_LOCAL_LINK.remove(session);
+		AgentEndpointProxyWebsocket proxy = REMOTE_LOCAL_LINK.remove(remoteSession);
 		LOGGER.info("Agent disconnect detected remote agent: [{}], local agent", proxy.getMatcherEndpointProxyId(), proxy.getAgentId());
 		proxy.remoteAgentDisconnected();
 	}
 
+	/**
+	 * Handle an incoming message from a remote WebSocket (agent).
+	 * @param remoteSession the session which sent the message.
+	 * @param message the message containing a JSON string with PmMessage.
+	 */
 	@OnWebSocketMessage
- 	public void onMessage(org.eclipse.jetty.websocket.api.Session session, String message) {
+ 	public void onMessage(org.eclipse.jetty.websocket.api.Session remoteSession, String message) {
 		// Find existing session
-		if (!REMOTE_LOCAL_LINK.containsKey(session)) {
+		if (!REMOTE_LOCAL_LINK.containsKey(remoteSession)) {
 			LOGGER.warn("Received bid update for non existing session.");
 			return;
 		}
 		
 		// Find associated local agentproxy
-		AgentEndpointProxyWebsocket proxy = REMOTE_LOCAL_LINK.get(session);
+		AgentEndpointProxyWebsocket proxy = REMOTE_LOCAL_LINK.get(remoteSession);
 		LOGGER.info("Received bid update from remote agent [{}] for local agent [{}]", proxy.getMatcherEndpointProxyId(), proxy.getAgentId());
 		
 		// Decode the JSON data
@@ -148,6 +181,12 @@ public class PowermatcherWebSocket {
 		proxy.updateLocalBid(newBid);
 	}
 
+	/**
+	 * Get the queryparams from the URL used to connect.
+	 * @param url the URL
+	 * @return the key value pairs of the queryparams.
+	 * @throws UnsupportedEncodingException when URL is incorrect.
+	 */
 	private static Map<String, String> splitQuery(URI url) throws UnsupportedEncodingException {
 	    Map<String, String> query_pairs = new LinkedHashMap<String, String>();
 	    String query = url.getQuery();
