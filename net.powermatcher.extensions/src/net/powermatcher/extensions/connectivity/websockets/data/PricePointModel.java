@@ -2,22 +2,22 @@ package net.powermatcher.extensions.connectivity.websockets.data;
 
 public class PricePointModel {
     /**
-     * Define the normalized price (int) field.
+     * Define the price (double) field.
      */
-    private int normalizedPrice;
+    private double price;
     /**
      * Define the demand (double) field.
      */
     private double demand;
     
-	public int getNormalizedPrice() {
-		return normalizedPrice;
-	
+	public double getPrice() {
+		return price;
 	}
-	public void setNormalizedPrice(int normalizedPrice) {
-		this.normalizedPrice = normalizedPrice;
+
+	public void setPrice(double price) {
+		this.price = price;
 	}
-	
+    
 	public double getDemand() {
 		return demand;
 	}

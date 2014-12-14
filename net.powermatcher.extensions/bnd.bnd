@@ -31,5 +31,5 @@ Service-Component:  \
 Export-Package:  \
 	net.powermatcher.extensions.connectivity.websockets.data,\
 	net.powermatcher.extensions.connectivity.websockets,\
-	net.powermatcher.extensions.connectivity.remote
+	net.powermatcher.extensions.connectivity.websockets.json
 Web-ContextPath: /powermatcher/websockets

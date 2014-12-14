@@ -10,14 +10,15 @@ import java.util.concurrent.TimeUnit;
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.connectivity.MatcherEndpointProxy;
 import net.powermatcher.api.data.Bid;
-import net.powermatcher.api.data.Price;
+import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.core.connectivity.BaseMatcherEndpointProxy;
 import net.powermatcher.extensions.connectivity.websockets.data.ClusterInfoModel;
 import net.powermatcher.extensions.connectivity.websockets.data.PmMessage;
-import net.powermatcher.extensions.connectivity.websockets.data.PmMessageSerializer;
-import net.powermatcher.extensions.connectivity.websockets.data.PriceModel;
 import net.powermatcher.extensions.connectivity.websockets.data.PmMessage.PayloadType;
+import net.powermatcher.extensions.connectivity.websockets.data.PriceModel;
+import net.powermatcher.extensions.connectivity.websockets.json.ModelMapper;
+import net.powermatcher.extensions.connectivity.websockets.json.PmJsonSerializer;
 
 import org.eclipse.jetty.websocket.api.CloseStatus;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
@@ -145,7 +146,7 @@ public class MatcherEndpointProxyWebsocket extends BaseMatcherEndpointProxy {
 	public void updateBidRemote(Bid newBid) {
 		// Relay bid to remote agent
 		try {
-			PmMessageSerializer serializer = new PmMessageSerializer();
+			PmJsonSerializer serializer = new PmJsonSerializer();
 			String message = serializer.serializeBid(newBid);			
 			this.remoteSession.getRemote().sendString(message);
 		} catch (Throwable t) {
@@ -171,14 +172,14 @@ public class MatcherEndpointProxyWebsocket extends BaseMatcherEndpointProxy {
 
 		try {
 			// Decode the JSON data
-			PmMessageSerializer serializer = new PmMessageSerializer();			
+			PmJsonSerializer serializer = new PmJsonSerializer();			
 			PmMessage pmMessage = serializer.deserialize(message);
 			
 			// Handle specific message
 			if (pmMessage.getPayloadType() == PayloadType.PRICE) {
 				// Relay price update to local agent
-				Price newPrice = serializer.mapPrice((PriceModel)pmMessage.getPayload());
-				this.updateLocalPrice(newPrice);
+				PriceUpdate newPriceUpdate = ModelMapper.mapPriceUpdate((PriceModel)pmMessage.getPayload());
+				this.updateLocalPrice(newPriceUpdate);
 			}
 			
 			if (pmMessage.getPayloadType() == PayloadType.CLUSTERINFO) {

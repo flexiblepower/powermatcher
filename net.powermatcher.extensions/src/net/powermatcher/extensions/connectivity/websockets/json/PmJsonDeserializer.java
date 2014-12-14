@@ -1,6 +1,11 @@
-package net.powermatcher.extensions.connectivity.websockets.data;
+package net.powermatcher.extensions.connectivity.websockets.json;
 
 import java.lang.reflect.Type;
+
+import net.powermatcher.extensions.connectivity.websockets.data.BidModel;
+import net.powermatcher.extensions.connectivity.websockets.data.ClusterInfoModel;
+import net.powermatcher.extensions.connectivity.websockets.data.PmMessage;
+import net.powermatcher.extensions.connectivity.websockets.data.PriceModel;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -8,7 +13,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
-public class PmMessageDeserializer implements JsonDeserializer<PmMessage> {
+public class PmJsonDeserializer implements JsonDeserializer<PmMessage> {
 
 	@Override
 	public PmMessage deserialize(JsonElement json, Type arg1,
@@ -32,5 +37,4 @@ public class PmMessageDeserializer implements JsonDeserializer<PmMessage> {
 
 		return message;
 	}
-
 }

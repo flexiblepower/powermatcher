@@ -14,7 +14,8 @@ import javax.naming.OperationNotSupportedException;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.extensions.connectivity.websockets.data.BidModel;
 import net.powermatcher.extensions.connectivity.websockets.data.PmMessage;
-import net.powermatcher.extensions.connectivity.websockets.data.PmMessageSerializer;
+import net.powermatcher.extensions.connectivity.websockets.json.ModelMapper;
+import net.powermatcher.extensions.connectivity.websockets.json.PmJsonSerializer;
 
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
@@ -139,9 +140,9 @@ public class PowermatcherWebSocket {
 		LOGGER.info("Received bid update from remote agent [{}] for local agent [{}]", proxy.getMatcherEndpointProxyId(), proxy.getAgentId());
 		
 		// Decode the JSON data
-		PmMessageSerializer serializer = new PmMessageSerializer();
+		PmJsonSerializer serializer = new PmJsonSerializer();
 		PmMessage pmMessage = serializer.deserialize(message);
-		Bid newBid = serializer.mapBid((BidModel)pmMessage.getPayload());
+		Bid newBid = ModelMapper.mapBid((BidModel)pmMessage.getPayload());
 		
 		// Relay bid update to local agent
 		proxy.updateLocalBid(newBid);

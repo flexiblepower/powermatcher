@@ -84,7 +84,7 @@ public class Freezer extends BaseDeviceAgent implements AgentEndpoint {
     }
 
     protected void doBidUpdate() {
-        if (getSession() != null) {
+        if (getSession() != null && getSession().getMarketBasis() != null) {
             double demand = minimumDemand + (maximumDemand - minimumDemand) * generator.nextDouble();
 
             PricePoint pricePoint1 = new PricePoint(new Price(getSession().getMarketBasis(), getSession()

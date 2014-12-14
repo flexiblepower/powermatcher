@@ -8,9 +8,10 @@ import javax.naming.OperationNotSupportedException;
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.connectivity.AgentEndpointProxy;
 import net.powermatcher.api.data.Price;
+import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.core.connectivity.BaseAgentEndpointProxy;
-import net.powermatcher.extensions.connectivity.websockets.data.PmMessageSerializer;
+import net.powermatcher.extensions.connectivity.websockets.json.PmJsonSerializer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,12 +96,12 @@ public class AgentEndpointProxyWebsocket extends BaseAgentEndpointProxy {
 	}
 
 	@Override
-	public void updateRemotePrice(Price newPrice) {
+	public void updateRemotePrice(PriceUpdate newPrice) {
 		try 
 		{
 			// Create price update message
-			PmMessageSerializer serializer = new PmMessageSerializer();
-			String message = serializer.serializePrice(newPrice);
+			PmJsonSerializer serializer = new PmJsonSerializer();
+			String message = serializer.serializePriceUpdate(newPrice);
 			this.remoteSession.getRemote().sendString(message);
 		} catch (IOException e) {
 			LOGGER.warn("Unable to send price update to remote agent, reason {}", e);
