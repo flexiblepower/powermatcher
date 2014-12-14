@@ -27,7 +27,7 @@ public abstract class Bid {
 	
 	public abstract Bid aggregate(final Bid other);
 	
-	public abstract PriceUpdate calculateIntersection(double targetDemand);
+	public abstract Price calculateIntersection(double targetDemand);
 	
 	public abstract double getMaximumDemand();
 	

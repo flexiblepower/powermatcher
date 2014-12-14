@@ -16,12 +16,14 @@ import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
+import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.Qualifier;
 import net.powermatcher.api.monitoring.events.IncomingBidEvent;
 import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.BidCache;
+import net.powermatcher.core.BidCacheSnapshot;
 import net.powermatcher.core.concentrator.Concentrator;
 
 import org.slf4j.Logger;
@@ -223,7 +225,7 @@ public class ObjectiveAuctioneer extends Auctioneer {
         // aggregate bid device agents
         Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis);
 
-        PriceUpdate newPriceUpdate;
+        Price newPrice;
         // check if objective agent is active
         if (this.objectiveEndpoint != null) {
             // receive the aggregate bid from the objective agent
@@ -231,24 +233,28 @@ public class ObjectiveAuctioneer extends Auctioneer {
             // aggregate again with device agent bid.
             Bid finalAggregatedBid = aggregatedBid.aggregate(aggregatedObjectiveBid);
 
-            newPriceUpdate = determinePrice(finalAggregatedBid);
+            newPrice = determinePrice(finalAggregatedBid);
             // send price update to objective agent
-            this.objectiveEndpoint.notifyPriceUpdate(newPriceUpdate);
+            // TODO this.objectiveEndpoint.notifyPriceUpdate(newPriceUpdate);
         } else {
-            newPriceUpdate = determinePrice(aggregatedBid);
+            newPrice = determinePrice(aggregatedBid);
         }
 
-        // send price updates to device agents
-        for (Session session : this.sessions) {
-            this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), getAgentId(), session.getSessionId(),
-                    timeService.currentDate(), newPriceUpdate, Qualifier.MATCHER));
+        BidCacheSnapshot bidCacheSnapshot = this.aggregatedBids.getMatchingSnapshot(aggregatedBid.getBidNumber());
 
-            session.updatePrice(newPriceUpdate);
-            LOGGER.debug("New price: {}, session {}", newPriceUpdate, session.getSessionId());
+        for (Session session : this.sessions) {
+        	Integer bidNumber = bidCacheSnapshot.getBidNumbers().get(session.getAgentId());
+        	if(bidNumber != null) {
+        		PriceUpdate sessionPriceUpdate = new PriceUpdate(newPrice, bidNumber);
+        		this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), getAgentId(), session.getSessionId(),
+        				timeService.currentDate(), sessionPriceUpdate, Qualifier.MATCHER));
+        		session.updatePrice(sessionPriceUpdate);
+        		LOGGER.debug("New price: {}, session {}", sessionPriceUpdate, session.getSessionId());
+        	}
         }
     }
 
-    protected PriceUpdate determinePrice(Bid aggregatedBid) {
+    protected Price determinePrice(Bid aggregatedBid) {
         return aggregatedBid.calculateIntersection(0);
     }
 

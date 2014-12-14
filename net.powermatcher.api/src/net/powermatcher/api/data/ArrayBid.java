@@ -171,7 +171,7 @@ public class ArrayBid extends Bid {
     }
 
     @Override
-    public PriceUpdate calculateIntersection(final double targetDemand) {
+    public Price calculateIntersection(final double targetDemand) {
         int leftBound = 0;
         int rightBound = demandArray.length - 1;
         int middle = rightBound / 2;
@@ -233,7 +233,7 @@ public class ArrayBid extends Bid {
             }
         }
 
-        return new PriceUpdate(new PriceStep(marketBasis, priceStep).toPrice(), this.bidNumber);
+        return new PriceStep(marketBasis, priceStep).toPrice();
     }
 
     @Override

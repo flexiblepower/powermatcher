@@ -192,28 +192,28 @@ public class ArrayBidTest {
         Bid bid;
         // Price of intersection { 100.0d, 50.0d, 50.0d, 0.0d, 0.0d } is 5.0
         bid = new ArrayBid(marketBasisFiveSteps, 0, new double[] { 100.0d, 50.0d, 50.0d, 0.0d, 0.0d });
-        assertEquals(5.0d, bid.calculateIntersection(0).getPrice().getPriceValue(), 0.0d);
+        assertEquals(5.0d, bid.calculateIntersection(0).getPriceValue(), 0.0d);
 
         // intersection of { 100.0d, 100.0d, 100.0d, 100.0d, 100.0d } is 7.0
         bid = new ArrayBid(marketBasisFiveSteps, 0, new double[] { 100.0d, 100.0d, 100.0d, 100.0d, 100.0d });
-        assertEquals(7.0d, bid.calculateIntersection(0).getPrice().getPriceValue(), 0.0d);
+        assertEquals(7.0d, bid.calculateIntersection(0).getPriceValue(), 0.0d);
 
         // intersection of { 75.0d, 50.0d, 50.0d, 50.0d, 50.0d, 50.0d, 25.0d, 0.0d, 0.0d, 0.0d } is 5.222222222222221
         bid = new ArrayBid(marketBasisTenSteps, 0, new double[] { 75.0d, 50.0d, 50.0d, 50.0d, 50.0d, 50.0d, 50.0d,
                 0.0d, 0.0d, 0.0d });
-        assertEquals(5.222222222222221, bid.calculateIntersection(0).getPrice().getPriceValue(), 0.0d);
+        assertEquals(5.222222222222221, bid.calculateIntersection(0).getPriceValue(), 0.0d);
 
         // intersection of { 100.0d, 100.0d, 100.0d, 100.0d, 100.0d } is 7.0
         bid = new ArrayBid(marketBasisFiveSteps, 0, new double[] { 100.0d, 100.0d, 100.0d, 100.0d, 100.0d });
-        assertEquals(7.0d, bid.calculateIntersection(0).getPrice().getPriceValue(), 0.0d);
+        assertEquals(7.0d, bid.calculateIntersection(0).getPriceValue(), 0.0d);
 
         // intersection of { 100.0d, 50.0d, 50.0d, 50.0d, 0.0d } is 7.0
         bid = new ArrayBid(marketBasisFiveSteps, 0, new double[] { 100.0d, 50.0d, 50.0d, 50.0d, 0.0d });
-        assertEquals(7.0d, bid.calculateIntersection(0).getPrice().getPriceValue(), 0.0d);
+        assertEquals(7.0d, bid.calculateIntersection(0).getPriceValue(), 0.0d);
 
         // intersection of { 100.0d, 75.0d, 50.0d, 0.0d, 0.0d } is 5.0
         bid = new ArrayBid(marketBasisFiveSteps, 0, new double[] { 100.0d, 75.0d, 50.0d, 0.0d, 0.0d });
-        assertEquals(5.0d, bid.calculateIntersection(0).getPrice().getPriceValue(), 0.0d);
+        assertEquals(5.0d, bid.calculateIntersection(0).getPriceValue(), 0.0d);
     }
 
     @Test

@@ -22,6 +22,7 @@ import net.powermatcher.api.monitoring.events.IncomingBidEvent;
 import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.BaseAgent;
 import net.powermatcher.core.BidCache;
+import net.powermatcher.core.BidCacheSnapshot;
 import net.powermatcher.core.concentrator.Concentrator;
 
 import org.slf4j.Logger;
@@ -193,18 +194,22 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
      */
     protected synchronized void publishNewPrice() {
         Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis);
-        PriceUpdate newPriceUpdate = determinePrice(aggregatedBid);
+        Price newPrice = determinePrice(aggregatedBid);
+        BidCacheSnapshot bidCacheSnapshot = this.aggregatedBids.getMatchingSnapshot(aggregatedBid.getBidNumber());
 
         for (Session session : this.sessions) {
-            this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), getAgentId(), session.getSessionId(),
-                    timeService.currentDate(), newPriceUpdate, Qualifier.MATCHER));
-
-            session.updatePrice(newPriceUpdate);
-            LOGGER.debug("New price: {}, session {}", newPriceUpdate, session.getSessionId());
+        	Integer bidNumber = bidCacheSnapshot.getBidNumbers().get(session.getAgentId());
+        	if(bidNumber != null) {
+        		PriceUpdate sessionPriceUpdate = new PriceUpdate(newPrice, bidNumber);
+        		this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), getAgentId(), session.getSessionId(),
+        				timeService.currentDate(), sessionPriceUpdate, Qualifier.MATCHER));
+        		session.updatePrice(sessionPriceUpdate);
+        		LOGGER.debug("New price: {}, session {}", sessionPriceUpdate, session.getSessionId());
+        	}
         }
     }
 
-    protected PriceUpdate determinePrice(Bid aggregatedBid) {
+    protected Price determinePrice(Bid aggregatedBid) {
         return aggregatedBid.calculateIntersection(0);
     }
 
