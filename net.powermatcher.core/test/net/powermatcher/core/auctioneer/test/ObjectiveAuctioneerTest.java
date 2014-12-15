@@ -10,7 +10,7 @@ import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
-import net.powermatcher.api.data.PriceUpdate;
+import net.powermatcher.api.data.Price;
 import net.powermatcher.core.BidCache;
 import net.powermatcher.core.auctioneer.ObjectiveAuctioneer;
 import net.powermatcher.core.sessions.SessionManager;
@@ -119,40 +119,41 @@ public class ObjectiveAuctioneerTest {
         removeAgents(3);
     }
     
-//    @Test
-//    public void objectiveAgentTest() {
-//        addAgents(3);
-//        agents[0].sendBid(new ArrayBid(marketBasis, 0, new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 }));
-//        agents[1].sendBid(new ArrayBid(marketBasis, 0, new double[] { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 }));
-//        agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 }));
-//        timer.doTaskOnce();
-//        
-//        this.objectiveauctioneer.addObjectiveEndpoint(this.mockObjectiveAgent);
-//        
-////        this.aggregatedBids = new ArrayBidCache(this.timeService, config.bidTimeout());
-//        this.aggregatedBids = new BidCache(this.timeService, 5);
-//        
-//        
-//        Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis);
-//        Bid bid = new ArrayBid(new ArrayBid(marketBasis, 0, new double[] { -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4 }));
-//        
-//        Bid finalAggregatedBid = null;
-//        if (this.mockObjectiveAgent != null) {
-//            
-//          Bid aggregatedObjectiveBid = this.mockObjectiveAgent.handleAggregateBid(aggregatedBid);
-//            
-//          finalAggregatedBid = aggregatedBid.aggregate(aggregatedObjectiveBid);
-//
-//          // aggregate again with device agent bid.
-//          PriceUpdate priceUpdate = determinePrice(finalAggregatedBid);
-//        }
-//        assertArrayEquals(new double[] { 50.0, 50.0, 50.0, 50.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, ((ArrayBid)finalAggregatedBid).getDemand(), 0);
-//        
-//    }
+
+    @Test
+    public void objectiveAgentTest() {
+        addAgents(3);
+        agents[0].sendBid(new ArrayBid(marketBasis, 0, new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 }));
+        agents[1].sendBid(new ArrayBid(marketBasis, 0, new double[] { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 }));
+        agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 }));
+        timer.doTaskOnce();
+        
+        this.objectiveauctioneer.addObjectiveEndpoint(this.mockObjectiveAgent);
+        
+//        this.aggregatedBids = new ArrayBidCache(this.timeService, config.bidTimeout());
+        this.aggregatedBids = new BidCache(this.timeService, 5);
+        
+        
+        Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis);
+        Bid bid = new ArrayBid(new ArrayBid(marketBasis, 0, new double[] { -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4 }));
+        
+        Bid finalAggregatedBid = null;
+        if (this.mockObjectiveAgent != null) {
+            
+          Bid aggregatedObjectiveBid = this.mockObjectiveAgent.handleAggregateBid(aggregatedBid);
+            
+          finalAggregatedBid = aggregatedBid.aggregate(aggregatedObjectiveBid);
+
+          // aggregate again with device agent bid.
+          determinePrice(finalAggregatedBid);
+        }
+        assertArrayEquals(new double[] { 50.0, 50.0, 50.0, 50.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, ((ArrayBid)finalAggregatedBid).getDemand(), 0);
+        
+    }
     
-//    protected PriceUpdate determinePrice(Bid aggregatedBid) {
-//        return aggregatedBid.calculateIntersection(0);
-//    }
+    protected Price determinePrice(Bid aggregatedBid) {
+        return aggregatedBid.calculateIntersection(0);
+    }
     
     @Test
     public void noEquilibriumOnSupplySide() {

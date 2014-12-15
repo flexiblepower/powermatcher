@@ -84,13 +84,13 @@ public class PVPanelAgent extends BaseDeviceAgent implements AgentEndpoint {
     }
 
     protected void doBidUpdate() {
-        if (getSession() != null) {
+        if (getMarketBasis() != null) {
             double demand = minimumDemand + (maximumDemand - minimumDemand) * generator.nextDouble();
 
-            PricePoint pricePoint1 = new PricePoint(new Price(getSession().getMarketBasis(), getSession()
-                    .getMarketBasis().getMinimumPrice()), demand);
-            PricePoint pricePoint2 = new PricePoint(new Price(getSession().getMarketBasis(), getSession()
-                    .getMarketBasis().getMaximumPrice()), minimumDemand);
+            PricePoint pricePoint1 = new PricePoint(new Price(getMarketBasis(),
+                    getMarketBasis().getMinimumPrice()), demand);
+            PricePoint pricePoint2 = new PricePoint(new Price(getMarketBasis(),
+                    getMarketBasis().getMaximumPrice()), minimumDemand);
 
             Bid newBid = createBid(pricePoint1, pricePoint2);
             LOGGER.debug("updateBid({})", newBid);

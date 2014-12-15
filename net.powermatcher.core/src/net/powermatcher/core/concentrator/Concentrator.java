@@ -1,6 +1,7 @@
 package net.powermatcher.core.concentrator;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.List;
@@ -111,7 +112,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
      */
     protected Config config;
 
-    private List<String> validAgents;
+    private List<String> validAgents = new ArrayList<String>();
 
     private static ConfigurationAdmin configurationAdmin;
 
@@ -182,6 +183,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
             LOGGER.info("Agent connected with session [{}]", session.getSessionId());
             return true;
         } else {
+            LOGGER.warn("Agent [{}] is not on whitelist, reject connection", session.getAgentId());
             return false;
         }
     }
@@ -343,6 +345,11 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
 
     protected void setWhiteListAgents(List<String> whiteListAgents) {
         this.validAgents = whiteListAgents;
+
+        // ConfigAdmin will sometimes generate a filter with 1 empty element. Ignore it.
+        if (whiteListAgents != null && !whiteListAgents.isEmpty() && whiteListAgents.get(0).isEmpty()) {
+        	this.validAgents = new ArrayList<String>();
+        }
     }
 
     @Override

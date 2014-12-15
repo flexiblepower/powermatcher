@@ -197,7 +197,7 @@ public class PeakShavingConcentratorTest {
     }
 
     protected PriceUpdate determinePrice(Bid aggregatedBid) {
-        return aggregatedBid.calculateIntersection(0);
+    	return new PriceUpdate(aggregatedBid.calculateIntersection(0), aggregatedBid.getBidNumber());
     }
 
     @After

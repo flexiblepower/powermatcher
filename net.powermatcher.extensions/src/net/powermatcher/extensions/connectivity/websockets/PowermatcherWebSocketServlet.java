@@ -3,6 +3,9 @@ package net.powermatcher.extensions.connectivity.websockets;
 import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 
+/**
+ * Servlet which activates the PowerMatcher WebSocket communication.
+ */
 public class PowermatcherWebSocketServlet extends WebSocketServlet {
  
 	/**

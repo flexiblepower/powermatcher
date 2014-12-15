@@ -1,5 +1,8 @@
 package net.powermatcher.extensions.connectivity.websockets.data;
 
+/**
+ * MarketBasis model class to transfer {@link MarketBasis} data over the wire.
+ */
 public class MarketBasisModel {
 	/**
      * Define the commodity (String) field.
