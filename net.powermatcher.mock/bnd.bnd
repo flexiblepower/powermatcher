@@ -3,7 +3,8 @@
 	osgi.cmpn,\
 	biz.aQute.bnd.annotation,\
 	${junit},\
-	net.powermatcher.api;version=latest
+	net.powermatcher.api;version=latest,\
+	slf4j.api
 Bundle-Version: 0.0.0.${tstamp}
 Private-Package:  \
 	net.powermatcher.mock

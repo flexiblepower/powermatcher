@@ -23,9 +23,9 @@ public class AuctioneerResilienceTest extends ResilienceTest {
 
     // The direct upstream matcher for the agents
     protected AuctioneerWrapper auctioneer;
-    
+
     protected MockScheduler timer;
-    
+
     protected void prepareTest(String testID, String suffix) throws IOException, DataFormatException {
         // Create agent list
         this.agentList = new ArrayList<MockAgent>();
@@ -35,7 +35,7 @@ public class AuctioneerResilienceTest extends ResilienceTest {
 
         // Get the expected results
         this.resultsReader = new CsvExpectedResultsReader(getExpectedResultsFile(testID, suffix));
-        
+
         this.marketBasis = resultsReader.getMarketBasis();
         this.auctioneer = new AuctioneerWrapper();
         Map<String, Object> auctioneerProperties = new HashMap<>();
@@ -65,19 +65,19 @@ public class AuctioneerResilienceTest extends ResilienceTest {
         // Create the bid reader
         this.bidReader = new CsvBidReader(getBidInputFile(testID, suffix), this.marketBasis);
     }
-    
+
     protected void checkEquilibriumPrice() {
         double expPrice = this.resultsReader.getEquilibriumPrice();
 
-        //Actual Scheduler does not work. Use MockScheduler to manually call timertask.
+        // Actual Scheduler does not work. Use MockScheduler to manually call timertask.
         timer.doTaskOnce();
 
         // Verify the price received by the agents
         for (MockAgent agent : agentList) {
-            assertEquals(expPrice, agent.getLastPriceUpdate().getCurrentPrice(), 0);
+            assertEquals(expPrice, agent.getLastPriceUpdate().getPrice().getPriceValue(), 0);
         }
     }
-    
+
     @After
     public void tearDown() throws IOException {
         if (this.bidReader != null) {

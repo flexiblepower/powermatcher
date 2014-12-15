@@ -41,7 +41,9 @@ public class SendReceiveBidTestCBF1 extends BidResilienceTest {
                  this.auctioneer.getAggregatedBid(this.marketBasis));
 
                 // Check if the price published by the auctioneer arrives at the agent
-                assertEquals(this.agentList.get(id).getLastPriceUpdate(), this.auctioneer.getLastPublishedPrice());
+                 //concentrator.getLastReceived instead of auctioneer.getLastPublished, because
+                 //lastPublished is not reliable anymore.
+                assertEquals(this.agentList.get(id).getLastPriceUpdate(), this.concentrator.getLastReceivedPriceUpdate());
             } else {
                 stop = true;
             }

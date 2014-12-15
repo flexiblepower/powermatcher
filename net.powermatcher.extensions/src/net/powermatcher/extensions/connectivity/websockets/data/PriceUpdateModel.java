@@ -1,10 +1,6 @@
 package net.powermatcher.extensions.connectivity.websockets.data;
 
-public class PriceModel {
-	/**
-	 * Define the cluster id field
-	 */
-	private String clusterId;
+public class PriceUpdateModel {
 	
     /**
      * Define the market basis (MarketBasis) field.
@@ -12,17 +8,14 @@ public class PriceModel {
     private MarketBasisModel marketBasis;
 
     /**
+     * Define the bidNumber field.
+     */
+    private int bidNumber;
+    
+    /**
      * Define the current price (double) field.
      */
-    private double currentPrice;
-
-	public String getClusterId() {
-		return clusterId;
-	}
-
-	public void setClusterId(String clusterId) {
-		this.clusterId = clusterId;
-	}
+    private double priceValue;
 
 	public MarketBasisModel getMarketBasis() {
 		return marketBasis;
@@ -32,11 +25,19 @@ public class PriceModel {
 		this.marketBasis = marketBasis;
 	}
 
-	public double getCurrentPrice() {
-		return currentPrice;
+	public int getBidNumber() {
+		return bidNumber;
 	}
 
-	public void setCurrentPrice(double currentPrice) {
-		this.currentPrice = currentPrice;
+	public void setBidNumber(int bidNumber) {
+		this.bidNumber = bidNumber;
+	}
+	
+	public double getPriceValue() {
+		return priceValue;
+	}
+
+	public void setPriceValue(double priceValue) {
+		this.priceValue = priceValue;
 	}
 }

@@ -8,7 +8,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ConcentratorTest.class, ConcentratorResilienceTestICF.class, ConcentratorResilienceTestICQ.class})
+@Suite.SuiteClasses({ ConcentratorTest.class, ConcentratorResilienceTestICF.class, ConcentratorResilienceTestICQ.class })
 public class ConcentratorTestSuite {
 
 }

@@ -36,14 +36,14 @@ public class MarketBasisTest {
     public void testMarketBasisNegativeMinimum(){
         expectedException.expect(InvalidParameterException.class);
         expectedException.expectMessage("Price steps must be > 0.");
-        MarketBasis testBasis = new MarketBasis("electricity", "EUR", -1, 0, 1);
+        new MarketBasis("electricity", "EUR", -1, 0, 1);
     }
     
     @Test
     public void testMarketBasisMaximumPriceTooSmall(){
         expectedException.expect(InvalidParameterException.class);
         expectedException.expectMessage("Maximum price must be > minimum price.");
-        MarketBasis testBasis = new MarketBasis("electricity", "EUR", 10, 2, 1);
+        new MarketBasis("electricity", "EUR", 10, 2, 1);
     }
 }
     

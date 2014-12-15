@@ -14,6 +14,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.powermatcher.visualisation.models.LevelModel;
+import net.powermatcher.visualisation.models.MenuItemModel;
+import net.powermatcher.visualisation.models.NodeModel;
+import net.powermatcher.visualisation.models.SubMenuItemModel;
+
 import org.apache.commons.io.IOUtils;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
@@ -21,7 +26,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.JsonArray;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import aQute.bnd.annotation.component.Activate;
@@ -137,82 +142,78 @@ public class VisualisationPlugin extends HttpServlet {
 
     private JsonObject getMenuAsJson() {
 
+        List<MenuItemModel> menuItems = new ArrayList<>();
+        MenuItemModel menuItem;
+        SubMenuItemModel subMenuItem;
+
+        Gson gson = new Gson();
         JsonObject output = new JsonObject();
 
-        JsonArray jarray = new JsonArray();
-
-        JsonObject tempObject;
-        JsonObject tempInnerObject;
-        JsonArray tempArray;
-
         for (String s : menu.keySet()) {
+            menuItem = new MenuItemModel(s);
 
-            tempObject = new JsonObject();
-            tempArray = new JsonArray();
-
-            tempObject.addProperty("title", s);
-
-            for (String str : menu.get(s)) {
-                tempInnerObject = new JsonObject();
-                tempInnerObject.addProperty("title", str.substring(str.lastIndexOf(".") + 1));
-                tempInnerObject.addProperty("fpid", str);
-                tempArray.add(tempInnerObject);
+            for (String fpid : menu.get(s)) {
+                String title = fpid.substring(fpid.lastIndexOf(".") + 1);
+                subMenuItem = new SubMenuItemModel(title, fpid);
+                menuItem.addSubMenuItem(subMenuItem);
             }
-
-            tempObject.add("items", tempArray);
-
-            jarray.add(tempObject);
+            menuItems.add(menuItem);
         }
 
-        output.add("menu", jarray);
+        output.add("menu", gson.toJsonTree(menuItems));
 
         return output;
     }
 
     private JsonObject getNodesAsJson() {
+
+        Gson gson = new Gson();
         JsonObject output = new JsonObject();
 
-        JsonArray agents = new JsonArray();
-        JsonArray connections = new JsonArray();
+        Map<Integer, LevelModel> levelMap = new HashMap<>();
+        Map<String, NodeModel> nodes = new HashMap<>();
 
-        JsonObject agent;
-        JsonObject connection;
+        NodeModel node;
+        LevelModel levelModel;
 
-        // TODO no configurations means nullpointer for some reason
-        // you need this to work when you start with a black slate
         try {
             for (Configuration c : configurationAdmin.listConfigurations(null)) {
                 if (filter.contains(c.getFactoryPid())) {
-                    agent = new JsonObject();
-                    connection = new JsonObject();
 
-                    String fpid = c.getFactoryPid();
                     String agentId = (String) c.getProperties().get("agentId");
-
-                    agent.addProperty("fpid", fpid);
-                    agent.addProperty("pid", c.getPid());
-                    agent.addProperty("agentId", agentId);
-
-                    agents.add(agent);
-
                     String desiredParentId = (String) c.getProperties().get("desiredParentId");
+                    String pid = c.getPid();
+                    String fpid = c.getFactoryPid();
 
-                    connection.addProperty("matcherRole", desiredParentId);
-                    connection.addProperty("agentRole", agentId);
-
-                    connections.add(connection);
+                    node = new NodeModel(fpid, pid, agentId, desiredParentId);
+                    nodes.put(agentId, node);
                 }
             }
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.equals(e.getMessage());
         } catch (InvalidSyntaxException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.equals(e.getMessage());
         }
 
-        output.add("agents", agents);
-        output.add("connections", connections);
+        for (NodeModel nm : nodes.values()) {
+            int count = 0;
+            String desiredParent = nm.getDesiredParentId();
+
+            // determining the level
+            while (!"null".equals(desiredParent) || nodes.containsKey(desiredParent)) {
+                count++;
+                desiredParent = nodes.get(desiredParent).getDesiredParentId();
+            }
+
+            if (!levelMap.containsKey(count)) {
+                levelModel = new LevelModel(count);
+                levelMap.put(count, levelModel);
+            }
+
+            levelMap.get(count).addNode(nm);
+        }
+
+        output.add("levels", gson.toJsonTree(levelMap.values()));
 
         return output;
     }

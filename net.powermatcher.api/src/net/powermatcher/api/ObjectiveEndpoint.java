@@ -1,7 +1,7 @@
 package net.powermatcher.api;
 
 import net.powermatcher.api.data.Bid;
-import net.powermatcher.api.data.Price;
+import net.powermatcher.api.data.PriceUpdate;
 
 /**
  * A {@link ObjectiveEndpoint} defines the interface for classes like objective agents. 
@@ -12,7 +12,7 @@ import net.powermatcher.api.data.Price;
  */
 public interface ObjectiveEndpoint {
 
-    void notifyPriceUpdate(Price newPrice);
+    void notifyPriceUpdate(PriceUpdate priceUpdate);
 
     Bid handleAggregateBid(Bid aggregatedBid);
 }

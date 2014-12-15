@@ -3,14 +3,13 @@ package net.powermatcher.integration.base;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.zip.DataFormatException;
 
 import net.powermatcher.api.MatcherEndpoint;
+import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.core.sessions.SessionManager;
 import net.powermatcher.core.time.SystemTimeService;
@@ -31,7 +30,8 @@ public class BidResilienceTest extends ResilienceTest {
     private static final String CONCENTRATOR_NAME = "concentrator";
     private static final Logger LOGGER = LoggerFactory.getLogger(BidResilienceTest.class);
 
-    protected MockScheduler timer;
+    protected MockScheduler auctioneerTimer;
+    protected MockScheduler concentratorTimer;
 
     // The direct upstream matcher for the agents
     protected ConcentratorWrapper concentrator;
@@ -65,11 +65,9 @@ public class BidResilienceTest extends ResilienceTest {
         auctioneerProperties.put("priceUpdateRate", "1");
         auctioneerProperties.put("clusterId", "testCluster");
 
-        auctioneer.setMarketBasis(marketBasis);
-
         this.matchers.add(this.auctioneer);
-        timer = new MockScheduler();
-        auctioneer.setExecutorService(timer);
+        auctioneerTimer = new MockScheduler();
+        auctioneer.setExecutorService(auctioneerTimer);
         auctioneer.setTimeService(new SystemTimeService());
         auctioneer.activate(auctioneerProperties);
 
@@ -81,10 +79,11 @@ public class BidResilienceTest extends ResilienceTest {
         concentratorProperties.put("bidTimeout", "600");
         concentratorProperties.put("bidUpdateRate", "30");
         concentratorProperties.put("agentId", CONCENTRATOR_NAME);
+        concentratorProperties.put("whiteListAgents", new ArrayList<String>());
 
         this.matchers.add(this.concentrator);
-
-        concentrator.setExecutorService(new ScheduledThreadPoolExecutor(10));
+        this.concentratorTimer = new MockScheduler();
+        concentrator.setExecutorService(concentratorTimer);
         concentrator.setTimeService(new SystemTimeService());
         concentrator.activate(concentratorProperties);
 
@@ -101,7 +100,7 @@ public class BidResilienceTest extends ResilienceTest {
 
     @Override
     protected void sendBidsToMatcher() throws IOException, DataFormatException {
-        Bid bid = null;
+        ArrayBid bid = null;
         MockAgent newAgent;
 
         double[] aggregatedDemand = new double[this.marketBasis.getPriceSteps()];
@@ -129,12 +128,12 @@ public class BidResilienceTest extends ResilienceTest {
                 } else {
                     stop = true;
                 }
-            } catch (InvalidParameterException e) {
-                LOGGER.error("Incorrect bid specification found: " + e.getMessage());
+            } catch (IllegalArgumentException e) {
+                LOGGER.error("Incorrect bid specification caught: " + e.getMessage());
                 bid = null;
             }
         } while (!stop);
-        concentrator.doBidUpdate();
+        concentratorTimer.doTaskOnce();
         // Write aggregated demand array
         LOGGER.info("Aggregated demand: ");
         for (int j = 0; j < aggregatedDemand.length; j++) {
@@ -175,7 +174,7 @@ public class BidResilienceTest extends ResilienceTest {
 
         // Verify the price received by the agents
         for (MockAgent agent : agentList) {
-            assertEquals(expPrice, agent.getLastPriceUpdate().getCurrentPrice(), 0);
+            assertEquals(expPrice, agent.getLastPriceUpdate().getPrice().getPriceValue(), 0);
         }
     }
 

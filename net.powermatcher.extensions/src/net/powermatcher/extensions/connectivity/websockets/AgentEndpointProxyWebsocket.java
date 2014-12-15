@@ -6,11 +6,12 @@ import java.util.Map;
 import javax.naming.OperationNotSupportedException;
 
 import net.powermatcher.api.AgentEndpoint;
+import net.powermatcher.api.Session;
 import net.powermatcher.api.connectivity.AgentEndpointProxy;
-import net.powermatcher.api.data.Price;
+import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.core.connectivity.BaseAgentEndpointProxy;
-import net.powermatcher.extensions.connectivity.websockets.data.PmMessageSerializer;
+import net.powermatcher.extensions.connectivity.websockets.json.PmJsonSerializer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,11 +22,15 @@ import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
+/**
+ * WebSocket implementation of an {@link AgentEndpointProxy}.
+ * Enabled two agents to communicate via WebSockets and JSON over a TCP connection.
+ */
 @Component(designateFactory = AgentEndpointProxyWebsocket.Config.class, immediate = true, 
 	provide = { ObservableAgent.class, AgentEndpoint.class, AgentEndpointProxy.class, AgentEndpointProxyWebsocket.class })
 public class AgentEndpointProxyWebsocket extends BaseAgentEndpointProxy {
     private static final Logger LOGGER = LoggerFactory.getLogger(AgentEndpointProxyWebsocket.class);
-	
+
 	@Meta.OCD
     public static interface Config {
         @Meta.AD(deflt = "concentrator", description = "desired parent to connect to")
@@ -64,25 +69,8 @@ public class AgentEndpointProxyWebsocket extends BaseAgentEndpointProxy {
 		
 		this.remoteSession = session;
 		
-		/* TODO
-		// Send cluster info
-		try 
-		{
-			// Create price update message
-			ClusterInfoModel clusterInfo = new ClusterInfoModel();
-			clusterInfo.setClusterId(this.getClusterId());
-			// TODO clusterInfo.setMarketBasis(this.getLocalMarketBasis());
-			PmMessage pmMessage = new PmMessage();
-			pmMessage.setPayload(clusterInfo);
-			pmMessage.setPayloadType(PayloadType.CLUSTERINFO);
-			
-			PmMessageSerializer serializer = new PmMessageSerializer();
-			String message = serializer.serializeClusterInfo(clusterInfo);
-			this.remoteSession.getRemote().sendString(message);
-		} catch (IOException e) {
-			LOGGER.warn("Unable to send price update to remote agent, reason {}", e);
-		}
-		*/
+		// Notify the remote agent about the cluster
+		sendCusterInformation();
 	}
 	
 	public void remoteAgentDisconnected() {
@@ -95,12 +83,36 @@ public class AgentEndpointProxyWebsocket extends BaseAgentEndpointProxy {
 	}
 
 	@Override
-	public void updateRemotePrice(Price newPrice) {
+	public void updateRemotePrice(PriceUpdate newPrice) {
 		try 
 		{
 			// Create price update message
-			PmMessageSerializer serializer = new PmMessageSerializer();
-			String message = serializer.serializePrice(newPrice);
+			PmJsonSerializer serializer = new PmJsonSerializer();
+			String message = serializer.serializePriceUpdate(newPrice);
+			this.remoteSession.getRemote().sendString(message);
+		} catch (IOException e) {
+			LOGGER.warn("Unable to send price update to remote agent, reason {}", e);
+		}
+	}
+
+	@Override
+	public void connectToMatcher(Session session) {
+		super.connectToMatcher(session);
+		
+		// Local matcher is connected, provide cluster information to remote agent.
+		sendCusterInformation();
+	}
+
+	private void sendCusterInformation() {
+		if (!isRemoteConnected() || this.getLocalMarketBasis() == null) {
+			// Skip sending information
+			return;
+		}
+		
+		try 
+		{
+			PmJsonSerializer serializer = new PmJsonSerializer();
+			String message = serializer.serializeClusterInfo(this.getClusterId(), this.getLocalMarketBasis());
 			this.remoteSession.getRemote().sendString(message);
 		} catch (IOException e) {
 			LOGGER.warn("Unable to send price update to remote agent, reason {}", e);

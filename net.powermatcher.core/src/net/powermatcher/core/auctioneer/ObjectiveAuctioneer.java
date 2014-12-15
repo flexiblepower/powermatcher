@@ -13,14 +13,17 @@ import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.ObjectiveEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
+import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
-import net.powermatcher.api.monitoring.IncomingBidEvent;
+import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
-import net.powermatcher.api.monitoring.OutgoingPriceEvent;
 import net.powermatcher.api.monitoring.Qualifier;
+import net.powermatcher.api.monitoring.events.IncomingBidEvent;
+import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.BidCache;
+import net.powermatcher.core.BidCacheSnapshot;
 import net.powermatcher.core.concentrator.Concentrator;
 
 import org.slf4j.Logger;
@@ -113,7 +116,7 @@ public class ObjectiveAuctioneer extends Auctioneer {
     private BidCache aggregatedBids;
 
     /**
-     * The {@link MarketBasis} for {@link Bid} and {@link Price}.
+     * The {@link MarketBasis} for {@link Bid} and {@link PriceUpdate}.
      */
     private MarketBasis marketBasis;
 
@@ -167,9 +170,7 @@ public class ObjectiveAuctioneer extends Auctioneer {
         if (this.objectiveEndpoint == objectiveEndpoint) {
             this.objectiveEndpoint = null;
             LOGGER.debug("Removed objective agent");
-        } else {
-            throw new IllegalStateException("This objective agent is not active and can't be removed");
-        }
+        } 
     }
 
     @Override
@@ -178,7 +179,7 @@ public class ObjectiveAuctioneer extends Auctioneer {
         session.setClusterId(this.getClusterId());
 
         this.sessions.add(session);
-        this.aggregatedBids.updateBid(session.getSessionId(), new Bid(this.marketBasis));
+        this.aggregatedBids.updateBid(session.getSessionId(), new ArrayBid.Builder(this.marketBasis).setDemand(0).build());
         LOGGER.info("Agent connected with session [{}]", session.getSessionId());
         return true;
     }
@@ -234,18 +235,22 @@ public class ObjectiveAuctioneer extends Auctioneer {
 
             newPrice = determinePrice(finalAggregatedBid);
             // send price update to objective agent
-            this.objectiveEndpoint.notifyPriceUpdate(newPrice);
+            // TODO this.objectiveEndpoint.notifyPriceUpdate(newPriceUpdate);
         } else {
             newPrice = determinePrice(aggregatedBid);
         }
 
-        // send price updates to device agents
-        for (Session session : this.sessions) {
-            this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), getAgentId(), session.getSessionId(),
-                    timeService.currentDate(), newPrice, Qualifier.MATCHER));
+        BidCacheSnapshot bidCacheSnapshot = this.aggregatedBids.getMatchingSnapshot(aggregatedBid.getBidNumber());
 
-            session.updatePrice(newPrice);
-            LOGGER.debug("New price: {}, session {}", newPrice, session.getSessionId());
+        for (Session session : this.sessions) {
+        	Integer bidNumber = bidCacheSnapshot.getBidNumbers().get(session.getAgentId());
+        	if(bidNumber != null) {
+        		PriceUpdate sessionPriceUpdate = new PriceUpdate(newPrice, bidNumber);
+        		this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), getAgentId(), session.getSessionId(),
+        				timeService.currentDate(), sessionPriceUpdate, Qualifier.MATCHER));
+        		session.updatePrice(sessionPriceUpdate);
+        		LOGGER.debug("New price: {}, session {}", sessionPriceUpdate, session.getSessionId());
+        	}
         }
     }
 

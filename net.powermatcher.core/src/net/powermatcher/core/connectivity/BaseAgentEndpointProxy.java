@@ -4,12 +4,16 @@ import net.powermatcher.api.Session;
 import net.powermatcher.api.connectivity.AgentEndpointProxy;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
-import net.powermatcher.api.data.Price;
+import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.core.BaseAgent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Base implementation for remote agents.
+ * This is the "receiving end" of a remote communication pair.
+ */
 public abstract class BaseAgentEndpointProxy extends BaseAgent implements AgentEndpointProxy {
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseAgentEndpointProxy.class);
 
@@ -61,14 +65,14 @@ public abstract class BaseAgentEndpointProxy extends BaseAgent implements AgentE
 	}
 
 	@Override
-	public synchronized void updatePrice(Price newPrice) {
+	public synchronized void updatePrice(PriceUpdate priceUpdate) {
 		if (!this.isRemoteConnected()) {
 			LOGGER.warn("Remote agent not connected, skip sending price update");
 			return;
 		}		
 		
-		LOGGER.info("Sending price update to remote agent {}", newPrice);
+		LOGGER.info("Sending price update to remote agent {}", priceUpdate);
 		
-		this.updateRemotePrice(newPrice);
+		this.updateRemotePrice(priceUpdate);
 	}
 }

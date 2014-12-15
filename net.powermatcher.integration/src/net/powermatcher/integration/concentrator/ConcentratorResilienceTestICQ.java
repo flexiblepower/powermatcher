@@ -3,15 +3,21 @@ package net.powermatcher.integration.concentrator;
 import java.io.IOException;
 import java.util.zip.DataFormatException;
 
+import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.integration.base.ConcentratorResilienceTest;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 /**
  * Concentrator quality test with focus on scalability.
  */
 public class ConcentratorResilienceTestICQ extends ConcentratorResilienceTest {
 
+//    @Rule
+//    public ExpectedException exception = ExpectedException.none();
+    
     /**
      * A large set of agents send a bid to the matcher via the concentrator.
      * 
@@ -27,6 +33,8 @@ public class ConcentratorResilienceTestICQ extends ConcentratorResilienceTest {
 
     @Test
     public void qualityScalabilityTestICQ2SendAggregatedBidRejectAscending() throws IOException, DataFormatException {
+//        exception.expect(IllegalArgumentException.class);
+//        exception.expectMessage("No session found");
         performAggregatedBidTest("ICQ/ICQ2", null);
     }
 
@@ -35,6 +43,6 @@ public class ConcentratorResilienceTestICQ extends ConcentratorResilienceTest {
 
         sendBidsToMatcher();
 
-        checkAggregatedBid(this.auctioneer.getLastReceivedBid());
+        checkAggregatedBid((ArrayBid)this.auctioneer.getLastReceivedBid());
     }
 }

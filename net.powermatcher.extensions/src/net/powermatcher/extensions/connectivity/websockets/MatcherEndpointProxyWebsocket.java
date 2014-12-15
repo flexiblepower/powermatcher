@@ -1,5 +1,6 @@
 package net.powermatcher.extensions.connectivity.websockets;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
@@ -10,14 +11,15 @@ import java.util.concurrent.TimeUnit;
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.connectivity.MatcherEndpointProxy;
 import net.powermatcher.api.data.Bid;
-import net.powermatcher.api.data.Price;
+import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.core.connectivity.BaseMatcherEndpointProxy;
 import net.powermatcher.extensions.connectivity.websockets.data.ClusterInfoModel;
 import net.powermatcher.extensions.connectivity.websockets.data.PmMessage;
-import net.powermatcher.extensions.connectivity.websockets.data.PmMessageSerializer;
-import net.powermatcher.extensions.connectivity.websockets.data.PriceModel;
 import net.powermatcher.extensions.connectivity.websockets.data.PmMessage.PayloadType;
+import net.powermatcher.extensions.connectivity.websockets.data.PriceUpdateModel;
+import net.powermatcher.extensions.connectivity.websockets.json.ModelMapper;
+import net.powermatcher.extensions.connectivity.websockets.json.PmJsonSerializer;
 
 import org.eclipse.jetty.websocket.api.CloseStatus;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
@@ -38,6 +40,10 @@ import aQute.bnd.annotation.metatype.Meta;
 
 import com.google.gson.JsonSyntaxException;
 
+/**
+ * WebSocket implementation of an {@link MatcherEndpointProxy}.
+ * Enabled two agents to communicate via WebSockets and JSON over a TCP connection.
+ */
 @WebSocket()
 @Component(designateFactory = MatcherEndpointProxyWebsocket.Config.class, immediate = true, 
 	provide = { ObservableAgent.class, MatcherEndpoint.class, MatcherEndpointProxy.class })
@@ -145,11 +151,11 @@ public class MatcherEndpointProxyWebsocket extends BaseMatcherEndpointProxy {
 	public void updateBidRemote(Bid newBid) {
 		// Relay bid to remote agent
 		try {
-			PmMessageSerializer serializer = new PmMessageSerializer();
+			PmJsonSerializer serializer = new PmJsonSerializer();
 			String message = serializer.serializeBid(newBid);			
 			this.remoteSession.getRemote().sendString(message);
-		} catch (Throwable t) {
-			LOGGER.error("Unable to send new bid to remote agent. Reason {}", t);
+		} catch (IOException e) {
+			LOGGER.error("Unable to send new bid to remote agent. Reason {}", e);
 		}		
 	}
 	
@@ -167,25 +173,25 @@ public class MatcherEndpointProxyWebsocket extends BaseMatcherEndpointProxy {
     
 	@OnWebSocketMessage
 	public void onMessage(String message) {
-		LOGGER.debug("Received price update from remote agent {}", message);
+		LOGGER.debug("Received message from remote agent {}", message);
 
 		try {
 			// Decode the JSON data
-			PmMessageSerializer serializer = new PmMessageSerializer();			
+			PmJsonSerializer serializer = new PmJsonSerializer();			
 			PmMessage pmMessage = serializer.deserialize(message);
 			
 			// Handle specific message
-			if (pmMessage.getPayloadType() == PayloadType.PRICE) {
+			if (pmMessage.getPayloadType() == PayloadType.PRICE_UPDATE) {
 				// Relay price update to local agent
-				Price newPrice = serializer.mapPrice((PriceModel)pmMessage.getPayload());
-				this.updateLocalPrice(newPrice);
+				PriceUpdate newPriceUpdate = ModelMapper.mapPriceUpdate((PriceUpdateModel)pmMessage.getPayload());
+				this.updateLocalPrice(newPriceUpdate);
 			}
 			
 			if (pmMessage.getPayloadType() == PayloadType.CLUSTERINFO) {
 				// Sync marketbasis and clusterid with local session, for new connections
 				ClusterInfoModel clusterInfo = (ClusterInfoModel)pmMessage.getPayload();
 				this.updateRemoteClusterId(clusterInfo.getClusterId());
-				this.updateRemoteMarketBasis(clusterInfo.getMarketBasis());
+				this.updateRemoteMarketBasis(ModelMapper.convertMarketBasis(clusterInfo.getMarketBasis()));
 			}
 		} catch (JsonSyntaxException e) {
 			LOGGER.warn("Unable to understand message from remote agent: {}", message);
@@ -208,8 +214,8 @@ public class MatcherEndpointProxyWebsocket extends BaseMatcherEndpointProxy {
             		connectFuture.get(this.connectTimeout, TimeUnit.SECONDS);
             
             this.remoteSession = newRemoteSession;
-        } catch (Throwable t) {
-			LOGGER.error("Unable to connect to remote agent. Reason {}", t);
+        } catch (Exception e) {
+			LOGGER.error("Unable to connect to remote agent. Reason {}", e);
 
 			this.remoteSession = null;
         	return false;

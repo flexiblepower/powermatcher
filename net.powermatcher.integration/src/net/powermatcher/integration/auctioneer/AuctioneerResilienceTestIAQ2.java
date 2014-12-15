@@ -3,12 +3,18 @@ package net.powermatcher.integration.auctioneer;
 import java.io.IOException;
 import java.util.zip.DataFormatException;
 
+import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.integration.base.AuctioneerResilienceTest;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class AuctioneerResilienceTestIAQ2 extends AuctioneerResilienceTest {
 
+  @Rule
+  public ExpectedException exception = ExpectedException.none();
+    
     /**
      * No equilibrium (demand side). Agents send series of bids with no-equilibrium price.
      * 
@@ -46,6 +52,7 @@ public class AuctioneerResilienceTestIAQ2 extends AuctioneerResilienceTest {
     @Test
     public void qualityTestIAQ2NoEquilibriumOnSupplySide() throws IOException, DataFormatException {
         performEquilibriumTest("IAQ/IAQ2/IAF2", null);
+        
     }
 
     /**
@@ -168,8 +175,8 @@ public class AuctioneerResilienceTestIAQ2 extends AuctioneerResilienceTest {
     /**
      * Equilibrium including bid rejection.
      * 
-     * Series of bids with a guaranteed equilibrium price,including an ascending bid. Expected outcome is the difened
-     * expectedquilibrium price, with the ascending bid being rejected.
+     * Series of bids with a guaranteed equilibrium price,including an ascending bid. Expected outcome is the defined
+     * expected equilibrium price, with the ascending bid being rejected.
      * 
      * 
      * Check the aggregated bid.
@@ -195,6 +202,6 @@ public class AuctioneerResilienceTestIAQ2 extends AuctioneerResilienceTest {
 
         sendBidsToMatcher();
 
-        checkAggregatedBid(this.auctioneer.getAggregatedBid(this.marketBasis));
+        checkAggregatedBid((ArrayBid)this.auctioneer.getAggregatedBid(this.marketBasis));
     }
 }

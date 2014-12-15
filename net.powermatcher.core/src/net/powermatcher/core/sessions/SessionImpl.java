@@ -5,7 +5,7 @@ import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
-import net.powermatcher.api.data.Price;
+import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.concentrator.Concentrator;
 
@@ -124,8 +124,8 @@ public class SessionImpl implements Session {
     }
 
     @Override
-    public void updatePrice(Price newPrice) {
-        agentEndpoint.updatePrice(newPrice);
+    public void updatePrice(PriceUpdate priceUpdate) {
+        agentEndpoint.updatePrice(priceUpdate);
     }
 
     @Override

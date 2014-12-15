@@ -1,6 +1,8 @@
 package net.powermatcher.extensions.connectivity.websockets.data;
 
-
+/**
+ * Bid model class to transfer {@link Bid} data over the wire.
+ */
 public class BidModel {
     /**
      * The marketBasis for bids and prices.

@@ -7,11 +7,12 @@ import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
-import net.powermatcher.api.data.Price;
+import net.powermatcher.api.data.PointBid;
 import net.powermatcher.api.data.PricePoint;
-import net.powermatcher.api.monitoring.IncomingPriceEvent;
-import net.powermatcher.api.monitoring.OutgoingBidEvent;
+import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.Qualifier;
+import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
+import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
 
 public abstract class BaseDeviceAgent extends BaseAgent implements AgentEndpoint, Comparable<BaseDeviceAgent> {
 	private final AtomicInteger bidNumberGenerator = new AtomicInteger();
@@ -40,18 +41,17 @@ public abstract class BaseDeviceAgent extends BaseAgent implements AgentEndpoint
         }
     }
 	
-	protected synchronized final Bid createBid(PricePoint... pricePoints) {
+	protected synchronized final PointBid createBid(PricePoint... pricePoints) {
 		if(session == null) {
 			return null;
 		} else {
-			Bid bid = new Bid(session.getMarketBasis(), pricePoints);
-			return new Bid(bid, bidNumberGenerator.incrementAndGet());
+			return new PointBid(session.getMarketBasis(), bidNumberGenerator.incrementAndGet(), pricePoints);
 		}
 	}
 
 	@Override
-	public synchronized void updatePrice(Price newPrice) {
-		publishEvent(new IncomingPriceEvent(getClusterId(), getAgentId(), session.getSessionId(), now(), newPrice, Qualifier.AGENT));
+	public synchronized void updatePrice(PriceUpdate priceUpdate) {
+		publishEvent(new IncomingPriceUpdateEvent(getClusterId(), getAgentId(), session.getSessionId(), now(), priceUpdate, Qualifier.AGENT));
 	}
 
 	private Bid lastBid;
