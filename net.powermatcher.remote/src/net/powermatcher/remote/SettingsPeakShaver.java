@@ -7,11 +7,15 @@ import java.util.Dictionary;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import net.powermatcher.api.Agent;
+import net.powermatcher.api.WhiteList;
 
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
@@ -112,5 +116,17 @@ public class SettingsPeakShaver extends HttpServlet {
     @Reference
     protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
         this.configurationAdmin = configurationAdmin;
+    }
+    
+    @Reference(dynamic = true, multiple = true, optional = true)
+    public void addWhiteList(SettingsPeakShaver settingsPeakShaver) {
+//        Agent agent = (Agent) whiteList;
+//        String agentId = agent.getAgentId();
+//
+//        if (agentId == null) {
+//            LOGGER.warn("WhiteList with agentId is null", whiteList);
+//        } else {
+//            whiteLists.put(agentId, whiteList);
+//        }
     }
 }

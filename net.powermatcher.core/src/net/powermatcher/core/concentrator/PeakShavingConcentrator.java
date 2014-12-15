@@ -3,6 +3,7 @@ package net.powermatcher.core.concentrator;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
@@ -24,6 +25,7 @@ import aQute.bnd.annotation.metatype.Meta;
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
+import net.powermatcher.api.SettingsPeakShaver;
 import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
@@ -56,8 +58,8 @@ import net.powermatcher.core.auctioneer.Auctioneer;
  * 
  */
 @Component(designateFactory = PeakShavingConcentrator.Config.class, immediate = true, provide = {
-        ObservableAgent.class, MatcherEndpoint.class, AgentEndpoint.class })
-public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoint, AgentEndpoint {
+        ObservableAgent.class, MatcherEndpoint.class, AgentEndpoint.class, SettingsPeakShaver.class })
+public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoint, AgentEndpoint, SettingsPeakShaver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PeakShavingConcentrator.class);
 
@@ -613,5 +615,11 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
 
     protected void setFloor(double floor) {
         this.floor = floor;
+    }
+
+    @Override
+    public void updatePeakShavingBorders(double floor, double ceiling) {
+        this.floor = floor;
+        this.ceiling = ceiling;
     }
 }

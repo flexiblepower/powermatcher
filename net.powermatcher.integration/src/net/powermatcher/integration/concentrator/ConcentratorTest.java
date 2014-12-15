@@ -2,6 +2,7 @@ package net.powermatcher.integration.concentrator;
 
 import static org.junit.Assert.assertArrayEquals;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,6 +57,7 @@ public class ConcentratorTest {
         concentratorProperties.put("bidTimeout", "600");
         concentratorProperties.put("bidUpdateRate", "30");
         concentratorProperties.put("agentId", CONCENTRATOR_NAME);
+        concentratorProperties.put("whiteListAgents", new ArrayList<String>());
 
         timer = new MockScheduler();
         concentrator.setExecutorService(timer);

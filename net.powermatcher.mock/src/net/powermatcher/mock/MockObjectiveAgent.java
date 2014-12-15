@@ -35,8 +35,8 @@ public class MockObjectiveAgent extends MockAgent implements ObjectiveEndpoint {
 
     @Override
     public Bid handleAggregateBid(Bid aggregatedBid) {
-        MarketBasis marketBasis = new MarketBasis(COMMODITY_ELECTRICITY, CURRENCY_EUR, 5, -1.0d, 7.0d);
-        double[] demand = new double[] { 100.0d, 50.0d, 50.0d, 0.0d, 0.0d };
+        MarketBasis marketBasis = new MarketBasis("electricity", "EUR", 11, 0, 10);
+        double[] demand = new double[] { 100.0d, 50.0d, 50.0d, 0.0d, 0.0d, 0.0d, 0.0d, 0.0d, 0.0d, 0.0d, 0.0d };
 
         Bid objectiveBid = new ArrayBid(marketBasis, 0,demand);
 
