@@ -190,9 +190,9 @@ public class VisualisationPlugin extends HttpServlet {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.equals(e.getMessage());
         } catch (InvalidSyntaxException e) {
-            e.printStackTrace();
+            LOGGER.equals(e.getMessage());
         }
 
         for (NodeModel nm : nodes.values()) {

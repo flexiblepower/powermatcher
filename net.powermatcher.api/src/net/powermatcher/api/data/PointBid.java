@@ -53,13 +53,11 @@ public class PointBid extends Bid implements Iterable<PricePoint> {
 
     @Override
     public ArrayBid aggregate(Bid other) {
-        // TODO: this can also be done directly on a PointBid
         return toArrayBid().aggregate(other);
     }
 
     @Override
-    public PriceUpdate calculateIntersection(double targetDemand) {
-        // TODO: this can also be done directly on a PointBid
+    public Price calculateIntersection(double targetDemand) {
         return toArrayBid().calculateIntersection(targetDemand);
     }
 

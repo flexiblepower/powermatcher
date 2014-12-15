@@ -6,6 +6,10 @@
     </appender>
 	
 	<timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss"/>
+
+    <logger level="debug" name="net.powermatcher" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
 	
     <root level="info">
         <appender-ref ref="STDOUT" level="info" />

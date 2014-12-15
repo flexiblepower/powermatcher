@@ -11,7 +11,7 @@ public abstract class Bid {
 	
 	protected Bid(MarketBasis marketBasis, int bidNumber) {
 		if(marketBasis == null) {
-			throw new NullPointerException("marketBasis");
+			throw new IllegalArgumentException("marketBasis is not allowed to be null");
 		}
 		this.marketBasis = marketBasis;
 		this.bidNumber = bidNumber;
@@ -27,7 +27,7 @@ public abstract class Bid {
 	
 	public abstract Bid aggregate(final Bid other);
 	
-	public abstract PriceUpdate calculateIntersection(double targetDemand);
+	public abstract Price calculateIntersection(double targetDemand);
 	
 	public abstract double getMaximumDemand();
 	
