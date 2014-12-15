@@ -6,7 +6,7 @@ public class PriceStep {
 
 	public PriceStep(MarketBasis marketBasis, int priceStep) {
 		if(marketBasis == null) {
-			throw new NullPointerException("marketBasis");
+			throw new NullPointerException("marketBasis can not be null");
 		} else if(priceStep < 0 || priceStep >= marketBasis.getPriceSteps()) {
 			throw new IllegalArgumentException("PriceStep " + priceStep + " is out of bounds [0, " + marketBasis.getPriceSteps() +")");
 		}
