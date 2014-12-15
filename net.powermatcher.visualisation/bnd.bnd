@@ -10,7 +10,7 @@ Bundle-Version: 1.0.0.${tstamp}
 	osgi.cmpn,\
 	osgi.core
 Private-Package:  \
-net.powermatcher.visualisation
+net.powermatcher.visualisation.*
 
 Service-Component:  \
 *

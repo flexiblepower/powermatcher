@@ -1,5 +1,6 @@
 package net.powermatcher.extensions.connectivity.websockets;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
@@ -153,8 +154,8 @@ public class MatcherEndpointProxyWebsocket extends BaseMatcherEndpointProxy {
 			PmJsonSerializer serializer = new PmJsonSerializer();
 			String message = serializer.serializeBid(newBid);			
 			this.remoteSession.getRemote().sendString(message);
-		} catch (Throwable t) {
-			LOGGER.error("Unable to send new bid to remote agent. Reason {}", t);
+		} catch (IOException e) {
+			LOGGER.error("Unable to send new bid to remote agent. Reason {}", e);
 		}		
 	}
 	
@@ -213,8 +214,8 @@ public class MatcherEndpointProxyWebsocket extends BaseMatcherEndpointProxy {
             		connectFuture.get(this.connectTimeout, TimeUnit.SECONDS);
             
             this.remoteSession = newRemoteSession;
-        } catch (Throwable t) {
-			LOGGER.error("Unable to connect to remote agent. Reason {}", t);
+        } catch (Exception e) {
+			LOGGER.error("Unable to connect to remote agent. Reason {}", e);
 
 			this.remoteSession = null;
         	return false;

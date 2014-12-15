@@ -115,11 +115,7 @@ public abstract class BaseMatcherEndpointProxy extends BaseAgent implements Matc
 		}
 		
 		// Relay bid to remote agent
-		try {
-			this.updateBidRemote(newBid);
-		} catch (Throwable t) {
-			LOGGER.error("Unable to send new bid to remote agent. Reason {}", t);
-		}		
+		this.updateBidRemote(newBid);
 	}
 	
 	@Override
