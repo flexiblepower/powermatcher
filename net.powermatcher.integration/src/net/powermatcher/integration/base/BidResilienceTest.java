@@ -79,6 +79,7 @@ public class BidResilienceTest extends ResilienceTest {
         concentratorProperties.put("bidTimeout", "600");
         concentratorProperties.put("bidUpdateRate", "30");
         concentratorProperties.put("agentId", CONCENTRATOR_NAME);
+        concentratorProperties.put("whiteListAgents", new ArrayList<String>());
 
         this.matchers.add(this.concentrator);
         this.concentratorTimer = new MockScheduler();

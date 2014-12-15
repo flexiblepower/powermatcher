@@ -1,8 +1,6 @@
 package net.powermatcher.core.concentrator.test;
 
-import static org.junit.Assert.assertArrayEquals;
-
-import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -58,6 +56,7 @@ public class PeakShavingConcentratorTest {
         concentratorProperties.put("bidTimeout", "600");
         concentratorProperties.put("bidUpdateRate", "30");
         concentratorProperties.put("agentId", CONCENTRATOR_NAME);
+        concentratorProperties.put("whiteListAgents", new ArrayList<String>());
 
         concentratorProperties.put("floor", -10);
         concentratorProperties.put("ceiling", 10);
@@ -107,34 +106,6 @@ public class PeakShavingConcentratorTest {
     }
 
     @Test
-    public void sendAggregatedBidExtreme() {
-        addAgents(3);
-        // Run 1
-        agents[0].sendBid(new ArrayBid(marketBasis, 0, new double[] { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5 }));
-        agents[1].sendBid(new ArrayBid(marketBasis, 0, new double[] { -2, -2, -2, -2, -2, -4, -4, -4, -4, -4, -4 }));
-        agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { -1, -1, -1, -1, -1, -1, -1, -3, -3, -3, -3 }));
-        timer.doTaskOnce();
-        assertArrayEquals(new double[] { -10.0, -10.0, -10.0, -10.0, -10.0, -10.0, -10.0, -10.0, -10.0, -10.0, -10.0 },
-                ((ArrayBid) this.matcher.getLastReceivedBid()).getDemand(), 0);
-        // Run 2
-        agents[0].sendBid(new ArrayBid(marketBasis, 0, new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 }));
-        agents[1].sendBid(new ArrayBid(marketBasis, 0, new double[] { 4, 4, 4, 4, 4, 2, 2, 2, 2, 2, 2 }));
-        agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1 }));
-        timer.doTaskOnce();
-        assertArrayEquals(new double[] { 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0 },
-                ((ArrayBid) this.matcher.getLastReceivedBid()).getDemand(), 0);
-        // Run 3
-        agents[0].sendBid(new ArrayBid(marketBasis, 0, new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 }));
-        agents[1].sendBid(new ArrayBid(marketBasis, 0, new double[] { 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0 }));
-        agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, 0, 0, -5, -5, -5, -5, -5, -5 }));
-        timer.doTaskOnce();
-
-        assertArrayEquals(new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 },
-                ((ArrayBid) this.matcher.getLastReceivedBid()).getDemand(), 0);
-        removeAgents(3);
-    }
-
-    @Test
     public void sendAggregatedBidRejectAscending() {
         addAgents(4);
         agents[0].sendBid(new ArrayBid(marketBasis, 0, new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 }));
@@ -142,39 +113,10 @@ public class PeakShavingConcentratorTest {
         agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, 0, 0, -5, -5, -5, -5, -5, -5 }));
         timer.doTaskOnce();
 
-        exception.expect(InvalidParameterException.class);
+        exception.expect(IllegalArgumentException.class);
         agents[3].sendBid(new ArrayBid(marketBasis, 0, new double[] { 5, 5, 5, 5, 5, 8, 8, 8, 8, 8, 8 }));
 
         removeAgents(4);
-    }
-
-    @Test
-    public void sendAggregatedBidLarge() {
-        addAgents(20);
-        agents[0].sendBid(new ArrayBid(marketBasis, 0, new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 }));
-        agents[1].sendBid(new ArrayBid(marketBasis, 0, new double[] { -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4 }));
-        agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 }));
-        agents[3].sendBid(new ArrayBid(marketBasis, 0, new double[] { -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2 }));
-        agents[4].sendBid(new ArrayBid(marketBasis, 0, new double[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }));
-        agents[5].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }));
-        agents[6].sendBid(new ArrayBid(marketBasis, 0, new double[] { 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0 }));
-        agents[7].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, 0, 0, 0, -4, -4, -4, -4, -4 }));
-        agents[8].sendBid(new ArrayBid(marketBasis, 0, new double[] { 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0 }));
-        agents[9].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, -2, -2, -2, -2, -2, -2, -2, -2 }));
-        agents[10].sendBid(new ArrayBid(marketBasis, 0, new double[] { 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0 }));
-        agents[11].sendBid(new ArrayBid(marketBasis, 0, new double[] { 7, 7, 7, 7, 7, 7, 7, 0, 0, 0, 0 }));
-        agents[12].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, -6, -6, -6, -6, -6, -6, -6, -6 }));
-        agents[13].sendBid(new ArrayBid(marketBasis, 0, new double[] { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 }));
-        agents[14].sendBid(new ArrayBid(marketBasis, 0, new double[] { -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9 }));
-        agents[15].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, 0, 0, 0, 0, 0, -8, -8, -8 }));
-        agents[16].sendBid(new ArrayBid(marketBasis, 0, new double[] { 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3 }));
-        agents[17].sendBid(new ArrayBid(marketBasis, 0, new double[] { 2, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0 }));
-        agents[18].sendBid(new ArrayBid(marketBasis, 0, new double[] { -1, -1, -1, -1, -2, -2, -2, -2, -3, -3, -3 }));
-        agents[19].sendBid(new ArrayBid(marketBasis, 0, new double[] { 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0 }));
-        timer.doTaskOnce();
-        assertArrayEquals(new double[] { -18.0, -18.0, -18.0, -18.0, -18.0, -18.0, -18.0, -18.0, -18.0, -18.0, -18.0 },
-                ((ArrayBid) this.matcher.getLastReceivedBid()).getDemand(), 0);
-        removeAgents(20);
     }
 
     @Test
@@ -197,7 +139,7 @@ public class PeakShavingConcentratorTest {
     }
 
     protected PriceUpdate determinePrice(Bid aggregatedBid) {
-    	return new PriceUpdate(aggregatedBid.calculateIntersection(0), aggregatedBid.getBidNumber());
+        return new PriceUpdate(aggregatedBid.calculateIntersection(0), aggregatedBid.getBidNumber());
     }
 
     @After

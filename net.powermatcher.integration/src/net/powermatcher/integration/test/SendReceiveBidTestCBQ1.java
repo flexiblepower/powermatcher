@@ -51,7 +51,7 @@ public class SendReceiveBidTestCBQ1 extends AuctioneerResilienceTest {
         prepareTest("CBQ/CBQ1/Test2", null);
 
         exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("Length of the demandArray is not equals to the number of price steps");
+        exception.expectMessage("Length of the demandArray is not equal to the number of price steps");
         this.bidReader.nextBid();
     }
 
@@ -72,7 +72,7 @@ public class SendReceiveBidTestCBQ1 extends AuctioneerResilienceTest {
         prepareTest("CBQ/CBQ1/Test3", null);
 
         exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("Length of the demandArray is not equals to the number of price steps");
+        exception.expectMessage("Length of the demandArray is not equal to the number of price steps");
         this.bidReader.nextBid();
     }
 }

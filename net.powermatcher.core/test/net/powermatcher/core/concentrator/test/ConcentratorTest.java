@@ -6,6 +6,7 @@ import static org.hamcrest.core.IsNull.nullValue;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,6 +62,7 @@ public class ConcentratorTest {
         props.put("agentId", concentratorId);
         props.put("desiredParentId", auctioneerId);
         props.put("bidUpdateRate", bidUpdateRate);
+        props.put("whiteListAgents", new ArrayList<String>());
 
         concentrator.setExecutorService(mockScheduler);
         concentrator.setTimeService(new SystemTimeService());
