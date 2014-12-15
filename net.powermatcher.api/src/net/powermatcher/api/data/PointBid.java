@@ -17,20 +17,45 @@ public class PointBid extends Bid implements Iterable<PricePoint> {
             this.pricePoints = new TreeSet<PricePoint>();
         }
 
-        public Builder bidNumber(int bidNumber) {
+        /**
+         * Sets the bidNumber with the specified bidNumber
+         * 
+         * @param bidNumber
+         * @return this instance of the Builder with the set bidNumber
+         */
+        public Builder setBidNumber(int bidNumber) {
             this.bidNumber = bidNumber;
             return this;
         }
 
+        /**
+         * Adds the supplied pricePoint the PricePoint array
+         * 
+         * @param pricePoint
+         * @return this instance of the Builder with the array
+         */
         public Builder add(PricePoint pricePoint) {
             pricePoints.add(pricePoint);
             return this;
         }
 
+        /**
+         * Creates a PricePoint with the supplied price and demand. Adds the point to the PricePoint array.
+         * 
+         * @param pricePoint
+         * @return this instance of the Builder with the array
+         */
         public Builder add(double price, double demand) {
             return add(new PricePoint(marketBasis, price, demand));
         }
 
+        /**
+         * Uses the supplied parameters to create a new PointBid
+         * 
+         * @return
+         * @throws IllegalArgumentException
+         *             when the marketBasis is null
+         */
         public PointBid build() {
             return new PointBid(marketBasis, bidNumber, pricePoints.toArray(new PricePoint[pricePoints.size()]));
         }
@@ -175,6 +200,25 @@ public class PointBid extends Bid implements Iterable<PricePoint> {
 
     public PricePoint[] getPricePoints() {
         return Arrays.copyOf(pricePoints, pricePoints.length);
+    }
+    
+    @Override
+    public int hashCode() {
+        return 2011 * Arrays.deepHashCode(pricePoints) + 3557 * bidNumber + marketBasis.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        PointBid other = (PointBid) ((obj instanceof PointBid) ? obj : null);
+        if (other == null) {
+            return false;
+        }
+
+        if (this == other) {
+            return true;
+        }
+        return other.bidNumber == this.bidNumber && this.marketBasis.equals(other.marketBasis)
+                && Arrays.equals(other.getPricePoints(), this.getPricePoints());
     }
 
     @Override
