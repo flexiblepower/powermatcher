@@ -198,14 +198,14 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
         BidCacheSnapshot bidCacheSnapshot = this.aggregatedBids.getMatchingSnapshot(aggregatedBid.getBidNumber());
 
         for (Session session : this.sessions) {
-        	Integer bidNumber = bidCacheSnapshot.getBidNumbers().get(session.getAgentId());
-        	if(bidNumber != null) {
-        		PriceUpdate sessionPriceUpdate = new PriceUpdate(newPrice, bidNumber);
-        		this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), getAgentId(), session.getSessionId(),
-        				timeService.currentDate(), sessionPriceUpdate, Qualifier.MATCHER));
-        		session.updatePrice(sessionPriceUpdate);
-        		LOGGER.debug("New price: {}, session {}", sessionPriceUpdate, session.getSessionId());
-        	}
+            Integer bidNumber = bidCacheSnapshot.getBidNumbers().get(session.getAgentId());
+            if (bidNumber != null) {
+                PriceUpdate sessionPriceUpdate = new PriceUpdate(newPrice, bidNumber);
+                this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), getAgentId(), session
+                        .getSessionId(), timeService.currentDate(), sessionPriceUpdate, Qualifier.MATCHER));
+                session.updatePrice(sessionPriceUpdate);
+                LOGGER.debug("New price: {}, session {}", sessionPriceUpdate, session.getSessionId());
+            }
         }
     }
 
@@ -225,5 +225,29 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
 
     protected BidCache getAggregatedBids() {
         return this.aggregatedBids;
+    }
+
+    public boolean canEqual(Object other) {
+        return other instanceof Auctioneer;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        Auctioneer that = (Auctioneer) ((obj instanceof Auctioneer) ? obj : null);
+        if (that == null) {
+            return false;
+        }
+
+        if (this == that) {
+            return true;
+        }
+
+        return canEqual(that) && this.aggregatedBids.equals(that.aggregatedBids)
+                && this.marketBasis.equals(that.marketBasis) && this.sessions.equals(that.sessions);
+    }
+
+    @Override
+    public int hashCode() {
+        return 211 * (aggregatedBids.hashCode() + marketBasis.hashCode());
     }
 }

@@ -5,6 +5,8 @@ import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import javax.swing.plaf.SliderUI;
+
 import net.powermatcher.api.Agent;
 import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.ObservableAgent;
@@ -96,6 +98,11 @@ public abstract class BaseAgent implements ObservableAgent {
 
         return canEqual(other) && other.getAgentId() == this.getClusterId() && this.getAgentId() == other.getAgentId()
                 && this.getDesiredParentId() == other.getDesiredParentId();
+    }
+
+    @Override
+    public int hashCode() {
+        return 211 * ((agentId == null ? 0: agentId.hashCode()) + (clusterId == null ? 0: clusterId.hashCode()) + (desiredParentId == null ? 0:desiredParentId.hashCode()));
     }
 
 }

@@ -302,8 +302,7 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
 
         LOGGER.debug("Received price update [{}]", priceUpdate);
         this.publishEvent(new IncomingPriceUpdateEvent(sessionToMatcher.getClusterId(), this.config.agentId(),
-                this.sessionToMatcher.getSessionId(), timeService.currentDate(), priceUpdate,
-                Qualifier.AGENT));
+                this.sessionToMatcher.getSessionId(), timeService.currentDate(), priceUpdate, Qualifier.AGENT));
 
         // Find bidCacheSnapshot belonging to the newly received price update
         BidCacheSnapshot bidCacheSnapshot = this.aggregatedBids.getMatchingSnapshot(priceUpdate.getBidNumber());
@@ -320,9 +319,11 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
                 continue;
             }
 
-            //PriceUpdate agentPrice = new Price(priceUpdate.getPrice().getMarketBasis(), priceUpdate.getPriceValue(), originalAgentBid);
-            
-            PriceUpdate agentPrice = new PriceUpdate(new Price(priceUpdate.getPrice().getMarketBasis(), priceUpdate.getPrice().getPriceValue()), priceUpdate.getBidNumber());
+            // PriceUpdate agentPrice = new Price(priceUpdate.getPrice().getMarketBasis(), priceUpdate.getPriceValue(),
+            // originalAgentBid);
+
+            PriceUpdate agentPrice = new PriceUpdate(new Price(priceUpdate.getPrice().getMarketBasis(), priceUpdate
+                    .getPrice().getPriceValue()), priceUpdate.getBidNumber());
 
             // call peakshaving code.
             PriceUpdate adjustedPrice = adjustPrice(agentPrice);
@@ -611,5 +612,34 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
 
     protected void setFloor(double floor) {
         this.floor = floor;
+    }
+
+    public boolean canEqual(Object other) {
+        return other instanceof PeakShavingConcentrator;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        PeakShavingConcentrator that = (PeakShavingConcentrator) ((obj instanceof PeakShavingConcentrator) ? obj : null);
+        if (that == null) {
+            return false;
+        }
+
+        if (this == that) {
+            return true;
+        }
+
+        return this.canEqual(that) && super.equals(that) && this.aggregatedBidIn.equals(that.aggregatedBidIn)
+                && this.aggregatedBidOut.equals(that.aggregatedBidOut)
+                && this.aggregatedBids.equals(that.aggregatedBids)
+                && Double.valueOf(this.ceiling).equals(Double.valueOf(that.ceiling))
+                && Double.valueOf(this.floor).equals(Double.valueOf(that.floor));
+    }
+
+    @Override
+    public int hashCode() {
+        return 211 * (this.aggregatedBidIn.hashCode() + this.aggregatedBidOut.hashCode()
+                + this.aggregatedBids.hashCode() + Double.valueOf(this.ceiling).hashCode() + Double.valueOf(this.floor)
+                .hashCode());
     }
 }
