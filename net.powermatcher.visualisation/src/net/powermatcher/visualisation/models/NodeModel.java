@@ -90,4 +90,9 @@ public class NodeModel implements Comparable<NodeModel> {
         return this.agentId.equals(that.agentId) && this.desiredParentId.equals(that.desiredParentId)
                 && this.fpid.equals(that.fpid) && this.pid.equals(that.pid);
     }
+
+    @Override
+    public int hashCode() {
+        return 211 * (agentId.hashCode() + desiredParentId.hashCode() + fpid.hashCode() + pid.hashCode());
+    }
 }

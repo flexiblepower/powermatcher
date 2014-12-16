@@ -98,4 +98,9 @@ public abstract class BaseAgent implements ObservableAgent {
                 && this.getDesiredParentId() == other.getDesiredParentId();
     }
 
+    @Override
+    public int hashCode() {
+        return 211 * (agentId.hashCode() + clusterId.hashCode() + desiredParentId.hashCode());
+    }
+
 }

@@ -157,4 +157,11 @@ public class SessionImpl implements Session {
                 && this.marketBasis.equals(that.marketBasis) && this.matcherEndpoint.equals(that.matcherEndpoint)
                 && this.sessionId.equals(that.sessionId);
     }
+
+    @Override
+    public int hashCode() {
+        return 211 * (this.agentId.hashCode() + this.clusterId.hashCode() + this.agentEndpoint.hashCode()
+                + this.matcherId.hashCode() + this.marketBasis.hashCode() + this.matcherEndpoint.hashCode() + this.sessionId
+                    .hashCode());
+    }
 }
