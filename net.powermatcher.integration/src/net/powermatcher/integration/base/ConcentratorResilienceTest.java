@@ -3,7 +3,6 @@ package net.powermatcher.integration.base;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +10,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.zip.DataFormatException;
 
 import net.powermatcher.api.MatcherEndpoint;
-import net.powermatcher.api.data.Bid;
+import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.core.sessions.SessionManager;
 import net.powermatcher.core.time.SystemTimeService;
 import net.powermatcher.integration.util.ConcentratorWrapper;
@@ -24,7 +23,7 @@ import org.junit.After;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConcentratorResilienceTest extends ResilienceTest{
+public class ConcentratorResilienceTest extends ResilienceTest {
 
     private static final String MATCHERAGENTNAME = "auctioneer";
     private static final String CONCENTRATOR_NAME = "concentrator";
@@ -33,7 +32,7 @@ public class ConcentratorResilienceTest extends ResilienceTest{
     // The direct upstream matcher for the agents
     protected ConcentratorWrapper concentrator;
 
-    //mock auctioneer
+    // mock auctioneer
     protected MockMatcherAgent auctioneer;
 
     protected void prepareTest(String testID, String suffix) throws IOException, DataFormatException {
@@ -49,12 +48,12 @@ public class ConcentratorResilienceTest extends ResilienceTest{
         this.marketBasis = resultsReader.getMarketBasis();
         this.concentrator = new ConcentratorWrapper();
         Map<String, Object> concentratorProperties = new HashMap<>();
-        concentratorProperties = new HashMap<String, Object>();
         concentratorProperties.put("matcherId", CONCENTRATOR_NAME);
         concentratorProperties.put("desiredParentId", MATCHERAGENTNAME);
         concentratorProperties.put("bidTimeout", "600");
         concentratorProperties.put("bidUpdateRate", "30");
         concentratorProperties.put("agentId", CONCENTRATOR_NAME);
+        concentratorProperties.put("whiteListAgents", new ArrayList<String>());
 
         this.matchers.add(this.concentrator);
 
@@ -81,7 +80,7 @@ public class ConcentratorResilienceTest extends ResilienceTest{
 
     protected void sendBidsToMatcher() throws IOException, DataFormatException {
 
-        Bid bid = null;
+        ArrayBid bid = null;
         MockAgent newAgent;
 
         double[] aggregatedDemand = new double[this.marketBasis.getPriceSteps()];
@@ -109,8 +108,8 @@ public class ConcentratorResilienceTest extends ResilienceTest{
                 } else {
                     stop = true;
                 }
-            } catch (InvalidParameterException e) {
-                LOGGER.error("Incorrect bid specification found: " + e.getMessage());
+            } catch (IllegalArgumentException e) {
+                LOGGER.error("Incorrect bid specification caught: " + e.getMessage());
                 bid = null;
             }
         } while (!stop);
@@ -141,10 +140,10 @@ public class ConcentratorResilienceTest extends ResilienceTest{
 
         // Verify the price received by the agents
         for (MockAgent agent : agentList) {
-            assertEquals(expPrice, agent.getLastPriceUpdate().getCurrentPrice(), 0);
+            assertEquals(expPrice, agent.getLastPriceUpdate().getPrice().getPriceValue(), 0);
         }
     }
-    
+
     @After
     public void tearDown() throws IOException {
         if (this.bidReader != null) {

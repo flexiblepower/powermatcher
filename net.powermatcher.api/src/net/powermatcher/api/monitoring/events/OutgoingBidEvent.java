@@ -1,19 +1,22 @@
-package net.powermatcher.api.monitoring;
+package net.powermatcher.api.monitoring.events;
 
 import java.util.Date;
 
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
+import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
+import net.powermatcher.api.monitoring.Qualifier;
 
 /**
- * An {@link IncomingPriceEvent} is sent when an {@link AgentEndpoint} receives a new {@link Price}.
+ * An {@link OutgoingBidEvent} is sent when an {@link AgentEndpoint} sends a new {@link Bid}.
  * 
  * @author FAN
  * @version 1.0
+ * 
  */
-public class IncomingPriceEvent extends PriceEvent {
+public class OutgoingBidEvent extends BidEvent {
 
     /**
      * Constructs an instance of this class.
@@ -27,16 +30,15 @@ public class IncomingPriceEvent extends PriceEvent {
      *            The id of the {@link Session} of the {@link AgentEndpoint} subclass sending the UpdateEvent
      * @param timestamp
      *            The {@link Date} received from the {@link TimeService}
-     * @param price
-     *            The received {@link Price}.
+     * @param bid
+     *            The new {@link Price} created by the {@link AgentEndpoint} subclass.
      */
-    public IncomingPriceEvent(String clusterId, String agentId, String sessionId, Date timestamp, Price price, Qualifier qualifier) {
-        super(clusterId, agentId, sessionId, timestamp, price, qualifier);
+    public OutgoingBidEvent(String clusterId, String agentId, String sessionId, Date timestamp, Bid bid, Qualifier qualifier) {
+        super(clusterId, agentId, sessionId, timestamp, bid, qualifier);
     }
 
     @Override
     public String toString() {
-        return IncomingPriceEvent.class.getSimpleName() + " " + super.toString() + ", price = "
-                + getPrice().toString();
+        return OutgoingBidEvent.class.getSimpleName() + " " + super.toString() + ", bid = " + getBid().toString();
     }
 }

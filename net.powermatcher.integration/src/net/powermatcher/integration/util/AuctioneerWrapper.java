@@ -6,7 +6,7 @@ import java.util.Set;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
-import net.powermatcher.api.data.Price;
+import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.core.auctioneer.Auctioneer;
 
 public class AuctioneerWrapper extends Auctioneer {
@@ -30,9 +30,9 @@ public class AuctioneerWrapper extends Auctioneer {
         super.publishNewPrice();
     }
 
-    public void publishPrice(Price newPrice) {
+    public void publishPrice(PriceUpdate priceUpdate) {
         for (Session session : shadowedSessions) {
-            session.updatePrice(newPrice);
+            session.updatePrice(priceUpdate);
         }
     }
 

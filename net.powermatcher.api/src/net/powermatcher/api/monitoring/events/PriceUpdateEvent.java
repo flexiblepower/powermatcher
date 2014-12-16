@@ -1,27 +1,25 @@
-package net.powermatcher.api.monitoring;
+package net.powermatcher.api.monitoring.events;
 
 import java.util.Date;
 
 import net.powermatcher.api.AgentEndpoint;
-import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
-import net.powermatcher.api.data.Bid;
-import net.powermatcher.api.data.Price;
+import net.powermatcher.api.data.PriceUpdate;
+import net.powermatcher.api.monitoring.Qualifier;
 
 /**
- * An {@link BidEvent} is sent when an {@link Bid} is sent or Received by an {@link AgentEndpoint} or a {@link MatcherEndpoint}.
+ * An {@link PriceUpdateEvent} is sent when an {@link AgentEndpoint} receives a new {@link PriceUpdate}.
  * 
  * @author FAN
  * @version 1.0
- * 
  */
-public class BidEvent extends AgentEvent {
+public abstract class PriceUpdateEvent extends AgentEvent {
 
     /**
-     * The new {@link Bid} created by the {@link AgentEndpoint} subclass.
+     * The received {@link PriceUpdate}
      */
-    private final Bid bid;
+    private final PriceUpdate priceUpdate;
 
     /**
      * Constructs an instance of this class.
@@ -35,20 +33,21 @@ public class BidEvent extends AgentEvent {
      *            The id of the {@link Session} of the {@link AgentEndpoint} subclass sending the UpdateEvent
      * @param timestamp
      *            The {@link Date} received from the {@link TimeService}
-     * @param bid
-     *            The new {@link Price} created by the {@link AgentEndpoint} subclass.
+     * @param priceUpdate
+     *            The received {@link PriceUpdate}.
      */
-    public BidEvent(String clusterId, String agentId, String sessionId, Date timestamp, Bid bid, Qualifier qualifier) {
+    public PriceUpdateEvent(String clusterId, String agentId, String sessionId, Date timestamp, PriceUpdate priceUpdate, Qualifier qualifier) {
         super(clusterId, agentId, sessionId, timestamp, qualifier);
-        this.bid = bid;
+        this.priceUpdate = priceUpdate;
     }
 
-    public Bid getBid() {
-        return bid;
+    public PriceUpdate getPriceUpdate() {
+        return priceUpdate;
     }
 
     @Override
     public String toString() {
-        return BidEvent.class.getSimpleName() + " " + super.toString() + ", bid = " + bid.toString();
+        return PriceUpdateEvent.class.getSimpleName() + " " + super.toString() + ", priceUpdate = "
+                + priceUpdate.toString();
     }
 }

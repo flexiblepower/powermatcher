@@ -9,10 +9,10 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import net.powermatcher.api.TimeService;
-import net.powermatcher.api.monitoring.BidEvent;
-import net.powermatcher.api.monitoring.AgentEvent;
 import net.powermatcher.api.monitoring.ObservableAgent;
-import net.powermatcher.api.monitoring.PriceEvent;
+import net.powermatcher.api.monitoring.events.AgentEvent;
+import net.powermatcher.api.monitoring.events.BidEvent;
+import net.powermatcher.api.monitoring.events.PriceUpdateEvent;
 import net.powermatcher.core.monitoring.BaseObserver;
 
 import org.slf4j.Logger;
@@ -37,14 +37,9 @@ public abstract class AgentEventLogger extends BaseObserver {
     private DateFormat dateFormat;
 
     /**
-     * A set containing all {@link BidLogRecord} instances that haven't been written to file yet.
-     */
-    private BlockingQueue<BidLogRecord> bidLogRecords = new LinkedBlockingQueue<>();
-
-    /**
      * A set containing all {@link PriceLogRecord} instances that haven't been written to file yet.
      */
-    private BlockingQueue<PriceLogRecord> priceLogRecords = new LinkedBlockingQueue<>();
+    private BlockingQueue<LogRecord> logRecords = new LinkedBlockingQueue<>();
 
     /**
      * Keeps the thread alive that performs the dumpLog() at a set interval
@@ -67,21 +62,10 @@ public abstract class AgentEventLogger extends BaseObserver {
     private long logUpdateRate;
 
     /**
-     * The method called when an {@link ObservableAgent} when they send an {@link AgentEvent}
+     * The {@link AgentEventType} this instance has to track
      */
-    @Override
-    public void update(AgentEvent event) {
-        if (event instanceof BidEvent) {
-            BidLogRecord bidLogRecord = new BidLogRecord((BidEvent) event, timeService.currentDate(), dateFormat);
-            bidLogRecords.add(bidLogRecord);
-        } else if (event instanceof PriceEvent) {
-            PriceLogRecord priceLogRecord = new PriceLogRecord((PriceEvent) event, timeService.currentDate(),
-                    dateFormat);
-            priceLogRecords.add(priceLogRecord);
-        }
-        LOGGER.info("AgentEventLogger [{}] received event: {}", loggerId, event);
-    }
-
+    private AgentEventType eventType;
+    
     /**
      * This method will be called by the annotated Activate() method of the subclasses.
      * 
@@ -90,7 +74,6 @@ public abstract class AgentEventLogger extends BaseObserver {
     public synchronized void baseActivate(Map<String, Object> properties) {
         processConfig(properties);
         createScheduledFuture();
-        LOGGER.info("AgentEventLogger [{}], activated", loggerId);
     }
 
     /**
@@ -108,14 +91,34 @@ public abstract class AgentEventLogger extends BaseObserver {
             }
         }, 0, logUpdateRate, TimeUnit.SECONDS);
     }
+    
+    /**
+     * The method called when an {@link ObservableAgent} when they send an {@link AgentEvent}
+     */
+    @Override
+    public void update(AgentEvent event) {
+
+        if (eventType.getClassType().isAssignableFrom(event.getClass())) {
+
+            LogRecord logRecord = null;
+
+            if (event instanceof BidEvent) {
+                logRecord = new BidLogRecord((BidEvent) event, timeService.currentDate(), getDateFormat());
+            } else if (event instanceof PriceUpdateEvent) {
+                logRecord = new PriceUpdateLogRecord((PriceUpdateEvent) event, timeService.currentDate(),
+                        getDateFormat());
+            }
+
+            addLogRecord(logRecord);
+            getLogger().info("AgentEventLogger [{}] received event: {}", getLoggerId(), event);
+        }
+    }
 
     /**
      * This method will be called by the annotated Deactivate() method of the subclasses.
      */
     public void baseDeactivate() {
         scheduledFuture.cancel(false);
-
-        LOGGER.info("AgentEventLogger [{}], deactivated", loggerId);
     }
 
     /**
@@ -126,8 +129,6 @@ public abstract class AgentEventLogger extends BaseObserver {
     public synchronized void baseModified(Map<String, Object> properties) {
         processConfig(properties);
         createScheduledFuture();
-
-        LOGGER.info("AgentEventLogger [{}], modified", loggerId);
     }
 
     /**
@@ -186,17 +187,10 @@ public abstract class AgentEventLogger extends BaseObserver {
     }
 
     /**
-     * @return the current value of bidLogRecords
-     */
-    protected BlockingQueue<BidLogRecord> getBidLogRecords() {
-        return bidLogRecords;
-    }
-
-    /**
      * @return the current value of priceLogRecords
      */
-    protected BlockingQueue<PriceLogRecord> getPriceLogRecords() {
-        return priceLogRecords;
+    protected BlockingQueue<LogRecord> getPriceLogRecords() {
+        return logRecords;
     }
 
     /**
@@ -204,5 +198,25 @@ public abstract class AgentEventLogger extends BaseObserver {
      */
     protected static Logger getLogger() {
         return LOGGER;
+    }
+
+    protected BlockingQueue<LogRecord> getLogRecords() {
+        return logRecords;
+    }
+    
+    protected void removeLogRecord(LogRecord logRecord) {
+        logRecords.remove(logRecord);
+    }
+    
+    protected void addLogRecord(LogRecord logRecord) {
+        logRecords.add(logRecord);
+    }
+
+    protected AgentEventType getEventType() {
+        return eventType;
+    }
+
+    protected void setEventType(AgentEventType eventType) {
+        this.eventType = eventType;
     }
 }

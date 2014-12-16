@@ -2,6 +2,7 @@ package net.powermatcher.api;
 
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
+import net.powermatcher.api.data.PriceUpdate;
 
 /**
  * A {@link AgentEndpoint} defines the interface for classes that can receive a {@link Price} and send a {@link Bid}, based
@@ -33,8 +34,8 @@ public interface AgentEndpoint extends Agent {
     /**
      * Used to update the {@link Price} used by this {@link AgentEndpoint} instance.
      * 
-     * @param newPrice
+     * @param priceUpdate
      *            The new {@link Price}
      */
-    void updatePrice(Price newPrice);
+    void updatePrice(PriceUpdate priceUpdate);
 }

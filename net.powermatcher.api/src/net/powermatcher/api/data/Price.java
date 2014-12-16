@@ -1,142 +1,73 @@
 package net.powermatcher.api.data;
 
-/**
- * Price is an immutable type specifying a PowerMatcher market price.
- * 
- * @author IBM
- * @version 0.9.0
- */
-public class Price {
-    /**
-     * Define the market basis (MarketBasis) field.
-     */
-    private MarketBasis marketBasis;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
-    /**
-     * Define the current price (double) field.
-     */
-    private double currentPrice;
-    
+public class Price implements Comparable<Price> {
+	private final MarketBasis marketBasis;
+	private final double priceValue;
 
-	private int bidNumber;
-
-    /**
-     * Constructs an instance of this class from the specified market basis and current price parameters.
-     * 
-     * @param marketBasis
-     *            The market basis (<code>MarketBasis</code>) parameter.
-     * @param currentPrice
-     *            The current price (<code>double</code>) parameter.
-     * @param bidNumber
-     *            The bidNumber that has resulted in this priceUpdate.
-     */
-    public Price(final MarketBasis marketBasis, final double currentPrice, final int bidNumber) {
-        this.marketBasis = marketBasis;
-        this.currentPrice = currentPrice;
-        this.bidNumber = bidNumber;
-    }
-
-    public Price(final MarketBasis marketBasis, final double currentPrice) {
-        this.marketBasis = marketBasis;
-        this.currentPrice = currentPrice;
-        this.bidNumber = 0;
-    }
-    /**
-     * To market basis with the specified new market basis parameter and return the Bid result.
-     * 
-     * @param newMarketBasis
-     *            The new market basis (<code>MarketBasis</code>) parameter.
-     * @return Results of the to market basis (<code>Bid</code>) value.
-     * @see #getMarketBasis()
-     */
-    public Price toMarketBasis(final MarketBasis newMarketBasis) {
-        if (this.marketBasis.equals(newMarketBasis)) {
-            return this;
-        } else {
-            return new Price(newMarketBasis, this.currentPrice, this.bidNumber);
-        }
-    }
-
-    /**
-     * Gets the current price (double) value.
-     * 
-     * @return The current price (<code>double</code>) value.
-     */
-    public double getCurrentPrice() {
-        return this.currentPrice;
-    }
-
-    /**
-     * Gets the market basis value.
-     * 
-     * @return The market basis (<code>MarketBasis</code>) value.
-     * @see #toMarketBasis(MarketBasis)
-     */
-    public MarketBasis getMarketBasis() {
-        return this.marketBasis;
-    }
-
-    /**
-     * Gets the normalized price (int) value.
-     * 
-     * @return The normalized price (<code>int</code>) value.
-     */
-    public int getNormalizedPrice() {
-        return this.marketBasis.toNormalizedPrice(this.currentPrice);
-    }
-
-    /**
-     * Equals with the specified obj parameter and return the boolean result.
-     * 
-     * @param obj
-     *            The obj (<code>Object</code>) parameter.
-     * @return Results of the equals (<code>boolean</code>) value.
-     */
-    
-    public int getBidNumber() {
-		return bidNumber;
+	public Price(MarketBasis marketBasis, double price) {
+		if(marketBasis == null) {
+			throw new NullPointerException("marketBasis");
+		} else if(Double.isNaN(price)) {
+			throw new IllegalArgumentException("Price NaN is not valid");
+		} else if(price < marketBasis.getMinimumPrice() || price > marketBasis.getMaximumPrice()) {
+			throw new IllegalArgumentException("Price " + price + " is out of bounds [" 
+												+ marketBasis.getMinimumPrice() + ", " + marketBasis.getMaximumPrice() +"]");
+		}
+		this.marketBasis = marketBasis;
+		this.priceValue = price;
 	}
 
-	public void setBidNumber(int bidNumber) {
-		this.bidNumber = bidNumber;
+	public MarketBasis getMarketBasis() {
+		return marketBasis;
+	}
+	
+	public double getPriceValue() {
+		return priceValue;
+	}
+	
+	public PriceStep toPriceStep() {
+		double priceStep = (priceValue - marketBasis.getMinimumPrice()) / marketBasis.getPriceIncrement();
+        return new PriceStep(marketBasis, Math.round((float) priceStep));
 	}
 
-    @Override
-    public boolean equals(final Object obj) {
-        Price other = (Price) ((obj instanceof Price) ? obj : null);
-        // TODO Reduce the number of conditional operators (4) used in the
-        // expression (maximum allowed 3).
-        return this == other
-                || (other != null && other.currentPrice == this.currentPrice && this.marketBasis
-                        .equals(other.marketBasis));
-    }
+	@Override
+	public int hashCode() {
+		return 83257 * marketBasis.hashCode() + 50723 * Double.valueOf(priceValue).hashCode(); 
+	}
 
-    /**
-     * Hash code and return the int result.
-     * 
-     * @return Results of the hash code (<code>int</code>) value.
-     */
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        long temp = Double.doubleToLongBits(this.currentPrice);
-        int result = prime + (int) (temp ^ (temp >>> 32));
-        result = prime * result + ((this.marketBasis == null) ? 0 : this.marketBasis.hashCode());
-        return result;
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		} else {
+			Price other = (Price) obj;
+			return marketBasis.equals(other.marketBasis) && priceValue == other.priceValue;
+		}
+	}
+	
+    public static final DecimalFormat PRICE_FORMAT = new DecimalFormat("0.##", DecimalFormatSymbols.getInstance(Locale.ROOT));
 
-    /**
-     * Returns the string value.
-     * 
-     * @return The string (<code>String</code>) value.
-     */
     @Override
-    public String toString() {
-        StringBuilder b = new StringBuilder();
-        b.append("Price{currentPrice=").append(MarketBasis.PRICE_FORMAT.format(this.currentPrice));
-        b.append(",bidReference=").append(bidNumber);
-        b.append('}');
-        return b.toString();
+	public String toString() {
+		return "Price{priceValue="+ PRICE_FORMAT.format(priceValue) + "}";
+	}
+    
+    @Override
+    public int compareTo(Price o) {
+    	if(!marketBasis.equals(o.marketBasis)) {
+    		throw new IllegalArgumentException("Non-equal market basis");
+    	} else if(priceValue < o.priceValue) {
+    		return -1;
+    	} else if(priceValue > o.priceValue) {
+    		return 1;
+    	} else {
+    		return 0;
+    	}
     }
-
 }

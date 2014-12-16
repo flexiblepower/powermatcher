@@ -9,10 +9,13 @@ import java.io.IOException;
 import java.util.zip.DataFormatException;
 
 import net.powermatcher.api.data.Price;
+import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.integration.base.BidResilienceTest;
 import net.powermatcher.mock.MockAgent;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,11 +23,14 @@ import org.slf4j.LoggerFactory;
  * Validate the correct behaviour of the components when incorrect prices are inserted.
  * 
  * @author IBM
- *
+ * 
  */
 public class SendReceivePriceTestCPQ1 extends BidResilienceTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SendReceivePriceTestCPQ1.class);
+
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
 
     /**
      * The auctioneer is invoked to publish a null price. The auctioneer will not publish the null price but reset its
@@ -46,23 +52,25 @@ public class SendReceivePriceTestCPQ1 extends BidResilienceTest {
         auctioneerTimer.doTaskOnce();
 
         // Validate if concentrator receives correct price
-        assertEquals(this.resultsReader.getEquilibriumPrice(), this.concentrator.getLastPrice().getCurrentPrice(), 0);
+        assertEquals(this.resultsReader.getEquilibriumPrice(), this.concentrator.getLastPrice().getPrice()
+                .getPriceValue(), 0);
 
         // Send null price
-        Price nullPrice = null;
+        PriceUpdate nullPriceUpdate = null;
         try {
-            this.auctioneer.publishPrice(nullPrice);
+            this.auctioneer.publishPrice(nullPriceUpdate);
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), is(equalTo("Price cannot be null")));
         }
 
         // Validate if concentrator has rejected the incorrect price and retained the last correct price.
         // Now uses concentrator.getLastReceived as auctioneer.getLastPublishedPrice is not reliable anymore
-        assertEquals(true, (this.concentrator.getLastReceivedPrice() == null));
+        assertEquals(true, (this.concentrator.getLastReceivedPriceUpdate() == null));
 
         // Check the last received price. The auctioneer should not have published the null
         // price and the last price at the concentrator should be the price that was sent earlier.
-        assertEquals(this.resultsReader.getEquilibriumPrice(), this.concentrator.getLastPrice().getCurrentPrice(), 0);
+        assertEquals(this.resultsReader.getEquilibriumPrice(), this.concentrator.getLastPrice().getPrice()
+                .getPriceValue(), 0);
 
     }
 
@@ -84,20 +92,20 @@ public class SendReceivePriceTestCPQ1 extends BidResilienceTest {
         sendBidsToMatcher();
         auctioneerTimer.doTaskOnce();
         // Check if concentrator received correct price
-        assertEquals(this.resultsReader.getEquilibriumPrice(), this.concentrator.getLastReceivedPrice()
-                .getCurrentPrice(), 0);
+        assertEquals(this.resultsReader.getEquilibriumPrice(), this.concentrator.getLastReceivedPriceUpdate()
+                .getPrice().getPriceValue(), 0);
 
         // Send incorrect price directly to the concentrator
-        Price falsePrice = null;
+        PriceUpdate falsePriceUpdate = null;
         try {
-            this.concentrator.updatePrice(falsePrice);
+            this.concentrator.updatePrice(falsePriceUpdate);
         } catch (Exception e) {
             assertEquals(IllegalArgumentException.class, e.getClass());
         }
 
         // Check if concentrator retains last received correct price
-        assertEquals(this.resultsReader.getEquilibriumPrice(), this.concentrator.getLastPublishedPrice()
-                .getCurrentPrice(), 0);
+        assertEquals(this.resultsReader.getEquilibriumPrice(), this.concentrator.getLastPublishedPriceUpdate()
+                .getPrice().getPriceValue(), 0);
     }
 
     /**
@@ -115,20 +123,26 @@ public class SendReceivePriceTestCPQ1 extends BidResilienceTest {
 
         // Prepare the test for reading test input
         prepareTest("CPQ/CPQ1", null);
+        
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("Price 52.0 is out of bounds [0.0, 50.0]");
 
         // Send bids to the matcherAgent (concentrator)
         sendBidsToMatcher();
         auctioneerTimer.doTaskOnce();
         // Validate if concentrator receives correct price
-        assertEquals(this.resultsReader.getEquilibriumPrice(), this.concentrator.getLastPrice().getCurrentPrice(), 0);
+        assertEquals(this.resultsReader.getEquilibriumPrice(), this.concentrator.getLastPrice().getPrice()
+                .getPriceValue(), 0);
 
         // Send price outside range price
         Price price = new Price(this.marketBasis, 52.0d);
-        this.auctioneer.publishPrice(price);
+        PriceUpdate priceUpdate = new PriceUpdate(price, 0);
+        this.auctioneer.publishPrice(priceUpdate);
 
         // Validate if concentrator has received the new price
         // Now uses concentrator.getLastReceived as auctioneer.getLastPublishedPrice is not reliable anymore
-        assertEquals(price.getCurrentPrice(), this.concentrator.getLastReceivedPrice().getCurrentPrice(), 0);
+        assertEquals(priceUpdate.getPrice().getPriceValue(), this.concentrator.getLastReceivedPriceUpdate().getPrice()
+                .getPriceValue(), 0);
 
     }
 
@@ -143,23 +157,28 @@ public class SendReceivePriceTestCPQ1 extends BidResilienceTest {
      * @throws DataFormatException
      */
     @Test
-    public void acceptPriceOutsideRangeConcentratorCPQ1() throws IOException, DataFormatException {
+    public void rejectPriceOutsideRangeConcentratorCPQ1() throws IOException, DataFormatException {
 
         // Prepare the test for reading test input
         prepareTest("CPQ/CPQ1", null);
+        
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("Price 52.0 is out of bounds [0.0, 50.0]");
 
         // Send bids to the matcherAgent (concentrator)
         sendBidsToMatcher();
         auctioneerTimer.doTaskOnce();
         // Validate if concentrator receives correct price
-        assertEquals(this.resultsReader.getEquilibriumPrice(), this.concentrator.getLastPrice().getCurrentPrice(), 0);
+        assertEquals(this.resultsReader.getEquilibriumPrice(), this.concentrator.getLastPrice().getPrice()
+                .getPriceValue(), 0);
 
         // Send price outside range price
         Price price = new Price(this.marketBasis, 52.0d);
-        this.auctioneer.publishPrice(price);
+        PriceUpdate priceUpdate = new PriceUpdate(price, 0);
+        this.auctioneer.publishPrice(priceUpdate);
 
         // Validate if concentrator has received the new price
-        assertEquals(price.getCurrentPrice(), this.concentrator.getLastPrice().getCurrentPrice(), 0);
+        assertEquals(price.getPriceValue(), this.concentrator.getLastPrice().getPrice().getPriceValue(), 0);
     }
 
     /**
@@ -178,19 +197,25 @@ public class SendReceivePriceTestCPQ1 extends BidResilienceTest {
 
         // Prepare the test for reading test input
         prepareTest("CPQ/CPQ1", null);
+        
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("Price 52.0 is out of bounds [0.0, 50.0]");
 
         // Send bids to the matcherAgent (concentrator)
         sendBidsToMatcher();
         auctioneerTimer.doTaskOnce();
         // Validate if concentrator receives correct price
-        assertEquals(this.resultsReader.getEquilibriumPrice(), this.concentrator.getLastPrice().getCurrentPrice(), 0);
+        assertEquals(this.resultsReader.getEquilibriumPrice(), this.concentrator.getLastPrice().getPrice()
+                .getPriceValue(), 0);
 
         // Send price outside range
         Price price = new Price(this.marketBasis, 52.0d);
-        this.auctioneer.publishPrice(price);
+        PriceUpdate priceUpdate = new PriceUpdate(price, 0);
+        this.auctioneer.publishPrice(priceUpdate);
 
         // Validate if concentrator publishes the price to the agents
-        assertEquals(price.getCurrentPrice(), this.concentrator.getLastPublishedPrice().getCurrentPrice(), 0);
+        assertEquals(price.getPriceValue(), this.concentrator.getLastPublishedPriceUpdate().getPrice().getPriceValue(),
+                0);
     }
 
     /**
@@ -214,44 +239,49 @@ public class SendReceivePriceTestCPQ1 extends BidResilienceTest {
         auctioneerTimer.doTaskOnce();
         // Send incorrect price directly to the concentrator
         LOGGER.info("4. Sending incorrect price (null) by auctioneer");
-        Price falsePrice = null;
+        PriceUpdate falsePriceUpdate = null;
         try {
             // this.concentrator.updatePrice(falsePrice);
-            this.auctioneer.publishPrice(falsePrice);
+            this.auctioneer.publishPrice(falsePriceUpdate);
         } catch (Exception e) {
             assertEquals(IllegalArgumentException.class, e.getClass());
         }
 
         // Check if concentrator retains last received correct price
-        assertEquals(this.resultsReader.getEquilibriumPrice(), this.concentrator.getLastPrice().getCurrentPrice(), 0);
+        assertEquals(this.resultsReader.getEquilibriumPrice(), this.concentrator.getLastPrice().getPrice()
+                .getPriceValue(), 0);
     }
 
     /**
      * A set of agents send a bid to the auctioneer via the concentrator. After sending a calculated (valid) price the
-     * auctioneer will be forced to send an price that is outside its local price range. According to the specifications
-     * this is permitted. Connected agents can have a different local price market base.
+     * auctioneer will be forced to send an price that is outside its local price range. Connected agents can have a
+     * different local price market base.
      * 
-     * Check if the agent accepts the price.
+     * Check if the agent rejects the price.
      * 
      * @throws IOException
      * @throws DataFormatException
      */
     @Test
-    public void acceptPriceOutsideRangeByAgentsCPQ1() throws IOException, DataFormatException {
+    public void rejectPriceOutsideRangeByAgentsCPQ1() throws IOException, DataFormatException {
 
         // Prepare the test for reading test input
         prepareTest("CPQ/CPQ1", null);
+
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("Price 52.0 is out of bounds [0.0, 50.0]");
 
         // Send bids to the matcherAgent (concentrator)
         sendBidsToMatcher();
 
         // Send price outside range
-        Price price = new Price(this.marketBasis, 52.0d, 1);
-        this.auctioneer.publishPrice(price);
+        Price price = new Price(this.marketBasis, 52.0d);
+        PriceUpdate priceUpdate = new PriceUpdate(price, 1);
+        this.auctioneer.publishPrice(priceUpdate);
 
         // Verify the price received by the agents
         for (MockAgent agent : agentList) {
-            assertEquals(price.getCurrentPrice(), agent.getLastPriceUpdate().getCurrentPrice(), 0);
+            assertEquals(price.getPriceValue(), agent.getLastPriceUpdate().getPrice().getPriceValue(), 0);
         }
     }
 }

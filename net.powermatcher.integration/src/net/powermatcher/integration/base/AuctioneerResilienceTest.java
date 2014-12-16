@@ -74,7 +74,7 @@ public class AuctioneerResilienceTest extends ResilienceTest {
 
         // Verify the price received by the agents
         for (MockAgent agent : agentList) {
-            assertEquals(expPrice, agent.getLastPriceUpdate().getCurrentPrice(), 0);
+            assertEquals(expPrice, agent.getLastPriceUpdate().getPrice().getPriceValue(), 0);
         }
     }
 

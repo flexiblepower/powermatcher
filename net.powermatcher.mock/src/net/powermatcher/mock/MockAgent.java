@@ -10,15 +10,15 @@ import net.powermatcher.api.Agent;
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
-import net.powermatcher.api.data.Price;
-import net.powermatcher.api.monitoring.AgentEvent;
+import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.ObservableAgent;
+import net.powermatcher.api.monitoring.events.AgentEvent;
 
 public class MockAgent implements Agent, AgentEndpoint, ObservableAgent {
 
     private Map<String, Object> agentProperties;
-    private Price lastPriceUpdate;
+    private PriceUpdate lastPriceUpdate;
     protected Session session;
     private String desiredParentId;
 
@@ -43,15 +43,15 @@ public class MockAgent implements Agent, AgentEndpoint, ObservableAgent {
     }
 
     @Override
-    public void updatePrice(Price newPrice) {
-        this.lastPriceUpdate = newPrice;
+    public void updatePrice(PriceUpdate priceUpdate) {
+        this.lastPriceUpdate = priceUpdate;
     }
 
     public void sendBid(Bid newBid) {
         this.session.updateBid(newBid);
     }
 
-    public Price getLastPriceUpdate() {
+    public PriceUpdate getLastPriceUpdate() {
         return lastPriceUpdate;
     }
 

@@ -3,11 +3,11 @@ package net.powermatcher.integration.base;
 import static org.junit.Assert.assertArrayEquals;
 
 import java.io.IOException;
-import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.zip.DataFormatException;
 
 import net.powermatcher.api.MatcherEndpoint;
+import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.core.sessions.SessionManager;
@@ -68,7 +68,7 @@ public class ResilienceTest {
     }
 
     protected void sendBidsToMatcher() throws IOException, DataFormatException {
-        Bid bid = null;
+        ArrayBid bid = null;
         MockAgent newAgent;
 
         double[] aggregatedDemand = new double[this.marketBasis.getPriceSteps()];
@@ -95,8 +95,8 @@ public class ResilienceTest {
                 } else {
                     stop = true;
                 }
-            } catch (InvalidParameterException e) {
-                LOGGER.error("Incorrect bid specification found: " + e.getMessage());
+            } catch (IllegalArgumentException e) {
+                LOGGER.error("Incorrect bid specification caught: " + e.getMessage());
                 bid = null;
             }
         } while (!stop);
@@ -116,7 +116,7 @@ public class ResilienceTest {
         String agentId = "agent" + (i + 1);
         MockAgent newAgent = new MockAgent(agentId);
         this.agentList.add(i, newAgent);
-        
+
         newAgent.setDesiredParentId(MATCHERNAME);
         addAgent(newAgent);
 
@@ -143,7 +143,7 @@ public class ResilienceTest {
         return "input/" + testID + "/Bids" + csvSuffix;
     }
 
-    protected void checkAggregatedBid(Bid aggregatedBid) {
+    protected void checkAggregatedBid(ArrayBid aggregatedBid) {
         assertArrayEquals(this.resultsReader.getAggregatedBid().getDemand(), aggregatedBid.getDemand(), 0);
     }
 }

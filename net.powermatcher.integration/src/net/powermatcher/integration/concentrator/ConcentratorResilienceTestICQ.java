@@ -3,6 +3,7 @@ package net.powermatcher.integration.concentrator;
 import java.io.IOException;
 import java.util.zip.DataFormatException;
 
+import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.integration.base.ConcentratorResilienceTest;
 
 import org.junit.Test;
@@ -35,6 +36,6 @@ public class ConcentratorResilienceTestICQ extends ConcentratorResilienceTest {
 
         sendBidsToMatcher();
 
-        checkAggregatedBid(this.auctioneer.getLastReceivedBid());
+        checkAggregatedBid((ArrayBid)this.auctioneer.getLastReceivedBid());
     }
 }

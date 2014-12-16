@@ -13,6 +13,7 @@ import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PricePoint;
+import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.core.BaseDeviceAgent;
 
@@ -75,7 +76,7 @@ public class PVPanelAgent extends BaseDeviceAgent implements AgentEndpoint {
     @Deactivate
     public void deactivate() {
         Session session = getSession();
-		if (session != null) {
+        if (session != null) {
             session.disconnect();
         }
         scheduledFuture.cancel(false);
@@ -83,18 +84,24 @@ public class PVPanelAgent extends BaseDeviceAgent implements AgentEndpoint {
     }
 
     protected void doBidUpdate() {
-       	if (getSession() != null) {
+        if (getMarketBasis() != null) {
             double demand = minimumDemand + (maximumDemand - minimumDemand) * generator.nextDouble();
-            Bid newBid = createBid(new PricePoint(0, demand));
-            LOGGER.debug("publishBid({})", newBid);
+
+            PricePoint pricePoint1 = new PricePoint(new Price(getMarketBasis(),
+                    getMarketBasis().getMinimumPrice()), demand);
+            PricePoint pricePoint2 = new PricePoint(new Price(getMarketBasis(),
+                    getMarketBasis().getMaximumPrice()), minimumDemand);
+
+            Bid newBid = createBid(pricePoint1, pricePoint2);
+            LOGGER.debug("updateBid({})", newBid);
             publishBid(newBid);
         }
     }
 
     @Override
-    public void updatePrice(Price newPrice) {
-    	LOGGER.debug("Received price update [{}], current bidNr = {}", newPrice, getCurrentBidNr());
-    	super.updatePrice(newPrice);
+    public void updatePrice(PriceUpdate newPrice) {
+        LOGGER.debug("Received price update [{}], current bidNr = {}", newPrice, getCurrentBidNr());
+        super.updatePrice(newPrice);
     }
 
     @Reference
@@ -107,9 +114,8 @@ public class PVPanelAgent extends BaseDeviceAgent implements AgentEndpoint {
         this.timeService = timeService;
     }
 
-    
     @Override
     protected Date now() {
-    	return timeService.currentDate();
+        return timeService.currentDate();
     }
 }

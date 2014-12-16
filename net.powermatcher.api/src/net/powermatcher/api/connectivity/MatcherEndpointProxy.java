@@ -3,7 +3,7 @@ package net.powermatcher.api.connectivity;
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
-import net.powermatcher.api.data.Price;
+import net.powermatcher.api.data.PriceUpdate;
 
 public interface MatcherEndpointProxy extends MatcherEndpoint {
 	boolean connectRemote();
@@ -16,7 +16,7 @@ public interface MatcherEndpointProxy extends MatcherEndpoint {
 	
 	void updateBidRemote(Bid newBid);
 
-	void updateLocalPrice(Price newPrice);
+	void updateLocalPrice(PriceUpdate priceUpdate);
 	
 	void updateRemoteMarketBasis(MarketBasis marketBasis);
 	

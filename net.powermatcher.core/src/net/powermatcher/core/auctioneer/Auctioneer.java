@@ -11,15 +11,18 @@ import java.util.concurrent.TimeUnit;
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
+import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
-import net.powermatcher.api.monitoring.IncomingBidEvent;
+import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
-import net.powermatcher.api.monitoring.OutgoingPriceEvent;
 import net.powermatcher.api.monitoring.Qualifier;
+import net.powermatcher.api.monitoring.events.IncomingBidEvent;
+import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.BaseAgent;
 import net.powermatcher.core.BidCache;
+import net.powermatcher.core.BidCacheSnapshot;
 import net.powermatcher.core.concentrator.Concentrator;
 
 import org.slf4j.Logger;
@@ -150,7 +153,7 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
         session.setClusterId(this.getClusterId());
 
         this.sessions.add(session);
-        this.aggregatedBids.updateBid(session.getAgentId(), new Bid(this.marketBasis));
+        this.aggregatedBids.updateBid(getAgentId(), new ArrayBid.Builder(this.marketBasis).setDemand(0).build());
         LOGGER.info("Agent connected with session [{}]", session.getSessionId());
         return true;
     }
@@ -192,13 +195,17 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
     protected synchronized void publishNewPrice() {
         Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis);
         Price newPrice = determinePrice(aggregatedBid);
+        BidCacheSnapshot bidCacheSnapshot = this.aggregatedBids.getMatchingSnapshot(aggregatedBid.getBidNumber());
 
         for (Session session : this.sessions) {
-            this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), getAgentId(), session.getSessionId(),
-                    timeService.currentDate(), newPrice, Qualifier.MATCHER));
-
-            session.updatePrice(newPrice);
-            LOGGER.debug("New price: {}, session {}", newPrice, session.getSessionId());
+        	Integer bidNumber = bidCacheSnapshot.getBidNumbers().get(session.getAgentId());
+        	if(bidNumber != null) {
+        		PriceUpdate sessionPriceUpdate = new PriceUpdate(newPrice, bidNumber);
+        		this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), getAgentId(), session.getSessionId(),
+        				timeService.currentDate(), sessionPriceUpdate, Qualifier.MATCHER));
+        		session.updatePrice(sessionPriceUpdate);
+        		LOGGER.debug("New price: {}, session {}", sessionPriceUpdate, session.getSessionId());
+        	}
         }
     }
 

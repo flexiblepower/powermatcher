@@ -13,12 +13,13 @@ import java.util.Observable;
 import java.util.Observer;
 
 import net.powermatcher.api.Session;
+import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
-import net.powermatcher.api.monitoring.AgentEvent;
 import net.powermatcher.api.monitoring.AgentObserver;
-import net.powermatcher.api.monitoring.IncomingBidEvent;
-import net.powermatcher.api.monitoring.OutgoingPriceEvent;
+import net.powermatcher.api.monitoring.events.AgentEvent;
+import net.powermatcher.api.monitoring.events.IncomingBidEvent;
+import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.sessions.SessionManager;
 import net.powermatcher.core.time.SystemTimeService;
@@ -93,7 +94,7 @@ public class AuctioneerTest {
     private class AuctioneerObserver implements AgentObserver {
 
         private IncomingBidEvent incomingBidEvent;
-        private OutgoingPriceEvent outgoingPriceEvent;
+        private OutgoingPriceUpdateEvent outgoingPriceEvent;
 
         @Override
         public void update(AgentEvent event) {
@@ -102,16 +103,15 @@ public class AuctioneerTest {
                     fail("IncomingBidEvent fired more than once");
                 }
                 incomingBidEvent = (IncomingBidEvent) event;
-            } else if (event instanceof OutgoingPriceEvent) {
+            } else if (event instanceof OutgoingPriceUpdateEvent) {
                 if (outgoingPriceEvent != null) {
                     fail("OutgoingPriceEvent fired more than once");
                 }
-                outgoingPriceEvent = (OutgoingPriceEvent) event;
+                outgoingPriceEvent = (OutgoingPriceUpdateEvent) event;
             } else {
                 fail("unexpected event");
             }
         }
-
     }
 
     @Test
@@ -161,7 +161,7 @@ public class AuctioneerTest {
     public void testUpdateBidNullSession() {
         exception.expect(IllegalStateException.class);
         exception.expectMessage("No session found");
-        auctioneer.updateBid(null, new Bid(marketBasis));
+        auctioneer.updateBid(null, new ArrayBid(marketBasis, 0, new double[] { 5.0, 4.0, 3.0, 1.0, 0.0 }));
     }
 
     @Test
@@ -174,7 +174,8 @@ public class AuctioneerTest {
 
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("Marketbasis new bid differs from marketbasis auctioneer");
-        auctioneer.updateBid(mockAgent.getSession(), new Bid(new MarketBasis("a", "b", 2, 0, 2)));
+        auctioneer.updateBid(mockAgent.getSession(), new ArrayBid(new MarketBasis("a", "b", 2, 0, 2), 0,
+                new double[] {5.0, 4.0}));
     }
 
     @Test
@@ -190,7 +191,7 @@ public class AuctioneerTest {
         sessionManager.addAgentEndpoint(mockAgent);
 
         double[] demandArray = new double[] { 2, 1, 0, -1, -2 };
-        Bid bid = new Bid(marketBasis, demandArray);
+        Bid bid = new ArrayBid(marketBasis, 0, demandArray);
         mockAgent.sendBid(bid);
 
         assertThat(observer.incomingBidEvent.getClusterId(), is(equalTo(clusterId)));
@@ -212,11 +213,11 @@ public class AuctioneerTest {
         sessionManager.addAgentEndpoint(mockAgent);
 
         double[] demandArray = new double[] { 2, 1, 0, -1, -2 };
-        Bid bid = new Bid(marketBasis, demandArray);
+        Bid bid = new ArrayBid(marketBasis, 0, demandArray);
         mockAgent.sendBid(bid);
         assertThat(mockAgent.getLastPriceUpdate(), is(nullValue()));
         mockScheduler.doTaskOnce();
         assertThat(mockAgent.getLastPriceUpdate(), is(notNullValue()));
-        assertThat(observer.outgoingPriceEvent.getPrice(), is(equalTo(mockAgent.getLastPriceUpdate())));
+        assertThat(observer.outgoingPriceEvent.getPriceUpdate(), is(equalTo(mockAgent.getLastPriceUpdate())));
     }
 }

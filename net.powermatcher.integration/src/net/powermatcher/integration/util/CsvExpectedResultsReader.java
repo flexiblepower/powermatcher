@@ -7,18 +7,18 @@ import java.util.zip.DataFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.powermatcher.api.data.Bid;
+import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.MarketBasis;
 
 public class CsvExpectedResultsReader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CsvExpectedResultsReader.class);
-    
+
     private String inputFile;
     private CsvReader csvReader;
     private MarketBasis marketBasis;
 
-    private Bid aggregatedBid;
+    private ArrayBid aggregatedBid;
     private double equilibriumPrice;
 
     public CsvExpectedResultsReader(String filename) throws IOException, DataFormatException {
@@ -41,7 +41,7 @@ public class CsvExpectedResultsReader {
 
         // Get aggregated bid from second line
         List<String> demandList = csvReader.nextLine();
-        this.aggregatedBid = new Bid(marketBasis, createAggregatedBid(demandList));
+        this.aggregatedBid = new ArrayBid(marketBasis, 0, createAggregatedBid(demandList));
 
         // Get equilibrium price from the third line
         List<String> priceList = csvReader.nextLine();
@@ -85,9 +85,9 @@ public class CsvExpectedResultsReader {
             String commodity = "electricity";
             String currency = "EUR";
             try {
-                int priceSteps = new Integer(marketBasisData.get(0));
-                double minimumPrice = new Double(marketBasisData.get(1));
-                double maximumPrice = new Double(marketBasisData.get(2));
+                int priceSteps =  Integer.valueOf(marketBasisData.get(0));
+                double minimumPrice = Double.valueOf(marketBasisData.get(1));
+                double maximumPrice = Double.valueOf(marketBasisData.get(2));
 
                 MarketBasis mb = new MarketBasis(commodity, currency, priceSteps, minimumPrice, maximumPrice);
                 this.marketBasis = mb;
@@ -108,7 +108,7 @@ public class CsvExpectedResultsReader {
         }
     }
 
-    public Bid getAggregatedBid() {
+    public ArrayBid getAggregatedBid() {
         return aggregatedBid;
     }
 

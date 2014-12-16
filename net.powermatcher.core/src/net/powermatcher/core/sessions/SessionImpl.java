@@ -5,7 +5,7 @@ import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
-import net.powermatcher.api.data.Price;
+import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.concentrator.Concentrator;
 
@@ -65,8 +65,8 @@ public class SessionImpl implements Session {
      */
     private MarketBasis marketBasis = null;
 
-    public SessionImpl(SessionManager sessionManager, AgentEndpoint agentEndpoint, String agentId, MatcherEndpoint matcherEndpoint,
-            String matcherId, String sessionId) {
+    public SessionImpl(SessionManager sessionManager, AgentEndpoint agentEndpoint, String agentId,
+            MatcherEndpoint matcherEndpoint, String matcherId, String sessionId) {
         this.sessionManager = sessionManager;
         this.agentId = agentId;
         this.matcherId = matcherId;
@@ -92,18 +92,11 @@ public class SessionImpl implements Session {
 
     @Override
     public String getClusterId() {
-// TODO enable this again?
-//        if (clusterId == null) {
-//            throw new IllegalStateException("No clusterId has been defined");
-//        }
         return clusterId;
     }
 
     @Override
     public MarketBasis getMarketBasis() {
-//        if (marketBasis == null) {
-//            throw new IllegalStateException("No marketBasis has been defined");
-//        }
         return marketBasis;
     }
 
@@ -124,8 +117,8 @@ public class SessionImpl implements Session {
     }
 
     @Override
-    public void updatePrice(Price newPrice) {
-        agentEndpoint.updatePrice(newPrice);
+    public void updatePrice(PriceUpdate priceUpdate) {
+        agentEndpoint.updatePrice(priceUpdate);
     }
 
     @Override
@@ -146,5 +139,22 @@ public class SessionImpl implements Session {
 
     public MatcherEndpoint getMatcherEndpoint() {
         return matcherEndpoint;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        SessionImpl that = (SessionImpl) ((obj instanceof SessionImpl) ? obj : null);
+        if (that == null) {
+            return false;
+        }
+
+        if (this == that) {
+            return true;
+        }
+
+        return this.agentId.equals(that.agentId) && this.clusterId.equals(that.clusterId)
+                && this.agentEndpoint.equals(that.agentEndpoint) && this.matcherId.equals(that.matcherId)
+                && this.marketBasis.equals(that.marketBasis) && this.matcherEndpoint.equals(that.matcherEndpoint)
+                && this.sessionId.equals(that.sessionId);
     }
 }

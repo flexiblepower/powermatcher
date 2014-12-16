@@ -2,7 +2,7 @@ package net.powermatcher.api;
 
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
-import net.powermatcher.api.data.Price;
+import net.powermatcher.api.data.PriceUpdate;
 
 /**
  * The {@link Session} interface defines the basic functionality needed to link an {@link AgentEndpoint} with a
@@ -28,7 +28,7 @@ public interface Session {
 
     void setMarketBasis(MarketBasis marketBasis);
 
-    void updatePrice(Price newPrice);
+    void updatePrice(PriceUpdate priceUpdate);
 
     void updateBid(Bid newBid);
 

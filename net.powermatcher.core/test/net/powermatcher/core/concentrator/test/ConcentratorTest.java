@@ -6,13 +6,16 @@ import static org.hamcrest.core.IsNull.nullValue;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import net.powermatcher.api.Session;
+import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
+import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.core.concentrator.Concentrator;
 import net.powermatcher.core.sessions.SessionImpl;
 import net.powermatcher.core.sessions.SessionManager;
@@ -59,6 +62,7 @@ public class ConcentratorTest {
         props.put("agentId", concentratorId);
         props.put("desiredParentId", auctioneerId);
         props.put("bidUpdateRate", bidUpdateRate);
+        props.put("whiteListAgents", new ArrayList<String>());
 
         concentrator.setExecutorService(mockScheduler);
         concentrator.setTimeService(new SystemTimeService());
@@ -106,6 +110,7 @@ public class ConcentratorTest {
         MockMatcherAgent mockMatcherAgent = new MockMatcherAgent(auctioneerId);
         mockMatcherAgent.setDesiredParentId("what");
         MockAgent mockAgent = new MockAgent("mockAgent");
+        mockMatcherAgent.setMarketBasis(marketBasis);
         mockAgent.setDesiredParentId(concentratorId);
 
         SessionManager sessionManager = new SessionManager();
@@ -131,6 +136,7 @@ public class ConcentratorTest {
     public void testAgentEndpointDisconnected() {
         MockMatcherAgent mockMatcherAgent = new MockMatcherAgent(auctioneerId);
         mockMatcherAgent.setDesiredParentId("test");
+        mockMatcherAgent.setMarketBasis(marketBasis);
         MockAgent mockAgent = new MockAgent("mockAgent");
         mockAgent.setDesiredParentId(concentratorId);
 
@@ -161,13 +167,14 @@ public class ConcentratorTest {
         exception.expect(IllegalStateException.class);
         exception.expectMessage("No session found");
         Concentrator concentrator = new Concentrator();
-        concentrator.updateBid(null, new Bid(marketBasis));
+        concentrator.updateBid(null, new ArrayBid.Builder(marketBasis).setDemand(0).build());
     }
 
     @Test
     public void testupdateBidDifferentMarketBasis() {
         MockMatcherAgent mockMatcherAgent = new MockMatcherAgent(auctioneerId);
         mockMatcherAgent.setDesiredParentId("test");
+        mockMatcherAgent.setMarketBasis(marketBasis);
         MockAgent mockAgent = new MockAgent("mockAgent");
         mockAgent.setDesiredParentId(concentratorId);
 
@@ -182,7 +189,7 @@ public class ConcentratorTest {
         sessionManager.addAgentEndpoint(mockAgent);
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("Marketbasis new bid differs from marketbasis auctioneer");
-        concentrator.updateBid(mockAgent.getSession(), new Bid(new MarketBasis("a", "b", 2, 0, 2)));
+        concentrator.updateBid(mockAgent.getSession(),new ArrayBid.Builder(new MarketBasis("a", "b", 2, 0, 2)).setDemand(0).build());
     }
 
     @Test
@@ -203,10 +210,10 @@ public class ConcentratorTest {
 
         sessionManager.addAgentEndpoint(mockAgent);
         double[] demandArray = new double[] { 2, 1, 0, -1, -2 };
-        Bid bid = new Bid(marketBasis, demandArray);
-        concentrator.updateBid(mockAgent.getSession(), bid);
+        ArrayBid arrayBid = new ArrayBid(marketBasis, 1, demandArray);
+        concentrator.updateBid(mockAgent.getSession(), arrayBid);
         mockScheduler.doTaskOnce();
-        Bid expectedBid = new Bid(bid, 1);
+        Bid expectedBid = new ArrayBid(arrayBid, 1);
         assertThat(mockMatcherAgent.getLastReceivedBid(), is(equalTo(expectedBid)));
     }
 
@@ -235,11 +242,11 @@ public class ConcentratorTest {
 
         sessionManager.addAgentEndpoint(mockAgent);
 
-        Bid bid = new Bid(marketBasis, 1, new double[] { 2, 1, 0, -1, -1 });
+        Bid bid = new ArrayBid(marketBasis, 1, new double[] { 2, 1, 0, -1, -1 });
         mockAgent.sendBid(bid);
         mockScheduler.doTaskOnce();
-        Price expected = new Price(marketBasis, 5.0, 1);
-        Price error = new Price(marketBasis, 6.0, 1);
+        PriceUpdate expected = new PriceUpdate(new Price(marketBasis, 5.0), 1);
+        PriceUpdate error = new PriceUpdate(new Price(marketBasis, 6.0), 1);
         concentrator.updatePrice(expected);
         concentrator.updatePrice(error);
         assertThat(mockAgent.getLastPriceUpdate(), is(equalTo(expected)));

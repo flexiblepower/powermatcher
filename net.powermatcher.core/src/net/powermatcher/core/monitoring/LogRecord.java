@@ -5,8 +5,8 @@ import java.util.Date;
 
 import javax.xml.crypto.Data;
 
-import net.powermatcher.api.monitoring.AgentEvent;
 import net.powermatcher.api.monitoring.Qualifier;
+import net.powermatcher.api.monitoring.events.AgentEvent;
 
 /**
  * @author IBM
@@ -60,13 +60,6 @@ public abstract class LogRecord {
         this.dateFormat = dateFormat;
     }
 
-    /**
-     * Get logRecord data as a String[]
-     * 
-     * @return All fields of the {@link LogRecord} in a {@link String}[]
-     */
-    public abstract String[] getLine();
-
     public String getClusterId() {
         return clusterId;
     }
@@ -84,7 +77,7 @@ public abstract class LogRecord {
     }
 
     public Date getEventTimestamp() {
-        return eventTimestamp;
+        return new Date(eventTimestamp.getTime());
     }
 
     public DateFormat getDateFormat() {

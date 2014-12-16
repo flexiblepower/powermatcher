@@ -1,6 +1,10 @@
 package net.powermatcher.core.concentrator;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Dictionary;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
@@ -11,19 +15,23 @@ import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
+import net.powermatcher.api.WhiteList;
+import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
-import net.powermatcher.api.data.Price;
-import net.powermatcher.api.monitoring.IncomingBidEvent;
-import net.powermatcher.api.monitoring.IncomingPriceEvent;
+import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
-import net.powermatcher.api.monitoring.OutgoingBidEvent;
-import net.powermatcher.api.monitoring.OutgoingPriceEvent;
 import net.powermatcher.api.monitoring.Qualifier;
+import net.powermatcher.api.monitoring.events.IncomingBidEvent;
+import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
+import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
+import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.BaseAgent;
 import net.powermatcher.core.BidCache;
 import net.powermatcher.core.BidCacheSnapshot;
 import net.powermatcher.core.auctioneer.Auctioneer;
 
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,8 +57,8 @@ import aQute.bnd.annotation.metatype.Meta;
  * 
  */
 @Component(designateFactory = Concentrator.Config.class, immediate = true, provide = { ObservableAgent.class,
-        MatcherEndpoint.class, AgentEndpoint.class })
-public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEndpoint {
+        MatcherEndpoint.class, AgentEndpoint.class, WhiteList.class })
+public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEndpoint, WhiteList {
     private static final Logger LOGGER = LoggerFactory.getLogger(Concentrator.class);
 
     @Meta.OCD
@@ -63,6 +71,9 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
 
         @Meta.AD(deflt = "60", description = "Number of seconds between bid updates")
         long bidUpdateRate();
+
+        @Meta.AD(description = "Valid agents for a connection to the cluster")
+        List<String> whiteListAgents();
     }
 
     /**
@@ -101,22 +112,22 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
      */
     protected Config config;
 
-    @Reference
-    public void setTimeService(TimeService timeService) {
-        this.timeService = timeService;
-    }
+    private List<String> validAgents = new ArrayList<String>();
 
-    @Reference
-    public void setExecutorService(ScheduledExecutorService scheduler) {
-        this.scheduler = scheduler;
-    }
+    private ConfigurationAdmin configurationAdmin;
+
+    private String servicePid;
 
     @Activate
     public void activate(final Map<String, Object> properties) {
         config = Configurable.createConfigurable(Config.class, properties);
 
+        this.servicePid = (String) properties.get("service.pid");
+
         this.setAgentId(config.agentId());
         this.setDesiredParentId(config.desiredParentId());
+        this.setWhiteListAgents(config.whiteListAgents());
+
         // Since the cleanup is never called, the expiration time is useless
         // TODO: how should we deal with this cleanup?
         this.aggregatedBids = new BidCache(this.timeService, 0);
@@ -163,13 +174,18 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
             return false;
         }
 
-        this.sessionToAgents.add(session);
-        session.setMarketBasis(this.sessionToMatcher.getMarketBasis());
-        session.setClusterId(this.sessionToMatcher.getClusterId());
+        if (validAgents.size() == 0 || validAgents.contains(session.getAgentId())) {
+            this.sessionToAgents.add(session);
+            session.setMarketBasis(this.sessionToMatcher.getMarketBasis());
+            session.setClusterId(this.sessionToMatcher.getClusterId());
 
-        this.aggregatedBids.updateBid(session.getAgentId(), new Bid(this.sessionToMatcher.getMarketBasis()));
-        LOGGER.info("Agent connected with session [{}]", session.getSessionId());
-        return true;
+            this.aggregatedBids.updateBid(session.getAgentId(), new ArrayBid.Builder(this.sessionToMatcher.getMarketBasis()).setDemand(0).build());
+            LOGGER.info("Agent connected with session [{}]", session.getSessionId());
+            return true;
+        } else {
+            LOGGER.warn("Agent [{}] is not on whitelist, reject connection", session.getAgentId());
+            return false;
+        }
     }
 
     @Override
@@ -205,58 +221,42 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
     }
 
     @Override
-    public synchronized void updatePrice(Price newPrice) {
-        if (newPrice == null) {
+    public synchronized void updatePrice(PriceUpdate priceUpdate) {
+        if (priceUpdate == null) {
             String message = "Price cannot be null";
             LOGGER.error(message);
             throw new IllegalArgumentException(message);
         }
-
-        LOGGER.debug("Received price update [{}]", newPrice);
-        this.publishEvent(new IncomingPriceEvent(sessionToMatcher.getClusterId(), this.config.agentId(),
-                this.sessionToMatcher.getSessionId(), timeService.currentDate(), newPrice, Qualifier.AGENT));
+        
+        LOGGER.debug("Received price update [{}]", priceUpdate);
+        this.publishEvent(new IncomingPriceUpdateEvent(sessionToMatcher.getClusterId(), this.config.agentId(),
+                this.sessionToMatcher.getSessionId(), timeService.currentDate(), priceUpdate, Qualifier.AGENT));
 
         // Find bidCacheSnapshot belonging to the newly received price update
-        BidCacheSnapshot bidCacheSnapshot = this.aggregatedBids.getMatchingSnapshot(newPrice.getBidNumber());
+        BidCacheSnapshot bidCacheSnapshot = this.aggregatedBids.getMatchingSnapshot(priceUpdate.getBidNumber());
         if (bidCacheSnapshot == null) {
-            // ignore price and log warning
-            LOGGER.warn("Received a price update for a bid that I never sent, id: {}", newPrice.getBidNumber());
-            return;
+        	// ignore price and log warning
+        	LOGGER.warn("Received a price update for a bid that I never sent, id: {}", priceUpdate.getBidNumber());
+        	return;
         }
-
-        newPrice = transformPrice(newPrice, bidCacheSnapshot.getAggregatedBid());
-
+        
+        
         // Publish new price to connected agents
         for (Session session : this.sessionToAgents) {
-            Integer originalAgentBid = bidCacheSnapshot.getBidNumbers().get(session.getAgentId());
-            if (originalAgentBid == null) {
-                // ignore price for this agent and log warning
-                LOGGER.warn("Received a price update for a bid that I never sent, id: {}", session.getAgentId());
-                continue;
-            }
+        	Integer originalAgentBid = bidCacheSnapshot.getBidNumbers().get(session.getAgentId());    
+        	if (originalAgentBid == null) {
+        		// ignore price for this agent and log warning
+        		continue;
+        	} 
 
-            Price agentPrice = new Price(newPrice.getMarketBasis(), newPrice.getCurrentPrice(), originalAgentBid);
+        	PriceUpdate agentPriceUpdate = new PriceUpdate(priceUpdate.getPrice(), originalAgentBid);
+        	
+            session.updatePrice(agentPriceUpdate);
 
-            session.updatePrice(agentPrice);
-
-            this.publishEvent(new OutgoingPriceEvent(session.getClusterId(), this.config.agentId(), session
-                    .getSessionId(), timeService.currentDate(), newPrice, Qualifier.MATCHER));
+            this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), this.config.agentId(), session.getSessionId(), timeService
+                    .currentDate(), priceUpdate, Qualifier.MATCHER));
 
         }
-    }
-
-    /**
-     * This method should be overridden when the price that will be sent has to be changed.
-     * 
-     * @param price
-     *            The (input) price as received from the connected matcher.
-     * @param bid
-     *            The aggregated bid on which this price was based.
-     * @return The price that will be sent to all the agents that are connected to this {@link Concentrator}. The
-     *         bidNumber of this price is irrelevant, since this will be changed for each agent.
-     */
-    protected Price transformPrice(Price price, Bid bid) {
-        return price;
     }
 
     protected synchronized void doBidUpdate() {
@@ -282,5 +282,77 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
      */
     protected Bid transformBid(Bid aggregatedBid) {
         return aggregatedBid;
+    }
+
+    @Override
+    public List<String> createWhiteList(List<String> whiteList) {
+        this.validAgents = whiteList;
+        this.updateConfigurationAdmin();
+        return this.validAgents;
+    }
+
+    @Override
+    public List<String> addWhiteList(List<String> whiteList) {
+        for (String agent : whiteList) {
+            this.validAgents.add(agent);
+        }
+        this.updateConfigurationAdmin();
+        return this.validAgents;
+    }
+
+    @Override
+    public List<String> removeWhiteList(List<String> whiteList) {
+        for (String agent : whiteList) {
+            if (this.validAgents.contains(agent)) {
+                this.validAgents.remove(agent);
+            }
+        }
+        this.updateConfigurationAdmin();
+        return this.validAgents;
+    }
+
+    private synchronized void updateConfigurationAdmin() {
+        try {
+            Configuration config = configurationAdmin.getConfiguration(this.servicePid);
+            Dictionary<String, Object> properties = config.getProperties();
+            properties.put("whiteListAgents", this.validAgents);
+
+            config.update(properties);
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage());
+        }
+    }
+
+    @Reference
+    protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
+        this.configurationAdmin = configurationAdmin;
+    }
+
+    @Reference
+    public void setTimeService(TimeService timeService) {
+        this.timeService = timeService;
+    }
+
+    @Reference()
+    public void setExecutorService(ScheduledExecutorService scheduler) {
+        this.scheduler = scheduler;
+    }
+
+    protected List<String> getWhiteListAgents() {
+        return validAgents;
+    }
+
+    protected void setWhiteListAgents(List<String> whiteListAgents) {
+        this.validAgents = whiteListAgents;
+
+        // ConfigAdmin will sometimes generate a filter with 1 empty element. Ignore it.
+        if (whiteListAgents != null && !whiteListAgents.isEmpty() && whiteListAgents.get(0).isEmpty()) {
+        	this.validAgents = new ArrayList<String>();
+        }
+    }
+
+    @Override
+    public List<String> getWhiteList() {
+        return this.validAgents;
     }
 }

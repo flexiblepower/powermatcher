@@ -11,9 +11,10 @@ import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 import net.powermatcher.api.ObjectiveEndpoint;
+import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
-import net.powermatcher.api.data.Price;
+import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.core.objectiveagent.BaseObjectiveAgent;
 
@@ -56,16 +57,16 @@ public class ObjectiveAgent extends BaseObjectiveAgent {
         MarketBasis marketBasis = new MarketBasis(COMMODITY_ELECTRICITY, CURRENCY_EUR, 5, -1.0d, 7.0d);
         double[] demand = new double[] { 100.0d, 50.0d, 50.0d, 0.0d, 0.0d };
 
-        Bid objectiveBid = new Bid(marketBasis, demand);
+        ArrayBid objectiveBid = new ArrayBid(marketBasis,1, demand);
 
-        Bid aggregatedObjectiveBid = objectiveBid.aggregate(aggregatedBid);
+        ArrayBid aggregatedObjectiveBid = objectiveBid.aggregate(aggregatedBid);
 
         LOGGER.info("ObjectiveAgent: new aggregated bid: [{}] ", aggregatedObjectiveBid.getDemand());
         return aggregatedObjectiveBid;
     }
 
     @Override
-    public void notifyPriceUpdate(Price newPrice) {
-        LOGGER.info("ObjectiveAgent: received price update [{}] ", newPrice);
+    public void notifyPriceUpdate(PriceUpdate priceUpdate) {
+        LOGGER.info("ObjectiveAgent: received price update [{}] ", priceUpdate);
     }
 }

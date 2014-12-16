@@ -4,6 +4,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import net.powermatcher.api.TimeService;
+import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.core.BidCache;
@@ -38,8 +39,8 @@ public class BidCacheTest {
 
     @Test
     public void testUpdateBid() {
-        Bid bid1 = new Bid(marketBasis);
-        Bid bid2 = new Bid(bid1, 2);
+        ArrayBid bid1 = new ArrayBid.Builder(marketBasis).setDemand(0).build();
+        ArrayBid bid2 = new ArrayBid(bid1, 2);
         Bid emptyBid = bidCache.updateBid("agent1", bid1);
         assertThat(emptyBid, is(nullValue()));
     }

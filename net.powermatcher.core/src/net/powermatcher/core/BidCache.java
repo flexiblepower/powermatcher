@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import net.powermatcher.api.TimeService;
+import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 
@@ -46,7 +47,7 @@ public class BidCache {
     /**
      * Define the aggregated bid (Bid) field.
      */
-    private Bid aggregatedBid;
+    private ArrayBid aggregatedBid;
     
     private int snapshotCounter;
     
@@ -97,7 +98,7 @@ public class BidCache {
         long currentTime = (timeSource == null) ? 0 : timeSource.currentTimeMillis();
         BidCacheElement element = new BidCacheElement(newBid, currentTime);
         BidCacheElement oldElement = this.bidCache.put(agentId, element);
-        Bid oldBid = null;
+        ArrayBid oldBid = null;
         if (this.aggregatedBid != null) {
             if (oldElement != null) {
                 oldBid = oldElement.getBid();
@@ -115,9 +116,9 @@ public class BidCache {
      *            The agent ID (<code>String</code>) parameter.
      * @return Results of the remove agent (<code>Bid</code>) value.
      */
-    public synchronized Bid removeAgent(final String agentId) {
+    public synchronized ArrayBid removeAgent(final String agentId) {
         BidCacheElement oldElement = this.bidCache.remove(agentId);
-        Bid lastBid = null;
+        ArrayBid lastBid = null;
         if (this.aggregatedBid != null && oldElement != null) {
             lastBid = oldElement.getBid();
             this.aggregatedBid = this.aggregatedBid.subtract(lastBid);
@@ -172,17 +173,17 @@ public class BidCache {
      *            The market basis (<code>MarketBasis</code>) parameter.
      * @return The aggregated bid for the bids in the cache.
      */
-    public synchronized Bid getAggregatedBid(final MarketBasis marketBasis) {
+    public synchronized ArrayBid getAggregatedBid(final MarketBasis marketBasis) {
         if (marketBasis != null) {
         	
         	BidCacheSnapshot bidCacheSnapshot = new BidCacheSnapshot();
         	
             if (this.aggregatedBid == null || !this.aggregatedBid.getMarketBasis().equals(marketBasis)) {
             	 	
-                Bid newAggregatedBid = new Bid(marketBasis);
+                ArrayBid newAggregatedBid = new ArrayBid.Builder(marketBasis).setDemand(0).build();
                 Set<String> idSet = this.bidCache.keySet();
                 for (String agentId : idSet) {
-                    Bid bid = getLastBid(agentId);                   
+                    ArrayBid bid = getLastBid(agentId);                   
                     newAggregatedBid = newAggregatedBid.aggregate(bid);
                 }
                 this.aggregatedBid = newAggregatedBid;
@@ -191,7 +192,7 @@ public class BidCache {
             //Make a blueprint of the bidCache storing agentID - bidNumber pairs
             Set<String> idSet = this.bidCache.keySet();
             for (String agentId : idSet) {
-                Bid bid = getLastBid(agentId);                   
+                ArrayBid bid = getLastBid(agentId);                   
                 bidCacheSnapshot.getBidNumbers().put(agentId, bid.getBidNumber());  
             }
 
@@ -199,7 +200,7 @@ public class BidCache {
             //Save it with the BidCacheSnapshot (not used).
             //Update the aggregatedBid with the new Bidnumber.  
             incrSnapshotCounter();
-            Bid newBidNr = new Bid(this.aggregatedBid, getSnapshotCounter());
+            ArrayBid newBidNr = new ArrayBid(this.aggregatedBid, getSnapshotCounter());
             this.aggregatedBid = newBidNr;            
            
             bidCacheSnapshot.setCount(getSnapshotCounter());
@@ -222,9 +223,9 @@ public class BidCache {
      *            The agent ID (<code>String</code>) parameter.
      * @return Results of the get last bid (<code>Bid</code>) value.
      */
-    public synchronized Bid getLastBid(final String agentId) {
+    public synchronized ArrayBid getLastBid(final String agentId) {
         BidCacheElement element = this.bidCache.get(agentId);
-        Bid lastBid = null;
+        ArrayBid lastBid = null;
         if (element != null) {
             lastBid = element.getBid();
         }
