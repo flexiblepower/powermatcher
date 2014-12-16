@@ -79,8 +79,7 @@ public class SessionManager implements SessionManagerInterface {
         Agent agent = (Agent) agentEndpoint;
         String agentId = agent.getAgentId();
 
-        if (!isUniqueAgentId(agentId, agentEndpoint, null)) {
-
+        if (isNotUniqueAgentId(agentId, agentEndpoint, null)) {
             // Modified agent
             if (desiredConnections.containsKey(agentId)) {
                 desiredConnections.remove(agentId);
@@ -96,25 +95,22 @@ public class SessionManager implements SessionManagerInterface {
             } else {
                 updateConnections();
             }
-        } else {
-            // delete
-
         }
         updateConnections();
     }
 
-    private boolean isUniqueAgentId(String agentId, AgentEndpoint agentEndpoint, MatcherEndpoint matcherEndpoint) {
+    private boolean isNotUniqueAgentId(String agentId, AgentEndpoint agentEndpoint, MatcherEndpoint matcherEndpoint) {
         if (agentIds.contains(agentId)) {
             if (agentEndpoint != null && agentEndpoints.get(agentId) != null) {
-                AgentEndpoint newAgentEndpoint = agentEndpoints.get(agentId);
-                delete(agentId, newAgentEndpoint, null);
+                AgentEndpoint oldAgentEndpoint = agentEndpoints.get(agentId);
+                delete(agentId, oldAgentEndpoint, null);
 
-                return true;
+                return false;
             } else if (matcherEndpoint != null && (matcherEndpoints.get(agentId) != null)) {
-                MatcherEndpoint newMatcherEndpoint = matcherEndpoints.get(agentId);
-                delete(agentId, null, newMatcherEndpoint);
+                MatcherEndpoint oldMatcherEndpoint = matcherEndpoints.get(agentId);
+                delete(agentId, null, oldMatcherEndpoint);
                 
-                return true;
+                return false;
             }
         } else {
             if (!agentIds.contains(agentId)) {
@@ -122,23 +118,22 @@ public class SessionManager implements SessionManagerInterface {
             }
         }
 
-        return false;
+        return true;
     }
 
     private void delete(String AgentId, AgentEndpoint agentEndpoint, MatcherEndpoint matcherEndpoint) {
-        String pidNewAgentEndpoint;
+        String pidOldAgentEndpoint;
         try {
             for (Configuration c : configurationAdmin.listConfigurations(null)) {
-
                 if (agentEndpoint != null) {
-                    pidNewAgentEndpoint = agentEndpoint.getServicePid();
+                    pidOldAgentEndpoint = agentEndpoint.getServicePid();
                 } else {
-                    pidNewAgentEndpoint = matcherEndpoint.getServicePid();
+                    pidOldAgentEndpoint = matcherEndpoint.getServicePid();
                 }
                 String pidConfigAgentEndpoint = (String) c.getProperties().get("service.pid");
                 if (agentEndpoint.getAgentId().equals((String) c.getProperties().get("agentId"))) {
-                    if (!pidNewAgentEndpoint.equals(pidConfigAgentEndpoint)) {
-
+                    // dont't delete old agentId;
+                    if (!pidOldAgentEndpoint.equals(pidConfigAgentEndpoint)) {
                         c.delete();
                     }
                 }
@@ -163,7 +158,7 @@ public class SessionManager implements SessionManagerInterface {
         String agentId = agent.getAgentId();
 
         // if (!isUniqueAgentId(agentId, agentEndpoint, null)) {
-        if (!isUniqueAgentId(agentId, null, matcherEndpoint)) {
+        if (isNotUniqueAgentId(agentId, null, matcherEndpoint)) {
 
             if (agentId == null) {
                 LOGGER.warn("Registered an matcher with no matcherId: " + matcherEndpoint);
