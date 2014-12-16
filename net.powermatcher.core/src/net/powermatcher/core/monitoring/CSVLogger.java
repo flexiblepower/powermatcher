@@ -172,7 +172,9 @@ public class CSVLogger extends AgentEventLogger {
             } else if ("PriceEvent".equals(getEventType().getDescription())) {
                 header = PRICE_HEADER_ROW;
             }
-            writeLineToCSV(header, logFile);
+            if (header != null) {
+                writeLineToCSV(header, logFile);
+            }
         }
         updateObservables();
     }
@@ -270,7 +272,9 @@ public class CSVLogger extends AgentEventLogger {
                 output = createLineForPriceUpdateLog((PriceUpdateLogRecord) logRecord);
             }
 
-            writeLineToCSV(output, logFile);
+            if (output != null) {
+                writeLineToCSV(output, logFile);
+            }
             removeLogRecord(logRecord);
         }
         getLogger().info("CSVLogger [{}] wrote to {}", getLoggerId(), logFile);
@@ -317,8 +321,8 @@ public class CSVLogger extends AgentEventLogger {
                     // int priceStep = marketBasis.toPriceStep(p.getNormalizedPrice());
                     pricePointBuiler.append(MarketBasis.PRICE_FORMAT.format(0));
                     // pricePointBuiler.append(MarketBasis.PRICE_FORMAT.format(marketBasis.toPrice(priceStep)));
-                    
-                     pricePointBuiler.append("|").append(MarketBasis.DEMAND_FORMAT.format(p.getDemand()));
+
+                    pricePointBuiler.append("|").append(MarketBasis.DEMAND_FORMAT.format(p.getDemand()));
                 }
             }
         }

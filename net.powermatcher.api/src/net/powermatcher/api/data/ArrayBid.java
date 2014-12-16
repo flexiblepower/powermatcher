@@ -357,7 +357,9 @@ public class ArrayBid extends Bid {
                      * Here i is in a constantly inclining or declining segment. Search for the last price step in the
                      * segment.
                      */
-                    while (i < priceSteps - 1 && this.demandArray[i] - this.demandArray[i + 1] == delta) {
+                    while (i < priceSteps - 1
+                            && Math.abs((this.demandArray[i] - this.demandArray[i + 1]) - delta) < Math.pow(10,
+                                    PRECISION * -1)) {
                         i += 1;
                     }
                     /*

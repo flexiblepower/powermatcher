@@ -29,7 +29,12 @@ public class MockScheduler extends ScheduledThreadPoolExecutor {
         
         @Override
         public boolean equals(Object obj) {
-            return true;
+            return super.equals(obj);
+        }
+        
+        @Override
+        public int hashCode() {
+            return super.hashCode();
         }
 
         @Override
