@@ -9,7 +9,7 @@ package net.powermatcher.visualisation.models;
  */
 public class NodeModel implements Comparable<NodeModel> {
     /**
-     * the factory pid of this node. This will be used by 
+     * the factory pid of this node. This will be used by
      */
     private String fpid;
     /**
@@ -68,11 +68,26 @@ public class NodeModel implements Comparable<NodeModel> {
 
         int output = this.desiredParentId.compareTo(that.desiredParentId);
 
-        //if the desiredParents are the same, they have to be sorted in their own level
+        // if the desiredParents are the same, they have to be sorted in their own level
         if (output == 0) {
             output = this.agentId.compareTo(that.agentId);
         }
 
         return output;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        NodeModel that = (NodeModel) ((obj instanceof NodeModel) ? obj : null);
+        if (that == null) {
+            return false;
+        }
+
+        if (this == that) {
+            return true;
+        }
+
+        return this.agentId.equals(that.agentId) && this.desiredParentId.equals(that.desiredParentId)
+                && this.fpid.equals(that.fpid) && this.pid.equals(that.pid);
     }
 }

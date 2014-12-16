@@ -5,6 +5,11 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ArrayBid extends Bid {
+    /**
+     * In the calculatePricePoints, 2 floating points will be compared. The significance is set here.
+     */
+    private static int PRECISION = 5;
+
     public static final class Builder {
         private final MarketBasis marketBasis;
         private int bidNumber;
@@ -347,8 +352,7 @@ public class ArrayBid extends Bid {
              * If not at the end of the demand array, check if the following segment is a step or an inclining segment.
              */
             if (i < priceSteps - 1) {
-                // TODO Test for floating point equality. Not just ==
-                if (this.demandArray[i] - this.demandArray[i + 1] == delta) {
+                if (Math.abs((this.demandArray[i] - this.demandArray[i + 1]) - delta) < Math.pow(10, PRECISION * -1)) {
                     /*
                      * Here i is in a constantly inclining or declining segment. Search for the last price step in the
                      * segment.
@@ -394,8 +398,7 @@ public class ArrayBid extends Bid {
      */
     private boolean endSegment(int priceSteps, List<PricePoint> points, boolean flatStart, int location) {
         if (location == priceSteps - 1
-                || (location < priceSteps - 1 
-                        && this.demandArray[location] - this.demandArray[location + 1] == 0)) {
+                || (location < priceSteps - 1 && this.demandArray[location] - this.demandArray[location + 1] == 0)) {
             points.add(newPoint(location));
             return true;
         }

@@ -28,8 +28,6 @@ public class ConcentratorResilienceTestICQ extends ConcentratorResilienceTest {
 
     @Test
     public void qualityScalabilityTestICQ2SendAggregatedBidRejectAscending() throws IOException, DataFormatException {
-//        exception.expect(IllegalArgumentException.class);
-//        exception.expectMessage("No session found");
         performAggregatedBidTest("ICQ/ICQ2", null);
     }
 

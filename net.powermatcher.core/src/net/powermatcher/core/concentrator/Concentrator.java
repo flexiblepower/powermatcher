@@ -114,7 +114,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
 
     private List<String> validAgents = new ArrayList<String>();
 
-    private static ConfigurationAdmin configurationAdmin;
+    private ConfigurationAdmin configurationAdmin;
 
     private String servicePid;
 
@@ -319,8 +319,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
 
             config.update(properties);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
     }
 
