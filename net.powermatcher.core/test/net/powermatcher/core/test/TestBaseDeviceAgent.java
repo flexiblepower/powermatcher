@@ -13,20 +13,20 @@ public class TestBaseDeviceAgent extends BaseDeviceAgent {
     protected Date now() {
         return new Date();
     }
-    
-    public PointBid testCreateBid(PricePoint[] pricePoints){
+
+    public PointBid testCreateBid(PricePoint[] pricePoints) {
         return super.createBid(pricePoints);
     }
-    
-    public MarketBasis testGetMarketBasis(){
+
+    public MarketBasis testGetMarketBasis() {
         return super.getMarketBasis();
     }
-    
-    public int testGetCurrenBidNumber(){
+
+    public int testGetCurrenBidNumber() {
         return super.getCurrentBidNr();
     }
-    
-    public void testSetAgentId(String agentId){
+
+    public void testSetAgentId(String agentId) {
         super.setAgentId(agentId);
     }
 

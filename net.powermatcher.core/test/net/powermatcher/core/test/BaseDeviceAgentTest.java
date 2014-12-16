@@ -14,13 +14,11 @@ import net.powermatcher.api.data.PricePoint;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.events.AgentEvent;
-import net.powermatcher.api.monitoring.events.IncomingBidEvent;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
 import net.powermatcher.core.sessions.SessionImpl;
 import net.powermatcher.mock.MockMatcherAgent;
 
-import org.hamcrest.core.IsEqual;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -142,7 +140,7 @@ public class BaseDeviceAgentTest {
         assertThat((ArrayBid) observer.outgoingBidEvent.getBid(), is(equalTo(bid)));
         assertThat((ArrayBid) baseDeviceAgent.getLastBid(), is(equalTo(bid)));
     }
-    
+
     @Test
     public void testRemoveObserver() {
         ArrayBid bid = new ArrayBid(marketBasis, 0, new double[] { 5.0, 3.0, 1.0, -1.0, -3.0 });
@@ -192,17 +190,17 @@ public class BaseDeviceAgentTest {
     }
 
     @Test
-    public void testCanEqual(){
+    public void testCanEqual() {
         TestBaseDeviceAgent another = new TestBaseDeviceAgent();
         assertThat(baseDeviceAgent.canEqual(another), is(true));
     }
-    
+
     @Test
-    public void testEquals(){
+    public void testEquals() {
         assertThat(baseDeviceAgent.equals(null), is(false));
         assertThat(baseDeviceAgent.equals(baseDeviceAgent), is(true));
         TestBaseDeviceAgent another = new TestBaseDeviceAgent();
-        
+
         ArrayBid bid = new ArrayBid(marketBasis, 0, new double[] { 5.0, 3.0, 1.0, -1.0, -3.0 });
         MockMatcherAgent matcher = new MockMatcherAgent("mock");
         Session session = new SessionImpl(null, baseDeviceAgent, "testAgent", matcher, "mock", "testSession");
@@ -214,9 +212,9 @@ public class BaseDeviceAgentTest {
         assertThat(baseDeviceAgent.equals(another), is(true));
         assertThat(another.equals(baseDeviceAgent), is(true));
     }
-    
+
     @Test
-    public void testHashCode(){
+    public void testHashCode() {
         TestBaseDeviceAgent another = new TestBaseDeviceAgent();
         ArrayBid bid = new ArrayBid(marketBasis, 0, new double[] { 5.0, 3.0, 1.0, -1.0, -3.0 });
         MockMatcherAgent matcher = new MockMatcherAgent("mock");
@@ -226,7 +224,7 @@ public class BaseDeviceAgentTest {
         baseDeviceAgent.publishBid(bid);
         another.connectToMatcher(sessionOther);
         another.publishBid(bid);
-        
+
         assertThat(baseDeviceAgent.hashCode(), is(equalTo(another.hashCode())));
     }
 }

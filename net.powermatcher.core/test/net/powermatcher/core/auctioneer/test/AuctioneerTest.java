@@ -9,8 +9,6 @@ import static org.junit.Assert.fail;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
 
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.ArrayBid;

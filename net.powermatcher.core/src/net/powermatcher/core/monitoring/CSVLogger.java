@@ -108,7 +108,7 @@ public class CSVLogger extends AgentEventLogger {
     @Activate
     public synchronized void activate(Map<String, Object> properties) {
         super.baseActivate(properties);
-        getLogger().info("CSVLogger [{}], actiaved", getLoggerId());
+        getLogger().info("CSVLogger [{}], activated", getLoggerId());
     }
 
     /**
