@@ -72,8 +72,7 @@ public class BidResilienceTest extends ResilienceTest {
         auctioneer.activate(auctioneerProperties);
 
         this.concentrator = new ConcentratorWrapper();
-        Map<String, Object> concentratorProperties = new HashMap<>();
-        concentratorProperties = new HashMap<String, Object>();
+        Map<String, Object> concentratorProperties =new HashMap<>();;
         concentratorProperties.put("matcherId", CONCENTRATOR_NAME);
         concentratorProperties.put("desiredParentId", AUCTIONEER_NAME);
         concentratorProperties.put("bidTimeout", "600");

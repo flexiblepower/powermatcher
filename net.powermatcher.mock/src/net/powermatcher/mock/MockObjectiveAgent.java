@@ -10,7 +10,6 @@ import net.powermatcher.api.ObjectiveEndpoint;
 import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
-import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PriceUpdate;
 
 public class MockObjectiveAgent extends MockAgent implements ObjectiveEndpoint {

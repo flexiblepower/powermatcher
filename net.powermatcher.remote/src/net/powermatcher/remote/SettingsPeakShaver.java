@@ -7,6 +7,7 @@ import java.util.Dictionary;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -31,7 +32,7 @@ public class SettingsPeakShaver extends HttpServlet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AgentWhitelist.class);
 
-    private static ConfigurationAdmin configurationAdmin;
+    private ConfigurationAdmin configurationAdmin;
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -61,7 +62,8 @@ public class SettingsPeakShaver extends HttpServlet {
 
                     c.update(properties);
 
-                    LOGGER.info("PeakShaver updated with floor: " + properties.get("floor") + " and ceiling: " + properties.get("ceiling"));
+                    LOGGER.info("PeakShaver updated with floor: " + properties.get("floor") + " and ceiling: "
+                            + properties.get("ceiling"));
                     propsConcentrator.add(floor);
                     propsConcentrator.add(ceiling);
 
@@ -70,40 +72,28 @@ public class SettingsPeakShaver extends HttpServlet {
                 }
             }
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         } catch (InvalidSyntaxException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
 
         Gson gson = new Gson();
         try {
             resp.getWriter().print(gson.toJson(settingsConcentrators));
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
     }
 
     private String getPayload(HttpServletRequest req) {
         StringBuilder buffer = new StringBuilder();
-        BufferedReader reader = null;
-        try {
-            reader = req.getReader();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
         String line;
-        try {
+        try (BufferedReader reader = req.getReader()) {
             while ((line = reader.readLine()) != null) {
                 buffer.append(line);
             }
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
 
         return buffer.toString();

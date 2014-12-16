@@ -204,11 +204,9 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
                     }
                 }
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error(e.getMessage());
             } catch (InvalidSyntaxException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error(e.getMessage());
             }
 
             throw new IllegalArgumentException("The floor constraint shouldn't be higher than the ceiling constraint");

@@ -21,7 +21,6 @@ import net.powermatcher.api.Agent;
 import net.powermatcher.api.WhiteList;
 import net.powermatcher.core.concentrator.Concentrator;
 
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,8 +36,6 @@ public class AgentWhitelist extends HttpServlet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AgentWhitelist.class);
 
-    private static ConfigurationAdmin configurationAdmin;
-
     /**
      * Holds the whiteLists
      */
@@ -46,7 +43,7 @@ public class AgentWhitelist extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        ConcurrentMap<String, List<String>> whiteListAgents = new ConcurrentHashMap<String, List<String>>();
+        ConcurrentMap<String, List<String>> whiteListAgents = null;
         String path = req.getPathInfo();
         if (path != null) {
             // call for concentratorId
@@ -62,7 +59,7 @@ public class AgentWhitelist extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        ConcurrentMap<String, List<String>> whiteListAgents = new ConcurrentHashMap<String, List<String>>();
+        ConcurrentMap<String, List<String>> whiteListAgents = null;
         String path = req.getPathInfo();
         String payload = getPayload(req);
         if (path != null) {
@@ -78,7 +75,7 @@ public class AgentWhitelist extends HttpServlet {
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        ConcurrentMap<String, List<String>> whiteListAgents = new ConcurrentHashMap<String, List<String>>();
+        ConcurrentMap<String, List<String>> whiteListAgents = null;
         String path = req.getPathInfo();
         String payload = getPayload(req);
 
@@ -96,7 +93,7 @@ public class AgentWhitelist extends HttpServlet {
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        ConcurrentMap<String, List<String>> whiteListAgents = new ConcurrentHashMap<String, List<String>>();
+        ConcurrentMap<String, List<String>> whiteListAgents = null;
         String path = req.getPathInfo();
         String payload = getPayload(req);
 
@@ -199,22 +196,13 @@ public class AgentWhitelist extends HttpServlet {
 
     private String getPayload(HttpServletRequest req) {
         StringBuilder buffer = new StringBuilder();
-        BufferedReader reader = null;
-        try {
-            reader = req.getReader();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
         String line;
-        try {
+        try (BufferedReader reader = req.getReader()) {
             while ((line = reader.readLine()) != null) {
                 buffer.append(line);
             }
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
 
         return buffer.toString();
@@ -225,8 +213,7 @@ public class AgentWhitelist extends HttpServlet {
         try {
             resp.getWriter().print(gson.toJson(whiteListAgents));
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
     }
 
@@ -254,11 +241,6 @@ public class AgentWhitelist extends HttpServlet {
         }
 
         return whiteListAgents;
-    }
-
-    @Reference
-    protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
     }
 
     @Reference(dynamic = true, multiple = true, optional = true)
