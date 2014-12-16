@@ -22,7 +22,6 @@ import net.powermatcher.api.monitoring.events.IncomingBidEvent;
 import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.BaseAgent;
 import net.powermatcher.core.BidCache;
-import net.powermatcher.core.BidCacheSnapshot;
 import net.powermatcher.core.concentrator.Concentrator;
 
 import org.slf4j.Logger;
@@ -193,19 +192,18 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
      * Generates the new price out of the aggregated bids and sends this to all listeners
      */
     protected synchronized void publishNewPrice() {
-        Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis);
+        Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis, false);
         Price newPrice = determinePrice(aggregatedBid);
-        BidCacheSnapshot bidCacheSnapshot = this.aggregatedBids.getMatchingSnapshot(aggregatedBid.getBidNumber());
 
-        for (Session session : this.sessions) {
-            Integer bidNumber = bidCacheSnapshot.getBidNumbers().get(session.getAgentId());
-            if (bidNumber != null) {
-                PriceUpdate sessionPriceUpdate = new PriceUpdate(newPrice, bidNumber);
-                this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), getAgentId(), session
-                        .getSessionId(), timeService.currentDate(), sessionPriceUpdate, Qualifier.MATCHER));
-                session.updatePrice(sessionPriceUpdate);
-                LOGGER.debug("New price: {}, session {}", sessionPriceUpdate, session.getSessionId());
-            }
+        for (Session session : this.sessions) {       	
+        	if(this.aggregatedBids.getLastBid(session.getAgentId()) != null) {
+        		Integer bidNumber = this.aggregatedBids.getLastBid(session.getAgentId()).getBidNumber();
+        		PriceUpdate sessionPriceUpdate = new PriceUpdate(newPrice, bidNumber);
+        		this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), getAgentId(), session.getSessionId(),
+        				timeService.currentDate(), sessionPriceUpdate, Qualifier.MATCHER));
+        		session.updatePrice(sessionPriceUpdate);
+        		LOGGER.debug("New price: {}, session {}", sessionPriceUpdate, session.getSessionId());
+        	}
         }
     }
 
@@ -225,29 +223,5 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
 
     protected BidCache getAggregatedBids() {
         return this.aggregatedBids;
-    }
-
-    public boolean canEqual(Object other) {
-        return other instanceof Auctioneer;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        Auctioneer that = (Auctioneer) ((obj instanceof Auctioneer) ? obj : null);
-        if (that == null) {
-            return false;
-        }
-
-        if (this == that) {
-            return true;
-        }
-
-        return canEqual(that) && this.aggregatedBids.equals(that.aggregatedBids)
-                && this.marketBasis.equals(that.marketBasis) && this.sessions.equals(that.sessions);
-    }
-
-    @Override
-    public int hashCode() {
-        return 211 * (aggregatedBids.hashCode() + marketBasis.hashCode());
     }
 }

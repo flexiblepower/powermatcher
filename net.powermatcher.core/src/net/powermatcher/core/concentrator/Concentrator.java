@@ -114,7 +114,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
 
     private List<String> validAgents = new ArrayList<String>();
 
-    private ConfigurationAdmin configurationAdmin;
+    private static ConfigurationAdmin configurationAdmin;
 
     private String servicePid;
 
@@ -179,8 +179,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
             session.setMarketBasis(this.sessionToMatcher.getMarketBasis());
             session.setClusterId(this.sessionToMatcher.getClusterId());
 
-            this.aggregatedBids.updateBid(session.getAgentId(),
-                    new ArrayBid.Builder(this.sessionToMatcher.getMarketBasis()).setDemand(0).build());
+            this.aggregatedBids.updateBid(session.getAgentId(), new ArrayBid.Builder(this.sessionToMatcher.getMarketBasis()).setDemand(0).build());
             LOGGER.info("Agent connected with session [{}]", session.getSessionId());
             return true;
         } else {
@@ -228,7 +227,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
             LOGGER.error(message);
             throw new IllegalArgumentException(message);
         }
-
+        
         LOGGER.debug("Received price update [{}]", priceUpdate);
         this.publishEvent(new IncomingPriceUpdateEvent(sessionToMatcher.getClusterId(), this.config.agentId(),
                 this.sessionToMatcher.getSessionId(), timeService.currentDate(), priceUpdate, Qualifier.AGENT));
@@ -236,32 +235,33 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
         // Find bidCacheSnapshot belonging to the newly received price update
         BidCacheSnapshot bidCacheSnapshot = this.aggregatedBids.getMatchingSnapshot(priceUpdate.getBidNumber());
         if (bidCacheSnapshot == null) {
-            // ignore price and log warning
-            LOGGER.warn("Received a price update for a bid that I never sent, id: {}", priceUpdate.getBidNumber());
-            return;
+        	// ignore price and log warning
+        	LOGGER.warn("Received a price update for a bid that I never sent, id: {}", priceUpdate.getBidNumber());
+        	return;
         }
-
+        
+        
         // Publish new price to connected agents
         for (Session session : this.sessionToAgents) {
-            Integer originalAgentBid = bidCacheSnapshot.getBidNumbers().get(session.getAgentId());
-            if (originalAgentBid == null) {
-                // ignore price for this agent and log warning
-                continue;
-            }
+        	Integer originalAgentBid = bidCacheSnapshot.getBidNumbers().get(session.getAgentId());    
+        	if (originalAgentBid == null) {
+        		// ignore price for this agent and log warning
+        		continue;
+        	} 
 
-            PriceUpdate agentPriceUpdate = new PriceUpdate(priceUpdate.getPrice(), originalAgentBid);
-
+        	PriceUpdate agentPriceUpdate = new PriceUpdate(priceUpdate.getPrice(), originalAgentBid);
+        	
             session.updatePrice(agentPriceUpdate);
 
-            this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), this.config.agentId(), session
-                    .getSessionId(), timeService.currentDate(), priceUpdate, Qualifier.MATCHER));
+            this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), this.config.agentId(), session.getSessionId(), timeService
+                    .currentDate(), priceUpdate, Qualifier.MATCHER));
 
         }
     }
 
     protected synchronized void doBidUpdate() {
         if (sessionToMatcher != null) {
-            Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.sessionToMatcher.getMarketBasis());
+            Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.sessionToMatcher.getMarketBasis(), true);
 
             aggregatedBid = transformBid(aggregatedBid);
 
@@ -319,7 +319,8 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
 
             config.update(properties);
         } catch (IOException e) {
-            LOGGER.error(e.getMessage());
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
     }
 
@@ -347,40 +348,12 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
 
         // ConfigAdmin will sometimes generate a filter with 1 empty element. Ignore it.
         if (whiteListAgents != null && !whiteListAgents.isEmpty() && whiteListAgents.get(0).isEmpty()) {
-            this.validAgents = new ArrayList<String>();
+        	this.validAgents = new ArrayList<String>();
         }
     }
 
     @Override
     public List<String> getWhiteList() {
         return this.validAgents;
-    }
-
-    public boolean canEqual(Object other) {
-        return other instanceof Concentrator;
-    }
-
-    public boolean equals(Object obj) {
-        Concentrator other = (Concentrator) ((obj instanceof Concentrator) ? obj : null);
-        if (other == null) {
-            return false;
-        }
-
-        if (this == other) {
-            return true;
-        }
-
-        return this.canEqual(other) && super.equals(other) && this.aggregatedBids.equals(other.aggregatedBids)
-                && this.servicePid.equals(other.servicePid) && this.sessionToMatcher.equals(other.sessionToMatcher)
-                && this.aggregatedBids.equals(other.aggregatedBids) && this.sessionToAgents.equals(sessionToAgents)
-                && this.validAgents.equals(other.validAgents);
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode()
-                + 211
-                * ((this.aggregatedBids == null ? 0 : aggregatedBids.hashCode()) + (this.servicePid == null ? 0 : servicePid.hashCode()) + this.sessionToMatcher.hashCode()
-                        + (this.aggregatedBids == null ? 0 : aggregatedBids.hashCode()) + (this.validAgents == null ? 0 : validAgents.hashCode()));
     }
 }

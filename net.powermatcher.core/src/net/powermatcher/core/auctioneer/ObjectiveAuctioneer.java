@@ -23,7 +23,6 @@ import net.powermatcher.api.monitoring.Qualifier;
 import net.powermatcher.api.monitoring.events.IncomingBidEvent;
 import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.BidCache;
-import net.powermatcher.core.BidCacheSnapshot;
 import net.powermatcher.core.concentrator.Concentrator;
 
 import org.slf4j.Logger;
@@ -223,7 +222,7 @@ public class ObjectiveAuctioneer extends Auctioneer {
     @Override
     public synchronized void publishNewPrice() {
         // aggregate bid device agents
-        Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis);
+        Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis, false);
 
         Price newPrice;
         // check if objective agent is active
@@ -240,11 +239,9 @@ public class ObjectiveAuctioneer extends Auctioneer {
             newPrice = determinePrice(aggregatedBid);
         }
 
-        BidCacheSnapshot bidCacheSnapshot = this.aggregatedBids.getMatchingSnapshot(aggregatedBid.getBidNumber());
-
-        for (Session session : this.sessions) {
-        	Integer bidNumber = bidCacheSnapshot.getBidNumbers().get(session.getAgentId());
-        	if(bidNumber != null) {
+        for (Session session : this.sessions) {       	
+        	if(this.aggregatedBids.getLastBid(session.getAgentId()) != null) {
+        		Integer bidNumber = this.aggregatedBids.getLastBid(session.getAgentId()).getBidNumber();
         		PriceUpdate sessionPriceUpdate = new PriceUpdate(newPrice, bidNumber);
         		this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), getAgentId(), session.getSessionId(),
         				timeService.currentDate(), sessionPriceUpdate, Qualifier.MATCHER));
