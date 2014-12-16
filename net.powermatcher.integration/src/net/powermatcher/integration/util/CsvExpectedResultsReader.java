@@ -85,9 +85,9 @@ public class CsvExpectedResultsReader {
             String commodity = "electricity";
             String currency = "EUR";
             try {
-                int priceSteps = new Integer(marketBasisData.get(0));
-                double minimumPrice = new Double(marketBasisData.get(1));
-                double maximumPrice = new Double(marketBasisData.get(2));
+                int priceSteps =  Integer.valueOf(marketBasisData.get(0));
+                double minimumPrice = Double.valueOf(marketBasisData.get(1));
+                double maximumPrice = Double.valueOf(marketBasisData.get(2));
 
                 MarketBasis mb = new MarketBasis(commodity, currency, priceSteps, minimumPrice, maximumPrice);
                 this.marketBasis = mb;

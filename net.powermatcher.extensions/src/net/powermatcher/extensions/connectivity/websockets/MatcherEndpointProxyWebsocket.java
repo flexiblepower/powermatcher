@@ -148,7 +148,7 @@ public class MatcherEndpointProxyWebsocket extends BaseMatcherEndpointProxy {
 	}
 	
 	@Override
-	public void updateBidRemote(Bid newBid) {
+	public synchronized void updateBidRemote(Bid newBid) {
 		// Relay bid to remote agent
 		try {
 			PmJsonSerializer serializer = new PmJsonSerializer();

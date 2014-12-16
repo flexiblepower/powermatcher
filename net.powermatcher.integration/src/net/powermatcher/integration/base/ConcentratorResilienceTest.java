@@ -48,7 +48,6 @@ public class ConcentratorResilienceTest extends ResilienceTest {
         this.marketBasis = resultsReader.getMarketBasis();
         this.concentrator = new ConcentratorWrapper();
         Map<String, Object> concentratorProperties = new HashMap<>();
-        concentratorProperties = new HashMap<String, Object>();
         concentratorProperties.put("matcherId", CONCENTRATOR_NAME);
         concentratorProperties.put("desiredParentId", MATCHERAGENTNAME);
         concentratorProperties.put("bidTimeout", "600");

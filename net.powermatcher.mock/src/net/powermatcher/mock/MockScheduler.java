@@ -26,6 +26,11 @@ public class MockScheduler extends ScheduledThreadPoolExecutor {
         public int compareTo(Delayed arg0) {
             return 0;
         }
+        
+        @Override
+        public boolean equals(Object obj) {
+            return true;
+        }
 
         @Override
         public boolean cancel(boolean arg0) {

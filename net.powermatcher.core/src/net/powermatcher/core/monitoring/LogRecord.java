@@ -77,7 +77,7 @@ public abstract class LogRecord {
     }
 
     public Date getEventTimestamp() {
-        return eventTimestamp;
+        return new Date(eventTimestamp.getTime());
     }
 
     public DateFormat getDateFormat() {

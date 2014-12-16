@@ -65,8 +65,8 @@ public class SessionImpl implements Session {
      */
     private MarketBasis marketBasis = null;
 
-    public SessionImpl(SessionManager sessionManager, AgentEndpoint agentEndpoint, String agentId, MatcherEndpoint matcherEndpoint,
-            String matcherId, String sessionId) {
+    public SessionImpl(SessionManager sessionManager, AgentEndpoint agentEndpoint, String agentId,
+            MatcherEndpoint matcherEndpoint, String matcherId, String sessionId) {
         this.sessionManager = sessionManager;
         this.agentId = agentId;
         this.matcherId = matcherId;
@@ -92,18 +92,11 @@ public class SessionImpl implements Session {
 
     @Override
     public String getClusterId() {
-// TODO enable this again?
-//        if (clusterId == null) {
-//            throw new IllegalStateException("No clusterId has been defined");
-//        }
         return clusterId;
     }
 
     @Override
     public MarketBasis getMarketBasis() {
-//        if (marketBasis == null) {
-//            throw new IllegalStateException("No marketBasis has been defined");
-//        }
         return marketBasis;
     }
 
@@ -146,5 +139,22 @@ public class SessionImpl implements Session {
 
     public MatcherEndpoint getMatcherEndpoint() {
         return matcherEndpoint;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        SessionImpl that = (SessionImpl) ((obj instanceof SessionImpl) ? obj : null);
+        if (that == null) {
+            return false;
+        }
+
+        if (this == that) {
+            return true;
+        }
+
+        return this.agentId.equals(that.agentId) && this.clusterId.equals(that.clusterId)
+                && this.agentEndpoint.equals(that.agentEndpoint) && this.matcherId.equals(that.matcherId)
+                && this.marketBasis.equals(that.marketBasis) && this.matcherEndpoint.equals(that.matcherEndpoint)
+                && this.sessionId.equals(that.sessionId);
     }
 }
