@@ -380,8 +380,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
     public int hashCode() {
         return super.hashCode()
                 + 211
-                * (this.aggregatedBids.hashCode() + this.servicePid.hashCode() + this.sessionToMatcher.hashCode()
-                        + this.aggregatedBids.hashCode() + this.sessionToAgents.hashCode() + this.validAgents
-                            .hashCode());
+                * ((this.aggregatedBids == null ? 0 : aggregatedBids.hashCode()) + (this.servicePid == null ? 0 : servicePid.hashCode()) + this.sessionToMatcher.hashCode()
+                        + (this.aggregatedBids == null ? 0 : aggregatedBids.hashCode()) + (this.validAgents == null ? 0 : validAgents.hashCode()));
     }
 }

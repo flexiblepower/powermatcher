@@ -58,12 +58,12 @@ public class SessionImpl implements Session {
     /**
      * Holds the clusterId
      */
-    private String clusterId = null;
+    private String clusterId;
 
     /**
      * The {@link MarketBasis} set from the {@link Auctioneer}
      */
-    private MarketBasis marketBasis = null;
+    private MarketBasis marketBasis;
 
     public SessionImpl(SessionManager sessionManager, AgentEndpoint agentEndpoint, String agentId,
             MatcherEndpoint matcherEndpoint, String matcherId, String sessionId) {
@@ -160,8 +160,6 @@ public class SessionImpl implements Session {
 
     @Override
     public int hashCode() {
-        return 211 * (this.agentId.hashCode() + this.clusterId.hashCode() + this.agentEndpoint.hashCode()
-                + this.matcherId.hashCode() + this.marketBasis.hashCode() + this.matcherEndpoint.hashCode() + this.sessionId
-                    .hashCode());
+        return 211 * (this.agentId.hashCode() + this.matcherId.hashCode() + this.sessionId.hashCode());
     }
 }

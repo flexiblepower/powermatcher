@@ -248,6 +248,6 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
 
     @Override
     public int hashCode() {
-        return 211 * (aggregatedBids.hashCode() + marketBasis.hashCode() + sessions.hashCode());
+        return 211 * (aggregatedBids.hashCode() + marketBasis.hashCode());
     }
 }
