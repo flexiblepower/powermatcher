@@ -1,23 +1,34 @@
 package net.powermatcher.core.sessions.test;
 
-import static org.junit.Assert.*;
-import static org.hamcrest.core.Is.*;
-import static org.hamcrest.core.IsNull.*;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.IsNull.notNullValue;
+import static org.hamcrest.core.IsNull.nullValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
-import org.junit.Before;
-import org.junit.Test;
-
+import net.powermatcher.api.AgentEndpoint;
+import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.sessions.SessionManager;
 import net.powermatcher.core.time.SystemTimeService;
 import net.powermatcher.mock.MockAgent;
 
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
 public class SessionManagerTest {
+    
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     private static final String AUCTIONEER_NAME = "auctioneer";
     private static final String CLUSTER_ID = "testCluster";
@@ -46,7 +57,7 @@ public class SessionManagerTest {
         auctioneer.setTimeService(new SystemTimeService());
         auctioneer.activate(auctioneerProperties);
         this.sessionManager = new SessionManager();
-    //    sessionManager.activate();
+        // sessionManager.activate();
 
         testAgent = new MockAgent(AGENT_ID);
         testAgent.setDesiredParentId("auctioneer");
@@ -84,6 +95,18 @@ public class SessionManagerTest {
         assertEquals(AUCTIONEER_NAME, agentSession.getMatcherId());
         assertEquals(CLUSTER_ID, agentSession.getClusterId());
     }
+    
+    @Test
+    public void testaddMatcherEndpointTwice() {
+        sessionManager.addAgentEndpoint(testAgent);
+        sessionManager.addMatcherEndpoint(auctioneer);
+        
+        sessionManager.addMatcherEndpoint(auctioneer);
+
+        Session agentSession = testAgent.getSession();
+        assertEquals(AUCTIONEER_NAME, agentSession.getMatcherId());
+        assertEquals(CLUSTER_ID, agentSession.getClusterId());
+    }
 
     @Test
     public void testremoveAgentEndpoint() {
@@ -111,5 +134,31 @@ public class SessionManagerTest {
         // re-add matcher, session should be recreated
         sessionManager.addMatcherEndpoint(auctioneer);
         assertThat(session, is(notNullValue()));
+    }
+
+    @Test
+    public void testGetAgentEndPoints() {
+        sessionManager.addAgentEndpoint(testAgent);
+        Map<String, AgentEndpoint> agentEndpoints = sessionManager.getAgentEndpoints();
+        assertThat(agentEndpoints.containsKey(testAgent.getAgentId()), is(true));
+    }
+
+    @Test
+    public void testGetMatcherEndPoints() {
+        sessionManager.addAgentEndpoint(testAgent);
+        sessionManager.addMatcherEndpoint(auctioneer);
+        Map<String, MatcherEndpoint> matcherEndpoints = sessionManager.getMatcherEndpoints();
+        assertThat(matcherEndpoints.containsKey(testAgent.getAgentId()), is(false));
+        assertThat(matcherEndpoints.containsKey(auctioneer.getAgentId()), is(true));
+    }
+
+    @Test
+    public void testActiveSessions() {
+        sessionManager.addAgentEndpoint(testAgent);
+        sessionManager.addMatcherEndpoint(auctioneer);
+        Map<String, Session> activeSessions = sessionManager.getActiveSessions();
+        assertThat(activeSessions.size(), is(equalTo(1)));
+        assertThat(activeSessions.get(AGENT_ID + ":" + AUCTIONEER_NAME).getMatcherId(), is(equalTo(auctioneer.getAgentId())));
+        assertThat(activeSessions.get(AGENT_ID + ":" + AUCTIONEER_NAME).getAgentId(), is(equalTo(testAgent.getAgentId())));
     }
 }
