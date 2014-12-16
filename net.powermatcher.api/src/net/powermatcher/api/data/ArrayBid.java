@@ -8,7 +8,7 @@ public class ArrayBid extends Bid {
     /**
      * In the calculatePricePoints, 2 floating points will be compared. The significance is set here.
      */
-    private static int SIGNIFCANCE = 5;
+    private static int PRECISION = 5;
 
     public static final class Builder {
         private final MarketBasis marketBasis;
@@ -352,7 +352,7 @@ public class ArrayBid extends Bid {
              * If not at the end of the demand array, check if the following segment is a step or an inclining segment.
              */
             if (i < priceSteps - 1) {
-                if (Math.abs((this.demandArray[i] - this.demandArray[i + 1]) - delta) < Math.pow(10, SIGNIFCANCE * -1)) {
+                if (Math.abs((this.demandArray[i] - this.demandArray[i + 1]) - delta) < Math.pow(10, PRECISION * -1)) {
                     /*
                      * Here i is in a constantly inclining or declining segment. Search for the last price step in the
                      * segment.
