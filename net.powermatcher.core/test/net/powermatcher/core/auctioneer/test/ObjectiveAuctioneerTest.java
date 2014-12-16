@@ -128,12 +128,9 @@ public class ObjectiveAuctioneerTest {
 
         this.objectiveauctioneer.addObjectiveEndpoint(this.mockObjectiveAgent);
 
-        // this.aggregatedBids = new ArrayBidCache(this.timeService, config.bidTimeout());
         this.aggregatedBids = new BidCache(this.timeService, 5);
 
         Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis);
-        Bid bid = new ArrayBid(
-                new ArrayBid(marketBasis, 0, new double[] { -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4 }));
 
         Bid finalAggregatedBid = null;
         if (this.mockObjectiveAgent != null) {
