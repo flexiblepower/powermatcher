@@ -95,7 +95,7 @@ public abstract class BaseDeviceAgent extends BaseAgent implements AgentEndpoint
             return true;
         }
 
-        return this.canEqual(other) && super.equals(other) && this.lastBid.equals(other.lastBid) && this.session.equals(other.session);
+        return this.canEqual(other) && super.equals(other) && this.lastBid.equals(other.lastBid);
     }
     
     @Override

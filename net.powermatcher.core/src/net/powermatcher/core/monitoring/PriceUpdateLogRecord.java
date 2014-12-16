@@ -24,7 +24,7 @@ public class PriceUpdateLogRecord extends LogRecord {
         this.qualifier = event.getQualifier();
     }
 
-    protected PriceUpdate getPriceUpdate() {
+    public PriceUpdate getPriceUpdate() {
         return priceUpdate;
     }
     

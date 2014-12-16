@@ -18,7 +18,7 @@ import net.powermatcher.api.monitoring.Qualifier;
  * @version 1.0
  * 
  */
-public class BidEvent extends AgentEvent {
+public abstract class BidEvent extends AgentEvent {
 
     /**
      * The new {@link Bid} created by the {@link AgentEndpoint} subclass.
