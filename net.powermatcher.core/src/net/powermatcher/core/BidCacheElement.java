@@ -27,6 +27,7 @@ public class BidCacheElement {
 
     /**
      * Constructs an instance of this class from the specified {@link Bid} and time stamp parameters.
+     * The Bid is converted to an {@link ArrayBid}.
      * 
      * @param arrayBid
      *            The bid (<code>Bid</code>) parameter.

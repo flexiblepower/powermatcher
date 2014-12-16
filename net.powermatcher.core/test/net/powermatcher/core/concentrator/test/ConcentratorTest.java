@@ -46,6 +46,7 @@ public class ConcentratorTest {
     private String auctioneerId;
     private String clusterId;
     private long bidUpdateRate;
+    private SystemTimeService systemTimeService;
 
     @Before
     public void setUp() {
@@ -65,7 +66,8 @@ public class ConcentratorTest {
         props.put("whiteListAgents", new ArrayList<String>());
 
         concentrator.setExecutorService(mockScheduler);
-        concentrator.setTimeService(new SystemTimeService());
+        systemTimeService = new SystemTimeService();
+        concentrator.setTimeService(systemTimeService);
         concentrator.activate(props);
     }
 
@@ -189,7 +191,8 @@ public class ConcentratorTest {
         sessionManager.addAgentEndpoint(mockAgent);
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("Marketbasis new bid differs from marketbasis auctioneer");
-        concentrator.updateBid(mockAgent.getSession(),new ArrayBid.Builder(new MarketBasis("a", "b", 2, 0, 2)).setDemand(0).build());
+        concentrator.updateBid(mockAgent.getSession(), new ArrayBid.Builder(new MarketBasis("a", "b", 2, 0, 2))
+                .setDemand(0).build());
     }
 
     @Test
@@ -250,5 +253,18 @@ public class ConcentratorTest {
         concentrator.updatePrice(expected);
         concentrator.updatePrice(error);
         assertThat(mockAgent.getLastPriceUpdate(), is(equalTo(expected)));
+    }
+
+    @Test
+    public void testEquals() {
+        assertThat(concentrator.equals(null), is(false));
+        assertThat(concentrator.equals(concentrator), is(true));
+
+        // Concentrator otherTrator = new Concentrator();
+        // concentrator.setExecutorService(mockScheduler);
+        // concentrator.setTimeService(systemTimeService);
+        // concentrator.activate(props);
+        // assertThat(concentrator.equals(otherTrator), is(true));
+        // assertThat(otherTrator.equals(concentrator), is(true));
     }
 }

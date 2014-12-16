@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.ArrayBid;
@@ -24,73 +25,42 @@ import net.powermatcher.api.data.MarketBasis;
  * @version 1.0
  */
 public class BidCache {
-    /**
-     * Define the default bid expiration time (long) field.
-     */
     public static final long DEFAULT_BID_EXPIRATION_TIME = 300;
-    /**
-     * Define the time source (TimeService) that is used for obtaining real or simulated time.
-     */
+
     private TimeService timeService;
-    /**
-     * Define the bid cache (Map<String,HanBidCacheElement>) field.
-     */
     private Map<String, BidCacheElement> bidCache;
-    /**
-     * Define the expiration time (long) field.
-     */
     private long expirationTimeMillis;
-    /**
-     * Define the last reset time (long) field.
-     */
     private long lastResetTime;
-    /**
-     * Define the aggregated bid (Bid) field.
-     */
     private ArrayBid aggregatedBid;
-    
-    private int snapshotCounter;
-    
+    private AtomicInteger snapshotCounter;
     private Map<Integer, BidCacheSnapshot> bidCacheHistory = new HashMap<Integer, BidCacheSnapshot>();
-    
+
     /**
-     * Default constructor
-     * 
+     * @param timeService
+     *            The timeservice used to obtain the current time. For comparison with the expirationTime.
      * @param expirationTime
      *            The expiration time (<code>int</code>) parameter.
-     * @see #BidCache()
      */
     public BidCache(final TimeService timeService, final int expirationTime) {
         this.lastResetTime = 0;
         this.expirationTimeMillis = expirationTime * 1000L;
         this.bidCache = new HashMap<String, BidCacheElement>();
         this.timeService = timeService;
+        this.snapshotCounter = new AtomicInteger();
     }
-    
-    public int getSnapshotCounter() {
-		return this.snapshotCounter;
-	}
-    
-    private void incrSnapshotCounter() {
-    	this.snapshotCounter += 1;
-	}
 
-	public void setSnapshotCounter(int snapshotCounter) {
-		this.snapshotCounter = snapshotCounter;
-	}
-	
-	/**
-     * Update bid with the specified agent ID and new bid parameters and return the Bid result.
+    /**
+     * Update bid with the specified agent ID and new bid parameters and return any old Bid as an ArrayBid.
      * 
      * @param agentId
      *            The agent ID (<code>String</code>) parameter.
      * @param newBid
      *            The new bid (<code>Bid</code>) parameter.
-     * @return Returns the old bid (<code>Bid</code>), or null if the agent is new.
+     * @return Returns the old bid (<code>ArrayBid</code>), or null if the agent is new.
      * @see #getAggregatedBid(MarketBasis)
      * @see #getLastBid(String)
      */
-    public synchronized Bid updateBid(final String agentId, final Bid newBid) {
+    public synchronized ArrayBid updateBid(final String agentId, final Bid newBid) {
         if (newBid == null) {
             throw new IllegalArgumentException();
         }
@@ -175,45 +145,45 @@ public class BidCache {
      */
     public synchronized ArrayBid getAggregatedBid(final MarketBasis marketBasis) {
         if (marketBasis != null) {
-        	
-        	BidCacheSnapshot bidCacheSnapshot = new BidCacheSnapshot();
-        	
+
+            BidCacheSnapshot bidCacheSnapshot = new BidCacheSnapshot();
+
             if (this.aggregatedBid == null || !this.aggregatedBid.getMarketBasis().equals(marketBasis)) {
-            	 	
+
                 ArrayBid newAggregatedBid = new ArrayBid.Builder(marketBasis).setDemand(0).build();
                 Set<String> idSet = this.bidCache.keySet();
                 for (String agentId : idSet) {
-                    ArrayBid bid = getLastBid(agentId);                   
+                    ArrayBid bid = getLastBid(agentId);
                     newAggregatedBid = newAggregatedBid.aggregate(bid);
                 }
                 this.aggregatedBid = newAggregatedBid;
             }
-            
-            //Make a blueprint of the bidCache storing agentID - bidNumber pairs
+
+            // Make a blueprint of the bidCache storing agentID - bidNumber pairs
             Set<String> idSet = this.bidCache.keySet();
             for (String agentId : idSet) {
-                ArrayBid bid = getLastBid(agentId);                   
-                bidCacheSnapshot.getBidNumbers().put(agentId, bid.getBidNumber());  
+                ArrayBid bid = getLastBid(agentId);
+                bidCacheSnapshot.getBidNumbers().put(agentId, bid.getBidNumber());
             }
 
-            //Increment the counter to create a unique bidNumber for the aggregatedBid. 
-            //Save it with the BidCacheSnapshot (not used).
-            //Update the aggregatedBid with the new Bidnumber.  
-            incrSnapshotCounter();
-            ArrayBid newBidNr = new ArrayBid(this.aggregatedBid, getSnapshotCounter());
-            this.aggregatedBid = newBidNr;            
-           
-            bidCacheSnapshot.setCount(getSnapshotCounter());
+            // Increment the counter to create a unique bidNumber for the aggregatedBid.
+            // Save it with the BidCacheSnapshot (not used).
+            // Update the aggregatedBid with the new Bidnumber.
+            int snapShotId = snapshotCounter.incrementAndGet();
+            ArrayBid newBidNr = new ArrayBid(this.aggregatedBid, snapShotId);
+            this.aggregatedBid = newBidNr;
+
+            bidCacheSnapshot.setCount(snapShotId);
             bidCacheSnapshot.setAggregatedBid(newBidNr);
-            bidCacheHistory.put(getSnapshotCounter(), bidCacheSnapshot);
-                        
+            bidCacheHistory.put(snapShotId, bidCacheSnapshot);
+
             return this.aggregatedBid;
         }
         return null;
     }
-    
+
     public synchronized BidCacheSnapshot getMatchingSnapshot(int bidNumber) {
-    	return this.bidCacheHistory.remove(bidNumber);
+        return this.bidCacheHistory.remove(bidNumber);
     }
 
     /**

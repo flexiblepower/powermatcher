@@ -114,7 +114,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
 
     private List<String> validAgents = new ArrayList<String>();
 
-    private ConfigurationAdmin configurationAdmin;
+    private static ConfigurationAdmin configurationAdmin;
 
     private String servicePid;
 
@@ -324,8 +324,8 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
     }
 
     @Reference
-    protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
+    protected static void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
+        Concentrator.configurationAdmin = configurationAdmin;
     }
 
     @Reference
@@ -369,10 +369,12 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
         if (this == other) {
             return true;
         }
-
-        return this.canEqual(other) && super.equals(other) && this.aggregatedBids.equals(other.aggregatedBids)
-                && this.servicePid.equals(other.servicePid) && this.sessionToMatcher.equals(other.sessionToMatcher)
-                && this.aggregatedBids.equals(other.aggregatedBids) && this.sessionToAgents.equals(sessionToAgents)
+        
+        //TODO Find a better way to implement this equals.
+        //This ones fails when any field is null
+        return this.aggregatedBids.equals(other.aggregatedBids)
+                && this.sessionToMatcher.equals(other.sessionToMatcher)
+                && this.aggregatedBids.equals(other.aggregatedBids) && this.sessionToAgents.equals(other.sessionToAgents)
                 && this.validAgents.equals(other.validAgents);
     }
 

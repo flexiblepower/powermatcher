@@ -16,7 +16,7 @@ public class PriceUpdateLogRecord extends LogRecord {
         this.priceUpdate = event.getPriceUpdate();
     }
 
-    protected PriceUpdate getPriceUpdate() {
+    public PriceUpdate getPriceUpdate() {
         return priceUpdate;
     }
 }
