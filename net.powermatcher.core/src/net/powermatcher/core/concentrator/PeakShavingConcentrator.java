@@ -25,7 +25,6 @@ import aQute.bnd.annotation.metatype.Meta;
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
-import net.powermatcher.api.SettingsPeakShaver;
 import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
@@ -58,8 +57,8 @@ import net.powermatcher.core.auctioneer.Auctioneer;
  * 
  */
 @Component(designateFactory = PeakShavingConcentrator.Config.class, immediate = true, provide = {
-        ObservableAgent.class, MatcherEndpoint.class, AgentEndpoint.class, SettingsPeakShaver.class })
-public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoint, AgentEndpoint, SettingsPeakShaver {
+        ObservableAgent.class, MatcherEndpoint.class, AgentEndpoint.class})
+public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoint, AgentEndpoint{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PeakShavingConcentrator.class);
 
@@ -423,35 +422,6 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         return this.aggregatedBidOut;
     }
 
-    /**
-     * Additional method about flow reduction or test purpose.
-     */
-    public synchronized double getFlowReduction() {
-        // retrieve the current allocation
-        double allocation = this.getAllocation();
-
-        // if allocation, aggregated bid in or price in is unknown, we can't
-        // calculate the flow reduction.
-        if (Double.isNaN(allocation) || this.aggregatedBidIn == null || this.priceIn == null) {
-            return Double.NaN;
-        }
-
-        // calculate the allocation which would have been the fact if no
-        // transformation would have been performed
-        double untransformedAllocation = this.aggregatedBidIn.getDemandAt(this.priceIn.toPriceStep());
-
-        LOGGER.debug("BID(IN)" + this.aggregatedBidIn);
-        LOGGER.debug("BID(OUT)" + this.aggregatedBidOut);
-        LOGGER.debug("CURRENTPRICE(OUT)=" + this.priceOut.getPriceValue());
-        LOGGER.debug("CURRENTPRICE(in)=" + this.priceIn.getPriceValue());
-        LOGGER.debug("ALLOCATION=" + allocation);
-        LOGGER.debug("UNTRANSFORMEDALLOC=" + untransformedAllocation);
-
-        // calculate and return the flow reduction as the absolute value of the
-        // difference between the allocation with and without transformation
-        return Math.abs(untransformedAllocation - allocation);
-    }
-
     private synchronized double getUncontrolledFlow() {
         // the uncontrolled flow can only be calculated if the measured flow is
         // known
@@ -615,11 +585,5 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
 
     protected void setFloor(double floor) {
         this.floor = floor;
-    }
-
-    @Override
-    public void updatePeakShavingBorders(double floor, double ceiling) {
-        this.floor = floor;
-        this.ceiling = ceiling;
     }
 }

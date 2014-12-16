@@ -121,6 +121,8 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
      */
     private Set<Session> sessions = new HashSet<Session>();
 
+    private String servicePid;
+    
     // TODO marketBasis, aggregatedBids and
     // matcherId are used in synchronized methods. Do we have do synchronize
     // activate? It's only called once, so maybe not.
@@ -131,6 +133,10 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
                 config.minimumPrice(), config.maximumPrice());
         this.aggregatedBids = new BidCache(this.timeService, config.bidTimeout());
 
+        
+        this.servicePid = (String) properties.get("service.pid");
+        
+        
         this.setClusterId(config.clusterId());
         this.setAgentId(config.agentId());
 

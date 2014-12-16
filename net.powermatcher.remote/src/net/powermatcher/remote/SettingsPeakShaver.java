@@ -14,9 +14,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.powermatcher.api.Agent;
-import net.powermatcher.api.WhiteList;
-
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -36,7 +33,7 @@ public class SettingsPeakShaver extends HttpServlet {
     private static final Logger LOGGER = LoggerFactory.getLogger(AgentWhitelist.class);
 
     private static ConfigurationAdmin configurationAdmin;
-
+    
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String payload = getPayload(req);
@@ -46,6 +43,7 @@ public class SettingsPeakShaver extends HttpServlet {
 
     private void updateBordersPeakShaver(String payload, HttpServletResponse resp) {
         ConcurrentMap<String, List<String>> settingsConcentrators = new ConcurrentHashMap<String, List<String>>();
+        
         List<String> propsConcentrator = new ArrayList<String>();
 
         try {
@@ -116,17 +114,5 @@ public class SettingsPeakShaver extends HttpServlet {
     @Reference
     protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
         this.configurationAdmin = configurationAdmin;
-    }
-    
-    @Reference(dynamic = true, multiple = true, optional = true)
-    public void addWhiteList(SettingsPeakShaver settingsPeakShaver) {
-//        Agent agent = (Agent) whiteList;
-//        String agentId = agent.getAgentId();
-//
-//        if (agentId == null) {
-//            LOGGER.warn("WhiteList with agentId is null", whiteList);
-//        } else {
-//            whiteLists.put(agentId, whiteList);
-//        }
     }
 }
