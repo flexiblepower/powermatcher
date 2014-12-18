@@ -121,7 +121,8 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
     @Activate
     public void activate(final Map<String, Object> properties) {
         config = Configurable.createConfigurable(Config.class, properties);
-
+        this.servicePid = (String) properties.get("service.pid");
+        
         this.setServicePid((String) properties.get("service.pid"));
         this.setAgentId(config.agentId());
         this.setDesiredParentId(config.desiredParentId());
