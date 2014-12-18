@@ -25,6 +25,7 @@ import net.powermatcher.api.monitoring.events.IncomingBidEvent;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
 import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
+import net.powermatcher.api.monitoring.events.WhitelistEvent;
 import net.powermatcher.core.BaseAgent;
 import net.powermatcher.core.BidCache;
 import net.powermatcher.core.BidCacheSnapshot;
@@ -185,6 +186,9 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
             return true;
         } else {
             LOGGER.warn("Agent [{}] is not on whitelist, reject connection", session.getAgentId());
+            publishEvent(new WhitelistEvent(this.getAgentId(), session.getAgentId(), this.getClusterId(),
+                    timeService.currentDate()));
+
             return false;
         }
     }
@@ -369,20 +373,21 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
         if (this == other) {
             return true;
         }
-        
-        //TODO Find a better way to implement this equals.
-        //This ones fails when any field is null
-        return this.aggregatedBids.equals(other.aggregatedBids)
-                && this.sessionToMatcher.equals(other.sessionToMatcher)
-                && this.aggregatedBids.equals(other.aggregatedBids) && this.sessionToAgents.equals(other.sessionToAgents)
-                && this.validAgents.equals(other.validAgents);
+
+        // TODO Find a better way to implement this equals.
+        // This ones fails when any field is null
+        return this.aggregatedBids.equals(other.aggregatedBids) && this.sessionToMatcher.equals(other.sessionToMatcher)
+                && this.aggregatedBids.equals(other.aggregatedBids)
+                && this.sessionToAgents.equals(other.sessionToAgents) && this.validAgents.equals(other.validAgents);
     }
 
     @Override
     public int hashCode() {
         return super.hashCode()
                 + 211
-                * ((this.aggregatedBids == null ? 0 : aggregatedBids.hashCode()) + (this.servicePid == null ? 0 : servicePid.hashCode()) + this.sessionToMatcher.hashCode()
-                        + (this.aggregatedBids == null ? 0 : aggregatedBids.hashCode()) + (this.validAgents == null ? 0 : validAgents.hashCode()));
+                * ((this.aggregatedBids == null ? 0 : aggregatedBids.hashCode())
+                        + (this.servicePid == null ? 0 : servicePid.hashCode()) + this.sessionToMatcher.hashCode()
+                        + (this.aggregatedBids == null ? 0 : aggregatedBids.hashCode()) + (this.validAgents == null ? 0
+                            : validAgents.hashCode()));
     }
 }

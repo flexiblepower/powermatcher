@@ -35,6 +35,7 @@ import net.powermatcher.api.monitoring.events.IncomingBidEvent;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
 import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
+import net.powermatcher.api.monitoring.events.PeakShavingEvent;
 import net.powermatcher.core.BaseAgent;
 import net.powermatcher.core.BidCache;
 import net.powermatcher.core.BidCacheSnapshot;
@@ -286,6 +287,9 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
             ArrayBid transformedBid = transformAggregatedBid(aggregatedBid);
             this.sessionToMatcher.updateBid(transformedBid);
 
+            publishEvent(new PeakShavingEvent(config.agentId(), this.getClusterId(), timeService.currentDate(),
+                    this.floor, this.ceiling, aggregatedBid.getDemand(), transformedBid.getDemand(), null, null));
+
             publishEvent(new OutgoingBidEvent(sessionToMatcher.getClusterId(), config.agentId(),
                     sessionToMatcher.getSessionId(), timeService.currentDate(), aggregatedBid, Qualifier.MATCHER));
 
@@ -319,19 +323,18 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
                 continue;
             }
 
-            // PriceUpdate agentPrice = new Price(priceUpdate.getPrice().getMarketBasis(), priceUpdate.getPriceValue(),
-            // originalAgentBid);
-
             PriceUpdate agentPrice = new PriceUpdate(new Price(priceUpdate.getPrice().getMarketBasis(), priceUpdate
                     .getPrice().getPriceValue()), priceUpdate.getBidNumber());
 
             // call peakshaving code.
             PriceUpdate adjustedPrice = adjustPrice(agentPrice);
             session.updatePrice(adjustedPrice);
+            
+            publishEvent(new PeakShavingEvent(config.agentId(), this.getClusterId(), timeService.currentDate(),
+                    this.floor, this.ceiling, new double[0], new double[0], agentPrice.getPrice(), adjustedPrice.getPrice()));
 
             this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), this.config.agentId(), session
                     .getSessionId(), timeService.currentDate(), priceUpdate, Qualifier.MATCHER));
-
         }
     }
 

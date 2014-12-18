@@ -27,7 +27,7 @@ public class NodeModel implements Comparable<NodeModel> {
         this.pid = pid;
         this.agentId = agentId;
         // TODO Gson won't add null values in the serialisation
-        this.desiredParentId = desiredParentId == null ? "null" : desiredParentId;
+        this.desiredParentId = (desiredParentId == null ? "null" : desiredParentId);
     }
 
     public String getFpid() {
