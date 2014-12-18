@@ -37,10 +37,13 @@ public class AgentWhitelist extends HttpServlet {
     private static final Logger LOGGER = LoggerFactory.getLogger(AgentWhitelist.class);
 
     /**
-     * Holds the whiteLists
+     * Holds the agents in the whiteLists
      */
     private static Map<String, WhiteList> whiteLists = new HashMap<String, WhiteList>();
-
+    
+    /**
+     * Retreives remote all whiteList agents on {@link Concentrator} id or for all {@link Concentrator}. 
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         ConcurrentMap<String, List<String>> whiteListAgents = null;
@@ -57,6 +60,9 @@ public class AgentWhitelist extends HttpServlet {
         returnGson(whiteListAgents, resp);
     }
 
+    /**
+     * Create remote new whiteList with agents on {@link Concentrator} id or for all {@link Concentrator}. 
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         ConcurrentMap<String, List<String>> whiteListAgents = null;
@@ -73,6 +79,9 @@ public class AgentWhitelist extends HttpServlet {
         returnGson(whiteListAgents, resp);
     }
 
+    /**
+     * Update remote whiteList agents on {@link Concentrator} id or for all {@link Concentrator}. 
+     */
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         ConcurrentMap<String, List<String>> whiteListAgents = null;
@@ -91,6 +100,9 @@ public class AgentWhitelist extends HttpServlet {
         returnGson(whiteListAgents, resp);
     }
 
+    /**
+     * Delete remote agentId's on whiteList for {@link Concentrator} id or for all {@link Concentrator}. 
+     */
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         ConcurrentMap<String, List<String>> whiteListAgents = null;

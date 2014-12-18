@@ -67,7 +67,7 @@ public class ConcentratorTest {
         props.put("agentId", concentratorId);
         props.put("desiredParentId", auctioneerId);
         props.put("bidUpdateRate", bidUpdateRate);
-        props.put("whiteListAgents", new ArrayList<String>());
+        props.put("whiteListAgents", whiteList);
 
         concentrator.setExecutorService(mockScheduler);
         systemTimeService = new SystemTimeService();

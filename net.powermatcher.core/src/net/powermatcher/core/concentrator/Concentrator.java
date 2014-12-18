@@ -113,17 +113,24 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
      */
     protected Config config;
 
+    /**
+     * Holds the whitelist agents
+     */
     private List<String> validAgents = new ArrayList<String>();
 
+    /**
+     * OSGI ConfigurationAdmin, stores bundle configuration data persistently.
+     */
     private static ConfigurationAdmin configurationAdmin;
 
+    /**
+     * Holds the service pid of a bundle from the ConfigurationAdmin
+     */
     private String servicePid;
 
     @Activate
     public void activate(final Map<String, Object> properties) {
         config = Configurable.createConfigurable(Config.class, properties);
-        this.servicePid = (String) properties.get("service.pid");
-        
         this.setServicePid((String) properties.get("service.pid"));
         this.setAgentId(config.agentId());
         this.setDesiredParentId(config.desiredParentId());
@@ -317,7 +324,8 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
 
     private synchronized void updateConfigurationAdmin() {
         try {
-            Configuration config = configurationAdmin.getConfiguration(this.servicePid);
+            Configuration config = configurationAdmin.getConfiguration(getServicePid());
+
             Dictionary<String, Object> properties = config.getProperties();
             properties.put("whiteListAgents", this.validAgents);
 
@@ -327,9 +335,10 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
         }
     }
 
+    @SuppressWarnings("static-access")
     @Reference
-    protected static void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        Concentrator.configurationAdmin = configurationAdmin;
+    protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
+        this.configurationAdmin = configurationAdmin;
     }
 
     @Reference

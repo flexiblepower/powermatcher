@@ -2,11 +2,9 @@ package net.powermatcher.core.sessions;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -68,10 +66,13 @@ public class SessionManager implements SessionManagerInterface {
     private Map<String, String> desiredConnections = new ConcurrentHashMap<String, String>();
 
     /**
-     * Holds the agentId's
+     * Holds the agentId's in the cluster
      */
     private List<String> agentIds = new ArrayList<String>();
 
+    /**
+     * OSGI ConfigurationAdmin, stores bundle configuration data persistently.
+     */
     private ConfigurationAdmin configurationAdmin;
 
     @Reference(dynamic = true, multiple = true, optional = true)
@@ -103,12 +104,12 @@ public class SessionManager implements SessionManagerInterface {
         if (agentIds.contains(agentId)) {
             if (agentEndpoint != null && agentEndpoints.get(agentId) != null) {
                 AgentEndpoint oldAgentEndpoint = agentEndpoints.get(agentId);
-                delete(agentId, oldAgentEndpoint, null);
+                deleteAgentId(agentId, oldAgentEndpoint, null);
 
                 return false;
             } else if (matcherEndpoint != null && (matcherEndpoints.get(agentId) != null)) {
                 MatcherEndpoint oldMatcherEndpoint = matcherEndpoints.get(agentId);
-                delete(agentId, null, oldMatcherEndpoint);
+                deleteAgentId(agentId, null, oldMatcherEndpoint);
                 
                 return false;
             }
@@ -121,7 +122,7 @@ public class SessionManager implements SessionManagerInterface {
         return true;
     }
 
-    private void delete(String AgentId, AgentEndpoint agentEndpoint, MatcherEndpoint matcherEndpoint) {
+    private void deleteAgentId(String AgentId, AgentEndpoint agentEndpoint, MatcherEndpoint matcherEndpoint) {
         String pidOldAgentEndpoint;
         try {
             for (Configuration c : configurationAdmin.listConfigurations(null)) {
@@ -132,8 +133,9 @@ public class SessionManager implements SessionManagerInterface {
                 }
                 String pidConfigAgentEndpoint = (String) c.getProperties().get("service.pid");
                 if (agentEndpoint.getAgentId().equals((String) c.getProperties().get("agentId"))) {
-                    // dont't delete old agentId;
+                    // dont't delete old same agentId in configAdmin
                     if (!pidOldAgentEndpoint.equals(pidConfigAgentEndpoint)) {
+                        LOGGER.error("AgentId " + agentEndpoint.getAgentId() + "was already registered." );
                         c.delete();
                     }
                 }
@@ -157,7 +159,6 @@ public class SessionManager implements SessionManagerInterface {
         Agent agent = (Agent) matcherEndpoint;
         String agentId = agent.getAgentId();
 
-        // if (!isUniqueAgentId(agentId, agentEndpoint, null)) {
         if (isNotUniqueAgentId(agentId, null, matcherEndpoint)) {
 
             if (agentId == null) {
@@ -249,5 +250,9 @@ public class SessionManager implements SessionManagerInterface {
     @Reference
     protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
         this.configurationAdmin = configurationAdmin;
+    }
+    
+    public void setAgentIds(List<String> agentIds) {
+        this.agentIds = agentIds;
     }
 }

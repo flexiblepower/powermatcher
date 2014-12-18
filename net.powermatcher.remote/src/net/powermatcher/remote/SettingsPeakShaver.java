@@ -7,12 +7,15 @@ import java.util.Dictionary;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.powermatcher.core.concentrator.PeakShavingConcentrator;
 
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
@@ -32,44 +35,40 @@ public class SettingsPeakShaver extends HttpServlet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AgentWhitelist.class);
 
+    /**
+     * OSGI ConfigurationAdmin, stores bundle configuration data persistently.
+     */
     private static ConfigurationAdmin configurationAdmin;
-    
+
+    /**
+     * Set remote new borders (floor and ceiling) for {@link PeakShavingConcentrator} 
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String payload = getPayload(req);
-
-        updateBordersPeakShaver(payload, resp);
+        updateBordersPeakShaver(req, resp);
     }
 
-    private void updateBordersPeakShaver(String payload, HttpServletResponse resp) {
+    private void updateBordersPeakShaver(HttpServletRequest req, HttpServletResponse resp) {
         ConcurrentMap<String, List<String>> settingsConcentrators = new ConcurrentHashMap<String, List<String>>();
-        
-        List<String> propsConcentrator = new ArrayList<String>();
 
         try {
             for (Configuration c : configurationAdmin.listConfigurations(null)) {
                 Dictionary<String, Object> properties = c.getProperties();
 
                 if (c.getFactoryPid().equals("net.powermatcher.core.concentrator.PeakShavingConcentrator")) {
-                    payload = payload.replace("[", "").replace("]", "");
-                    payload = payload.replace("{", "").replace("}", "");
-                    String[] newAgentsLst = payload.split(",");
 
-                    String floor = newAgentsLst[0].replace("\"", "");
-                    properties.put("floor", floor);
-
-                    String ceiling = newAgentsLst[1].replace("\"", "");
-                    properties.put("ceiling", ceiling);
-
+                    List<String> borderPeakShaver = getFloorAndCeiling(getPayload(req));
+                    properties.put("floor", borderPeakShaver.get(0));
+                    properties.put("ceiling", borderPeakShaver.get(1));
                     c.update(properties);
+
+                    settingsConcentrators.put((String) properties.get("agentid"), borderPeakShaver);
 
                     LOGGER.info("PeakShaver updated with floor: " + properties.get("floor") + " and ceiling: "
                             + properties.get("ceiling"));
-                    propsConcentrator.add(floor);
-                    propsConcentrator.add(ceiling);
 
-                    String agentId = (String) properties.get("agentid");
-                    settingsConcentrators.put(agentId, propsConcentrator);
+                    Gson gson = new Gson();
+                    resp.getWriter().print(gson.toJson(settingsConcentrators));
                 }
             }
         } catch (IOException e) {
@@ -77,13 +76,35 @@ public class SettingsPeakShaver extends HttpServlet {
         } catch (InvalidSyntaxException e) {
             LOGGER.error(e.getMessage());
         }
+    }
 
-        Gson gson = new Gson();
-        try {
-            resp.getWriter().print(gson.toJson(settingsConcentrators));
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage());
+    private List<String> getFloorAndCeiling(String payload) {
+        String floor = null;
+        String ceiling = null;
+        List<String> bordersPeakshaver = new ArrayList<String>();
+
+        payload = payload.replace("[", "").replace("]", "");
+        payload = payload.replace("{", "").replace("}", "");
+        String[] newAgentsLst = payload.split(",");
+
+        String strFloor = newAgentsLst[0].replace("\"", "");
+        String strCeiling = newAgentsLst[1].replace("\"", "");
+
+        final Pattern pattern = Pattern.compile("-?\\d+");
+        final Matcher matcherFloor = pattern.matcher(strFloor);
+
+        while (matcherFloor.find()) {
+            floor = matcherFloor.group();
+            bordersPeakshaver.add(floor);
         }
+
+        final Matcher matcherCeiling = pattern.matcher(strCeiling);
+        while (matcherCeiling.find()) {
+            ceiling = matcherCeiling.group();
+            bordersPeakshaver.add(ceiling);
+        }
+
+        return bordersPeakshaver;
     }
 
     private String getPayload(HttpServletRequest req) {
@@ -100,6 +121,7 @@ public class SettingsPeakShaver extends HttpServlet {
         return buffer.toString();
     }
 
+    @SuppressWarnings("static-access")
     @Reference
     protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
         this.configurationAdmin = configurationAdmin;
