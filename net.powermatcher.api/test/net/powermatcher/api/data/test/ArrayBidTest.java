@@ -2,9 +2,9 @@ package net.powermatcher.api.data.test;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
@@ -15,7 +15,6 @@ import net.powermatcher.api.data.PriceStep;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -30,10 +29,10 @@ public class ArrayBidTest {
 
     private MarketBasis marketBasisFiveSteps;
     private MarketBasis marketBasisTenSteps;
-    private double[] demand1 = new double[] { 100.0d, 50.0d, 50.0d, 0.0d, 0.0d };
-    private double[] demand2 = new double[] { 100.0d, 100.0d, 100.0d, 100.0d, 100.0d };
-    private double[] demand3 = new double[] { 75.0d, 50.0d, 50.0d, 50.0d, 50.0d, 50.0d, 50.0d, 50.0d, 50.0d, 0.0d };
-    private double[] demand4 = new double[] { 150.0d, 100.0d, 75.0d, 50.0d, 50.0d, 25.0d, 25.0d, 25.0d, 0.0d, -25.0d };
+    private double[] demandFive = new double[] { 100.0d, 50.0d, 50.0d, 0.0d, 0.0d };
+    private double[] demandFive2 = new double[] { 100.0d, 100.0d, 100.0d, 100.0d, 100.0d };
+    private double[] demandTen = new double[] { 75.0d, 50.0d, 50.0d, 50.0d, 50.0d, 50.0d, 50.0d, 50.0d, 50.0d, 0.0d };
+    private double[] demandTen2 = new double[] { 150.0d, 100.0d, 75.0d, 50.0d, 50.0d, 25.0d, 25.0d, 25.0d, 0.0d, -25.0d };
     private double[] ascendingDemand = new double[] { 0.0d, 0.0d, 5.0d, 5.0d, 10.0d };
     private double[] negativeDemand = new double[] { 0.0d, 0.0d, -10.0d, -50.0d, -50.0d };
     private ArrayBid bid1;
@@ -48,11 +47,11 @@ public class ArrayBidTest {
     public void setUp() {
         this.marketBasisFiveSteps = new MarketBasis(COMMODITY_ELECTRICITY, CURRENCY_EUR, 5, -1.0d, 7.0d);
         this.marketBasisTenSteps = new MarketBasis(COMMODITY_ELECTRICITY, CURRENCY_EUR, 10, -1.0d, 7.0d);
-        bidNumber = 1;
-        this.bid1 = new ArrayBid(this.marketBasisFiveSteps, bidNumber, this.demand1);
-        this.bid2 = new ArrayBid(this.marketBasisFiveSteps, bidNumber, this.demand2);
-        this.bid3 = new ArrayBid(this.marketBasisTenSteps, bidNumber, this.demand3);
-        this.bid4 = new ArrayBid(this.marketBasisTenSteps, bidNumber, this.demand4);
+        this.bidNumber = 1;
+        this.bid1 = new ArrayBid(this.marketBasisFiveSteps, bidNumber, this.demandFive);
+        this.bid2 = new ArrayBid(this.marketBasisFiveSteps, bidNumber, this.demandFive2);
+        this.bid3 = new ArrayBid(this.marketBasisTenSteps, bidNumber, this.demandTen);
+        this.bid4 = new ArrayBid(this.marketBasisTenSteps, bidNumber, this.demandTen2);
         this.bid5 = new ArrayBid(this.marketBasisFiveSteps, bidNumber, this.negativeDemand);
     }
 
@@ -74,7 +73,7 @@ public class ArrayBidTest {
     public void testConstructor() {
         assertThat(bid1.getMarketBasis(), is(equalTo(marketBasisFiveSteps)));
         assertThat(bid1.getBidNumber(), is(equalTo(bidNumber)));
-        assertThat(bid1.getDemand(), is(equalTo(demand1)));
+        assertThat(bid1.getDemand(), is(equalTo(demandFive)));
     }
 
     @Test
@@ -83,7 +82,7 @@ public class ArrayBidTest {
         ArrayBid copiedBid = new ArrayBid(bid1, bidNumber);
         assertThat(copiedBid.getMarketBasis(), is(equalTo(marketBasisFiveSteps)));
         assertThat(copiedBid.getBidNumber(), is(equalTo(bidNumber)));
-        assertThat(copiedBid.getDemand(), is(equalTo(demand1)));
+        assertThat(copiedBid.getDemand(), is(equalTo(demandFive)));
     }
 
     @Test
@@ -91,7 +90,7 @@ public class ArrayBidTest {
         ArrayBid copiedBid = new ArrayBid(bid1);
         assertThat(copiedBid.getMarketBasis(), is(equalTo(marketBasisFiveSteps)));
         assertThat(copiedBid.getBidNumber(), is(equalTo(bidNumber)));
-        assertThat(copiedBid.getDemand(), is(equalTo(demand1)));
+        assertThat(copiedBid.getDemand(), is(equalTo(demandFive)));
     }
 
     @Test
@@ -123,7 +122,7 @@ public class ArrayBidTest {
         expectedException.expectMessage("Demand array has already been filled to maximum");
         builder.setDemand(-2.0);
     }
-    
+
     @Test
     public void testBuilderSetDemandArrayAscending() {
         ArrayBid.Builder builder = new ArrayBid.Builder(marketBasisFiveSteps);
@@ -133,29 +132,37 @@ public class ArrayBidTest {
     }
 
     @Test
+    public void testBuilderSetDemandArrayWrongSize() {
+        ArrayBid.Builder builder = new ArrayBid.Builder(marketBasisFiveSteps);
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("supplied array is not same size as number of priceSteps in MarketBasis");
+        builder.setDemandArray(demandTen);
+    }
+
+    @Test
     public void testBuilderBuildSetDemandArray() {
         ArrayBid.Builder builder = new ArrayBid.Builder(marketBasisFiveSteps);
         builder.setBidNumber(bidNumber);
-        builder.setDemandArray(demand1);
+        builder.setDemandArray(demandFive);
         ArrayBid buildBid = builder.build();
         assertThat(buildBid.getBidNumber(), is(equalTo(bidNumber)));
         assertThat(buildBid.getMarketBasis(), is(equalTo(marketBasisFiveSteps)));
-        assertThat(buildBid.getDemand(), is(equalTo(demand1)));
+        assertThat(buildBid.getDemand(), is(equalTo(demandFive)));
     }
 
     @Test
     public void testBuilderBuildSetDemand() {
         ArrayBid.Builder builder = new ArrayBid.Builder(marketBasisFiveSteps);
         builder.setBidNumber(bidNumber);
-        builder.setDemand(demand1[0]);
-        builder.setDemand(demand1[1]);
-        builder.setDemand(demand1[2]);
-        builder.setDemand(demand1[3]);
-        builder.setDemand(demand1[4]);
+        builder.setDemand(demandFive[0]);
+        builder.setDemand(demandFive[1]);
+        builder.setDemand(demandFive[2]);
+        builder.setDemand(demandFive[3]);
+        builder.setDemand(demandFive[4]);
         ArrayBid buildBid = builder.build();
         assertThat(buildBid.getBidNumber(), is(equalTo(bidNumber)));
         assertThat(buildBid.getMarketBasis(), is(equalTo(marketBasisFiveSteps)));
-        assertThat(buildBid.getDemand(), is(equalTo(demand1)));
+        assertThat(buildBid.getDemand(), is(equalTo(demandFive)));
     }
 
     @Test
@@ -190,45 +197,61 @@ public class ArrayBidTest {
     @Test
     public void testCalculateIntersection() {
         Bid bid;
-        // Price of intersection { 100.0d, 50.0d, 50.0d, 0.0d, 0.0d } is 5.0
         bid = new ArrayBid(marketBasisFiveSteps, 0, new double[] { 100.0d, 50.0d, 50.0d, 0.0d, 0.0d });
-        assertEquals(5.0d, bid.calculateIntersection(0).getPriceValue(), 0.0d);
+        Price intersection = bid.calculateIntersection(0);
+        assertEquals(5.0d, intersection.getPriceValue(), 0.0d);
 
-        // intersection of { 100.0d, 100.0d, 100.0d, 100.0d, 100.0d } is 7.0
         bid = new ArrayBid(marketBasisFiveSteps, 0, new double[] { 100.0d, 100.0d, 100.0d, 100.0d, 100.0d });
-        assertEquals(7.0d, bid.calculateIntersection(0).getPriceValue(), 0.0d);
+        intersection = bid.calculateIntersection(0);
+        assertEquals(7.0d, intersection.getPriceValue(), 0.0d);
 
-        // intersection of { 75.0d, 50.0d, 50.0d, 50.0d, 50.0d, 50.0d, 25.0d, 0.0d, 0.0d, 0.0d } is 5.222222222222221
+        bid = new ArrayBid(marketBasisFiveSteps, 0, new double[] { 100.0d, 100.0d, 100.0d, 100.0d, 100.0d });
+        intersection = bid.calculateIntersection(100);
+        assertEquals(7.0d, intersection.getPriceValue(), 0.0d);
+
+        bid = new ArrayBid(marketBasisFiveSteps, 0, new double[] { 150.0d, 100.0d, 100.0d, 100.0d, 100.0d });
+        intersection = bid.calculateIntersection(100);
+        assertEquals(7.0d, intersection.getPriceValue(), 0.0d);
+
+        bid = new ArrayBid(marketBasisFiveSteps, 0, new double[] { 100.0d, 0.0d, 0.0d, 0.0d, 0.0d });
+        intersection = bid.calculateIntersection(0);
+        assertEquals(1.0d, intersection.getPriceValue(), 0.0d);
+
+        bid = new ArrayBid(marketBasisFiveSteps, 0, new double[] { 0.0d, 0.0d, 0.0d, 0.0d, 0.0d });
+        intersection = bid.calculateIntersection(0);
+        assertEquals(1.0d, intersection.getPriceValue(), 0.0d);
+
         bid = new ArrayBid(marketBasisTenSteps, 0, new double[] { 75.0d, 50.0d, 50.0d, 50.0d, 50.0d, 50.0d, 50.0d,
                 0.0d, 0.0d, 0.0d });
-        assertEquals(5.222222222222221, bid.calculateIntersection(0).getPriceValue(), 0.0d);
+        intersection = bid.calculateIntersection(0);
+        assertEquals(5.222222222222221, intersection.getPriceValue(), 0.0d);
 
-        // intersection of { 100.0d, 100.0d, 100.0d, 100.0d, 100.0d } is 7.0
         bid = new ArrayBid(marketBasisFiveSteps, 0, new double[] { 100.0d, 100.0d, 100.0d, 100.0d, 100.0d });
-        assertEquals(7.0d, bid.calculateIntersection(0).getPriceValue(), 0.0d);
+        intersection = bid.calculateIntersection(0);
+        assertEquals(7.0d, intersection.getPriceValue(), 0.0d);
 
-        // intersection of { 100.0d, 50.0d, 50.0d, 50.0d, 0.0d } is 7.0
         bid = new ArrayBid(marketBasisFiveSteps, 0, new double[] { 100.0d, 50.0d, 50.0d, 50.0d, 0.0d });
-        assertEquals(7.0d, bid.calculateIntersection(0).getPriceValue(), 0.0d);
+        intersection = bid.calculateIntersection(0);
+        assertEquals(7.0d, intersection.getPriceValue(), 0.0d);
 
-        // intersection of { 100.0d, 75.0d, 50.0d, 0.0d, 0.0d } is 5.0
         bid = new ArrayBid(marketBasisFiveSteps, 0, new double[] { 100.0d, 75.0d, 50.0d, 0.0d, 0.0d });
-        assertEquals(5.0d, bid.calculateIntersection(0).getPriceValue(), 0.0d);
+        intersection = bid.calculateIntersection(0);
+        assertEquals(5.0d, intersection.getPriceValue(), 0.0d);
     }
 
     @Test
     public void testGetMaximumDemand() {
-        double maxDemand = demand1[0];
+        double maxDemand = demandFive[0];
         assertThat(bid1.getMaximumDemand(), is(equalTo(maxDemand)));
-        maxDemand = demand3[0];
+        maxDemand = demandTen[0];
         assertThat(bid3.getMaximumDemand(), is(equalTo(maxDemand)));
     }
 
     @Test
     public void testGetMinimumDemand() {
-        double minDemand = demand2[demand2.length - 1];
+        double minDemand = demandFive2[demandFive2.length - 1];
         assertThat(bid2.getMinimumDemand(), is(equalTo(minDemand)));
-        minDemand = demand4[demand4.length - 1];
+        minDemand = demandTen2[demandTen2.length - 1];
         assertThat(bid4.getMinimumDemand(), is(equalTo(minDemand)));
     }
 
@@ -245,12 +268,18 @@ public class ArrayBidTest {
         assertThat(pointBid.getMarketBasis(), is(equalTo(bid1.getMarketBasis())));
         ArrayBid arrayBid = pointBid.toArrayBid();
         assertThat(arrayBid.getDemand(), is(equalTo(bid1.getDemand())));
+
+        ArrayBid desc = new ArrayBid(marketBasisFiveSteps, 0, new double[] { 7.0, 6.0, 5.0, 4.0, 3.0 });
+        pointBid = desc.toPointBid();
+        PricePoint[] expectedPricePoints = new PricePoint[] { new PricePoint(new Price(marketBasisFiveSteps, -1), 7.0),
+                new PricePoint(new Price(marketBasisFiveSteps, 7), 3.0) };
+        assertThat(pointBid.getPricePoints(), is(equalTo(expectedPricePoints)));
     }
 
     @Test
     public void testGetDemand() {
         double[] demand = bid1.getDemand();
-        assertThat(demand, is(equalTo(demand1)));
+        assertThat(demand, is(equalTo(demandFive)));
     }
 
     @Test
@@ -362,7 +391,7 @@ public class ArrayBidTest {
         Assert.assertThat(bid3.equals(bid4), is(false));
         Assert.assertThat(bid4.equals(bid3), is(false));
 
-        Bid testBid = new ArrayBid(marketBasisFiveSteps, bidNumber, demand1);
+        Bid testBid = new ArrayBid(marketBasisFiveSteps, bidNumber, demandFive);
         Assert.assertThat(bid1.equals(testBid), is(true));
         Assert.assertThat(testBid.equals(bid1), is(true));
 
@@ -380,12 +409,6 @@ public class ArrayBidTest {
     }
 
     @Test
-    @Ignore
-    public void testFlatDemand() {
-        fail("Not yet implemented");
-    }
-
-    @Test
     public void testGetMarketBasis() {
         assertThat(marketBasisFiveSteps, is(bid1.getMarketBasis()));
         assertThat(marketBasisTenSteps, is(bid3.getMarketBasis()));
@@ -397,12 +420,27 @@ public class ArrayBidTest {
     }
 
     @Test
-    @Ignore
     public void testHashCode() {
-        ArrayBid copy = new ArrayBid(bid3);
-        assertThat(copy.equals(bid3), is(true));
-        assertThat(bid3.equals(copy), is(true));
-        assertThat(copy.hashCode(), is(equalTo(bid3.hashCode())));
+        ArrayBid one = new ArrayBid(marketBasisFiveSteps, 0, new double[] { 3.0, 2.0, 1.0, 0.0, -1.0 });
+        ArrayBid other = new ArrayBid(marketBasisFiveSteps, 0, new double[] { 3.0, 2.0, 1.0, 0.0, -1.0 });
+        assertThat(one.equals(other), is(true));
+        assertThat(other.equals(one), is(true));
+        assertThat(one.hashCode(), is(equalTo(other.hashCode())));
+
+        other = new ArrayBid(marketBasisTenSteps, 0,
+                new double[] { 4.0, 4.0, 4.0, 2.0, 2.0, 1.0, 0.0, -1.0, -1.0, -1.0 });
+        assertThat(one.hashCode(), is(not(equalTo(other.hashCode()))));
+
+        other = new ArrayBid(marketBasisFiveSteps, 1, new double[] { 3.0, 2.0, 1.0, 0.0, -1.0 });
+        assertThat(one.hashCode(), is(not(equalTo(other.hashCode()))));
+
+        other = new ArrayBid(marketBasisFiveSteps, 0, new double[] { 4.0, 2.0, 1.0, 0.0, -1.0 });
+        assertThat(one.hashCode(), is(not(equalTo(other.hashCode()))));
     }
 
+    @Test
+    public void testToString() {
+        String bid1String = bid1.toString();
+        assertThat(bid1String.startsWith("ArrayBid"), is(true));
+    }
 }

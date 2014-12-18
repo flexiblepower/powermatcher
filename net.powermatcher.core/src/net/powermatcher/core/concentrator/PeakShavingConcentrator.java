@@ -36,6 +36,7 @@ import net.powermatcher.api.monitoring.events.IncomingBidEvent;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
 import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
+import net.powermatcher.api.monitoring.events.PeakShavingEvent;
 import net.powermatcher.core.BaseAgent;
 import net.powermatcher.core.BidCache;
 import net.powermatcher.core.BidCacheSnapshot;
@@ -205,11 +206,9 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
                     }
                 }
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error(e.getMessage());
             } catch (InvalidSyntaxException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error(e.getMessage());
             }
 
             throw new IllegalArgumentException("The floor constraint shouldn't be higher than the ceiling constraint");
@@ -289,6 +288,9 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
             ArrayBid transformedBid = transformAggregatedBid(aggregatedBid);
             this.sessionToMatcher.updateBid(transformedBid);
 
+            publishEvent(new PeakShavingEvent(config.agentId(), this.getClusterId(), timeService.currentDate(),
+                    this.floor, this.ceiling, aggregatedBid.getDemand(), transformedBid.getDemand(), null, null));
+
             publishEvent(new OutgoingBidEvent(sessionToMatcher.getClusterId(), config.agentId(),
                     sessionToMatcher.getSessionId(), timeService.currentDate(), aggregatedBid, Qualifier.MATCHER));
 
@@ -305,8 +307,7 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
 
         LOGGER.debug("Received price update [{}]", priceUpdate);
         this.publishEvent(new IncomingPriceUpdateEvent(sessionToMatcher.getClusterId(), this.config.agentId(),
-                this.sessionToMatcher.getSessionId(), timeService.currentDate(), priceUpdate,
-                Qualifier.AGENT));
+                this.sessionToMatcher.getSessionId(), timeService.currentDate(), priceUpdate, Qualifier.AGENT));
 
         // Find bidCacheSnapshot belonging to the newly received price update
         BidCacheSnapshot bidCacheSnapshot = this.aggregatedBids.getMatchingSnapshot(priceUpdate.getBidNumber());
@@ -323,17 +324,18 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
                 continue;
             }
 
-            //PriceUpdate agentPrice = new Price(priceUpdate.getPrice().getMarketBasis(), priceUpdate.getPriceValue(), originalAgentBid);
-            
-            PriceUpdate agentPrice = new PriceUpdate(new Price(priceUpdate.getPrice().getMarketBasis(), priceUpdate.getPrice().getPriceValue()), priceUpdate.getBidNumber());
+            PriceUpdate agentPrice = new PriceUpdate(new Price(priceUpdate.getPrice().getMarketBasis(), priceUpdate
+                    .getPrice().getPriceValue()), priceUpdate.getBidNumber());
 
             // call peakshaving code.
             PriceUpdate adjustedPrice = adjustPrice(agentPrice);
             session.updatePrice(adjustedPrice);
+            
+            publishEvent(new PeakShavingEvent(config.agentId(), this.getClusterId(), timeService.currentDate(),
+                    this.floor, this.ceiling, new double[0], new double[0], agentPrice.getPrice(), adjustedPrice.getPrice()));
 
             this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), this.config.agentId(), session
                     .getSessionId(), timeService.currentDate(), priceUpdate, Qualifier.MATCHER));
-
         }
     }
 
@@ -585,5 +587,34 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
 
     protected void setFloor(double floor) {
         this.floor = floor;
+    }
+
+    public boolean canEqual(Object other) {
+        return other instanceof PeakShavingConcentrator;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        PeakShavingConcentrator that = (PeakShavingConcentrator) ((obj instanceof PeakShavingConcentrator) ? obj : null);
+        if (that == null) {
+            return false;
+        }
+
+        if (this == that) {
+            return true;
+        }
+
+        return this.canEqual(that) && super.equals(that) && this.aggregatedBidIn.equals(that.aggregatedBidIn)
+                && this.aggregatedBidOut.equals(that.aggregatedBidOut)
+                && this.aggregatedBids.equals(that.aggregatedBids)
+                && Double.valueOf(this.ceiling).equals(Double.valueOf(that.ceiling))
+                && Double.valueOf(this.floor).equals(Double.valueOf(that.floor));
+    }
+
+    @Override
+    public int hashCode() {
+        return 211 * (this.aggregatedBidIn.hashCode() + this.aggregatedBidOut.hashCode()
+                + this.aggregatedBids.hashCode() + Double.valueOf(this.ceiling).hashCode() + Double.valueOf(this.floor)
+                .hashCode());
     }
 }

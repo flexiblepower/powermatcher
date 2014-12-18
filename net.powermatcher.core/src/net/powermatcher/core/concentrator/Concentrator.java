@@ -25,6 +25,7 @@ import net.powermatcher.api.monitoring.events.IncomingBidEvent;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
 import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
+import net.powermatcher.api.monitoring.events.WhitelistEvent;
 import net.powermatcher.core.BaseAgent;
 import net.powermatcher.core.BidCache;
 import net.powermatcher.core.BidCacheSnapshot;
@@ -179,11 +180,15 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
             session.setMarketBasis(this.sessionToMatcher.getMarketBasis());
             session.setClusterId(this.sessionToMatcher.getClusterId());
 
-            this.aggregatedBids.updateBid(session.getAgentId(), new ArrayBid.Builder(this.sessionToMatcher.getMarketBasis()).setDemand(0).build());
+            this.aggregatedBids.updateBid(session.getAgentId(),
+                    new ArrayBid.Builder(this.sessionToMatcher.getMarketBasis()).setDemand(0).build());
             LOGGER.info("Agent connected with session [{}]", session.getSessionId());
             return true;
         } else {
             LOGGER.warn("Agent [{}] is not on whitelist, reject connection", session.getAgentId());
+            publishEvent(new WhitelistEvent(this.getAgentId(), session.getAgentId(), this.getClusterId(),
+                    timeService.currentDate()));
+
             return false;
         }
     }
@@ -227,7 +232,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
             LOGGER.error(message);
             throw new IllegalArgumentException(message);
         }
-        
+
         LOGGER.debug("Received price update [{}]", priceUpdate);
         this.publishEvent(new IncomingPriceUpdateEvent(sessionToMatcher.getClusterId(), this.config.agentId(),
                 this.sessionToMatcher.getSessionId(), timeService.currentDate(), priceUpdate, Qualifier.AGENT));
@@ -235,26 +240,25 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
         // Find bidCacheSnapshot belonging to the newly received price update
         BidCacheSnapshot bidCacheSnapshot = this.aggregatedBids.getMatchingSnapshot(priceUpdate.getBidNumber());
         if (bidCacheSnapshot == null) {
-        	// ignore price and log warning
-        	LOGGER.warn("Received a price update for a bid that I never sent, id: {}", priceUpdate.getBidNumber());
-        	return;
+            // ignore price and log warning
+            LOGGER.warn("Received a price update for a bid that I never sent, id: {}", priceUpdate.getBidNumber());
+            return;
         }
-        
-        
+
         // Publish new price to connected agents
         for (Session session : this.sessionToAgents) {
-        	Integer originalAgentBid = bidCacheSnapshot.getBidNumbers().get(session.getAgentId());    
-        	if (originalAgentBid == null) {
-        		// ignore price for this agent and log warning
-        		continue;
-        	} 
+            Integer originalAgentBid = bidCacheSnapshot.getBidNumbers().get(session.getAgentId());
+            if (originalAgentBid == null) {
+                // ignore price for this agent and log warning
+                continue;
+            }
 
-        	PriceUpdate agentPriceUpdate = new PriceUpdate(priceUpdate.getPrice(), originalAgentBid);
-        	
+            PriceUpdate agentPriceUpdate = new PriceUpdate(priceUpdate.getPrice(), originalAgentBid);
+
             session.updatePrice(agentPriceUpdate);
 
-            this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), this.config.agentId(), session.getSessionId(), timeService
-                    .currentDate(), priceUpdate, Qualifier.MATCHER));
+            this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), this.config.agentId(), session
+                    .getSessionId(), timeService.currentDate(), priceUpdate, Qualifier.MATCHER));
 
         }
     }
@@ -319,14 +323,13 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
 
             config.update(properties);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
     }
 
     @Reference
-    protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
+    protected static void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
+        Concentrator.configurationAdmin = configurationAdmin;
     }
 
     @Reference
@@ -348,7 +351,7 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
 
         // ConfigAdmin will sometimes generate a filter with 1 empty element. Ignore it.
         if (whiteListAgents != null && !whiteListAgents.isEmpty() && whiteListAgents.get(0).isEmpty()) {
-        	this.validAgents = new ArrayList<String>();
+            this.validAgents = new ArrayList<String>();
         }
     }
 
@@ -356,5 +359,35 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint, AgentEnd
     public List<String> getWhiteList() {
         return this.validAgents;
     }
-    
+
+    public boolean canEqual(Object other) {
+        return other instanceof Concentrator;
+    }
+
+    public boolean equals(Object obj) {
+        Concentrator other = (Concentrator) ((obj instanceof Concentrator) ? obj : null);
+        if (other == null) {
+            return false;
+        }
+
+        if (this == other) {
+            return true;
+        }
+
+        // TODO Find a better way to implement this equals.
+        // This ones fails when any field is null
+        return this.aggregatedBids.equals(other.aggregatedBids) && this.sessionToMatcher.equals(other.sessionToMatcher)
+                && this.aggregatedBids.equals(other.aggregatedBids)
+                && this.sessionToAgents.equals(other.sessionToAgents) && this.validAgents.equals(other.validAgents);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode()
+                + 211
+                * ((this.aggregatedBids == null ? 0 : aggregatedBids.hashCode())
+                        + (this.servicePid == null ? 0 : servicePid.hashCode()) + this.sessionToMatcher.hashCode()
+                        + (this.aggregatedBids == null ? 0 : aggregatedBids.hashCode()) + (this.validAgents == null ? 0
+                            : validAgents.hashCode()));
+    }
 }

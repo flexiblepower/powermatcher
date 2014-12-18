@@ -22,11 +22,20 @@ public abstract class PriceUpdateEvent extends AgentEvent {
     private final PriceUpdate priceUpdate;
 
     /**
+     * The qualifier of the event
+     */
+    private Qualifier qualifier;
+
+    /**
+     * The id of the {@link Session} of the {@link AgentEndpoint} subclass sending the UpdateEvent
+     */
+    private final String sessionId;
+
+    /**
      * Constructs an instance of this class.
      * 
      * @param clusterId
-	 *            The id of the cluster the {@link AgentEndpoint} subclass sending
-	 *            the UpdateEvent is running in.
+     *            The id of the cluster the {@link AgentEndpoint} subclass sending the UpdateEvent is running in.
      * @param agentId
      *            The id of the {@link AgentEndpoint} subclass sending the UpdateEvent.
      * @param sessionId
@@ -36,18 +45,30 @@ public abstract class PriceUpdateEvent extends AgentEvent {
      * @param priceUpdate
      *            The received {@link PriceUpdate}.
      */
-    public PriceUpdateEvent(String clusterId, String agentId, String sessionId, Date timestamp, PriceUpdate priceUpdate, Qualifier qualifier) {
-        super(clusterId, agentId, sessionId, timestamp, qualifier);
+    public PriceUpdateEvent(String clusterId, String agentId, String sessionId, Date timestamp,
+            PriceUpdate priceUpdate, Qualifier qualifier) {
+        super(clusterId, agentId, timestamp);
         this.priceUpdate = priceUpdate;
+        this.qualifier = qualifier;
+        this.sessionId = sessionId;
     }
 
     public PriceUpdate getPriceUpdate() {
         return priceUpdate;
     }
 
+    public Qualifier getQualifier() {
+        return qualifier;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
     @Override
     public String toString() {
-        return PriceUpdateEvent.class.getSimpleName() + " " + super.toString() + ", priceUpdate = "
+        return PriceUpdateEvent.class.getSimpleName() + " " + super.toString() + ", qualifier = "
+                + qualifier.getDescription() + ", sessionId = " + this.sessionId + ", priceUpdate = "
                 + priceUpdate.toString();
     }
 }

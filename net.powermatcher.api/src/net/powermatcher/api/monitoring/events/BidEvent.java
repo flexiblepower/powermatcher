@@ -11,13 +11,14 @@ import net.powermatcher.api.data.Price;
 import net.powermatcher.api.monitoring.Qualifier;
 
 /**
- * An {@link BidEvent} is sent when an {@link Bid} is sent or Received by an {@link AgentEndpoint} or a {@link MatcherEndpoint}.
+ * An {@link BidEvent} is sent when an {@link Bid} is sent or Received by an {@link AgentEndpoint} or a
+ * {@link MatcherEndpoint}.
  * 
  * @author FAN
  * @version 1.0
  * 
  */
-public class BidEvent extends AgentEvent {
+public abstract class BidEvent extends AgentEvent {
 
     /**
      * The new {@link Bid} created by the {@link AgentEndpoint} subclass.
@@ -25,11 +26,20 @@ public class BidEvent extends AgentEvent {
     private final Bid bid;
 
     /**
+     * The qualifier of the event
+     */
+    private Qualifier qualifier;
+
+    /**
+     * The id of the {@link Session} of the {@link AgentEndpoint} subclass sending the UpdateEvent
+     */
+    private final String sessionId;
+
+    /**
      * Constructs an instance of this class.
      * 
      * @param clusterId
-	 *            The id of the cluster the {@link AgentEndpoint} subclass sending
-	 *            the UpdateEvent is running in.
+     *            The id of the cluster the {@link AgentEndpoint} subclass sending the UpdateEvent is running in.
      * @param agentId
      *            The id of the {@link AgentEndpoint} subclass sending the UpdateEvent.
      * @param sessionId
@@ -40,16 +50,27 @@ public class BidEvent extends AgentEvent {
      *            The new {@link Price} created by the {@link AgentEndpoint} subclass.
      */
     public BidEvent(String clusterId, String agentId, String sessionId, Date timestamp, Bid bid, Qualifier qualifier) {
-        super(clusterId, agentId, sessionId, timestamp, qualifier);
+        super(clusterId, agentId, timestamp);
         this.bid = bid;
+        this.qualifier = qualifier;
+        this.sessionId = sessionId;
     }
 
     public Bid getBid() {
         return bid;
     }
 
+    public Qualifier getQualifier() {
+        return qualifier;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
     @Override
     public String toString() {
-        return BidEvent.class.getSimpleName() + " " + super.toString() + ", bid = " + bid.toString();
+        return BidEvent.class.getSimpleName() + " " + super.toString() + ", qualifier = " + qualifier.getDescription()
+                + ", sessionId = " + this.sessionId + ", bid = " + bid.toString();
     }
 }

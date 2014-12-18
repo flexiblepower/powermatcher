@@ -11,13 +11,18 @@ import net.powermatcher.api.data.Price;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 /**
  * @author FAN
  * @version 1.0
  */
 public class PriceTest {
+    
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     private static final String CURRENCY_EUR = "EUR";
     private static final String COMMODITY_ELECTRICITY = "electricity";
@@ -26,26 +31,17 @@ public class PriceTest {
     MarketBasis marketBasis;
     Price price;
 
-    /**
-     * @throws InvalidParameterException
-     */
     @Before
     public void setUp() throws InvalidParameterException {
         this.marketBasis = new MarketBasis(COMMODITY_ELECTRICITY, CURRENCY_EUR, 10, -1.0d, 8.0d);
         this.price = new Price(this.marketBasis, DEMAND);
     }
 
-    /**
-	 * 
-	 */
     @Test
     public void testGetPriceValue() {
         assertEquals(DEMAND, this.price.getPriceValue(), 0.0d);
     }
 
-    /**
-	 * 
-	 */
     @Test
     public void testGetMarketBasis() {
         assertEquals(this.marketBasis, this.price.getMarketBasis());
@@ -55,26 +51,43 @@ public class PriceTest {
         assertFalse(marketBasis2.equals(this.price.getMarketBasis()));
     }
 
-    /**
-	 * 
-	 */
     @Test
     public void testPrice() {
         Price price = new Price(this.marketBasis, 1.0d);
         assertEquals(0.0d, price.getPriceValue(), 1.0d);
     }
+    
+    @Test
+    public void testPriceMarketBasisNull() {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("marketBasis not allowed to be null");
+        new Price(null, 1.0d);
+    }
+    
+    @Test
+    public void testPriceNaN() {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("Price NaN is not valid");
+        new Price(marketBasis, Double.NaN);
+    }
+    
+    @Test
+    public void testPriceOutOfBoundsUpper() {
+        expectedException.expect(IllegalArgumentException.class);
+        new Price(marketBasis, 9.0);
+    }
+    
+    @Test
+    public void testPriceOutOfBoundsLoper() {
+        expectedException.expect(IllegalArgumentException.class);
+        new Price(marketBasis, -2.0);
+    }
 
-    /**
-	 * 
-	 */
     @Test
     public void testPriceMarketBasisDouble() {
         assertNotNull(this.price);
     }
 
-    /**
-	 * 
-	 */
     @Test
     public void testSetPriceValue() {
         this.price = new Price(this.marketBasis, 3.0d);
@@ -85,15 +98,11 @@ public class PriceTest {
         assertEquals(8.0d, this.price.getPriceValue(), 0.0d);
     }
 
-    /**
-	 * 
-	 */
     @Test
     public void testSetPriceValueStep() {
         this.price = new Price(this.marketBasis, 3.0d);
         assertEquals(3.0d, this.price.getPriceValue(), 0.0d);
     }
-    
     
     @Test
     public void testEquals(){

@@ -5,17 +5,27 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ArrayBid extends Bid {
+    /**
+     * In the calculatePricePoints, 2 floating points will be compared. The significance is set here.
+     */
+    private static int PRECISION = 5;
+
     public static final class Builder {
         private final MarketBasis marketBasis;
         private int bidNumber;
         private int nextIndex;
-        private double[] demandArray;
+        private double[] builderDemand;
 
+        /**
+         * Constructor for the ArrayBid.Builder. A helper class for constructing ArrayBids.
+         * 
+         * @param marketBasis
+         */
         public Builder(MarketBasis marketBasis) {
             this.marketBasis = marketBasis;
             bidNumber = 0;
             nextIndex = 0;
-            demandArray = new double[marketBasis.getPriceSteps()];
+            builderDemand = new double[marketBasis.getPriceSteps()];
         }
 
         /**
@@ -42,16 +52,16 @@ public class ArrayBid extends Bid {
         public Builder setDemand(double demand) {
             checkIndex(nextIndex);
             if (nextIndex > 0) {
-                if (demand > demandArray[nextIndex - 1]) {
+                if (demand > builderDemand[nextIndex - 1]) {
                     throw new IllegalArgumentException("The demand can not be ascending");
                 }
             }
-            demandArray[nextIndex++] = demand;
+            builderDemand[nextIndex++] = demand;
             return this;
         }
 
         private void checkIndex(int ix) {
-            if (ix >= demandArray.length) {
+            if (ix >= builderDemand.length) {
                 throw new ArrayIndexOutOfBoundsException("Demand array has already been filled to maximum");
             }
         }
@@ -73,8 +83,8 @@ public class ArrayBid extends Bid {
                         "supplied array is not same size as number of priceSteps in MarketBasis");
             }
             checkDescending(demand);
-            this.demandArray = Arrays.copyOf(demand, demand.length);
-            this.nextIndex = demandArray.length;
+            this.builderDemand = Arrays.copyOf(demand, demand.length);
+            this.nextIndex = builderDemand.length;
             return this;
         }
 
@@ -86,8 +96,8 @@ public class ArrayBid extends Bid {
          *             When the length of the demandArray is not equal to the number of price steps
          */
         public ArrayBid build() {
-            fillArrayToPriceStep(demandArray.length);
-            return new ArrayBid(marketBasis, bidNumber, demandArray);
+            fillArrayToPriceStep(builderDemand.length);
+            return new ArrayBid(marketBasis, bidNumber, builderDemand);
         }
 
         /**
@@ -109,9 +119,9 @@ public class ArrayBid extends Bid {
             if (priceStep > marketBasis.getPriceSteps()) {
                 throw new IllegalArgumentException("The supplied priceStep is out of bounds");
             }
-            double demand = demandArray[nextIndex - 1];
+            double demand = builderDemand[nextIndex - 1];
             while (nextIndex < priceStep) {
-                demandArray[nextIndex++] = demand;
+                builderDemand[nextIndex++] = demand;
             }
             return this;
         }
@@ -185,55 +195,86 @@ public class ArrayBid extends Bid {
         }
 
         /*
-         * Find the point where the demand falls below the target
-         */
-        while (rightBound < demandArray.length && demandArray[rightBound] >= targetDemand) {
-            rightBound += 1;
-        }
-
-        /*
-         * The index of the point which is just above the intersection is now stored in the variable 'middle'. This
-         * means that middle + 1 is the index of the point that lies just under the intersection. That means that the
-         * exact intersection is between middle and middle+1, hence a weighted interpolation is needed.
          * 
-         * Pricing for boundary cases: 1) If the curve is a flat line, if the demand is positive the price will become
-         * the maximum price, or if the demand is zero or negative, the price will become 0. 2) If the curve is a single
-         * step, the price of the stepping point (the left or the right boundary).
          */
-        int priceStep;
+        rightBound = determineDropoff(targetDemand, rightBound);
 
-        // TODO Refactor this code to not nest more than 3
-        // if/for/while/switch/try statements.
+        int priceStep;
         if (leftBound > 0 && rightBound < demandArray.length) {
-            /* Interpolate */
-            double interpolation = ((demandArray[leftBound] - targetDemand) / (demandArray[leftBound] - demandArray[rightBound]))
-                    * (rightBound - leftBound);
-            priceStep = leftBound + (int) Math.ceil(interpolation);
+            priceStep = interpolate(targetDemand, leftBound, rightBound);
         } else {
-            if (leftBound == 0 && rightBound == demandArray.length) {
-                /* Curve is flat line or single step at leftBound */
-                if (demandArray[leftBound] != 0) {
-                    /*
-                     * Curve is flat line for non-zero demand or single step at leftBound
-                     */
-                    if (demandArray[leftBound + 1] == 0) {
-                        /* Curve is a single step at leftBound */
-                        priceStep = leftBound + 1;
-                    } else {
-                        /* Curve is flat line for non-zero demand */
-                        priceStep = rightBound - 1;
-                    }
-                } else {
-                    /* Curve is flat line for zero demand 0 */
-                    priceStep = new Price(marketBasis, 0).toPriceStep().getPriceStep();
-                }
-            } else {
-                /* Curve is a single step at leftBound */
-                priceStep = demandArray[leftBound] <= targetDemand ? leftBound : leftBound + 1;
-            }
+            priceStep = determineCurve(targetDemand, leftBound, rightBound);
         }
 
         return new PriceStep(marketBasis, priceStep).toPrice();
+    }
+
+    /**
+     * Find the point where the demand falls below the target
+     * 
+     * @param targetDemand
+     * @param rightBound
+     * @return dropoff point
+     */
+    private int determineDropoff(final double targetDemand, int rightBound) {
+        while (rightBound < demandArray.length && demandArray[rightBound] >= targetDemand) {
+            rightBound += 1;
+        }
+        return rightBound;
+    }
+
+    /**
+     * The index of the point which is just above the intersection is now stored in the variable 'middle'. This means
+     * that middle + 1 is the index of the point that lies just under the intersection. That means that the exact
+     * intersection is between middle and middle+1, hence a weighted interpolation is needed.
+     * 
+     * @param targetDemand
+     * @param leftBound
+     * @param rightBound
+     * @return The interpolated priceStep
+     */
+    private int interpolate(final double targetDemand, int leftBound, int rightBound) {
+        int priceStep;
+        double interpolation = ((demandArray[leftBound] - targetDemand) / (demandArray[leftBound] - demandArray[rightBound]))
+                * (rightBound - leftBound);
+        priceStep = leftBound + (int) Math.ceil(interpolation);
+        return priceStep;
+    }
+
+    /**
+     * Pricing for boundary cases: 1) If the curve is a flat line, if the demand is positive the price will become the
+     * maximum price, or if the demand is zero or negative, the price will become 0. 2) If the curve is a single step,
+     * the price of the stepping point (the left or the right boundary).
+     * 
+     * @param targetDemand
+     * @param leftBound
+     * @param rightBound
+     * @return
+     */
+    private int determineCurve(final double targetDemand, int leftBound, int rightBound) {
+        int priceStep;
+        if (leftBound == 0 && rightBound == demandArray.length) {
+            /* Curve is flat line or single step at leftBound */
+            if (demandArray[leftBound] != 0) {
+                /*
+                 * Curve is flat line for non-zero demand or single step at leftBound
+                 */
+                if (demandArray[leftBound + 1] == 0) {
+                    /* Curve is a single step at leftBound */
+                    priceStep = leftBound + 1;
+                } else {
+                    /* Curve is flat line for non-zero demand */
+                    priceStep = rightBound - 1;
+                }
+            } else {
+                /* Curve is flat line for zero demand 0 */
+                priceStep = new Price(marketBasis, 0).toPriceStep().getPriceStep();
+            }
+        } else {
+            /* Curve is a single step at leftBound */
+            priceStep = demandArray[leftBound] <= targetDemand ? leftBound : leftBound + 1;
+        }
+        return priceStep;
     }
 
     @Override
@@ -311,13 +352,14 @@ public class ArrayBid extends Bid {
              * If not at the end of the demand array, check if the following segment is a step or an inclining segment.
              */
             if (i < priceSteps - 1) {
-                // TODO Test for floating point equality. Not just ==
-                if (this.demandArray[i] - this.demandArray[i + 1] == delta) {
+                if (Math.abs((this.demandArray[i] - this.demandArray[i + 1]) - delta) < Math.pow(10, PRECISION * -1)) {
                     /*
                      * Here i is in a constantly inclining or declining segment. Search for the last price step in the
                      * segment.
                      */
-                    while (i < priceSteps - 1 && this.demandArray[i] - this.demandArray[i + 1] == delta) {
+                    while (i < priceSteps - 1
+                            && Math.abs((this.demandArray[i] - this.demandArray[i + 1]) - delta) < Math.pow(10,
+                                    PRECISION * -1)) {
                         i += 1;
                     }
                     /*
@@ -340,21 +382,29 @@ public class ArrayBid extends Bid {
                 }
             }
 
-            /*
-             * Add a point at i for the following two cases:
-             * 
-             * 1) Add a point for the start of the next flat segment and loop.
-             * 
-             * 2) Add a final point if the last step of the demand array is the end of an inclining or declining
-             * segment.
-             */
-            if (i == priceSteps - 1 || (i < priceSteps - 1 && this.demandArray[i] - this.demandArray[i + 1] == 0)) {
-                points.add(newPoint(i));
-                flatStart = true;
-            }
+            flatStart = endSegment(priceSteps, points, flatStart, i);
         }
 
         return points.toArray(new PricePoint[points.size()]);
+    }
+
+    /**
+     * Adds a point at location for the following two cases: 1) Add a point for the start of the next flat segment and
+     * loop. 2) Add a final point if the last step of the demand array is the end of an inclining or declining segment.
+     * 
+     * @param priceSteps
+     * @param points
+     * @param flatStart
+     * @param location
+     * @return boolean indicating if the nextPoint is the start of a new flat segment
+     */
+    private boolean endSegment(int priceSteps, List<PricePoint> points, boolean flatStart, int location) {
+        if (location == priceSteps - 1
+                || (location < priceSteps - 1 && this.demandArray[location] - this.demandArray[location + 1] == 0)) {
+            points.add(newPoint(location));
+            return true;
+        }
+        return false;
     }
 
     private PricePoint newPoint(int priceStep) {
@@ -394,7 +444,7 @@ public class ArrayBid extends Bid {
 
     @Override
     public int hashCode() {
-        return 2011 * demandArray.hashCode() + 3557 * bidNumber;
+        return 2011 * Arrays.hashCode(demandArray) + 3557 * bidNumber + marketBasis.hashCode();
     }
 
     @Override

@@ -40,7 +40,7 @@ public class PricePoint implements Comparable<PricePoint> {
 
     @Override
     public String toString() {
-    	return "PricePoint{" + price + ", damand = " + demand + ")";
+    	return "PricePoint{" + price + ", demand = " + demand + ")";
     }
 
 	@Override

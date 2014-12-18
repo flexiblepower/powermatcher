@@ -1,6 +1,5 @@
 package net.powermatcher.core;
 
-import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
@@ -90,4 +89,30 @@ public abstract class BaseAgent implements ObservableAgent {
             observer.update(event);
         }
     }
+
+    public boolean canEqual(Object other) {
+        return other instanceof BaseAgent;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        BaseDeviceAgent other = (BaseDeviceAgent) ((obj instanceof BaseDeviceAgent) ? obj : null);
+        if (other == null) {
+            return false;
+        }
+
+        if (this == other) {
+            return true;
+        }
+
+        return canEqual(other) && other.getAgentId() == this.getClusterId() && this.getAgentId() == other.getAgentId()
+                && this.getDesiredParentId() == other.getDesiredParentId();
+    }
+
+    @Override
+    public int hashCode() {
+        return 211 * ((agentId == null ? 0 : agentId.hashCode()) + (clusterId == null ? 0 : clusterId.hashCode()) + (desiredParentId == null ? 0
+                : desiredParentId.hashCode()));
+    }
+
 }

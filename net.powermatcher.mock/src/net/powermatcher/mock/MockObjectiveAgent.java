@@ -3,15 +3,14 @@ package net.powermatcher.mock;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import net.powermatcher.api.ObjectiveEndpoint;
 import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
-import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PriceUpdate;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MockObjectiveAgent extends MockAgent implements ObjectiveEndpoint {
 
@@ -19,7 +18,7 @@ public class MockObjectiveAgent extends MockAgent implements ObjectiveEndpoint {
 
     private static final String CURRENCY_EUR = "EUR";
     private static final String COMMODITY_ELECTRICITY = "electricity";
-    
+
     private Map<String, Object> objectiveAgentProperties;
 
     public MockObjectiveAgent(String agentId) {
@@ -35,14 +34,14 @@ public class MockObjectiveAgent extends MockAgent implements ObjectiveEndpoint {
 
     @Override
     public Bid handleAggregateBid(Bid aggregatedBid) {
-        MarketBasis marketBasis = new MarketBasis("electricity", "EUR", 11, 0, 10);
+        MarketBasis marketBasis = new MarketBasis(COMMODITY_ELECTRICITY, CURRENCY_EUR, 11, 0, 10);
         double[] demand = new double[] { 100.0d, 50.0d, 50.0d, 0.0d, 0.0d, 0.0d, 0.0d, 0.0d, 0.0d, 0.0d, 0.0d };
 
-        Bid objectiveBid = new ArrayBid(marketBasis, 0,demand);
+        Bid objectiveBid = new ArrayBid(marketBasis, 0, demand);
 
         Bid aggregatedObjectiveBid = objectiveBid.aggregate(aggregatedBid);
 
-        LOGGER.info("ObjectiveAgent: new aggregated bid: [{}] ", ((ArrayBid)aggregatedObjectiveBid).getDemand());
+        LOGGER.info("ObjectiveAgent: new aggregated bid: [{}] ", ((ArrayBid) aggregatedObjectiveBid).getDemand());
         return aggregatedObjectiveBid;
     }
 }

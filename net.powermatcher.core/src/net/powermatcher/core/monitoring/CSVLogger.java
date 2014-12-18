@@ -38,7 +38,7 @@ public class CSVLogger extends AgentEventLogger {
     /**
      * The header for the bidlog file
      */
-    private static final String[] BID_HEADER_ROW = new String[] { "logTime", "clusterId", "id", "qualifier",
+    private static final String[] BID_HEADER_ROW = new String[] { "logTime", "clusterId", "agentId", "qualifier",
             "commodity", "currency", "minimumPrice", "maximumPrice", "minimumDemand", "maximumDemand",
             "effectiveDemand", "effectivePrice", "lastUpdateTime", "bidNumber", "demand", "pricePoints" };
 
@@ -47,6 +47,12 @@ public class CSVLogger extends AgentEventLogger {
      */
     private static final String[] PRICE_HEADER_ROW = new String[] { "logTime", "clusterId", "id", "qualifier",
             "commodity", "currency", "minimumPrice", "maximumPrice", "priceValue", "lastUpdateTime" };
+
+    private static final String[] WHITELIST_HEADER_ROW = new String[] { "logTime", "clusterId", "agentId",
+            "blockedAgentId", "lastUpdateTime" };
+
+    private static final String[] PEAKSHAVING_HEADER_ROW = new String[] { "logTime", "clusterId", "agentId", "floor",
+            "ceiling", "oldDemand", "newDemand", "oldPrice", "newPrice" };
 
     /**
      * OSGI configuration of the {@link CSVLogger}
@@ -57,10 +63,7 @@ public class CSVLogger extends AgentEventLogger {
                 description = "Filter for specific agentId's. When no filters are supplied, it will log everything.")
         List<String> filter();
 
-        @Meta.AD(
-                name = "eventType",
-                optionLabels = { "BIDEVENT", "PRICEEVENT" },
-                description = "The AgentEventType this logger has to log.")
+        @Meta.AD(name = "eventType", description = "The AgentEventType this logger has to log.")
         AgentEventType eventType();
 
         @Meta.AD(
@@ -108,7 +111,7 @@ public class CSVLogger extends AgentEventLogger {
     @Activate
     public synchronized void activate(Map<String, Object> properties) {
         super.baseActivate(properties);
-        getLogger().info("CSVLogger [{}], actiaved", getLoggerId());
+        getLogger().info("CSVLogger [{}], activated", getLoggerId());
     }
 
     /**
@@ -167,12 +170,25 @@ public class CSVLogger extends AgentEventLogger {
         this.logFile = createLogFile(config.logFilenamePattern(), config.logLocation());
         if (!logFile.exists()) {
             String[] header = null;
-            if ("BidEvent".equals(getEventType().getDescription())) {
-                header = BID_HEADER_ROW;
-            } else if ("PriceEvent".equals(getEventType().getDescription())) {
+
+            switch (getEventType()) {
+            case PRICE_EVENT:
                 header = PRICE_HEADER_ROW;
+                break;
+            case BID_EVENT:
+                header = BID_HEADER_ROW;
+                break;
+            case WHITELIST_EVENT:
+                header = WHITELIST_HEADER_ROW;
+                break;
+            case PEAK_SHAVING_EVENT:
+                header = PEAKSHAVING_HEADER_ROW;
+            default:
+                break;
             }
-            writeLineToCSV(header, logFile);
+            if (header != null) {
+                writeLineToCSV(header, logFile);
+            }
         }
         updateObservables();
     }
@@ -268,12 +284,52 @@ public class CSVLogger extends AgentEventLogger {
                 output = createLineForBidLogRecord((BidLogRecord) logRecord);
             } else if (logRecord instanceof PriceUpdateLogRecord) {
                 output = createLineForPriceUpdateLog((PriceUpdateLogRecord) logRecord);
+            } else if (logRecord instanceof WhitelistLogRecord) {
+                output = createLineForWhitelistLogRecord((WhitelistLogRecord) logRecord);
+            } else if (logRecord instanceof PeakShavingLogRecord) {
+                output = createLineForPeakShavingLogRecor((PeakShavingLogRecord) logRecord);
             }
 
-            writeLineToCSV(output, logFile);
+            if (output != null) {
+                writeLineToCSV(output, logFile);
+            }
             removeLogRecord(logRecord);
         }
         getLogger().info("CSVLogger [{}] wrote to {}", getLoggerId(), logFile);
+    }
+
+    private String[] createLineForPeakShavingLogRecor(PeakShavingLogRecord logRecord) {
+
+        StringBuilder oldDemandBuilder = new StringBuilder();
+
+        for (Double d : logRecord.getOldDemand()) {
+            if (oldDemandBuilder.length() > 0) {
+                oldDemandBuilder.append("#");
+            }
+            oldDemandBuilder.append(d);
+        }
+
+        StringBuilder newDemandBuilder = new StringBuilder();
+
+        for (Double d : logRecord.getNewDemand()) {
+            if (newDemandBuilder.length() > 0) {
+                newDemandBuilder.append("#");
+            }
+            newDemandBuilder.append(d);
+        }
+
+        String oldPrice = logRecord.getOldPrice() == null ? "" : String.valueOf(logRecord.getOldPrice());
+        String newPrice = logRecord.getNewPrice() == null ? "" : String.valueOf(logRecord.getNewPrice());
+
+        return new String[] { getDateFormat().format(logRecord.getLogTime()), logRecord.getClusterId(),
+                logRecord.getAgentId(), String.valueOf(logRecord.getFloor()), String.valueOf(logRecord.getCeiling()),
+                oldDemandBuilder.toString(), newDemandBuilder.toString(), oldPrice, newPrice };
+    }
+
+    private String[] createLineForWhitelistLogRecord(WhitelistLogRecord logRecord) {
+        return new String[] { getDateFormat().format(logRecord.getLogTime()), logRecord.getClusterId(),
+                logRecord.getAgentId(), logRecord.getBlockedAgent(),
+                getDateFormat().format(logRecord.getEventTimestamp()) };
     }
 
     /**
@@ -312,13 +368,8 @@ public class CSVLogger extends AgentEventLogger {
                     if (pricePointBuiler.length() > 0) {
                         pricePointBuiler.append("|");
                     }
-                    // TODO fix this refactor
-
-                    // int priceStep = marketBasis.toPriceStep(p.getNormalizedPrice());
-                    pricePointBuiler.append(MarketBasis.PRICE_FORMAT.format(0));
-                    // pricePointBuiler.append(MarketBasis.PRICE_FORMAT.format(marketBasis.toPrice(priceStep)));
-                    
-                     pricePointBuiler.append("|").append(MarketBasis.DEMAND_FORMAT.format(p.getDemand()));
+                    pricePointBuiler.append(MarketBasis.PRICE_FORMAT.format(p.getPrice().getPriceValue()));
+                    pricePointBuiler.append("|").append(MarketBasis.DEMAND_FORMAT.format(p.getDemand()));
                 }
             }
         }
