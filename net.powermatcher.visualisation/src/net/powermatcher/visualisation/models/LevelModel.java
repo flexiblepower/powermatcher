@@ -4,8 +4,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * A data object representing a level for the visualizer. The visualization tree contains n levels. Level 0 is the top
- * level, the bottom level has to be determined.
+ * A data object representing a level for the visualizer. The visualization tree contains N levels. Level 0 is the top
+ * level, the Nth level has to be determined.
  * 
  * @author FAN
  * @version 1.0
@@ -19,23 +19,23 @@ public class LevelModel {
     private int level;
 
     /**
-     * The set of nodes in this level of the tree.
+     * The set of {@link NodeModel}'s in this level of the tree.
      */
     private Set<NodeModel> nodes;
 
     /**
-     * A constructor to create an instance with a certain level
+     * A constructor to create an instance with a certain level.
      * 
      * @param level
-     *            the number of the level of this instance
+     *            the number of the level of this instance.
      */
     public LevelModel(int level) {
         this.level = level;
+        //a treeSet because they have to be sorted.
         this.nodes = new TreeSet<NodeModel>();
     }
 
     /**
-     * 
      * @return the level of this instance.
      */
     public int getLevel() {
@@ -50,16 +50,17 @@ public class LevelModel {
     }
 
     /**
-     * @return the set of nodes of this level0
+     * @return the set of {@link NodeModel}'s of this level.
      */
     public Set<NodeModel> getNodes() {
         return nodes;
     }
 
     /**
-     * Adds a node to the node Set of this level.
+     * Adds a {@link NodeModel} to the nodes Set of this level.
      * 
-     * @param node the node that has to be added.
+     * @param node
+     *            the {@link NodeModel} that has to be added.
      */
     public void addNode(NodeModel node) {
         this.nodes.add(node);
