@@ -10,7 +10,7 @@ public class Price implements Comparable<Price> {
 
 	public Price(MarketBasis marketBasis, double price) {
 		if(marketBasis == null) {
-			throw new NullPointerException("marketBasis");
+			throw new IllegalArgumentException("marketBasis not allowed to be null");
 		} else if(Double.isNaN(price)) {
 			throw new IllegalArgumentException("Price NaN is not valid");
 		} else if(price < marketBasis.getMinimumPrice() || price > marketBasis.getMaximumPrice()) {

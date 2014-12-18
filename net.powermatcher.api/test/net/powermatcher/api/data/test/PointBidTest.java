@@ -92,6 +92,14 @@ public class PointBidTest {
         assertThat(buildBid.getPricePoints()[0], is(equalTo(pricePoint)));
         assertThat(buildBid.getPricePoints().length, is(equalTo(1)));
     }
+    
+    @Test
+    public void testBuilderSetBidNumber() {
+        PointBid.Builder builder = new Builder(marketBasisFiveSteps);
+        builder.setBidNumber(bidNumber);
+        PointBid buildBid = builder.build();
+        assertThat(buildBid.getBidNumber(), is(equalTo(bidNumber)));
+    }
 
     @Test
     public void testBuilderAddPriceDemand() {
@@ -157,6 +165,14 @@ public class PointBidTest {
         price = new Price(marketBasisTenSteps, 3);
         demandAt = bid2.getDemandAt(price);
         assertThat(demandAt, is(equalTo(21.666666666666668)));
+        
+        price = new Price(marketBasisTenSteps, 7);
+        demandAt = bid2.getDemandAt(price);
+        assertThat(demandAt, is(equalTo(25.0)));
+
+        price = new Price(marketBasisTenSteps, -1);
+        demandAt = bid2.getDemandAt(price);
+        assertThat(demandAt, is(equalTo(20.0)));
     }
 
     @Test
