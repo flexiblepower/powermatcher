@@ -41,7 +41,7 @@ import aQute.bnd.annotation.component.Reference;
  * 
  */
 @Component(immediate = true)
-public class SessionManager implements SessionManagerInterface {
+public class SessionManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionManager.class);
 
@@ -98,53 +98,6 @@ public class SessionManager implements SessionManagerInterface {
             }
         }
         updateConnections();
-    }
-
-    private boolean isNotUniqueAgentId(String agentId, AgentEndpoint agentEndpoint, MatcherEndpoint matcherEndpoint) {
-        if (agentIds.contains(agentId)) {
-            if (agentEndpoint != null && agentEndpoints.get(agentId) != null) {
-                AgentEndpoint oldAgentEndpoint = agentEndpoints.get(agentId);
-                deleteAgentId(agentId, oldAgentEndpoint, null);
-
-                return false;
-            } else if (matcherEndpoint != null && (matcherEndpoints.get(agentId) != null)) {
-                MatcherEndpoint oldMatcherEndpoint = matcherEndpoints.get(agentId);
-                deleteAgentId(agentId, null, oldMatcherEndpoint);
-                
-                return false;
-            }
-        } else {
-            if (!agentIds.contains(agentId)) {
-                agentIds.add(agentId);
-            }
-        }
-
-        return true;
-    }
-
-    private void deleteAgentId(String AgentId, AgentEndpoint agentEndpoint, MatcherEndpoint matcherEndpoint) {
-        String pidOldAgentEndpoint;
-        try {
-            for (Configuration c : configurationAdmin.listConfigurations(null)) {
-                if (agentEndpoint != null) {
-                    pidOldAgentEndpoint = agentEndpoint.getServicePid();
-                } else {
-                    pidOldAgentEndpoint = matcherEndpoint.getServicePid();
-                }
-                String pidConfigAgentEndpoint = (String) c.getProperties().get("service.pid");
-                if (agentEndpoint.getAgentId().equals((String) c.getProperties().get("agentId"))) {
-                    // dont't delete old same agentId in configAdmin
-                    if (!pidOldAgentEndpoint.equals(pidConfigAgentEndpoint)) {
-                        LOGGER.error("AgentId " + agentEndpoint.getAgentId() + "was already registered." );
-                        c.delete();
-                    }
-                }
-            }
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage());
-        } catch (InvalidSyntaxException e) {
-            LOGGER.error(e.getMessage());
-        }
     }
 
     @Activate
@@ -211,6 +164,50 @@ public class SessionManager implements SessionManagerInterface {
         }
     }
 
+    private boolean isNotUniqueAgentId(String agentId, AgentEndpoint agentEndpoint, MatcherEndpoint matcherEndpoint) {
+        if (agentIds.contains(agentId)) {
+            if (agentEndpoint != null && agentEndpoints.get(agentId) != null) {
+                AgentEndpoint oldAgentEndpoint = agentEndpoints.get(agentId);
+                deleteAgentId(agentId, oldAgentEndpoint, null);
+
+                return false;
+            } else if (matcherEndpoint != null && (matcherEndpoints.get(agentId) != null)) {
+                MatcherEndpoint oldMatcherEndpoint = matcherEndpoints.get(agentId);
+                deleteAgentId(agentId, null, oldMatcherEndpoint);
+
+                return false;
+            }
+        } else {
+            if (!agentIds.contains(agentId)) {
+                agentIds.add(agentId);
+            }
+        }
+        return true;
+    }
+
+    private void deleteAgentId(String AgentId, AgentEndpoint agentEndpoint, MatcherEndpoint matcherEndpoint) {
+        String pidOldAgentEndpoint;
+        try {
+            for (Configuration c : configurationAdmin.listConfigurations(null)) {
+                if (agentEndpoint != null) {
+                    pidOldAgentEndpoint = agentEndpoint.getServicePid();
+                } else {
+                    pidOldAgentEndpoint = matcherEndpoint.getServicePid();
+                }
+                String pidConfigAgentEndpoint = (String) c.getProperties().get("service.pid");
+                if ((agentEndpoint.getAgentId().equals((String) c.getProperties().get("agentId")))
+                        && (!pidOldAgentEndpoint.equals(pidConfigAgentEndpoint))) {
+                    LOGGER.error("AgentId " + agentEndpoint.getAgentId() + "was already registered.");
+                    c.delete();
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage());
+        } catch (InvalidSyntaxException e) {
+            LOGGER.error(e.getMessage());
+        }
+    }
+
     public void removeMatcherEndpoint(MatcherEndpoint matcherEndpoint) {
         Agent agent = (Agent) matcherEndpoint;
         String matcherId = agent.getAgentId();
@@ -225,12 +222,10 @@ public class SessionManager implements SessionManagerInterface {
         activeSessions.remove(sessionImpl.getSessionId());
     }
 
-    @Override
     public Map<String, AgentEndpoint> getAgentEndpoints() {
         return new HashMap<String, AgentEndpoint>(agentEndpoints);
     }
 
-    @Override
     public Map<String, MatcherEndpoint> getMatcherEndpoints() {
         return new HashMap<String, MatcherEndpoint>(matcherEndpoints);
     }
@@ -240,7 +235,6 @@ public class SessionManager implements SessionManagerInterface {
      * 
      * @return {@link Session}
      */
-    @Override
     public Map<String, Session> getActiveSessions() {
         return new HashMap<String, Session>(activeSessions);
     }
@@ -249,7 +243,7 @@ public class SessionManager implements SessionManagerInterface {
     protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
         this.configurationAdmin = configurationAdmin;
     }
-    
+
     public void setAgentIds(List<String> agentIds) {
         this.agentIds = agentIds;
     }

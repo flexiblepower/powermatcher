@@ -63,7 +63,7 @@ public class PVPanelAgent extends BaseDeviceAgent implements AgentEndpoint {
         this.setAgentId(config.agentId());
         this.setDesiredParentId(config.desiredParentId());
         this.setServicePid((String) properties.get("service.pid"));
-        
+
         this.minimumDemand = config.minimumDemand();
         this.maximumDemand = config.maximumDemand();
         scheduledFuture = scheduler.scheduleAtFixedRate(new Runnable() {
@@ -89,10 +89,10 @@ public class PVPanelAgent extends BaseDeviceAgent implements AgentEndpoint {
         if (getMarketBasis() != null) {
             double demand = minimumDemand + (maximumDemand - minimumDemand) * generator.nextDouble();
 
-            PricePoint pricePoint1 = new PricePoint(new Price(getMarketBasis(),
-                    getMarketBasis().getMinimumPrice()), demand);
-            PricePoint pricePoint2 = new PricePoint(new Price(getMarketBasis(),
-                    getMarketBasis().getMaximumPrice()), minimumDemand);
+            PricePoint pricePoint1 = new PricePoint(new Price(getMarketBasis(), getMarketBasis().getMinimumPrice()),
+                    demand);
+            PricePoint pricePoint2 = new PricePoint(new Price(getMarketBasis(), getMarketBasis().getMaximumPrice()),
+                    minimumDemand);
 
             Bid newBid = createBid(pricePoint1, pricePoint2);
             LOGGER.debug("updateBid({})", newBid);

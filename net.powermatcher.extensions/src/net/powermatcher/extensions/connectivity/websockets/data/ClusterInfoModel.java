@@ -4,23 +4,23 @@ package net.powermatcher.extensions.connectivity.websockets.data;
  * CusterInfo model class to transfer clusterId and {@link MarketBasis} data over the wire.
  */
 public class ClusterInfoModel {
-	private MarketBasisModel marketBasis;
+    private MarketBasisModel marketBasis;
 
-	private String clusterId;
+    private String clusterId;
 
-	public MarketBasisModel getMarketBasis() {
-		return marketBasis;
-	}
+    public MarketBasisModel getMarketBasis() {
+        return marketBasis;
+    }
 
-	public void setMarketBasis(MarketBasisModel marketBasis) {
-		this.marketBasis = marketBasis;
-	}
+    public void setMarketBasis(MarketBasisModel marketBasis) {
+        this.marketBasis = marketBasis;
+    }
 
-	public String getClusterId() {
-		return clusterId;
-	}
+    public String getClusterId() {
+        return clusterId;
+    }
 
-	public void setClusterId(String clusterId) {
-		this.clusterId = clusterId;
-	}
+    public void setClusterId(String clusterId) {
+        this.clusterId = clusterId;
+    }
 }

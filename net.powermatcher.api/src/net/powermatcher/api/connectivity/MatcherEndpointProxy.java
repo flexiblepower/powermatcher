@@ -6,19 +6,19 @@ import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.PriceUpdate;
 
 public interface MatcherEndpointProxy extends MatcherEndpoint {
-	boolean connectRemote();
-	
-	boolean disconnectRemote();
+    boolean connectRemote();
 
-	boolean isLocalConnected();
+    boolean disconnectRemote();
 
-	boolean isRemoteConnected();
-	
-	void updateBidRemote(Bid newBid);
+    boolean isLocalConnected();
 
-	void updateLocalPrice(PriceUpdate priceUpdate);
-	
-	void updateRemoteMarketBasis(MarketBasis marketBasis);
-	
-	void updateRemoteClusterId(String clusterId);
+    boolean isRemoteConnected();
+
+    void updateBidRemote(Bid newBid);
+
+    void updateLocalPrice(PriceUpdate priceUpdate);
+
+    void updateRemoteMarketBasis(MarketBasis marketBasis);
+
+    void updateRemoteClusterId(String clusterId);
 }

@@ -57,7 +57,7 @@ public class ObjectiveAgent extends BaseObjectiveAgent {
         MarketBasis marketBasis = new MarketBasis(COMMODITY_ELECTRICITY, CURRENCY_EUR, 5, -1.0d, 7.0d);
         double[] demand = new double[] { 100.0d, 50.0d, 50.0d, 0.0d, 0.0d };
 
-        ArrayBid objectiveBid = new ArrayBid(marketBasis,1, demand);
+        ArrayBid objectiveBid = new ArrayBid(marketBasis, 1, demand);
 
         ArrayBid aggregatedObjectiveBid = objectiveBid.aggregate(aggregatedBid);
 

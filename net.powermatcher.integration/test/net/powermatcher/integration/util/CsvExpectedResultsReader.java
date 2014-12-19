@@ -85,7 +85,7 @@ public class CsvExpectedResultsReader {
             String commodity = "electricity";
             String currency = "EUR";
             try {
-                int priceSteps =  Integer.valueOf(marketBasisData.get(0));
+                int priceSteps = Integer.valueOf(marketBasisData.get(0));
                 double minimumPrice = Double.valueOf(marketBasisData.get(1));
                 double maximumPrice = Double.valueOf(marketBasisData.get(2));
 

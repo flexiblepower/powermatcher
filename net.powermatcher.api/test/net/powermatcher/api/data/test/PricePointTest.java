@@ -52,7 +52,7 @@ public class PricePointTest {
         assertThat(pricePoint.equals(pricePoint), is(true));
         assertThat(pricePoint.equals(other), is(true));
         assertThat(other.equals(pricePoint), is(true));
-        
+
     }
 
     @Test

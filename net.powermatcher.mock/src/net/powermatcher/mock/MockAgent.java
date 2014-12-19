@@ -21,7 +21,7 @@ public class MockAgent implements Agent, AgentEndpoint, ObservableAgent {
     private PriceUpdate lastPriceUpdate;
     protected Session session;
     private String desiredParentId;
-    
+
     private String servicePid;
 
     /**
@@ -89,8 +89,8 @@ public class MockAgent implements Agent, AgentEndpoint, ObservableAgent {
     public void removeObserver(AgentObserver observer) {
         observers.remove(observer);
     }
-    
-    public Session getSession(){
+
+    public Session getSession() {
         return this.session;
     }
 

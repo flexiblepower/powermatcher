@@ -53,7 +53,7 @@ public class BidCacheTest {
         ArrayBid updateBid = bidCache.updateBid("agent1", bid2);
         assertThat(updateBid, is(equalTo(bid1)));
     }
-    
+
     @Test
     public void testGetAggregatedBid() {
         ArrayBid aggregatedBid = bidCache.getAggregatedBid(null);
@@ -73,7 +73,7 @@ public class BidCacheTest {
         removeAgent = bidCache.removeAgent("agent1");
         assertThat(removeAgent, is(equalTo(bid)));
     }
-    
+
     @Test
     public void testGetMatchingSnapshot() {
         String agentId = "agent1";
@@ -87,17 +87,17 @@ public class BidCacheTest {
         assertThat(bidNumbers.size(), is(equalTo(1)));
         assertThat(bidNumbers.get(agentId), is(equalTo(0)));
     }
-    
+
     @Test
     public void testGetLast() {
         String agentId = "agent1";
         ArrayBid lastBid = bidCache.getLastBid(agentId);
         assertThat(lastBid, is(nullValue()));
-        
+
         ArrayBid bid = new ArrayBid(marketBasis, 0, new double[] { 6, 5, 4, 3, 2 });
         bidCache.updateBid(agentId, bid);
         bidCache.getAggregatedBid(marketBasis);
-        
+
         lastBid = bidCache.getLastBid(agentId);
         assertThat(lastBid, is(equalTo(bid)));
     }
@@ -107,7 +107,7 @@ public class BidCacheTest {
         Set<String> expected = new HashSet<String>();
         expected.add("agent1");
         expected.add("agent2");
-        double[] expectedDemand =new double[]{10,8,7,6,3};
+        double[] expectedDemand = new double[] { 10, 8, 7, 6, 3 };
 
         ArrayBid bid = new ArrayBid(marketBasis, 0, new double[] { 6, 5, 4, 3, 2 });
         bidCache.updateBid("agent1", bid);
@@ -115,11 +115,11 @@ public class BidCacheTest {
         ArrayBid bid2 = new ArrayBid(marketBasis, 0, new double[] { 4, 3, 3, 3, 1 });
         bidCache.updateBid("agent1", bid);
         bidCache.updateBid("agent2", bid2);
-        
+
         ArrayBid aggregatedBid = bidCache.getAggregatedBid(marketBasis);
         assertThat(aggregatedBid.getBidNumber(), is(equalTo(1)));
         assertThat(aggregatedBid.getDemand(), is(equalTo(expectedDemand)));
-        
+
         Set<String> cleanup = bidCache.cleanup();
         assertThat(cleanup, is(equalTo(expected)));
     }

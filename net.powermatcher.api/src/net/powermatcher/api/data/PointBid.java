@@ -201,7 +201,7 @@ public class PointBid extends Bid implements Iterable<PricePoint> {
     public PricePoint[] getPricePoints() {
         return Arrays.copyOf(pricePoints, pricePoints.length);
     }
-    
+
     @Override
     public int hashCode() {
         return 2011 * Arrays.deepHashCode(pricePoints) + 3557 * bidNumber + marketBasis.hashCode();

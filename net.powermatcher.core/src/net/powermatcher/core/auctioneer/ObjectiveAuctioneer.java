@@ -170,7 +170,7 @@ public class ObjectiveAuctioneer extends Auctioneer {
         if (this.objectiveEndpoint == objectiveEndpoint) {
             this.objectiveEndpoint = null;
             LOGGER.debug("Removed objective agent");
-        } 
+        }
     }
 
     @Override
@@ -179,7 +179,8 @@ public class ObjectiveAuctioneer extends Auctioneer {
         session.setClusterId(this.getClusterId());
 
         this.sessions.add(session);
-        this.aggregatedBids.updateBid(session.getSessionId(), new ArrayBid.Builder(this.marketBasis).setDemand(0).build());
+        this.aggregatedBids.updateBid(session.getSessionId(), new ArrayBid.Builder(this.marketBasis).setDemand(0)
+                .build());
         LOGGER.info("Agent connected with session [{}]", session.getSessionId());
         return true;
     }
@@ -211,10 +212,10 @@ public class ObjectiveAuctioneer extends Auctioneer {
 
         LOGGER.debug("Received from session [{}] bid update [{}] ", session.getSessionId(), newBid);
 
-        this.publishEvent(new IncomingBidEvent(session.getClusterId(), getAgentId(), session.getSessionId(), timeService
-                .currentDate(), session.getAgentId(), newBid, Qualifier.AGENT));
+        this.publishEvent(new IncomingBidEvent(session.getClusterId(), getAgentId(), session.getSessionId(),
+                timeService.currentDate(), session.getAgentId(), newBid, Qualifier.AGENT));
     }
-    
+
     /**
      * Generates the new price out of the aggregated bids and sends this to all listeners. The listeners can be device
      * agents and objective agents. TODO This is temporarily made public instead of default to test some things. This
@@ -243,14 +244,14 @@ public class ObjectiveAuctioneer extends Auctioneer {
         BidCacheSnapshot bidCacheSnapshot = this.aggregatedBids.getMatchingSnapshot(aggregatedBid.getBidNumber());
 
         for (Session session : this.sessions) {
-        	Integer bidNumber = bidCacheSnapshot.getBidNumbers().get(session.getAgentId());
-        	if(bidNumber != null) {
-        		PriceUpdate sessionPriceUpdate = new PriceUpdate(newPrice, bidNumber);
-        		this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), getAgentId(), session.getSessionId(),
-        				timeService.currentDate(), sessionPriceUpdate, Qualifier.MATCHER));
-        		session.updatePrice(sessionPriceUpdate);
-        		LOGGER.debug("New price: {}, session {}", sessionPriceUpdate, session.getSessionId());
-        	}
+            Integer bidNumber = bidCacheSnapshot.getBidNumbers().get(session.getAgentId());
+            if (bidNumber != null) {
+                PriceUpdate sessionPriceUpdate = new PriceUpdate(newPrice, bidNumber);
+                this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), getAgentId(), session
+                        .getSessionId(), timeService.currentDate(), sessionPriceUpdate, Qualifier.MATCHER));
+                session.updatePrice(sessionPriceUpdate);
+                LOGGER.debug("New price: {}, session {}", sessionPriceUpdate, session.getSessionId());
+            }
         }
     }
 

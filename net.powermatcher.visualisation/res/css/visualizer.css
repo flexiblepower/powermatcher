@@ -16,6 +16,7 @@
 	background-color: white;
 	margin-top: 25px;
 	height: 600px;
+	overflow: auto;
 }
 
 #new-menu {

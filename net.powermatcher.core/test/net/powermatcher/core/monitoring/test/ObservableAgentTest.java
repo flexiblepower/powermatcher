@@ -86,6 +86,7 @@ public class ObservableAgentTest {
     private AgentEvent createDummyEvent() {
         MarketBasis marketBasis = new MarketBasis("Electicity", "EUR", 10, 0.0, 100.0);
         PriceUpdate priceUpdate = new PriceUpdate(new Price(marketBasis, 0), 0);
-        return new IncomingPriceUpdateEvent("defaultCluster", "agent1", "sessionId", new Date(), priceUpdate,Qualifier.AGENT);
+        return new IncomingPriceUpdateEvent("defaultCluster", "agent1", "sessionId", new Date(), priceUpdate,
+                Qualifier.AGENT);
     }
 }

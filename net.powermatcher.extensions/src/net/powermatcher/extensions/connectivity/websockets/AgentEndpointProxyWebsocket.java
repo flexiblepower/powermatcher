@@ -23,15 +23,15 @@ import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
 /**
- * WebSocket implementation of an {@link AgentEndpointProxy}.
- * Enabled two agents to communicate via WebSockets and JSON over a TCP connection.
+ * WebSocket implementation of an {@link AgentEndpointProxy}. Enabled two agents to communicate via WebSockets and JSON
+ * over a TCP connection.
  */
-@Component(designateFactory = AgentEndpointProxyWebsocket.Config.class, immediate = true, 
-	provide = { ObservableAgent.class, AgentEndpoint.class, AgentEndpointProxy.class, AgentEndpointProxyWebsocket.class })
+@Component(designateFactory = AgentEndpointProxyWebsocket.Config.class, immediate = true, provide = {
+        ObservableAgent.class, AgentEndpoint.class, AgentEndpointProxy.class, AgentEndpointProxyWebsocket.class })
 public class AgentEndpointProxyWebsocket extends BaseAgentEndpointProxy {
     private static final Logger LOGGER = LoggerFactory.getLogger(AgentEndpointProxyWebsocket.class);
 
-	@Meta.OCD
+    @Meta.OCD
     public static interface Config {
         @Meta.AD(deflt = "concentrator", description = "desired parent to connect to")
         String desiredParentId();
@@ -42,80 +42,78 @@ public class AgentEndpointProxyWebsocket extends BaseAgentEndpointProxy {
         @Meta.AD(deflt = "matcherendpointproxy", description = "Remote matcher endpoint proxy")
         String remoteAgentEndpointId();
     }
-    
-	private org.eclipse.jetty.websocket.api.Session remoteSession;
-	
-	@Activate
-	public void activate(Map<String, Object> properties) {
+
+    private org.eclipse.jetty.websocket.api.Session remoteSession;
+
+    @Activate
+    public void activate(Map<String, Object> properties) {
         Config config = Configurable.createConfigurable(Config.class, properties);
 
         this.setDesiredParentId(config.desiredParentId());
         this.setAgentId(config.agentId());
         this.setMatcherEndpointProxyId(config.remoteAgentEndpointId());
-	}
-	
-	@Deactivate
-	public void deactivated() {
-		if (this.isRemoteConnected()) {
-			this.remoteSession.close();
-		}
-	}
+    }
 
-	public void remoteAgentConnected(org.eclipse.jetty.websocket.api.Session session) 
-			throws OperationNotSupportedException {
-		if (this.isRemoteConnected()) {
-			throw new OperationNotSupportedException("Remote Agent already connected.");
-		}
-		
-		this.remoteSession = session;
-		
-		// Notify the remote agent about the cluster
-		sendCusterInformation();
-	}
-	
-	public void remoteAgentDisconnected() {
-		this.remoteSession = null;
-	}
+    @Deactivate
+    public void deactivated() {
+        if (this.isRemoteConnected()) {
+            this.remoteSession.close();
+        }
+    }
 
-	@Override
-	public boolean isRemoteConnected() {
-		return this.remoteSession != null && this.remoteSession.isOpen();
-	}
+    public void remoteAgentConnected(org.eclipse.jetty.websocket.api.Session session)
+            throws OperationNotSupportedException {
+        if (this.isRemoteConnected()) {
+            throw new OperationNotSupportedException("Remote Agent already connected.");
+        }
 
-	@Override
-	public void updateRemotePrice(PriceUpdate newPrice) {
-		try 
-		{
-			// Create price update message
-			PmJsonSerializer serializer = new PmJsonSerializer();
-			String message = serializer.serializePriceUpdate(newPrice);
-			this.remoteSession.getRemote().sendString(message);
-		} catch (IOException e) {
-			LOGGER.warn("Unable to send price update to remote agent, reason {}", e);
-		}
-	}
+        this.remoteSession = session;
 
-	@Override
-	public void connectToMatcher(Session session) {
-		super.connectToMatcher(session);
-		
-		// Local matcher is connected, provide cluster information to remote agent.
-		sendCusterInformation();
-	}
+        // Notify the remote agent about the cluster
+        sendCusterInformation();
+    }
 
-	private void sendCusterInformation() {
-		if (!isRemoteConnected() || this.getLocalMarketBasis() == null) {
-			// Skip sending information
-			return;
-		}
-		
-		try 
-		{
-			PmJsonSerializer serializer = new PmJsonSerializer();
-			String message = serializer.serializeClusterInfo(this.getClusterId(), this.getLocalMarketBasis());
-			this.remoteSession.getRemote().sendString(message);
-		} catch (IOException e) {
-			LOGGER.warn("Unable to send price update to remote agent, reason {}", e);
-		}
-	}
+    public void remoteAgentDisconnected() {
+        this.remoteSession = null;
+    }
+
+    @Override
+    public boolean isRemoteConnected() {
+        return this.remoteSession != null && this.remoteSession.isOpen();
+    }
+
+    @Override
+    public void updateRemotePrice(PriceUpdate newPrice) {
+        try {
+            // Create price update message
+            PmJsonSerializer serializer = new PmJsonSerializer();
+            String message = serializer.serializePriceUpdate(newPrice);
+            this.remoteSession.getRemote().sendString(message);
+        } catch (IOException e) {
+            LOGGER.warn("Unable to send price update to remote agent, reason {}", e);
+        }
+    }
+
+    @Override
+    public void connectToMatcher(Session session) {
+        super.connectToMatcher(session);
+
+        // Local matcher is connected, provide cluster information to remote agent.
+        sendCusterInformation();
+    }
+
+    private void sendCusterInformation() {
+        if (!isRemoteConnected() || this.getLocalMarketBasis() == null) {
+            // Skip sending information
+            return;
+        }
+
+        try {
+            PmJsonSerializer serializer = new PmJsonSerializer();
+            String message = serializer.serializeClusterInfo(this.getClusterId(), this.getLocalMarketBasis());
+            this.remoteSession.getRemote().sendString(message);
+        } catch (IOException e) {
+            LOGGER.warn("Unable to send price update to remote agent, reason {}", e);
+        }
+    }
 }

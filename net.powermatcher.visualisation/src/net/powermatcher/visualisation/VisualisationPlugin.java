@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 import aQute.bnd.annotation.component.Activate;
@@ -35,6 +36,12 @@ import aQute.bnd.annotation.component.Reference;
 import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
+/**
+ * {@link HttpServlet} used by the visualizer frontend.
+ * 
+ * @author FAN
+ * @version 1.0
+ */
 @Component(
         provide = Servlet.class,
         properties = { "felix.webconsole.title=Powermatcher cluster visualizer",
@@ -44,8 +51,14 @@ import aQute.bnd.annotation.metatype.Meta;
 public class VisualisationPlugin extends HttpServlet {
     private static final long serialVersionUID = -3582669073153236495L;
 
+    /**
+     * The slf4j {@link Logger} instance.
+     */
     private static final Logger LOGGER = LoggerFactory.getLogger(VisualisationPlugin.class);
 
+    /**
+     * The Base path of this servlet.
+     */
     private static final String BASE_PATH = "/pm-cluster-visualizer";
 
     /**
@@ -60,38 +73,66 @@ public class VisualisationPlugin extends HttpServlet {
         List<String> menu();
     }
 
+    /**
+     * An {@link ConfigurationAdmin} instance
+     */
     private ConfigurationAdmin configurationAdmin;
 
+    /**
+     * The filter used to alert observables
+     */
     private List<String> filter = new ArrayList<>();
 
-    private Map<String, List<String>> menu = new HashMap<>();
+    /**
+     * The {@link MenuItemModel} items
+     */
+    private Map<String, MenuItemModel> menuItems;
 
+    /**
+     * The method called by OSGi to turn this instance into a managed service.
+     */
     @Activate
     public void activate(Map<String, Object> properties) {
         Config config = Configurable.createConfigurable(Config.class, properties);
 
-        List<String> tempList;
-
-        for (String s : config.menu()) {
-            String[] temp = s.split("::");
-            filter.add(temp[1]);
-
-            if (!menu.containsKey(temp[0])) {
-                tempList = new ArrayList<>();
-                tempList.add(temp[1]);
-
-                menu.put(temp[0], tempList);
-            } else {
-                tempList = menu.get(temp[0]);
-                tempList.add(temp[1]);
-
-                menu.put(temp[0], tempList);
-            }
-        }
-
+        menuItems = new HashMap<>();
+        fillMenuItems(config.menu());
         LOGGER.info("VisualisationPlugin [{}], activated");
     }
 
+    /**
+     * Fills the menuItems Map.
+     * 
+     * @param input
+     *            the List containing String values, separated with ::
+     */
+    private void fillMenuItems(List<String> input) {
+        MenuItemModel menuItem;
+        SubMenuItemModel subMenuItem;
+
+        for (String s : input) {
+            String[] temp = s.split("::");
+
+            String fpid = temp[1];
+            filter.add(fpid);
+
+            menuItem = new MenuItemModel(temp[0]);
+
+            String title = temp[1].substring(fpid.lastIndexOf(".") + 1);
+            subMenuItem = new SubMenuItemModel(title, fpid);
+
+            if (menuItems.containsKey(menuItem.getTitle())) {
+                menuItems.get(menuItem.getTitle()).addSubMenuItem(subMenuItem);
+            } else {
+                menuItem.addSubMenuItem(subMenuItem);
+                menuItems.put(menuItem.getTitle(), menuItem);
+            }
+        }
+    }
+
+    /**
+     * @see HttpServlet#doGet
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
@@ -118,6 +159,9 @@ public class VisualisationPlugin extends HttpServlet {
         }
     }
 
+    /**
+     * @see HttpServlet#doPost
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
@@ -140,34 +184,25 @@ public class VisualisationPlugin extends HttpServlet {
         resp.getWriter().print(output.toString());
     }
 
+    /**
+     * @return the menuItems map as a {@link JsonObject}.
+     */
     private JsonObject getMenuAsJson() {
-
-        List<MenuItemModel> menuItems = new ArrayList<>();
-        MenuItemModel menuItem;
-        SubMenuItemModel subMenuItem;
 
         Gson gson = new Gson();
         JsonObject output = new JsonObject();
 
-        for (String s : menu.keySet()) {
-            menuItem = new MenuItemModel(s);
-
-            for (String fpid : menu.get(s)) {
-                String title = fpid.substring(fpid.lastIndexOf(".") + 1);
-                subMenuItem = new SubMenuItemModel(title, fpid);
-                menuItem.addSubMenuItem(subMenuItem);
-            }
-            menuItems.add(menuItem);
-        }
-
-        output.add("menu", gson.toJsonTree(menuItems));
+        output.add("menu", gson.toJsonTree(menuItems.values()));
 
         return output;
     }
 
+    /**
+     * @return all {@link LevelModel}'s of this cluster as a {@link JsonObject}.
+     */
     private JsonObject getNodesAsJson() {
 
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder().serializeNulls().create();
         JsonObject output = new JsonObject();
 
         Map<Integer, LevelModel> levelMap = new HashMap<>();
@@ -200,7 +235,7 @@ public class VisualisationPlugin extends HttpServlet {
             String desiredParent = nm.getDesiredParentId();
 
             // determining the level
-            while (!"null".equals(desiredParent) || nodes.containsKey(desiredParent)) {
+            while (desiredParent != null && nodes.containsKey(desiredParent)) {
                 count++;
                 desiredParent = nodes.get(desiredParent).getDesiredParentId();
             }
@@ -218,22 +253,29 @@ public class VisualisationPlugin extends HttpServlet {
         return output;
     }
 
+    /**
+     * OSGi calls this method to get a resource before calling this.doGet. If this method returns en URL, it returns the
+     * resource. If it returns <code>null</code>, it calls this.doGet
+     * 
+     * @param path
+     *            the path of the requested resource
+     * @return the {@link URL} if the resource exists or <code>null</code> if it's not an accepted file format.
+     */
     protected URL getResource(String path) {
-
-        // OSGi's AbstractWebConsole.doGet calls this method, so
-        // don't remove it!
-        // if you return null, it'll continue with AbstractWebConsole.doGet and return the resource. If you return null,
-        // it calls this.doGet()
-
         if (path.endsWith(".js") || path.endsWith(".png") || path.endsWith(".css")) {
             String newPath = path.replaceAll(BASE_PATH + "/", "");
             return getClass().getClassLoader().getResource(newPath);
         } else {
-            // if you return null, it calls to doGet
             return null;
         }
     }
 
+    /**
+     * This method is used by OSGi to inject the {@link ConfigurationAdmin}.
+     * 
+     * @param the
+     *            {@link ConfigurationAdmin} instance.
+     */
     @Reference
     protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
         this.configurationAdmin = configurationAdmin;

@@ -46,7 +46,7 @@ public abstract class LogRecord {
      * @param qualifier
      *            The qualifier of the agent that published the {@link AgentEvent}.
      */
-    protected LogRecord( String clusterId,  String agentId,  Date logTime, Date eventTimestamp, DateFormat dateFormat) {
+    protected LogRecord(String clusterId, String agentId, Date logTime, Date eventTimestamp, DateFormat dateFormat) {
         this.clusterId = clusterId;
         this.agentId = agentId;
         this.logTime = logTime;
@@ -73,5 +73,5 @@ public abstract class LogRecord {
     public DateFormat getDateFormat() {
         return dateFormat;
     }
-    
+
 }

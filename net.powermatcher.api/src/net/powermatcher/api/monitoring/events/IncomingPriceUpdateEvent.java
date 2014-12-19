@@ -20,8 +20,7 @@ public class IncomingPriceUpdateEvent extends PriceUpdateEvent {
      * Constructs an instance of this class.
      * 
      * @param clusterId
-	 *            The id of the cluster the {@link AgentEndpoint} subclass sending
-	 *            the UpdateEvent is running in.
+     *            The id of the cluster the {@link AgentEndpoint} subclass sending the UpdateEvent is running in.
      * @param agentId
      *            The id of the {@link AgentEndpoint} subclass sending the UpdateEvent.
      * @param sessionId
@@ -31,7 +30,8 @@ public class IncomingPriceUpdateEvent extends PriceUpdateEvent {
      * @param priceUpdate
      *            The received {@link PriceUpdate}.
      */
-    public IncomingPriceUpdateEvent(String clusterId, String agentId, String sessionId, Date timestamp, PriceUpdate priceUpdate, Qualifier qualifier) {
+    public IncomingPriceUpdateEvent(String clusterId, String agentId, String sessionId, Date timestamp,
+            PriceUpdate priceUpdate, Qualifier qualifier) {
         super(clusterId, agentId, sessionId, timestamp, priceUpdate, qualifier);
     }
 

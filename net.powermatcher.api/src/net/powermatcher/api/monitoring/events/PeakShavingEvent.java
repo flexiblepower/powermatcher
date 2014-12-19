@@ -41,7 +41,7 @@ public class PeakShavingEvent extends AgentEvent {
     public double[] getNewDemand() {
         return Arrays.copyOf(newDemand, newDemand.length);
     }
-    
+
     public Price getOldPrice() {
         return oldPrice;
     }
@@ -78,7 +78,7 @@ public class PeakShavingEvent extends AgentEvent {
             }
             sb.append("}, ");
         }
-        //TODO add Price to toString
+        // TODO add Price to toString
         return super.toString() + ", floor = " + floor + ", ceiling = " + ceiling + sb.toString();
     }
 }
