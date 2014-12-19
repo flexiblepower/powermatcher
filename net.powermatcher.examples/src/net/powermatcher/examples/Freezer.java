@@ -62,6 +62,8 @@ public class Freezer extends BaseDeviceAgent implements AgentEndpoint {
         Config config = Configurable.createConfigurable(Config.class, properties);
         this.setAgentId(config.agentId());
         this.setDesiredParentId(config.desiredParentId());
+        this.setServicePid((String) properties.get("service.pid"));
+        
         this.minimumDemand = config.minimumDemand();
         this.maximumDemand = config.maximumDemand();
         scheduledFuture = scheduler.scheduleAtFixedRate(new Runnable() {
