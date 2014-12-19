@@ -38,7 +38,7 @@ public class ObjectiveAuctioneerTest {
 
     private SessionManager sessionManager;
 
-    private static final String AUCTIONEER_NAME = "objectiveauctioneer";
+    private static final String OBJECTIVE_AUCTIONEER_NAME = "objectiveauctioneer";
     private static final String OBJECTIVE_AGENT_NAME = "objectiveagent";
 
     private BidCache aggregatedBids;
@@ -55,9 +55,9 @@ public class ObjectiveAuctioneerTest {
         this.objectiveauctioneer.addObjectiveEndpoint(this.mockObjectiveAgent);
 
         auctioneerProperties = new HashMap<String, Object>();
-        auctioneerProperties.put("agentId", AUCTIONEER_NAME);
+        auctioneerProperties.put("agentId", OBJECTIVE_AUCTIONEER_NAME);
         auctioneerProperties.put("clusterId", "DefaultCluster");
-        auctioneerProperties.put("matcherId", AUCTIONEER_NAME);
+        auctioneerProperties.put("matcherId", OBJECTIVE_AUCTIONEER_NAME);
         auctioneerProperties.put("commodity", "electricity");
         auctioneerProperties.put("currency", "EUR");
         auctioneerProperties.put("priceSteps", "11");
@@ -77,7 +77,7 @@ public class ObjectiveAuctioneerTest {
         for (int i = 0; i < NR_AGENTS; i++) {
             String agentId = "agent" + (i + 1);
             MockAgent newAgent = new MockAgent(agentId);
-            newAgent.setDesiredParentId(AUCTIONEER_NAME);
+            newAgent.setDesiredParentId(OBJECTIVE_AUCTIONEER_NAME);
             agents[i] = newAgent;
         }
 
@@ -142,9 +142,9 @@ public class ObjectiveAuctioneerTest {
             // aggregate again with device agent bid.
             determinePrice(finalAggregatedBid);
         }
+
         assertArrayEquals(new double[] { 100.0, 50.0, 50.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 },
                 ((ArrayBid) finalAggregatedBid).getDemand(), 0);
-
     }
 
     protected Price determinePrice(Bid aggregatedBid) {

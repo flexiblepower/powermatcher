@@ -8,7 +8,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
@@ -24,6 +27,9 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 public class SessionManagerTest {
     
@@ -37,7 +43,8 @@ public class SessionManagerTest {
     private SessionManager sessionManager;
     private Auctioneer auctioneer;
     private MockAgent testAgent;
-
+    private ConfigurationAdmin configurationAdmin;
+    
     @Before
     public void setUp() {
         this.auctioneer = new Auctioneer();
@@ -57,7 +64,6 @@ public class SessionManagerTest {
         auctioneer.setTimeService(new SystemTimeService());
         auctioneer.activate(auctioneerProperties);
         this.sessionManager = new SessionManager();
-        // sessionManager.activate();
 
         testAgent = new MockAgent(AGENT_ID);
         testAgent.setDesiredParentId("auctioneer");
@@ -80,7 +86,9 @@ public class SessionManagerTest {
 
         MockAgent agent2 = new MockAgent(AGENT_ID);
         agent2.setDesiredParentId(AUCTIONEER_NAME);
-
+        List<String> agentIds = new ArrayList<String>();
+        sessionManager.setAgentIds(agentIds);
+        
         sessionManager.addAgentEndpoint(agent2);
         int newCode = testAgent.getSession().hashCode();
         assertThat("Codes should be equal", hashCode == newCode, is(true));
@@ -100,7 +108,8 @@ public class SessionManagerTest {
     public void testaddMatcherEndpointTwice() {
         sessionManager.addAgentEndpoint(testAgent);
         sessionManager.addMatcherEndpoint(auctioneer);
-        
+        List<String> agentIds = new ArrayList<String>();
+        sessionManager.setAgentIds(agentIds);
         sessionManager.addMatcherEndpoint(auctioneer);
 
         Session agentSession = testAgent.getSession();

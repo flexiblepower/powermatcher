@@ -25,6 +25,8 @@ public abstract class BaseAgent implements ObservableAgent {
 
     private String desiredParentId;
 
+    private String servicePid;
+    
     /**
      * Collection of {@link Observer} services.
      */
@@ -49,6 +51,10 @@ public abstract class BaseAgent implements ObservableAgent {
         this.agentId = agentId;
     }
 
+    protected void setServicePid(String servicePid) {
+        this.servicePid = servicePid;
+    }
+
     @Override
     public String getClusterId() {
         return this.clusterId;
@@ -65,6 +71,11 @@ public abstract class BaseAgent implements ObservableAgent {
 
     protected void setDesiredParentId(String desiredParentId) {
         this.desiredParentId = desiredParentId;
+    }
+
+    @Override
+    public String getServicePid() {
+        return this.servicePid;
     }
 
     /**

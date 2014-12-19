@@ -24,4 +24,6 @@ public interface Agent {
 	 * @return the desired identification of parent {@link Agent}. null when no parent is required (Auctioneer).
 	 */
 	String getDesiredParentId();
+	
+	String getServicePid();
 }

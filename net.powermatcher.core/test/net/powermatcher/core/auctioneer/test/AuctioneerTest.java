@@ -7,7 +7,9 @@ import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import net.powermatcher.api.Session;
@@ -126,6 +128,8 @@ public class AuctioneerTest {
 
     @Test
     public void testConnectToAgent() {
+        List<String> agentIds = new ArrayList<String>();
+        sessionManager.setAgentIds(agentIds);
         sessionManager.addMatcherEndpoint(auctioneer);
         MockAgent agent = new MockAgent("agent1");
         agent.setDesiredParentId(AUCTIONEER_NAME);
@@ -141,6 +145,8 @@ public class AuctioneerTest {
 
     @Test
     public void testAgentEndpointDisconnected() {
+        List<String> agentIds = new ArrayList<String>();
+        sessionManager.setAgentIds(agentIds);
         sessionManager.addMatcherEndpoint(auctioneer);
         MockAgent agent = new MockAgent("agent1");
         agent.setDesiredParentId(AUCTIONEER_NAME);
@@ -166,7 +172,8 @@ public class AuctioneerTest {
     public void testupdateBidDifferentMarketBasis() {
         MockAgent mockAgent = new MockAgent("mockAgent");
         mockAgent.setDesiredParentId(AUCTIONEER_NAME);
-
+        List<String> agentIds = new ArrayList<String>();
+        sessionManager.setAgentIds(agentIds);
         sessionManager.addMatcherEndpoint(auctioneer);
         sessionManager.addAgentEndpoint(mockAgent);
 
@@ -184,7 +191,8 @@ public class AuctioneerTest {
 
         AuctioneerObserver observer = new AuctioneerObserver();
         auctioneer.addObserver(observer);
-
+        List<String> agentIds = new ArrayList<String>();
+        sessionManager.setAgentIds(agentIds);
         sessionManager.addMatcherEndpoint(auctioneer);
         sessionManager.addAgentEndpoint(mockAgent);
 
@@ -206,7 +214,8 @@ public class AuctioneerTest {
 
         AuctioneerObserver observer = new AuctioneerObserver();
         auctioneer.addObserver(observer);
-
+        List<String> agentIds = new ArrayList<String>();
+        sessionManager.setAgentIds(agentIds);
         sessionManager.addMatcherEndpoint(auctioneer);
         sessionManager.addAgentEndpoint(mockAgent);
 
