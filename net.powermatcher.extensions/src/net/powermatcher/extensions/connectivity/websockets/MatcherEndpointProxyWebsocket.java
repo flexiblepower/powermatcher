@@ -41,17 +41,17 @@ import aQute.bnd.annotation.metatype.Meta;
 import com.google.gson.JsonSyntaxException;
 
 /**
- * WebSocket implementation of an {@link MatcherEndpointProxy}.
- * Enabled two agents to communicate via WebSockets and JSON over a TCP connection.
+ * WebSocket implementation of an {@link MatcherEndpointProxy}. Enabled two agents to communicate via WebSockets and
+ * JSON over a TCP connection.
  */
 @WebSocket()
-@Component(designateFactory = MatcherEndpointProxyWebsocket.Config.class, immediate = true, 
-	provide = { ObservableAgent.class, MatcherEndpoint.class, MatcherEndpointProxy.class })
+@Component(designateFactory = MatcherEndpointProxyWebsocket.Config.class, immediate = true, provide = {
+        ObservableAgent.class, MatcherEndpoint.class, MatcherEndpointProxy.class })
 public class MatcherEndpointProxyWebsocket extends BaseMatcherEndpointProxy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MatcherEndpointProxyWebsocket.class);
 
-	@Meta.OCD
+    @Meta.OCD
     public static interface Config {
         @Meta.AD(deflt = "", description = "remote agent endpoint proxy to connect to.")
         String desiredConnectionId();
@@ -59,168 +59,171 @@ public class MatcherEndpointProxyWebsocket extends BaseMatcherEndpointProxy {
         @Meta.AD(deflt = "matcherendpointproxy", description = "local agent identification")
         String agentId();
 
-        @Meta.AD(deflt = "ws://localhost:8080/powermatcher/websockets/agentendpoint", description = "URL of powermatcher websocket endpoint.")
+        @Meta.AD(
+                deflt = "ws://localhost:8080/powermatcher/websockets/agentendpoint",
+                description = "URL of powermatcher websocket endpoint.")
         String powermatcherUrl();
-        
+
         @Meta.AD(deflt = "30", description = "reconnect timeout keeping the connection alive.")
         int reconnectTimeout();
-        
+
         @Meta.AD(deflt = "60", description = "connect timeout to wait for remote server to respond.")
         int connectTimeout();
     }
-    
-    private URI powermatcherUrl; 
 
-	private org.eclipse.jetty.websocket.api.Session remoteSession;
+    private URI powermatcherUrl;
 
-	private WebSocketClient client;
-	
-	private int connectTimeout;
+    private org.eclipse.jetty.websocket.api.Session remoteSession;
 
-	@Activate
-	public synchronized void activate(Map<String, Object> properties) {
-		// Read configuration properties
+    private WebSocketClient client;
+
+    private int connectTimeout;
+
+    @Activate
+    public synchronized void activate(Map<String, Object> properties) {
+        // Read configuration properties
         Config config = Configurable.createConfigurable(Config.class, properties);
         this.setAgentId(config.agentId());
-        
-		try {
-			this.powermatcherUrl = new URI(config.powermatcherUrl() + "?agentId=" + this.getAgentId() + "&desiredConnectionId=" + config.desiredConnectionId());
-		} catch (URISyntaxException e) {
-			LOGGER.error("Malformed URL for powermatcher websocket endpoint. Reason {}", e);
-			return;
-		}
-		
-		this.baseActivate(config.reconnectTimeout());
-		this.connectTimeout = config.connectTimeout();
-	}
-	
-	@Deactivate
-	public synchronized void deactivate() {
-		this.baseDeactivate();
-	}
+
+        try {
+            this.powermatcherUrl = new URI(config.powermatcherUrl() + "?agentId=" + this.getAgentId()
+                    + "&desiredConnectionId=" + config.desiredConnectionId());
+        } catch (URISyntaxException e) {
+            LOGGER.error("Malformed URL for powermatcher websocket endpoint. Reason {}", e);
+            return;
+        }
+
+        this.baseActivate(config.reconnectTimeout());
+        this.connectTimeout = config.connectTimeout();
+    }
+
+    @Deactivate
+    public synchronized void deactivate() {
+        this.baseDeactivate();
+    }
 
     @Reference
     @Override
     public void setExecutorService(ScheduledExecutorService scheduler) {
-    	super.setExecutorService(scheduler);
+        super.setExecutorService(scheduler);
     }
 
     @Override
-	public synchronized boolean connectRemote() {
-		if (!this.isLocalConnected()) {
-			// Don't connect when no agentRole is connected
-			return true;
-		}
-	
-		if (this.isRemoteConnected()) {
-			// Already connected, skip connection
-			return true;
-		}
-		
-		return connectWebsocket();
-	}    
-	
-	@Override
-	public synchronized boolean disconnectRemote() {
-		// Terminate remote session (if any)
-		if (this.isRemoteConnected()) {
-			this.remoteSession.close(new CloseStatus(0, "Normal disconnect"));
-		}
+    public synchronized boolean connectRemote() {
+        if (!this.isLocalConnected()) {
+            // Don't connect when no agentRole is connected
+            return true;
+        }
 
-		this.remoteSession = null;		
+        if (this.isRemoteConnected()) {
+            // Already connected, skip connection
+            return true;
+        }
 
-		// Stop the client
-		if (this.client != null && !this.client.isStopped()) {
-			try {
-				this.client.stop();
-			} catch (Exception e) {
-		        LOGGER.warn("Unable to disconnect, reason: [{}]", e);
-				return false;
-			}
-		}
+        return connectWebsocket();
+    }
 
-		return true;
-	}
+    @Override
+    public synchronized boolean disconnectRemote() {
+        // Terminate remote session (if any)
+        if (this.isRemoteConnected()) {
+            this.remoteSession.close(new CloseStatus(0, "Normal disconnect"));
+        }
 
-	@Override
-	public boolean isRemoteConnected() {
-		return this.remoteSession != null && this.remoteSession.isOpen();
-	}
-	
-	@Override
-	public synchronized void updateBidRemote(Bid newBid) {
-		// Relay bid to remote agent
-		try {
-			PmJsonSerializer serializer = new PmJsonSerializer();
-			String message = serializer.serializeBid(newBid);			
-			this.remoteSession.getRemote().sendString(message);
-		} catch (IOException e) {
-			LOGGER.error("Unable to send new bid to remote agent. Reason {}", e);
-		}		
-	}
-	
+        this.remoteSession = null;
+
+        // Stop the client
+        if (this.client != null && !this.client.isStopped()) {
+            try {
+                this.client.stop();
+            } catch (Exception e) {
+                LOGGER.warn("Unable to disconnect, reason: [{}]", e);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean isRemoteConnected() {
+        return this.remoteSession != null && this.remoteSession.isOpen();
+    }
+
+    @Override
+    public synchronized void updateBidRemote(Bid newBid) {
+        // Relay bid to remote agent
+        try {
+            PmJsonSerializer serializer = new PmJsonSerializer();
+            String message = serializer.serializeBid(newBid);
+            this.remoteSession.getRemote().sendString(message);
+        } catch (IOException e) {
+            LOGGER.error("Unable to send new bid to remote agent. Reason {}", e);
+        }
+    }
+
     @OnWebSocketConnect
     public void onConnect(org.eclipse.jetty.websocket.api.Session session) {
         LOGGER.info("Connected: {}", session);
     }
-	
+
     @OnWebSocketClose
-    public void onDisconnect(int statusCode, String reason) {    	
+    public void onDisconnect(int statusCode, String reason) {
         LOGGER.info("Connection closed: {} - {}", statusCode, reason);
 
         this.remoteSession = null;
     }
-    
-	@OnWebSocketMessage
-	public void onMessage(String message) {
-		LOGGER.debug("Received message from remote agent {}", message);
 
-		try {
-			// Decode the JSON data
-			PmJsonSerializer serializer = new PmJsonSerializer();			
-			PmMessage pmMessage = serializer.deserialize(message);
-			
-			// Handle specific message
-			if (pmMessage.getPayloadType() == PayloadType.PRICE_UPDATE) {
-				// Relay price update to local agent
-				PriceUpdate newPriceUpdate = ModelMapper.mapPriceUpdate((PriceUpdateModel)pmMessage.getPayload());
-				this.updateLocalPrice(newPriceUpdate);
-			}
-			
-			if (pmMessage.getPayloadType() == PayloadType.CLUSTERINFO) {
-				// Sync marketbasis and clusterid with local session, for new connections
-				ClusterInfoModel clusterInfo = (ClusterInfoModel)pmMessage.getPayload();
-				this.updateRemoteClusterId(clusterInfo.getClusterId());
-				this.updateRemoteMarketBasis(ModelMapper.convertMarketBasis(clusterInfo.getMarketBasis()));
-			}
-		} catch (JsonSyntaxException e) {
-			LOGGER.warn("Unable to understand message from remote agent: {}", message);
-		}
-	}	
+    @OnWebSocketMessage
+    public void onMessage(String message) {
+        LOGGER.debug("Received message from remote agent {}", message);
 
-	private boolean connectWebsocket() {
-		// Try to setup a new websocket connection.		
+        try {
+            // Decode the JSON data
+            PmJsonSerializer serializer = new PmJsonSerializer();
+            PmMessage pmMessage = serializer.deserialize(message);
+
+            // Handle specific message
+            if (pmMessage.getPayloadType() == PayloadType.PRICE_UPDATE) {
+                // Relay price update to local agent
+                PriceUpdate newPriceUpdate = ModelMapper.mapPriceUpdate((PriceUpdateModel) pmMessage.getPayload());
+                this.updateLocalPrice(newPriceUpdate);
+            }
+
+            if (pmMessage.getPayloadType() == PayloadType.CLUSTERINFO) {
+                // Sync marketbasis and clusterid with local session, for new connections
+                ClusterInfoModel clusterInfo = (ClusterInfoModel) pmMessage.getPayload();
+                this.updateRemoteClusterId(clusterInfo.getClusterId());
+                this.updateRemoteMarketBasis(ModelMapper.convertMarketBasis(clusterInfo.getMarketBasis()));
+            }
+        } catch (JsonSyntaxException e) {
+            LOGGER.warn("Unable to understand message from remote agent: {}", message);
+        }
+    }
+
+    private boolean connectWebsocket() {
+        // Try to setup a new websocket connection.
         client = new WebSocketClient();
         ClientUpgradeRequest request = new ClientUpgradeRequest();
-        
-        try {
-        	client.start();
-	        Future<org.eclipse.jetty.websocket.api.Session> connectFuture =
-	        		client.connect(this, this.powermatcherUrl, request);
-	        LOGGER.info("Connecting to : {}", request);
 
-	        // Wait configurable time for remote to respond
-            org.eclipse.jetty.websocket.api.Session newRemoteSession = 
-            		connectFuture.get(this.connectTimeout, TimeUnit.SECONDS);
-            
+        try {
+            client.start();
+            Future<org.eclipse.jetty.websocket.api.Session> connectFuture = client.connect(this, this.powermatcherUrl,
+                    request);
+            LOGGER.info("Connecting to : {}", request);
+
+            // Wait configurable time for remote to respond
+            org.eclipse.jetty.websocket.api.Session newRemoteSession = connectFuture.get(this.connectTimeout,
+                    TimeUnit.SECONDS);
+
             this.remoteSession = newRemoteSession;
         } catch (Exception e) {
-			LOGGER.error("Unable to connect to remote agent. Reason {}", e);
+            LOGGER.error("Unable to connect to remote agent. Reason {}", e);
 
-			this.remoteSession = null;
-        	return false;
+            this.remoteSession = null;
+            return false;
         }
-        
+
         return true;
-	}
+    }
 }

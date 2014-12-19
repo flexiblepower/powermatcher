@@ -92,7 +92,7 @@ public class PointBidTest {
         assertThat(buildBid.getPricePoints()[0], is(equalTo(pricePoint)));
         assertThat(buildBid.getPricePoints().length, is(equalTo(1)));
     }
-    
+
     @Test
     public void testBuilderSetBidNumber() {
         PointBid.Builder builder = new Builder(marketBasisFiveSteps);
@@ -165,7 +165,7 @@ public class PointBidTest {
         price = new Price(marketBasisTenSteps, 3);
         demandAt = bid2.getDemandAt(price);
         assertThat(demandAt, is(equalTo(21.666666666666668)));
-        
+
         price = new Price(marketBasisTenSteps, 7);
         demandAt = bid2.getDemandAt(price);
         assertThat(demandAt, is(equalTo(25.0)));
@@ -200,7 +200,7 @@ public class PointBidTest {
         ArrayBid aggregatedBid = bid1.aggregate(other);
         assertThat(aggregatedBid.getBidNumber(), is(equalTo(0)));
         assertThat(aggregatedBid.getMarketBasis(), is(equalTo(marketBasisFiveSteps)));
-        double[] expectedDemand = new double[]{20.0, 16.0, 12.0, 8.0, 4.0};
+        double[] expectedDemand = new double[] { 20.0, 16.0, 12.0, 8.0, 4.0 };
         assertThat(aggregatedBid.getDemand(), is(equalTo(expectedDemand)));
     }
 

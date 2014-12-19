@@ -17,7 +17,7 @@ public class MenuItemModel {
      * The title of this menu item.
      */
     String title;
-    
+
     /**
      * The {@link SubMenuItemModel} items belonging to this instance.
      */
@@ -27,7 +27,7 @@ public class MenuItemModel {
      * The constructor to create an {@link MenuItemModel} instance.
      * 
      * @param title
-     * the title of this menu item.
+     *            the title of this menu item.
      */
     public MenuItemModel(String title) {
         this.title = title;
@@ -42,7 +42,8 @@ public class MenuItemModel {
     }
 
     /**
-     * @param the new String value for title.
+     * @param the
+     *            new String value for title.
      */
     public void setTitle(String title) {
         this.title = title;
@@ -56,7 +57,8 @@ public class MenuItemModel {
     }
 
     /**
-     * @param the new <code>List</code> of {@link SubMenuItemModel}'s
+     * @param the
+     *            new <code>List</code> of {@link SubMenuItemModel}'s
      */
     public void setItemts(List<SubMenuItemModel> subItemts) {
         this.items = subItemts;

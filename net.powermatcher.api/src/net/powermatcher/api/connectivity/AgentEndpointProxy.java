@@ -5,11 +5,11 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.PriceUpdate;
 
 public interface AgentEndpointProxy extends AgentEndpoint {
-	boolean isLocalConnected();
+    boolean isLocalConnected();
 
-	boolean isRemoteConnected();
+    boolean isRemoteConnected();
 
-	void updateLocalBid(Bid newBid);
-	
-	void updateRemotePrice(PriceUpdate priceUpdate);
+    void updateLocalBid(Bid newBid);
+
+    void updateRemotePrice(PriceUpdate priceUpdate);
 }

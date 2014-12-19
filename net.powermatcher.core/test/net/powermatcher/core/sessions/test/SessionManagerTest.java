@@ -8,7 +8,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,12 +26,9 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
 
 public class SessionManagerTest {
-    
+
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
@@ -43,8 +39,7 @@ public class SessionManagerTest {
     private SessionManager sessionManager;
     private Auctioneer auctioneer;
     private MockAgent testAgent;
-    private ConfigurationAdmin configurationAdmin;
-    
+
     @Before
     public void setUp() {
         this.auctioneer = new Auctioneer();
@@ -88,7 +83,7 @@ public class SessionManagerTest {
         agent2.setDesiredParentId(AUCTIONEER_NAME);
         List<String> agentIds = new ArrayList<String>();
         sessionManager.setAgentIds(agentIds);
-        
+
         sessionManager.addAgentEndpoint(agent2);
         int newCode = testAgent.getSession().hashCode();
         assertThat("Codes should be equal", hashCode == newCode, is(true));
@@ -103,7 +98,7 @@ public class SessionManagerTest {
         assertEquals(AUCTIONEER_NAME, agentSession.getMatcherId());
         assertEquals(CLUSTER_ID, agentSession.getClusterId());
     }
-    
+
     @Test
     public void testaddMatcherEndpointTwice() {
         sessionManager.addAgentEndpoint(testAgent);
@@ -167,7 +162,9 @@ public class SessionManagerTest {
         sessionManager.addMatcherEndpoint(auctioneer);
         Map<String, Session> activeSessions = sessionManager.getActiveSessions();
         assertThat(activeSessions.size(), is(equalTo(1)));
-        assertThat(activeSessions.get(AGENT_ID + ":" + AUCTIONEER_NAME).getMatcherId(), is(equalTo(auctioneer.getAgentId())));
-        assertThat(activeSessions.get(AGENT_ID + ":" + AUCTIONEER_NAME).getAgentId(), is(equalTo(testAgent.getAgentId())));
+        assertThat(activeSessions.get(AGENT_ID + ":" + AUCTIONEER_NAME).getMatcherId(),
+                is(equalTo(auctioneer.getAgentId())));
+        assertThat(activeSessions.get(AGENT_ID + ":" + AUCTIONEER_NAME).getAgentId(),
+                is(equalTo(testAgent.getAgentId())));
     }
 }

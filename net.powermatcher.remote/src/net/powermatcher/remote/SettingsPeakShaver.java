@@ -41,7 +41,7 @@ public class SettingsPeakShaver extends HttpServlet {
     private static ConfigurationAdmin configurationAdmin;
 
     /**
-     * Set remote new borders (floor and ceiling) for {@link PeakShavingConcentrator} 
+     * Set remote new borders (floor and ceiling) for {@link PeakShavingConcentrator}
      */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

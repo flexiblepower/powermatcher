@@ -35,15 +35,15 @@ public class SendReceiveBidTestCBF1 extends BidResilienceTest {
                 concentrator.doBidUpdate();
                 // Check if the concentrator received the bid
                 assertEquals(bid, this.concentrator.getLastReceivedBid());
-                
-                 // Check if the published bid by concentrator is received at the auctioneer
-                 assertEquals(this.auctioneer.getLastReceivedBid(),
-                 this.auctioneer.getAggregatedBid(this.marketBasis));
+
+                // Check if the published bid by concentrator is received at the auctioneer
+                assertEquals(this.auctioneer.getLastReceivedBid(), this.auctioneer.getAggregatedBid(this.marketBasis));
 
                 // Check if the price published by the auctioneer arrives at the agent
-                 //concentrator.getLastReceived instead of auctioneer.getLastPublished, because
-                 //lastPublished is not reliable anymore.
-                assertEquals(this.agentList.get(id).getLastPriceUpdate(), this.concentrator.getLastReceivedPriceUpdate());
+                // concentrator.getLastReceived instead of auctioneer.getLastPublished, because
+                // lastPublished is not reliable anymore.
+                assertEquals(this.agentList.get(id).getLastPriceUpdate(),
+                        this.concentrator.getLastReceivedPriceUpdate());
             } else {
                 stop = true;
             }

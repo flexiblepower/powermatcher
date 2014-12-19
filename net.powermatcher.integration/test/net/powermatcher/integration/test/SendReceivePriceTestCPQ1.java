@@ -123,7 +123,7 @@ public class SendReceivePriceTestCPQ1 extends BidResilienceTest {
 
         // Prepare the test for reading test input
         prepareTest("CPQ/CPQ1", null);
-        
+
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("Price 52.0 is out of bounds [0.0, 50.0]");
 
@@ -161,7 +161,7 @@ public class SendReceivePriceTestCPQ1 extends BidResilienceTest {
 
         // Prepare the test for reading test input
         prepareTest("CPQ/CPQ1", null);
-        
+
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("Price 52.0 is out of bounds [0.0, 50.0]");
 
@@ -197,7 +197,7 @@ public class SendReceivePriceTestCPQ1 extends BidResilienceTest {
 
         // Prepare the test for reading test input
         prepareTest("CPQ/CPQ1", null);
-        
+
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("Price 52.0 is out of bounds [0.0, 50.0]");
 

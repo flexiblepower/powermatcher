@@ -12,9 +12,9 @@ import org.junit.rules.ExpectedException;
 
 public class AuctioneerResilienceTestIAQ2 extends AuctioneerResilienceTest {
 
-  @Rule
-  public ExpectedException exception = ExpectedException.none();
-    
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
+
     /**
      * No equilibrium (demand side). Agents send series of bids with no-equilibrium price.
      * 
@@ -52,7 +52,7 @@ public class AuctioneerResilienceTestIAQ2 extends AuctioneerResilienceTest {
     @Test
     public void qualityTestIAQ2NoEquilibriumOnSupplySide() throws IOException, DataFormatException {
         performEquilibriumTest("IAQ/IAQ2/IAF2", null);
-        
+
     }
 
     /**
@@ -202,6 +202,6 @@ public class AuctioneerResilienceTestIAQ2 extends AuctioneerResilienceTest {
 
         sendBidsToMatcher();
 
-        checkAggregatedBid((ArrayBid)this.auctioneer.getAggregatedBid(this.marketBasis));
+        checkAggregatedBid((ArrayBid) this.auctioneer.getAggregatedBid(this.marketBasis));
     }
 }

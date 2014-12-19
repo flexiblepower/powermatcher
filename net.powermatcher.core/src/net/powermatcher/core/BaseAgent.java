@@ -26,7 +26,7 @@ public abstract class BaseAgent implements ObservableAgent {
     private String desiredParentId;
 
     private String servicePid;
-    
+
     /**
      * Collection of {@link Observer} services.
      */

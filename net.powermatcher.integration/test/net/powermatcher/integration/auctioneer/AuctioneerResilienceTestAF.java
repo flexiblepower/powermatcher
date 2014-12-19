@@ -14,7 +14,7 @@ public class AuctioneerResilienceTestAF extends AuctioneerResilienceTest {
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
-    
+
     /**
      * No equilibrium (demand side). Agents send series of bids with no-equilibrium price.
      * 
@@ -201,6 +201,6 @@ public class AuctioneerResilienceTestAF extends AuctioneerResilienceTest {
 
         sendBidsToMatcher();
 
-        checkAggregatedBid((ArrayBid)this.auctioneer.getAggregatedBid(this.marketBasis));
+        checkAggregatedBid((ArrayBid) this.auctioneer.getAggregatedBid(this.marketBasis));
     }
 }

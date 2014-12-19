@@ -179,8 +179,8 @@ public class AuctioneerTest {
 
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("Marketbasis new bid differs from marketbasis auctioneer");
-        auctioneer.updateBid(mockAgent.getSession(), new ArrayBid(new MarketBasis("a", "b", 2, 0, 2), 0,
-                new double[] {5.0, 4.0}));
+        auctioneer.updateBid(mockAgent.getSession(), new ArrayBid(new MarketBasis("a", "b", 2, 0, 2), 0, new double[] {
+                5.0, 4.0 }));
     }
 
     @Test

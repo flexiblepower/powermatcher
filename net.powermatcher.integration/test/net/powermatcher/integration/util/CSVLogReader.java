@@ -11,8 +11,8 @@ public class CSVLogReader {
 
     private static final String CSV_LOG_DELIMITERS = ";";
     private static final Logger LOGGER = LoggerFactory.getLogger(CSVLogReader.class);
-    
-    private CSVLogReader(){
+
+    private CSVLogReader() {
     }
 
     public static boolean containsLogLines(String filename) {

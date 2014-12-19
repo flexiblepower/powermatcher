@@ -37,7 +37,7 @@ import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
 /**
- *  {@link HttpServlet} used by the visualizer frontend.
+ * {@link HttpServlet} used by the visualizer frontend.
  * 
  * @author FAN
  * @version 1.0

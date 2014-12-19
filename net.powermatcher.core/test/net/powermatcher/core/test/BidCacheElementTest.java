@@ -32,7 +32,6 @@ public class BidCacheElementTest {
         demand = new double[] { 4, 3, 2, 1, 0 };
         pricePoints = new PricePoint[] { new PricePoint(new Price(marketBasis, 1), 30),
                 new PricePoint(new Price(marketBasis, 10), 20) };
-        
 
         arrayBid = new ArrayBid(marketBasis, 0, demand);
         pointBid = new PointBid(marketBasis, 0, pricePoints);
@@ -46,7 +45,7 @@ public class BidCacheElementTest {
         assertThat(arrayBidCacheElement.getTimestamp(), is(equalTo(stamp1)));
         long stamp2 = timeService.currentTimeMillis();
         BidCacheElement pointBidCacheElement = new BidCacheElement(pointBid, stamp2);
-        double[] expectedDemand = new double[]{30.0, 27.5, 25.0, 22.5, 20.0};
+        double[] expectedDemand = new double[] { 30.0, 27.5, 25.0, 22.5, 20.0 };
         assertThat(pointBidCacheElement.getBid().getDemand(), (is(equalTo(expectedDemand))));
         assertThat(pointBidCacheElement.getTimestamp(), is(equalTo(stamp2)));
     }
@@ -56,7 +55,7 @@ public class BidCacheElementTest {
         long stamp1 = timeService.currentTimeMillis();
         BidCacheElement arrayBidCacheElement = new BidCacheElement(arrayBid, stamp1);
         arrayBidCacheElement.setBid(pointBid);
-        double[] expectedDemand = new double[]{30.0, 27.5, 25.0, 22.5, 20.0};
+        double[] expectedDemand = new double[] { 30.0, 27.5, 25.0, 22.5, 20.0 };
         assertThat(arrayBidCacheElement.getBid().getDemand(), (is(equalTo(expectedDemand))));
         assertThat(arrayBidCacheElement.getTimestamp(), is(equalTo(stamp1)));
     }

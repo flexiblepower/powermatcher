@@ -97,10 +97,10 @@ public abstract class BaseDeviceAgent extends BaseAgent implements AgentEndpoint
 
         return this.canEqual(other) && super.equals(other) && this.lastBid.equals(other.lastBid);
     }
-    
+
     @Override
     public int hashCode() {
-        return 211 * (super.hashCode() +  lastBid.hashCode() + session.hashCode());
+        return 211 * (super.hashCode() + lastBid.hashCode() + session.hashCode());
     }
 
 }

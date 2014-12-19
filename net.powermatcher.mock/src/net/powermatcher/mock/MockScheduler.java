@@ -12,11 +12,11 @@ public class MockScheduler extends ScheduledThreadPoolExecutor {
     private Runnable task;
     private long updateRate;
     private MockFuture mockFuture;
-    
-    public class MockFuture implements ScheduledFuture<String>{
+
+    public class MockFuture implements ScheduledFuture<String> {
 
         private boolean cancelled = false;
-        
+
         @Override
         public long getDelay(TimeUnit arg0) {
             return 0;
@@ -26,12 +26,12 @@ public class MockScheduler extends ScheduledThreadPoolExecutor {
         public int compareTo(Delayed arg0) {
             return 0;
         }
-        
+
         @Override
         public boolean equals(Object obj) {
             return super.equals(obj);
         }
-        
+
         @Override
         public int hashCode() {
             return super.hashCode();
@@ -62,7 +62,7 @@ public class MockScheduler extends ScheduledThreadPoolExecutor {
         public boolean isDone() {
             return true;
         }
-        
+
     }
 
     public MockScheduler() {
@@ -76,12 +76,12 @@ public class MockScheduler extends ScheduledThreadPoolExecutor {
         mockFuture = new MockFuture();
         return mockFuture;
     }
-    
-    public long getUpdateRate(){
+
+    public long getUpdateRate() {
         return updateRate;
     }
-    
-    public MockFuture getMockFuture(){
+
+    public MockFuture getMockFuture() {
         return mockFuture;
     }
 

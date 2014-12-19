@@ -59,7 +59,8 @@ public class NodeModel implements Comparable<NodeModel> {
     }
 
     /**
-     * @param the new fpid <code>String</code>.
+     * @param the
+     *            new fpid <code>String</code>.
      */
     public void setFpid(String fpid) {
         this.fpid = fpid;
@@ -74,7 +75,8 @@ public class NodeModel implements Comparable<NodeModel> {
     }
 
     /**
-     * @param the new pid <code>String</code>.
+     * @param the
+     *            new pid <code>String</code>.
      */
     public void setPid(String pid) {
         this.pid = pid;
@@ -88,7 +90,8 @@ public class NodeModel implements Comparable<NodeModel> {
     }
 
     /**
-     * @param the new AgentId <code>String</code>.
+     * @param the
+     *            new AgentId <code>String</code>.
      */
     public void setAgentId(String agentId) {
         this.agentId = agentId;
@@ -102,7 +105,8 @@ public class NodeModel implements Comparable<NodeModel> {
     }
 
     /**
-     * @param the new desiredParentId <code>String</code>.
+     * @param the
+     *            new desiredParentId <code>String</code>.
      */
     public void setDesiredParentId(String desiredParentId) {
         this.desiredParentId = desiredParentId;
@@ -110,7 +114,8 @@ public class NodeModel implements Comparable<NodeModel> {
 
     /**
      * This method determines which instance is "bigger". The nodes are first sorted alphabetically by desiredParentId.
-     * If those are the same, they are sorted by alphabetically by agentId (to group them alphabetically under their parent).
+     * If those are the same, they are sorted by alphabetically by agentId (to group them alphabetically under their
+     * parent).
      * 
      * @param that
      *            The {@link NodeModel} instance you want to compare with this one.
@@ -123,7 +128,7 @@ public class NodeModel implements Comparable<NodeModel> {
 
         int output = 0;
 
-        //The desiredParentId is null for the Auctioneer, so it you have to check this first.
+        // The desiredParentId is null for the Auctioneer, so it you have to check this first.
         if (this.desiredParentId == null ^ that.desiredParentId == null) {
             output = (that.desiredParentId == null) ? -1 : 1;
         } else if (this.desiredParentId == null && that.desiredParentId == null) {

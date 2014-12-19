@@ -3,7 +3,7 @@ package net.powermatcher.api.monitoring;
 public enum Qualifier {
 
     MATCHER("matcher"), AGENT("agent");
-    
+
     private String description;
 
     private Qualifier(String description) {

@@ -31,7 +31,7 @@ public class LevelModel {
      */
     public LevelModel(int level) {
         this.level = level;
-        //a treeSet because they have to be sorted.
+        // a treeSet because they have to be sorted.
         this.nodes = new TreeSet<NodeModel>();
     }
 
@@ -43,7 +43,8 @@ public class LevelModel {
     }
 
     /**
-     * @param the level you want to set this level to.
+     * @param the
+     *            level you want to set this level to.
      */
     public void setLevel(int level) {
         this.level = level;

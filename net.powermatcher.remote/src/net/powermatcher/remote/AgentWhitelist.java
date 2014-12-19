@@ -40,9 +40,9 @@ public class AgentWhitelist extends HttpServlet {
      * Holds the concentrators with a whitelist
      */
     private static Map<String, WhiteList> concentrators = new HashMap<String, WhiteList>();
-    
+
     /**
-     * Retreives remote all whiteList agents on {@link Concentrator} id or for all {@link Concentrator}. 
+     * Retreives remote all whiteList agents on {@link Concentrator} id or for all {@link Concentrator}.
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -61,7 +61,7 @@ public class AgentWhitelist extends HttpServlet {
     }
 
     /**
-     * Create remote new whiteList with agents on {@link Concentrator} id or for all {@link Concentrator}. 
+     * Create remote new whiteList with agents on {@link Concentrator} id or for all {@link Concentrator}.
      */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -80,7 +80,7 @@ public class AgentWhitelist extends HttpServlet {
     }
 
     /**
-     * Update remote whiteList agents on {@link Concentrator} id or for all {@link Concentrator}. 
+     * Update remote whiteList agents on {@link Concentrator} id or for all {@link Concentrator}.
      */
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -101,7 +101,7 @@ public class AgentWhitelist extends HttpServlet {
     }
 
     /**
-     * Delete remote agentId's on whiteList for {@link Concentrator} id or for all {@link Concentrator}. 
+     * Delete remote agentId's on whiteList for {@link Concentrator} id or for all {@link Concentrator}.
      */
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -248,7 +248,7 @@ public class AgentWhitelist extends HttpServlet {
         List<String> whiteListAgents = new ArrayList<String>();
         for (String agent : agentsLst) {
             agent = agent.replace("\"", "");
-            agent.trim();
+            agent = agent.trim();
             whiteListAgents.add(agent);
         }
 

@@ -24,35 +24,35 @@ public class BidModel {
      */
     private int bidNumber;
 
-	public MarketBasisModel getMarketBasis() {
-		return marketBasis;
-	}
+    public MarketBasisModel getMarketBasis() {
+        return marketBasis;
+    }
 
-	public void setMarketBasis(MarketBasisModel marketBasis) {
-		this.marketBasis = marketBasis;
-	}
+    public void setMarketBasis(MarketBasisModel marketBasis) {
+        this.marketBasis = marketBasis;
+    }
 
-	public double[] getDemand() {
-		return demand;
-	}
+    public double[] getDemand() {
+        return demand;
+    }
 
-	public void setDemand(double[] demand) {
-		this.demand = demand;
-	}
+    public void setDemand(double[] demand) {
+        this.demand = demand;
+    }
 
-	public PricePointModel[] getPricePoints() {
-		return pricePoints;
-	}
+    public PricePointModel[] getPricePoints() {
+        return pricePoints;
+    }
 
-	public void setPricePoints(PricePointModel[] pricePoints) {
-		this.pricePoints = pricePoints;
-	}
+    public void setPricePoints(PricePointModel[] pricePoints) {
+        this.pricePoints = pricePoints;
+    }
 
-	public int getBidNumber() {
-		return bidNumber;
-	}
+    public int getBidNumber() {
+        return bidNumber;
+    }
 
-	public void setBidNumber(int bidNumber) {
-		this.bidNumber = bidNumber;
-	}
+    public void setBidNumber(int bidNumber) {
+        this.bidNumber = bidNumber;
+    }
 }

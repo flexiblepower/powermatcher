@@ -21,7 +21,7 @@ public class ConcentratorResilienceTestICF extends ConcentratorResilienceTest {
 
         sendBidsToMatcher();
 
-        checkAggregatedBid((ArrayBid)this.auctioneer.getLastReceivedBid());
+        checkAggregatedBid((ArrayBid) this.auctioneer.getLastReceivedBid());
     }
 
     /**

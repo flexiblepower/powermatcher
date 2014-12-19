@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.zip.DataFormatException;
 
@@ -47,7 +46,6 @@ public class BidResilienceTest extends ResilienceTest {
         // Create matcher list
         this.matchers = new ArrayList<MatcherEndpoint>();
 
-        
         // Get the expected results
         this.resultsReader = new CsvExpectedResultsReader(getExpectedResultsFile(testID, suffix));
 
@@ -74,7 +72,8 @@ public class BidResilienceTest extends ResilienceTest {
         auctioneer.activate(auctioneerProperties);
 
         this.concentrator = new ConcentratorWrapper();
-        Map<String, Object> concentratorProperties =new HashMap<>();;
+        Map<String, Object> concentratorProperties = new HashMap<>();
+        ;
         concentratorProperties.put("matcherId", CONCENTRATOR_NAME);
         concentratorProperties.put("desiredParentId", AUCTIONEER_NAME);
         concentratorProperties.put("bidTimeout", "600");

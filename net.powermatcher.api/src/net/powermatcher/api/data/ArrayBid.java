@@ -10,6 +10,10 @@ public class ArrayBid extends Bid {
      */
     private static int PRECISION = 5;
 
+    private final double[] demandArray;
+
+    private transient PointBid pointBid;
+
     public static final class Builder {
         private final MarketBasis marketBasis;
         private int bidNumber;
@@ -51,10 +55,8 @@ public class ArrayBid extends Bid {
          */
         public Builder setDemand(double demand) {
             checkIndex(nextIndex);
-            if (nextIndex > 0) {
-                if (demand > builderDemand[nextIndex - 1]) {
-                    throw new IllegalArgumentException("The demand can not be ascending");
-                }
+            if (nextIndex > 0 && demand > builderDemand[nextIndex - 1]) {
+                throw new IllegalArgumentException("The demand can not be ascending");
             }
             builderDemand[nextIndex++] = demand;
             return this;
@@ -137,10 +139,6 @@ public class ArrayBid extends Bid {
         }
     }
 
-    private final double[] demandArray;
-
-    private transient PointBid pointBid;
-
     public ArrayBid(MarketBasis marketBasis, int bidNumber, double[] demandArray) {
         super(marketBasis, bidNumber);
         if (demandArray.length != marketBasis.getPriceSteps()) {
@@ -194,9 +192,6 @@ public class ArrayBid extends Bid {
             middle = (leftBound + rightBound) / 2;
         }
 
-        /*
-         * 
-         */
         rightBound = determineDropoff(targetDemand, rightBound);
 
         int priceStep;
@@ -297,7 +292,7 @@ public class ArrayBid extends Bid {
             pointBid = new PointBid(this);
         }
         return pointBid;
-    };
+    }
 
     public double[] getDemand() {
         return Arrays.copyOf(demandArray, demandArray.length);

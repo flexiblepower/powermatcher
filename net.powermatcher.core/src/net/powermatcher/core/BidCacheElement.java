@@ -26,8 +26,8 @@ public class BidCacheElement {
     long timestamp;
 
     /**
-     * Constructs an instance of this class from the specified {@link Bid} and time stamp parameters.
-     * The Bid is converted to an {@link ArrayBid}.
+     * Constructs an instance of this class from the specified {@link Bid} and time stamp parameters. The Bid is
+     * converted to an {@link ArrayBid}.
      * 
      * @param arrayBid
      *            The bid (<code>Bid</code>) parameter.
@@ -35,16 +35,16 @@ public class BidCacheElement {
      *            The time stamp (<code>long</code>) parameter.
      */
     public BidCacheElement(final Bid bid, final long timestamp) {
-        
-        if(bid instanceof PointBid){
+
+        if (bid instanceof PointBid) {
             this.arrayBid = bid.toArrayBid();
-        }else{
-            this.arrayBid = (ArrayBid)bid;
+        } else {
+            this.arrayBid = (ArrayBid) bid;
         }
-        
+
         this.timestamp = timestamp;
     }
-    
+
     /**
      * Gets the bid value.
      * 
@@ -73,11 +73,11 @@ public class BidCacheElement {
      * @see #getBid()
      */
     public void setBid(final Bid bid) {
-        
-        if(bid instanceof PointBid){
+
+        if (bid instanceof PointBid) {
             this.arrayBid = bid.toArrayBid();
-        }else{
-            this.arrayBid = (ArrayBid)bid;
+        } else {
+            this.arrayBid = (ArrayBid) bid;
         }
     }
 

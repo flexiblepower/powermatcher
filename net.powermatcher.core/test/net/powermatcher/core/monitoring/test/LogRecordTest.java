@@ -2,11 +2,8 @@ package net.powermatcher.core.monitoring.test;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -45,7 +42,7 @@ public class LogRecordTest {
     private ArrayBid bid;
     private Price price;
     private PriceUpdate priceUpdate;
-    
+
     @Before
     public void setUp() throws Exception {
         marketBasis = new MarketBasis("electricity", "EUR", 5, 0, 10);
@@ -59,15 +56,13 @@ public class LogRecordTest {
         dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         bid = new ArrayBid(marketBasis, bidNumber, demand);
         price = new Price(marketBasis, 10);
-        priceUpdate= new PriceUpdate(price, bidNumber);
-        incomingBidEvent = new IncomingBidEvent(clusterId, agentId, sessionId, timeStamp, fromAgentId,
-                bid, qualifier);
-        outgoingBidEvent = new OutgoingBidEvent(clusterId, agentId, sessionId, timeStamp, bid,
+        priceUpdate = new PriceUpdate(price, bidNumber);
+        incomingBidEvent = new IncomingBidEvent(clusterId, agentId, sessionId, timeStamp, fromAgentId, bid, qualifier);
+        outgoingBidEvent = new OutgoingBidEvent(clusterId, agentId, sessionId, timeStamp, bid, qualifier);
+        incomingPriceUpdateEvent = new IncomingPriceUpdateEvent(clusterId, agentId, sessionId, timeStamp, priceUpdate,
                 qualifier);
-        incomingPriceUpdateEvent = new  IncomingPriceUpdateEvent(clusterId, agentId, sessionId, timeStamp,
-                priceUpdate, qualifier);
-        outgoingPriceUpdateEvent = new  OutgoingPriceUpdateEvent(clusterId, agentId, sessionId, timeStamp,
-                priceUpdate, qualifier);
+        outgoingPriceUpdateEvent = new OutgoingPriceUpdateEvent(clusterId, agentId, sessionId, timeStamp, priceUpdate,
+                qualifier);
     }
 
     @Test
@@ -84,7 +79,7 @@ public class LogRecordTest {
         assertThat(bidLogRecord.getQualifier(), is(equalTo(qualifier)));
         assertThat(bidLogRecord.getBid().toArrayBid(), is(equalTo(bid)));
     }
-    
+
     @Test
     public void testBidLogRecordOutgoingBid() {
         Calendar c = Calendar.getInstance();
@@ -99,13 +94,14 @@ public class LogRecordTest {
         assertThat(bidLogRecord.getQualifier(), is(equalTo(qualifier)));
         assertThat(bidLogRecord.getBid().toArrayBid(), is(equalTo(bid)));
     }
-    
+
     @Test
     public void testPriceLogRecordIncomingPrice() {
         Calendar c = Calendar.getInstance();
         c.set(2014, 12, 12);
         Date logTime = c.getTime();
-        PriceUpdateLogRecord priceUpdateLogRecord = new PriceUpdateLogRecord(incomingPriceUpdateEvent, logTime, dateFormat);
+        PriceUpdateLogRecord priceUpdateLogRecord = new PriceUpdateLogRecord(incomingPriceUpdateEvent, logTime,
+                dateFormat);
         assertThat(priceUpdateLogRecord.getClusterId(), is(equalTo(clusterId)));
         assertThat(priceUpdateLogRecord.getAgentId(), is(equalTo(agentId)));
         assertThat(priceUpdateLogRecord.getEventTimestamp(), is(equalTo(timeStamp)));
@@ -114,12 +110,14 @@ public class LogRecordTest {
         assertThat(priceUpdateLogRecord.getQualifier(), is(equalTo(qualifier)));
         assertThat(priceUpdateLogRecord.getPriceUpdate(), is(equalTo(priceUpdate)));
     }
+
     @Test
     public void testPriceLogRecordOutgoingPrice() {
         Calendar c = Calendar.getInstance();
         c.set(2014, 12, 12);
         Date logTime = c.getTime();
-        PriceUpdateLogRecord priceUpdateLogRecord = new PriceUpdateLogRecord(outgoingPriceUpdateEvent, logTime, dateFormat);
+        PriceUpdateLogRecord priceUpdateLogRecord = new PriceUpdateLogRecord(outgoingPriceUpdateEvent, logTime,
+                dateFormat);
         assertThat(priceUpdateLogRecord.getClusterId(), is(equalTo(clusterId)));
         assertThat(priceUpdateLogRecord.getAgentId(), is(equalTo(agentId)));
         assertThat(priceUpdateLogRecord.getEventTimestamp(), is(equalTo(timeStamp)));

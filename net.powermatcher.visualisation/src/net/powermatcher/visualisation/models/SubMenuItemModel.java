@@ -3,7 +3,7 @@ package net.powermatcher.visualisation.models;
 import net.powermatcher.api.Agent;
 
 /**
- * A data object representing a SubMenu item for the visualizer. 
+ * A data object representing a SubMenu item for the visualizer.
  * 
  * @author FAN
  * @version 1.0
@@ -42,7 +42,8 @@ public class SubMenuItemModel {
     }
 
     /**
-     * @param the new title <code>String</code>
+     * @param the
+     *            new title <code>String</code>
      */
     public void setTitle(String title) {
         this.title = title;
@@ -56,7 +57,8 @@ public class SubMenuItemModel {
     }
 
     /**
-     * @param the new fpid <code>String</code>
+     * @param the
+     *            new fpid <code>String</code>
      */
     public void setFpid(String fpid) {
         this.fpid = fpid;

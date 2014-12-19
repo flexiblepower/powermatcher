@@ -54,8 +54,8 @@ public class MockMatcherAgent extends MockAgent implements MatcherEndpoint {
     public void setMarketBasis(MarketBasis marketBasis) {
         this.marketBasis = marketBasis;
     }
-    
-    public void publishPrice(PriceUpdate priceUpdate){
+
+    public void publishPrice(PriceUpdate priceUpdate) {
         session.updatePrice(priceUpdate);
     }
 

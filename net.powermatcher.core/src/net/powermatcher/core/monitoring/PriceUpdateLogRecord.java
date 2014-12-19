@@ -16,7 +16,6 @@ public class PriceUpdateLogRecord extends LogRecord {
      */
     private Qualifier qualifier;
 
-
     public PriceUpdateLogRecord(PriceUpdateEvent event, Date logTime, DateFormat dateFormat) {
 
         super(event.getClusterId(), event.getAgentId(), logTime, event.getTimestamp(), dateFormat);
@@ -27,7 +26,7 @@ public class PriceUpdateLogRecord extends LogRecord {
     public PriceUpdate getPriceUpdate() {
         return priceUpdate;
     }
-    
+
     public Qualifier getQualifier() {
         return qualifier;
     }

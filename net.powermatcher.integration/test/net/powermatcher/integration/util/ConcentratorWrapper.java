@@ -9,7 +9,7 @@ import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.core.concentrator.Concentrator;
 
 public class ConcentratorWrapper extends Concentrator {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ConcentratorWrapper.class);
 
     private PriceUpdate lastPublishedPriceUpdate;
@@ -21,17 +21,17 @@ public class ConcentratorWrapper extends Concentrator {
     public void updatePrice(PriceUpdate priceUpdate) {
         this.lastReceivedPriceUpdate = priceUpdate;
         super.updatePrice(priceUpdate);
-        
-        //This should reflect the check in Concentrator.updatePrice
-        if(priceUpdate != null){
+
+        // This should reflect the check in Concentrator.updatePrice
+        if (priceUpdate != null) {
             this.lastPublishedPriceUpdate = priceUpdate;
         }
     }
 
     @Override
-    public void updateBid(Session session, Bid newBid){
+    public void updateBid(Session session, Bid newBid) {
         try {
-            //Exceptions can be thrown in updateBid, if so, lastPublishedBid is not set.
+            // Exceptions can be thrown in updateBid, if so, lastPublishedBid is not set.
             this.lastReceivedBid = newBid;
             super.updateBid(session, newBid);
             this.lastPublishedBid = newBid;
@@ -56,12 +56,12 @@ public class ConcentratorWrapper extends Concentrator {
     public PriceUpdate getLastPrice() {
         return this.lastPublishedPriceUpdate;
     }
-    
-    public Bid getLastReceivedBid(){
+
+    public Bid getLastReceivedBid() {
         return this.lastReceivedBid;
     }
-    
-    public Bid getLastPublishedBid(){
+
+    public Bid getLastPublishedBid() {
         return this.lastPublishedBid;
     }
 }

@@ -57,8 +57,8 @@ import net.powermatcher.core.auctioneer.Auctioneer;
  * 
  */
 @Component(designateFactory = PeakShavingConcentrator.Config.class, immediate = true, provide = {
-        ObservableAgent.class, MatcherEndpoint.class, AgentEndpoint.class})
-public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoint, AgentEndpoint{
+        ObservableAgent.class, MatcherEndpoint.class, AgentEndpoint.class })
+public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoint, AgentEndpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PeakShavingConcentrator.class);
 
@@ -329,9 +329,10 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
             // call peakshaving code.
             PriceUpdate adjustedPrice = adjustPrice(agentPrice);
             session.updatePrice(adjustedPrice);
-            
+
             publishEvent(new PeakShavingEvent(config.agentId(), this.getClusterId(), timeService.currentDate(),
-                    this.floor, this.ceiling, new double[0], new double[0], agentPrice.getPrice(), adjustedPrice.getPrice()));
+                    this.floor, this.ceiling, new double[0], new double[0], agentPrice.getPrice(),
+                    adjustedPrice.getPrice()));
 
             this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), this.config.agentId(), session
                     .getSessionId(), timeService.currentDate(), priceUpdate, Qualifier.MATCHER));

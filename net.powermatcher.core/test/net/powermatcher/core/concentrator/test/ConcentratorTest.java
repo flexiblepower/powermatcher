@@ -63,7 +63,7 @@ public class ConcentratorTest {
         bidUpdateRate = 30;
         whiteList = new ArrayList<>();
         whiteList.add("testAgent");
-        
+
         props.put("agentId", concentratorId);
         props.put("desiredParentId", auctioneerId);
         props.put("bidUpdateRate", bidUpdateRate);
@@ -79,7 +79,7 @@ public class ConcentratorTest {
     public void testActivate() {
         assertThat(concentrator.getAgentId(), is(equalTo(concentratorId)));
         assertThat(concentrator.getDesiredParentId(), is(equalTo(auctioneerId)));
-        assertThat(concentrator.getWhiteList(), is(equalTo(whiteList)));        
+        assertThat(concentrator.getWhiteList(), is(equalTo(whiteList)));
         assertThat(mockScheduler.getUpdateRate(), is(equalTo(bidUpdateRate)));
     }
 
@@ -111,7 +111,7 @@ public class ConcentratorTest {
         assertThat(session2.getMarketBasis(), is(equalTo(marketBasis)));
         assertThat(session2.getClusterId(), is(equalTo(clusterId)));
     }
-    
+
     @Test
     public void testMatcherEndpointDisconnected() {
         MockMatcherAgent mockMatcherAgent = new MockMatcherAgent(auctioneerId);
