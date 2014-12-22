@@ -41,6 +41,6 @@ public class TestBaseDeviceAgent extends BaseDeviceAgent {
 
     @Override
     protected void doBidUpdate() {
-        // Do nothing
+        // No implementation needed in this Test class.
     }
 }
