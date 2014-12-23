@@ -183,6 +183,7 @@ public class CSVLogger extends AgentEventLogger {
                 break;
             case PEAK_SHAVING_EVENT:
                 header = PEAKSHAVING_HEADER_ROW;
+                break;
             default:
                 break;
             }
