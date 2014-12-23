@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:javaee="http://java.sun.com/xml/ns/javaee"
+    xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+    <javaee:display-name>Powermatcher WebSocket Application</javaee:display-name>
+
+    <servlet>
+        <servlet-name>PowermatcherWebSocket</servlet-name>
+        <servlet-class>net.powermatcher.extensions.connectivity.websockets.PowermatcherWebSocketServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PowermatcherWebSocket</servlet-name>
+        <url-pattern>/agentendpoint/*</url-pattern>
+    </servlet-mapping>
+</web-app>

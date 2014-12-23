@@ -1,0 +1,17 @@
+Bundle-Version: 1.0.0.${tstamp}
+-buildpath:  \
+	biz.aQute.bnd.annotation,\
+	org.apache.felix.http.servlet-api,\
+	org.apache.commons.io,\
+	slf4j.api,\
+	com.google.gson,\
+	net.powermatcher.core;version=latest,\
+	net.powermatcher.api;version=latest,\
+	osgi.cmpn,\
+	osgi.core
+Private-Package:  \
+net.powermatcher.visualisation.*
+
+Service-Component:  \
+*
+ Include-Resource: res

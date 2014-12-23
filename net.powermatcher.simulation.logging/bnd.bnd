@@ -1,7 +1,0 @@
--buildpath: net.powermatcher.telemetry.service;version=latest,\
-	slf4j.api,\
-	net.powermatcher.core.agent;version=latest,\
-	net.powermatcher.simulation.engine;version=latest
-Export-Package: net.powermatcher.simulation.logging,\
-	net.powermatcher.simulation.logging.sink
-Bundle-Version: 1.0.0

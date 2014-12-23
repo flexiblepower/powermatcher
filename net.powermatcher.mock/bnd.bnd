@@ -1,0 +1,15 @@
+-buildpath:  \
+	osgi.core,\
+	osgi.cmpn,\
+	biz.aQute.bnd.annotation,\
+	${junit},\
+	net.powermatcher.api;version=latest,\
+	slf4j.api
+Bundle-Version: 0.0.0.${tstamp}
+Private-Package:  \
+	net.powermatcher.mock
+Service-Component:  \
+	*
+testbin: bin
+Export-Package:  \
+	net.powermatcher.mock
