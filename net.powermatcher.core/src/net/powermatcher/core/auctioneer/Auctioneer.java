@@ -51,7 +51,7 @@ import aQute.bnd.annotation.metatype.Meta;
  * </p>
  * 
  * @author FAN
- * @version 1.0
+ * @version 2.0
  * 
  */
 @Component(designateFactory = Auctioneer.Config.class, immediate = true, provide = { ObservableAgent.class,
@@ -195,15 +195,16 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
         Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis, false);
         Price newPrice = determinePrice(aggregatedBid);
 
-        for (Session session : this.sessions) {       	
-        	if(this.aggregatedBids.getLastBid(session.getAgentId()) != null) {
-        		Integer bidNumber = this.aggregatedBids.getLastBid(session.getAgentId()).getBidNumber();
-        		PriceUpdate sessionPriceUpdate = new PriceUpdate(newPrice, bidNumber);
-        		this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), getAgentId(), session.getSessionId(),
-        				timeService.currentDate(), sessionPriceUpdate, Qualifier.MATCHER));
-        		session.updatePrice(sessionPriceUpdate);
-        		LOGGER.debug("New price: {}, session {}", sessionPriceUpdate, session.getSessionId());
-        	}
+        for (Session session : this.sessions) {
+            ArrayBid lastBid = this.aggregatedBids.getLastBid(session.getAgentId());
+            if (lastBid != null) {
+                Integer bidNumber = lastBid.getBidNumber();
+                PriceUpdate sessionPriceUpdate = new PriceUpdate(newPrice, bidNumber);
+                this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), getAgentId(), session
+                        .getSessionId(), timeService.currentDate(), sessionPriceUpdate, Qualifier.MATCHER));
+                session.updatePrice(sessionPriceUpdate);
+                LOGGER.debug("New price: {}, session {}", sessionPriceUpdate, session.getSessionId());
+            }
         }
     }
 
@@ -223,5 +224,29 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
 
     protected BidCache getAggregatedBids() {
         return this.aggregatedBids;
+    }
+
+    public boolean canEqual(Object other) {
+        return other instanceof Auctioneer;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        Auctioneer that = (Auctioneer) ((obj instanceof Auctioneer) ? obj : null);
+        if (that == null) {
+            return false;
+        }
+
+        if (this == that) {
+            return true;
+        }
+
+        return canEqual(that) && this.aggregatedBids.equals(that.aggregatedBids)
+                && this.marketBasis.equals(that.marketBasis) && this.sessions.equals(that.sessions);
+    }
+
+    @Override
+    public int hashCode() {
+        return 211 * (aggregatedBids.hashCode() + marketBasis.hashCode());
     }
 }

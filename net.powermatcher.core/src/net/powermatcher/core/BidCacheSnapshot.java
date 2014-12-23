@@ -7,7 +7,6 @@ public class BidCacheSnapshot {
 
     private Map<String, Integer> bidNumbers;
 
-
     public BidCacheSnapshot() {
         this.bidNumbers = new HashMap<>();
     }
@@ -19,5 +18,4 @@ public class BidCacheSnapshot {
     public void setBidNumbers(Map<String, Integer> bidNumbers) {
         this.bidNumbers = bidNumbers;
     }
-
 }
