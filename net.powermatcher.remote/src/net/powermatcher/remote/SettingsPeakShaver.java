@@ -15,6 +15,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import net.powermatcher.core.concentrator.PeakShavingConcentrator;
 
 import org.osgi.framework.InvalidSyntaxException;
@@ -23,10 +24,10 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.Gson;
-
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
+
+import com.google.gson.Gson;
 
 @Component(provide = Servlet.class, immediate = true)
 public class SettingsPeakShaver extends HttpServlet {

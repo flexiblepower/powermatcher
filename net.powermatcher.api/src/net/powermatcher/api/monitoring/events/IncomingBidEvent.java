@@ -10,9 +10,9 @@ import net.powermatcher.api.monitoring.Qualifier;
 
 /**
  * An {@link IncomingBidEvent} is sent when an {@link AgentEndpoint} receives a new {@link Bid}.
- * 
+ *
  * @author FAN
- * @version 1.0
+ * @version 2.0
  */
 public class IncomingBidEvent extends BidEvent {
 
@@ -23,7 +23,7 @@ public class IncomingBidEvent extends BidEvent {
 
     /**
      * Constructs an instance of this class.
-     * 
+     *
      * @param clusterId
      *            The id of the cluster the {@link AgentEndpoint} subclass sending the UpdateEvent is running in.
      * @param agentId

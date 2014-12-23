@@ -1,5 +1,7 @@
 package net.powermatcher.extensions.connectivity.websockets.data;
 
+import net.powermatcher.api.data.Bid;
+
 /**
  * Bid model class to transfer {@link Bid} data over the wire.
  */

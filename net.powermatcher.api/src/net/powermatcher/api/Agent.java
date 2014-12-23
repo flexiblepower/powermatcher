@@ -5,7 +5,7 @@ package net.powermatcher.api;
  * required for an Agent to provide to a cluster.
  * 
  * @author FAN
- * @version 1.0
+ * @version 2.0
  * 
  */
 public interface Agent {

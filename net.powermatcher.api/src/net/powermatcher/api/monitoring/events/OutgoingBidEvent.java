@@ -11,16 +11,16 @@ import net.powermatcher.api.monitoring.Qualifier;
 
 /**
  * An {@link OutgoingBidEvent} is sent when an {@link AgentEndpoint} sends a new {@link Bid}.
- * 
+ *
  * @author FAN
- * @version 1.0
- * 
+ * @version 2.0
+ *
  */
 public class OutgoingBidEvent extends BidEvent {
 
     /**
      * Constructs an instance of this class.
-     * 
+     *
      * @param clusterId
      *            The id of the cluster the {@link AgentEndpoint} subclass sending the UpdateEvent is running in.
      * @param agentId

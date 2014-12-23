@@ -5,20 +5,21 @@ import java.util.Date;
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
+import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.Qualifier;
 
 /**
  * An {@link IncomingPriceUpdateEvent} is sent when an {@link AgentEndpoint} receives a new {@link Price}.
- * 
+ *
  * @author FAN
- * @version 1.0
+ * @version 2.0
  */
 public class IncomingPriceUpdateEvent extends PriceUpdateEvent {
 
     /**
      * Constructs an instance of this class.
-     * 
+     *
      * @param clusterId
      *            The id of the cluster the {@link AgentEndpoint} subclass sending the UpdateEvent is running in.
      * @param agentId

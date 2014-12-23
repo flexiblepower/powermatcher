@@ -10,7 +10,7 @@ import net.powermatcher.api.data.PriceUpdate;
  * instances. These are linked by a {@link Session}.
  * 
  * @author FAN
- * @version 1.0
+ * @version 2.0
  * 
  */
 public interface AgentEndpoint extends Agent {

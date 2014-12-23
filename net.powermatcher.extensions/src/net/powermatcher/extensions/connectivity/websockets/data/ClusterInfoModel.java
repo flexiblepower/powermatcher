@@ -1,5 +1,7 @@
 package net.powermatcher.extensions.connectivity.websockets.data;
 
+import net.powermatcher.api.data.MarketBasis;
+
 /**
  * CusterInfo model class to transfer clusterId and {@link MarketBasis} data over the wire.
  */

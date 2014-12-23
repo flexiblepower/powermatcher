@@ -8,7 +8,7 @@ import net.powermatcher.core.BaseAgent;
  * ObjectiveEndpoint with notifyPriceUpdate(Price) and handleAggregateBid(Bid).
  * 
  * @author FAN
- * @version 1.0
+ * @version 2.0
  */
 public abstract class BaseObjectiveAgent extends BaseAgent implements ObjectiveEndpoint {
 

@@ -8,8 +8,7 @@ import javax.xml.crypto.Data;
 import net.powermatcher.api.monitoring.events.AgentEvent;
 
 /**
- * @author IBM
- * @version 0.9.0
+ * @version 2.0
  */
 public abstract class LogRecord {
     /**
@@ -38,7 +37,7 @@ public abstract class LogRecord {
 
 /**
      * Constructs an instance of this class from the specified equipment ID parameter.
-     * 
+     *
      * @param clusterId
      *            The cluster id of the agent that published the {@link AgentEvent}.
      * @param agentId

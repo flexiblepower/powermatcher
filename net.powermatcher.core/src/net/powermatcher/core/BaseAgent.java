@@ -15,7 +15,7 @@ import net.powermatcher.api.monitoring.events.AgentEvent;
  * the {@link Observable} interface, providing Observable functionality.
  * 
  * @author FAN
- * @version 1.0
+ * @version 2.0
  */
 public abstract class BaseAgent implements ObservableAgent {
 

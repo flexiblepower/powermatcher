@@ -15,7 +15,6 @@ import net.powermatcher.api.monitoring.events.BidEvent;
 import net.powermatcher.api.monitoring.events.PeakShavingEvent;
 import net.powermatcher.api.monitoring.events.PriceUpdateEvent;
 import net.powermatcher.api.monitoring.events.WhitelistEvent;
-import net.powermatcher.core.monitoring.BaseObserver;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

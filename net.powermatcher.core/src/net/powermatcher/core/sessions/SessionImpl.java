@@ -20,7 +20,7 @@ import net.powermatcher.core.concentrator.Concentrator;
  * the {@link Auctioneer} and {@link Concentrator}.
  * 
  * @author FAN
- * @version 1.0
+ * @version 2.0
  * 
  */
 public class SessionImpl implements Session {

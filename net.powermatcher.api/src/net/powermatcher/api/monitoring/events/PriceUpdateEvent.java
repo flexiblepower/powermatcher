@@ -12,7 +12,7 @@ import net.powermatcher.api.monitoring.Qualifier;
  * An {@link PriceUpdateEvent} is sent when an {@link AgentEndpoint} receives a new {@link PriceUpdate}.
  * 
  * @author FAN
- * @version 1.0
+ * @version 2.0
  */
 public abstract class PriceUpdateEvent extends AgentEvent {
 

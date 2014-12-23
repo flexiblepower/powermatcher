@@ -37,7 +37,7 @@ import aQute.bnd.annotation.component.Reference;
  * {@link MatcherEndpoint} to an agent and an {@link AgentEndpoint} with a {@link MatcherEndpoint}.
  * 
  * @author FAN
- * @version 1.0
+ * @version 2.0
  * 
  */
 @Component(immediate = true)

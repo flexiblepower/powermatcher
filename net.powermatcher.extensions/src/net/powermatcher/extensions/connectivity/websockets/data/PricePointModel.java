@@ -1,5 +1,7 @@
 package net.powermatcher.extensions.connectivity.websockets.data;
 
+import net.powermatcher.api.data.PricePoint;
+
 /**
  * PricePoint model class to transfer {@link PricePoint} data over the wire.
  */
