@@ -5,7 +5,6 @@ import java.util.Date;
 
 import javax.xml.crypto.Data;
 
-import net.powermatcher.api.monitoring.Qualifier;
 import net.powermatcher.api.monitoring.events.AgentEvent;
 
 /**
@@ -21,10 +20,6 @@ public abstract class LogRecord {
      * The Agent Id that published the {@link AgentEvent}.
      */
     private String agentId;
-    /**
-     * The qualifier of the agent that published the {@link AgentEvent}.
-     */
-    private Qualifier qualifier;
 
     /**
      * The time the event was logged in a {@link Data} instance
@@ -51,10 +46,9 @@ public abstract class LogRecord {
      * @param qualifier
      *            The qualifier of the agent that published the {@link AgentEvent}.
      */
-    protected LogRecord( String clusterId,  String agentId,  Qualifier qualifier, Date logTime, Date eventTimestamp, DateFormat dateFormat) {
+    protected LogRecord(String clusterId, String agentId, Date logTime, Date eventTimestamp, DateFormat dateFormat) {
         this.clusterId = clusterId;
         this.agentId = agentId;
-        this.qualifier = qualifier;
         this.logTime = logTime;
         this.eventTimestamp = eventTimestamp;
         this.dateFormat = dateFormat;
@@ -68,10 +62,6 @@ public abstract class LogRecord {
         return agentId;
     }
 
-    public Qualifier getQualifier() {
-        return qualifier;
-    }
-
     public Date getLogTime() {
         return logTime;
     }
@@ -83,5 +73,5 @@ public abstract class LogRecord {
     public DateFormat getDateFormat() {
         return dateFormat;
     }
-    
+
 }

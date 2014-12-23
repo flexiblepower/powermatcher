@@ -37,10 +37,13 @@ public class AgentWhitelist extends HttpServlet {
     private static final Logger LOGGER = LoggerFactory.getLogger(AgentWhitelist.class);
 
     /**
-     * Holds the whiteLists
+     * Holds the concentrators with a whitelist
      */
-    private static Map<String, WhiteList> whiteLists = new HashMap<String, WhiteList>();
+    private static Map<String, WhiteList> concentrators = new HashMap<String, WhiteList>();
 
+    /**
+     * Retreives remote all whiteList agents on {@link Concentrator} id or for all {@link Concentrator}.
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         ConcurrentMap<String, List<String>> whiteListAgents = null;
@@ -57,6 +60,9 @@ public class AgentWhitelist extends HttpServlet {
         returnGson(whiteListAgents, resp);
     }
 
+    /**
+     * Create remote new whiteList with agents on {@link Concentrator} id or for all {@link Concentrator}.
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         ConcurrentMap<String, List<String>> whiteListAgents = null;
@@ -73,6 +79,9 @@ public class AgentWhitelist extends HttpServlet {
         returnGson(whiteListAgents, resp);
     }
 
+    /**
+     * Update remote whiteList agents on {@link Concentrator} id or for all {@link Concentrator}.
+     */
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         ConcurrentMap<String, List<String>> whiteListAgents = null;
@@ -91,6 +100,9 @@ public class AgentWhitelist extends HttpServlet {
         returnGson(whiteListAgents, resp);
     }
 
+    /**
+     * Delete remote agentId's on whiteList for {@link Concentrator} id or for all {@link Concentrator}.
+     */
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         ConcurrentMap<String, List<String>> whiteListAgents = null;
@@ -111,7 +123,7 @@ public class AgentWhitelist extends HttpServlet {
 
     private ConcurrentMap<String, List<String>> getAllAgentsWhiteList() {
         ConcurrentMap<String, List<String>> validAgents = new ConcurrentHashMap<String, List<String>>();
-        for (Map.Entry<String, WhiteList> agent : whiteLists.entrySet()) {
+        for (Map.Entry<String, WhiteList> agent : concentrators.entrySet()) {
             Concentrator whiteListAgent = (Concentrator) agent.getValue();
             validAgents.put(agent.getKey(), whiteListAgent.getWhiteList());
         }
@@ -120,7 +132,7 @@ public class AgentWhitelist extends HttpServlet {
 
     private ConcurrentMap<String, List<String>> getConcentratorWhiteList(String agentId) {
         ConcurrentMap<String, List<String>> validAgents = new ConcurrentHashMap<String, List<String>>();
-        for (Map.Entry<String, WhiteList> agent : whiteLists.entrySet()) {
+        for (Map.Entry<String, WhiteList> agent : concentrators.entrySet()) {
             Concentrator whiteListAgent = (Concentrator) agent.getValue();
             if (agentId.equals(agent.getKey())) {
                 validAgents.put(agent.getKey(), whiteListAgent.getWhiteList());
@@ -131,7 +143,7 @@ public class AgentWhitelist extends HttpServlet {
 
     private ConcurrentMap<String, List<String>> createWhiteList(List<String> whiteListAgents) {
         ConcurrentMap<String, List<String>> validAgents = new ConcurrentHashMap<String, List<String>>();
-        for (Map.Entry<String, WhiteList> agent : whiteLists.entrySet()) {
+        for (Map.Entry<String, WhiteList> agent : concentrators.entrySet()) {
             Concentrator whiteListAgent = (Concentrator) agent.getValue();
             validAgents.put(agent.getKey(), whiteListAgent.createWhiteList(whiteListAgents));
         }
@@ -140,7 +152,7 @@ public class AgentWhitelist extends HttpServlet {
 
     private ConcurrentMap<String, List<String>> createConcentratorWhiteList(List<String> whiteListAgents, String agentId) {
         ConcurrentMap<String, List<String>> validAgents = new ConcurrentHashMap<String, List<String>>();
-        for (Map.Entry<String, WhiteList> agent : whiteLists.entrySet()) {
+        for (Map.Entry<String, WhiteList> agent : concentrators.entrySet()) {
             Concentrator whiteListAgent = (Concentrator) agent.getValue();
 
             if (agentId.equals(whiteListAgent.getAgentId())) {
@@ -152,7 +164,7 @@ public class AgentWhitelist extends HttpServlet {
 
     private ConcurrentMap<String, List<String>> addWhiteList(List<String> whiteListAgents) {
         ConcurrentMap<String, List<String>> validAgents = new ConcurrentHashMap<String, List<String>>();
-        for (Map.Entry<String, WhiteList> agent : whiteLists.entrySet()) {
+        for (Map.Entry<String, WhiteList> agent : concentrators.entrySet()) {
             Concentrator whiteListAgent = (Concentrator) agent.getValue();
             validAgents.put(agent.getKey(), whiteListAgent.addWhiteList(whiteListAgents));
         }
@@ -161,7 +173,7 @@ public class AgentWhitelist extends HttpServlet {
 
     private ConcurrentMap<String, List<String>> addConcentratorWhiteList(List<String> whiteListAgents, String agentId) {
         ConcurrentMap<String, List<String>> validAgents = new ConcurrentHashMap<String, List<String>>();
-        for (Map.Entry<String, WhiteList> agent : whiteLists.entrySet()) {
+        for (Map.Entry<String, WhiteList> agent : concentrators.entrySet()) {
             Concentrator whiteListAgent = (Concentrator) agent.getValue();
 
             if (agentId.equals(whiteListAgent.getAgentId())) {
@@ -174,7 +186,7 @@ public class AgentWhitelist extends HttpServlet {
 
     private ConcurrentMap<String, List<String>> deleteConcentratorWhiteList(List<String> whiteListAgents, String agentId) {
         ConcurrentMap<String, List<String>> validAgents = new ConcurrentHashMap<String, List<String>>();
-        for (Map.Entry<String, WhiteList> agent : whiteLists.entrySet()) {
+        for (Map.Entry<String, WhiteList> agent : concentrators.entrySet()) {
             Concentrator whiteListAgent = (Concentrator) agent.getValue();
 
             if (agentId.equals(whiteListAgent.getAgentId())) {
@@ -186,7 +198,7 @@ public class AgentWhitelist extends HttpServlet {
 
     private ConcurrentMap<String, List<String>> deleteWhiteList(List<String> whiteListAgents) {
         ConcurrentMap<String, List<String>> validAgents = new ConcurrentHashMap<String, List<String>>();
-        for (Map.Entry<String, WhiteList> agent : whiteLists.entrySet()) {
+        for (Map.Entry<String, WhiteList> agent : concentrators.entrySet()) {
             Concentrator whiteListAgent = (Concentrator) agent.getValue();
 
             validAgents.put(agent.getKey(), whiteListAgent.removeWhiteList(whiteListAgents));
@@ -236,7 +248,7 @@ public class AgentWhitelist extends HttpServlet {
         List<String> whiteListAgents = new ArrayList<String>();
         for (String agent : agentsLst) {
             agent = agent.replace("\"", "");
-            agent.trim();
+            agent = agent.trim();
             whiteListAgents.add(agent);
         }
 
@@ -251,7 +263,7 @@ public class AgentWhitelist extends HttpServlet {
         if (agentId == null) {
             LOGGER.warn("WhiteList with agentId is null", whiteList);
         } else {
-            whiteLists.put(agentId, whiteList);
+            concentrators.put(agentId, whiteList);
         }
     }
 
@@ -259,8 +271,8 @@ public class AgentWhitelist extends HttpServlet {
         Agent agent = (Agent) whiteList;
         String agentId = agent.getAgentId();
 
-        if (agentId != null && whiteLists.get(agentId) == whiteList) {
-            whiteLists.remove(agentId);
+        if (agentId != null && concentrators.get(agentId) == whiteList) {
+            concentrators.remove(agentId);
             LOGGER.info("Removed whiteList: {}", agentId);
         }
     }

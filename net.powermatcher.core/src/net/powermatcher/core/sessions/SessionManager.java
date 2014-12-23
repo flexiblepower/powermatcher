@@ -1,6 +1,9 @@
 package net.powermatcher.core.sessions;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -12,6 +15,9 @@ import net.powermatcher.api.Session;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.concentrator.Concentrator;
 
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +41,7 @@ import aQute.bnd.annotation.component.Reference;
  * 
  */
 @Component(immediate = true)
-public class SessionManager implements SessionManagerInterface {
+public class SessionManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionManager.class);
 
@@ -59,26 +65,39 @@ public class SessionManager implements SessionManagerInterface {
      */
     private Map<String, String> desiredConnections = new ConcurrentHashMap<String, String>();
 
+    /**
+     * Holds the agentId's in the cluster
+     */
+    private List<String> agentIds = new ArrayList<String>();
+
+    /**
+     * OSGI ConfigurationAdmin, stores bundle configuration data persistently.
+     */
+    private ConfigurationAdmin configurationAdmin;
+
     @Reference(dynamic = true, multiple = true, optional = true)
     public void addAgentEndpoint(AgentEndpoint agentEndpoint) {
         Agent agent = (Agent) agentEndpoint;
         String agentId = agent.getAgentId();
 
-        // Modified agent
-        if (desiredConnections.containsKey(agentId)) {
-            desiredConnections.remove(agentId);
-        }
+        if (isNotUniqueAgentId(agentId, agentEndpoint, null)) {
+            // Modified agent
+            if (desiredConnections.containsKey(agentId)) {
+                desiredConnections.remove(agentId);
+            }
 
-        desiredConnections.put(agentId, agent.getDesiredParentId());
-        LOGGER.debug("Added new wanted connection: [{}]", agentId + ":" + agent.getDesiredParentId());
+            desiredConnections.put(agentId, agent.getDesiredParentId());
+            LOGGER.debug("Added new wanted connection: [{}]", agentId + ":" + agent.getDesiredParentId());
 
-        if (agentId == null) {
-            LOGGER.warn("Registered an agent with no agentId: " + agentEndpoint);
-        } else if (agentEndpoints.putIfAbsent(agentId, agentEndpoint) != null) {
-            LOGGER.warn("An agent with the id " + agentId + " was already registered");
-        } else {
-            updateConnections();
+            if (agentId == null) {
+                LOGGER.warn("Registered an agent with no agentId: " + agentEndpoint);
+            } else if (agentEndpoints.putIfAbsent(agentId, agentEndpoint) != null) {
+                LOGGER.warn("An agent with the id " + agentId + " was already registered");
+            } else {
+                updateConnections();
+            }
         }
+        updateConnections();
     }
 
     @Activate
@@ -91,12 +110,15 @@ public class SessionManager implements SessionManagerInterface {
         Agent agent = (Agent) matcherEndpoint;
         String agentId = agent.getAgentId();
 
-        if (agentId == null) {
-            LOGGER.warn("Registered an matcher with no matcherId: " + matcherEndpoint);
-        } else if (matcherEndpoints.putIfAbsent(agentId, matcherEndpoint) != null) {
-            LOGGER.warn("An matcher with the id " + agentId + " was already registered");
-        } else {
-            updateConnections();
+        if (isNotUniqueAgentId(agentId, null, matcherEndpoint)) {
+
+            if (agentId == null) {
+                LOGGER.warn("Registered an matcher with no matcherId: " + matcherEndpoint);
+            } else if (matcherEndpoints.putIfAbsent(agentId, matcherEndpoint) != null) {
+                LOGGER.warn("An matcher with the id " + agentId + " was already registered");
+            } else {
+                updateConnections();
+            }
         }
     }
 
@@ -142,6 +164,50 @@ public class SessionManager implements SessionManagerInterface {
         }
     }
 
+    private boolean isNotUniqueAgentId(String agentId, AgentEndpoint agentEndpoint, MatcherEndpoint matcherEndpoint) {
+        if (agentIds.contains(agentId)) {
+            if (agentEndpoint != null && agentEndpoints.get(agentId) != null) {
+                AgentEndpoint oldAgentEndpoint = agentEndpoints.get(agentId);
+                deleteAgentId(agentId, oldAgentEndpoint, null);
+
+                return false;
+            } else if (matcherEndpoint != null && (matcherEndpoints.get(agentId) != null)) {
+                MatcherEndpoint oldMatcherEndpoint = matcherEndpoints.get(agentId);
+                deleteAgentId(agentId, null, oldMatcherEndpoint);
+
+                return false;
+            }
+        } else {
+            if (!agentIds.contains(agentId)) {
+                agentIds.add(agentId);
+            }
+        }
+        return true;
+    }
+
+    private void deleteAgentId(String AgentId, AgentEndpoint agentEndpoint, MatcherEndpoint matcherEndpoint) {
+        String pidOldAgentEndpoint;
+        try {
+            for (Configuration c : configurationAdmin.listConfigurations(null)) {
+                if (agentEndpoint != null) {
+                    pidOldAgentEndpoint = agentEndpoint.getServicePid();
+                } else {
+                    pidOldAgentEndpoint = matcherEndpoint.getServicePid();
+                }
+                String pidConfigAgentEndpoint = (String) c.getProperties().get("service.pid");
+                if ((agentEndpoint.getAgentId().equals((String) c.getProperties().get("agentId")))
+                        && (!pidOldAgentEndpoint.equals(pidConfigAgentEndpoint))) {
+                    LOGGER.error("AgentId " + agentEndpoint.getAgentId() + "was already registered.");
+                    c.delete();
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage());
+        } catch (InvalidSyntaxException e) {
+            LOGGER.error(e.getMessage());
+        }
+    }
+
     public void removeMatcherEndpoint(MatcherEndpoint matcherEndpoint) {
         Agent agent = (Agent) matcherEndpoint;
         String matcherId = agent.getAgentId();
@@ -156,12 +222,10 @@ public class SessionManager implements SessionManagerInterface {
         activeSessions.remove(sessionImpl.getSessionId());
     }
 
-    @Override
     public Map<String, AgentEndpoint> getAgentEndpoints() {
         return new HashMap<String, AgentEndpoint>(agentEndpoints);
     }
 
-    @Override
     public Map<String, MatcherEndpoint> getMatcherEndpoints() {
         return new HashMap<String, MatcherEndpoint>(matcherEndpoints);
     }
@@ -171,8 +235,16 @@ public class SessionManager implements SessionManagerInterface {
      * 
      * @return {@link Session}
      */
-    @Override
     public Map<String, Session> getActiveSessions() {
         return new HashMap<String, Session>(activeSessions);
+    }
+
+    @Reference
+    protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
+        this.configurationAdmin = configurationAdmin;
+    }
+
+    public void setAgentIds(List<String> agentIds) {
+        this.agentIds = agentIds;
     }
 }

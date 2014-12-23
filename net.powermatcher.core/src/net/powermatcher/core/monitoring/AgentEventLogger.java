@@ -12,7 +12,9 @@ import net.powermatcher.api.TimeService;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.events.AgentEvent;
 import net.powermatcher.api.monitoring.events.BidEvent;
+import net.powermatcher.api.monitoring.events.PeakShavingEvent;
 import net.powermatcher.api.monitoring.events.PriceUpdateEvent;
+import net.powermatcher.api.monitoring.events.WhitelistEvent;
 import net.powermatcher.core.monitoring.BaseObserver;
 
 import org.slf4j.Logger;
@@ -65,11 +67,12 @@ public abstract class AgentEventLogger extends BaseObserver {
      * The {@link AgentEventType} this instance has to track
      */
     private AgentEventType eventType;
-    
+
     /**
      * This method will be called by the annotated Activate() method of the subclasses.
      * 
-     * @param properties the configuration properties
+     * @param properties
+     *            the configuration properties
      */
     public synchronized void baseActivate(Map<String, Object> properties) {
         processConfig(properties);
@@ -91,7 +94,7 @@ public abstract class AgentEventLogger extends BaseObserver {
             }
         }, 0, logUpdateRate, TimeUnit.SECONDS);
     }
-    
+
     /**
      * The method called when an {@link ObservableAgent} when they send an {@link AgentEvent}
      */
@@ -107,6 +110,14 @@ public abstract class AgentEventLogger extends BaseObserver {
             } else if (event instanceof PriceUpdateEvent) {
                 logRecord = new PriceUpdateLogRecord((PriceUpdateEvent) event, timeService.currentDate(),
                         getDateFormat());
+            } else if (event instanceof WhitelistEvent) {
+                logRecord = new WhitelistLogRecord(event, timeService.currentDate(), getDateFormat(),
+                        ((WhitelistEvent) event).getBlockedAgent());
+            } else if (event instanceof PeakShavingEvent) {
+                PeakShavingEvent peakShavingEvent = (PeakShavingEvent) event;
+                logRecord = new PeakShavingLogRecord(event, timeService.currentDate(), getDateFormat(),
+                        peakShavingEvent.getFloor(), peakShavingEvent.getCeiling(), peakShavingEvent.getOldDemand(),
+                        peakShavingEvent.getNewDemand(), peakShavingEvent.getNewPrice(), peakShavingEvent.getOldPrice());
             }
 
             addLogRecord(logRecord);
@@ -124,7 +135,8 @@ public abstract class AgentEventLogger extends BaseObserver {
     /**
      * This method will be called by the annotated Modfied() method of the subclasses.
      * 
-     * @param properties the configuration properties
+     * @param properties
+     *            the configuration properties
      */
     public synchronized void baseModified(Map<String, Object> properties) {
         processConfig(properties);
@@ -145,7 +157,8 @@ public abstract class AgentEventLogger extends BaseObserver {
     protected abstract void dumpLogs();
 
     /**
-     * @param the logupdateRate to be set (in miliseconds)
+     * @param the
+     *            logupdateRate to be set (in miliseconds)
      */
     protected void setLogUpdateRate(long logUpdateRate) {
         this.logUpdateRate = logUpdateRate;
@@ -159,14 +172,16 @@ public abstract class AgentEventLogger extends BaseObserver {
     }
 
     /**
-     * @param the {@link DateFormat} to be set
+     * @param the
+     *            {@link DateFormat} to be set
      */
     protected void setDateFormat(DateFormat dateFormat) {
         this.dateFormat = dateFormat;
     }
 
     /**
-     * @param the {@link ScheduledExecutorService} to be set
+     * @param the
+     *            {@link ScheduledExecutorService} to be set
      */
     protected void setScheduler(ScheduledExecutorService scheduler) {
         this.scheduler = scheduler;
@@ -180,7 +195,8 @@ public abstract class AgentEventLogger extends BaseObserver {
     }
 
     /**
-     * @param the loggerId to be set
+     * @param the
+     *            loggerId to be set
      */
     protected void setLoggerId(String loggerId) {
         this.loggerId = loggerId;
@@ -203,11 +219,11 @@ public abstract class AgentEventLogger extends BaseObserver {
     protected BlockingQueue<LogRecord> getLogRecords() {
         return logRecords;
     }
-    
+
     protected void removeLogRecord(LogRecord logRecord) {
         logRecords.remove(logRecord);
     }
-    
+
     protected void addLogRecord(LogRecord logRecord) {
         logRecords.add(logRecord);
     }

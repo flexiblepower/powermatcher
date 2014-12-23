@@ -35,6 +35,7 @@ import net.powermatcher.api.monitoring.events.IncomingBidEvent;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
 import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
+import net.powermatcher.api.monitoring.events.PeakShavingEvent;
 import net.powermatcher.core.BaseAgent;
 import net.powermatcher.core.BidCache;
 import net.powermatcher.core.BidCacheSnapshot;
@@ -52,7 +53,7 @@ import net.powermatcher.core.auctioneer.Auctioneer;
  * comment.
  * 
  * @author FAN
- * @version 1.0
+ * @version 2.0
  * 
  */
 @Component(designateFactory = PeakShavingConcentrator.Config.class, immediate = true, provide = {
@@ -203,12 +204,8 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
                         c.delete();
                     }
                 }
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (InvalidSyntaxException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            } catch (IOException | InvalidSyntaxException e) {
+                LOGGER.error(e.getMessage());
             }
 
             throw new IllegalArgumentException("The floor constraint shouldn't be higher than the ceiling constraint");
@@ -259,7 +256,6 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
 
     @Override
     public void updateBid(Session session, Bid newBid) {
-
         if (!sessionToAgents.contains(session)) {
             throw new IllegalStateException("No session found");
         }
@@ -277,16 +273,19 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
     }
 
     /**
-     * sends the aggregatedbids to the matcher this method has temporarily been made public due to issues with the
-     * scheduler. TODO fix this asap
+     * sends the aggregatedbids to the matcher
+     * 
      */
-    public synchronized void doBidUpdate() {
+    protected synchronized void doBidUpdate() {
         if (sessionToMatcher != null) {
             ArrayBid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.sessionToMatcher.getMarketBasis(), true);
 
             // Peakshaving call
             ArrayBid transformedBid = transformAggregatedBid(aggregatedBid);
             this.sessionToMatcher.updateBid(transformedBid);
+
+            publishEvent(new PeakShavingEvent(config.agentId(), this.getClusterId(), timeService.currentDate(),
+                    this.floor, this.ceiling, aggregatedBid.getDemand(), transformedBid.getDemand(), null, null));
 
             publishEvent(new OutgoingBidEvent(sessionToMatcher.getClusterId(), config.agentId(),
                     sessionToMatcher.getSessionId(), timeService.currentDate(), aggregatedBid, Qualifier.MATCHER));
@@ -304,15 +303,14 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
 
         LOGGER.debug("Received price update [{}]", priceUpdate);
         this.publishEvent(new IncomingPriceUpdateEvent(sessionToMatcher.getClusterId(), this.config.agentId(),
-                this.sessionToMatcher.getSessionId(), timeService.currentDate(), priceUpdate,
-                Qualifier.AGENT));
+                this.sessionToMatcher.getSessionId(), timeService.currentDate(), priceUpdate, Qualifier.AGENT));
 
         // Find bidCacheSnapshot belonging to the newly received price update
         BidCacheSnapshot bidCacheSnapshot = this.aggregatedBids.getMatchingSnapshot(priceUpdate.getBidNumber());
         if (bidCacheSnapshot == null) {
-        	// ignore price and log warning
-        	LOGGER.warn("Received a price update for a bid that I never sent, id: {}", priceUpdate.getBidNumber());
-        	return;
+            // ignore price and log warning
+            LOGGER.warn("Received a price update for a bid that I never sent, id: {}", priceUpdate.getBidNumber());
+            return;
         }
 
         // Publish new price to connected agents
@@ -320,18 +318,22 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
             Integer originalAgentBid = bidCacheSnapshot.getBidNumbers().get(session.getAgentId());
             if (originalAgentBid == null) {
                 // ignore price for this agent and log warning
+                LOGGER.warn("No matching bid for agent with id: {} in snapShot", session.getAgentId());
                 continue;
             }
-            
-            PriceUpdate agentPrice = new PriceUpdate(new Price(priceUpdate.getPrice().getMarketBasis(), priceUpdate.getPrice().getPriceValue()), originalAgentBid);
+
+            PriceUpdate agentPrice = new PriceUpdate(priceUpdate.getPrice(), originalAgentBid);
 
             // call peakshaving code.
             PriceUpdate adjustedPrice = adjustPrice(agentPrice);
             session.updatePrice(adjustedPrice);
 
+            publishEvent(new PeakShavingEvent(config.agentId(), this.getClusterId(), timeService.currentDate(),
+                    this.floor, this.ceiling, new double[0], new double[0], agentPrice.getPrice(),
+                    adjustedPrice.getPrice()));
+
             this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), this.config.agentId(), session
                     .getSessionId(), timeService.currentDate(), priceUpdate, Qualifier.MATCHER));
-
         }
     }
 
@@ -418,35 +420,6 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         this.aggregatedBidOut = newAggregatedBidOut;
 
         return this.aggregatedBidOut;
-    }
-
-    /**
-     * Additional method about flow reduction or test purpose.
-     */
-    public synchronized double getFlowReduction() {
-        // retrieve the current allocation
-        double allocation = this.getAllocation();
-
-        // if allocation, aggregated bid in or price in is unknown, we can't
-        // calculate the flow reduction.
-        if (Double.isNaN(allocation) || this.aggregatedBidIn == null || this.priceIn == null) {
-            return Double.NaN;
-        }
-
-        // calculate the allocation which would have been the fact if no
-        // transformation would have been performed
-        double untransformedAllocation = this.aggregatedBidIn.getDemandAt(this.priceIn.toPriceStep());
-
-        LOGGER.debug("BID(IN)" + this.aggregatedBidIn);
-        LOGGER.debug("BID(OUT)" + this.aggregatedBidOut);
-        LOGGER.debug("CURRENTPRICE(OUT)=" + this.priceOut.getPriceValue());
-        LOGGER.debug("CURRENTPRICE(in)=" + this.priceIn.getPriceValue());
-        LOGGER.debug("ALLOCATION=" + allocation);
-        LOGGER.debug("UNTRANSFORMEDALLOC=" + untransformedAllocation);
-
-        // calculate and return the flow reduction as the absolute value of the
-        // difference between the allocation with and without transformation
-        return Math.abs(untransformedAllocation - allocation);
     }
 
     private synchronized double getUncontrolledFlow() {

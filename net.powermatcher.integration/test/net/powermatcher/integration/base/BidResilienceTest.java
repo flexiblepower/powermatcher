@@ -72,14 +72,14 @@ public class BidResilienceTest extends ResilienceTest {
         auctioneer.activate(auctioneerProperties);
 
         this.concentrator = new ConcentratorWrapper();
-        Map<String, Object> concentratorProperties =new HashMap<>();;
+        Map<String, Object> concentratorProperties = new HashMap<>();
+        ;
         concentratorProperties.put("matcherId", CONCENTRATOR_NAME);
         concentratorProperties.put("desiredParentId", AUCTIONEER_NAME);
         concentratorProperties.put("bidTimeout", "600");
         concentratorProperties.put("bidUpdateRate", "30");
         concentratorProperties.put("agentId", CONCENTRATOR_NAME);
         concentratorProperties.put("whiteListAgents", new ArrayList<String>());
-
         this.matchers.add(this.concentrator);
         this.concentratorTimer = new MockScheduler();
         concentrator.setExecutorService(concentratorTimer);

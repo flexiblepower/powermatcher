@@ -13,10 +13,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Base class used to create an {@link AgentObserver}. The {@link AgentObserver} searches for {@link ObservableAgent} services and adds
- * itself.
+ * Base class used to create an {@link AgentObserver}. The {@link AgentObserver} searches for {@link ObservableAgent}
+ * services and adds itself.
  * 
- * {@link ObservableAgent} services are able to call the update method of {@link AgentObserver} with {@link AgentEvent} events.
+ * {@link ObservableAgent} services are able to call the update method of {@link AgentObserver} with {@link AgentEvent}
+ * events.
  */
 public abstract class BaseObserver implements AgentObserver {
 

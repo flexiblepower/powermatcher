@@ -11,7 +11,6 @@ import net.powermatcher.api.data.PointBid;
 import net.powermatcher.api.data.PricePoint;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.Qualifier;
-import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
 
 public abstract class BaseDeviceAgent extends BaseAgent implements AgentEndpoint, Comparable<BaseDeviceAgent> {
@@ -21,12 +20,12 @@ public abstract class BaseDeviceAgent extends BaseAgent implements AgentEndpoint
     private Session session;
 
     @Override
-    public synchronized final void connectToMatcher(Session session) {
+    public final synchronized void connectToMatcher(Session session) {
         this.session = session;
     }
 
     @Override
-    public synchronized final void matcherEndpointDisconnected(Session session) {
+    public final synchronized void matcherEndpointDisconnected(Session session) {
         this.session = null;
     }
 
@@ -34,7 +33,7 @@ public abstract class BaseDeviceAgent extends BaseAgent implements AgentEndpoint
         return session;
     }
 
-    protected synchronized final MarketBasis getMarketBasis() {
+    protected final synchronized MarketBasis getMarketBasis() {
         if (session == null) {
             return null;
         } else {
@@ -42,7 +41,7 @@ public abstract class BaseDeviceAgent extends BaseAgent implements AgentEndpoint
         }
     }
 
-    protected synchronized final PointBid createBid(PricePoint... pricePoints) {
+    protected final synchronized PointBid createBid(PricePoint... pricePoints) {
         if (session == null) {
             return null;
         } else {
@@ -50,17 +49,13 @@ public abstract class BaseDeviceAgent extends BaseAgent implements AgentEndpoint
         }
     }
 
-    @Override
-    public synchronized void updatePrice(PriceUpdate priceUpdate) {
-        publishEvent(new IncomingPriceUpdateEvent(getClusterId(), getAgentId(), session.getSessionId(), now(),
-                priceUpdate, Qualifier.AGENT));
-    }
+    public abstract void updatePrice(PriceUpdate priceUpdate);
 
     public final Bid getLastBid() {
         return lastBid;
     }
 
-    public synchronized final void publishBid(Bid newBid) {
+    public final synchronized void publishBid(Bid newBid) {
         if (session != null) {
             lastBid = newBid;
             session.updateBid(newBid);
@@ -74,6 +69,8 @@ public abstract class BaseDeviceAgent extends BaseAgent implements AgentEndpoint
     }
 
     protected abstract Date now();
+
+    protected abstract void doBidUpdate();
 
     @Override
     public int compareTo(BaseDeviceAgent o) {
@@ -95,12 +92,12 @@ public abstract class BaseDeviceAgent extends BaseAgent implements AgentEndpoint
             return true;
         }
 
-        return this.canEqual(other) && super.equals(other) && this.lastBid.equals(other.lastBid) && this.session.equals(other.session);
+        return this.canEqual(other) && super.equals(other) && this.lastBid.equals(other.lastBid);
     }
-    
+
     @Override
     public int hashCode() {
-        return 211 * (super.hashCode() +  lastBid.hashCode() + session.hashCode());
+        return 211 * (super.hashCode() + lastBid.hashCode() + session.hashCode());
     }
 
 }

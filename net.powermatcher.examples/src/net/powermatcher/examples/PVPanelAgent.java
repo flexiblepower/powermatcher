@@ -15,6 +15,8 @@ import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PricePoint;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
+import net.powermatcher.api.monitoring.Qualifier;
+import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.core.BaseDeviceAgent;
 
 import org.slf4j.Logger;
@@ -62,6 +64,8 @@ public class PVPanelAgent extends BaseDeviceAgent implements AgentEndpoint {
         Config config = Configurable.createConfigurable(Config.class, properties);
         this.setAgentId(config.agentId());
         this.setDesiredParentId(config.desiredParentId());
+        this.setServicePid((String) properties.get("service.pid"));
+
         this.minimumDemand = config.minimumDemand();
         this.maximumDemand = config.maximumDemand();
         scheduledFuture = scheduler.scheduleAtFixedRate(new Runnable() {
@@ -83,14 +87,15 @@ public class PVPanelAgent extends BaseDeviceAgent implements AgentEndpoint {
         LOGGER.info("Agent [{}], deactivated", this.getAgentId());
     }
 
+    @Override
     protected void doBidUpdate() {
         if (getMarketBasis() != null) {
             double demand = minimumDemand + (maximumDemand - minimumDemand) * generator.nextDouble();
 
-            PricePoint pricePoint1 = new PricePoint(new Price(getMarketBasis(),
-                    getMarketBasis().getMinimumPrice()), demand);
-            PricePoint pricePoint2 = new PricePoint(new Price(getMarketBasis(),
-                    getMarketBasis().getMaximumPrice()), minimumDemand);
+            PricePoint pricePoint1 = new PricePoint(new Price(getMarketBasis(), getMarketBasis().getMinimumPrice()),
+                    demand);
+            PricePoint pricePoint2 = new PricePoint(new Price(getMarketBasis(), getMarketBasis().getMaximumPrice()),
+                    minimumDemand);
 
             Bid newBid = createBid(pricePoint1, pricePoint2);
             LOGGER.debug("updateBid({})", newBid);
@@ -99,9 +104,10 @@ public class PVPanelAgent extends BaseDeviceAgent implements AgentEndpoint {
     }
 
     @Override
-    public void updatePrice(PriceUpdate newPrice) {
-        LOGGER.debug("Received price update [{}], current bidNr = {}", newPrice, getCurrentBidNr());
-        super.updatePrice(newPrice);
+    public synchronized void updatePrice(PriceUpdate priceUpdate) {
+        LOGGER.debug("Received price update [{}], current bidNr = {}", priceUpdate, getCurrentBidNr());
+        publishEvent(new IncomingPriceUpdateEvent(getClusterId(), getAgentId(), getSession().getSessionId(), now(),
+                priceUpdate, Qualifier.AGENT));
     }
 
     @Reference

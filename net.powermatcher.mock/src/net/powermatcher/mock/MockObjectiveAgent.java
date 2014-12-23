@@ -3,14 +3,14 @@ package net.powermatcher.mock;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import net.powermatcher.api.ObjectiveEndpoint;
 import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.PriceUpdate;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MockObjectiveAgent extends MockAgent implements ObjectiveEndpoint {
 

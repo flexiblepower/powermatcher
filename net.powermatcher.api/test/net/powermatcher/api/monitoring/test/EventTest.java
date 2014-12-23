@@ -87,7 +87,8 @@ public class EventTest {
     }
 
     public void testIncomingPriceUpdateEvent() {
-        IncomingPriceUpdateEvent ice = new IncomingPriceUpdateEvent(clusterId, agentId, sessionId, timestamp, priceUpdate, agentQualifier);
+        IncomingPriceUpdateEvent ice = new IncomingPriceUpdateEvent(clusterId, agentId, sessionId, timestamp,
+                priceUpdate, agentQualifier);
         assertThat(ice.getClusterId(), is(equalTo(clusterId)));
         assertThat(ice.getAgentId(), is(equalTo(agentId)));
         assertThat(ice.getSessionId(), is(equalTo(sessionId)));
@@ -98,14 +99,15 @@ public class EventTest {
 
     @Test
     public void testIncomingPriceUpdateEventToString() {
-        IncomingPriceUpdateEvent ice = new IncomingPriceUpdateEvent(clusterId, agentId, sessionId, timestamp, priceUpdate, agentQualifier);
+        IncomingPriceUpdateEvent ice = new IncomingPriceUpdateEvent(clusterId, agentId, sessionId, timestamp,
+                priceUpdate, agentQualifier);
         String icetoString = ice.toString();
         assertThat(icetoString, is(notNullValue()));
     }
 
     public void testOutgoingPriceUpdateEvent() {
-        OutgoingPriceUpdateEvent oce = new OutgoingPriceUpdateEvent(clusterId, agentId, sessionId, timestamp, priceUpdate,
-                matcherQualifier);
+        OutgoingPriceUpdateEvent oce = new OutgoingPriceUpdateEvent(clusterId, agentId, sessionId, timestamp,
+                priceUpdate, matcherQualifier);
         assertThat(oce.getClusterId(), is(equalTo(clusterId)));
         assertThat(oce.getAgentId(), is(equalTo(agentId)));
         assertThat(oce.getSessionId(), is(equalTo(sessionId)));
@@ -116,8 +118,8 @@ public class EventTest {
 
     @Test
     public void testOutgoingPriceUpdateEventToString() {
-        OutgoingPriceUpdateEvent oce = new OutgoingPriceUpdateEvent(clusterId, agentId, sessionId, timestamp, priceUpdate,
-                matcherQualifier);
+        OutgoingPriceUpdateEvent oce = new OutgoingPriceUpdateEvent(clusterId, agentId, sessionId, timestamp,
+                priceUpdate, matcherQualifier);
         String icetoString = oce.toString();
         assertThat(icetoString, is(notNullValue()));
     }

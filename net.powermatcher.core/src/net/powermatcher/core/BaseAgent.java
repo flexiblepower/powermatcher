@@ -5,8 +5,6 @@ import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import javax.swing.plaf.SliderUI;
-
 import net.powermatcher.api.Agent;
 import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.ObservableAgent;
@@ -26,6 +24,8 @@ public abstract class BaseAgent implements ObservableAgent {
     private String clusterId;
 
     private String desiredParentId;
+
+    private String servicePid;
 
     /**
      * Collection of {@link Observer} services.
@@ -51,6 +51,10 @@ public abstract class BaseAgent implements ObservableAgent {
         this.agentId = agentId;
     }
 
+    protected void setServicePid(String servicePid) {
+        this.servicePid = servicePid;
+    }
+
     @Override
     public String getClusterId() {
         return this.clusterId;
@@ -67,6 +71,11 @@ public abstract class BaseAgent implements ObservableAgent {
 
     protected void setDesiredParentId(String desiredParentId) {
         this.desiredParentId = desiredParentId;
+    }
+
+    @Override
+    public String getServicePid() {
+        return this.servicePid;
     }
 
     /**
@@ -102,7 +111,8 @@ public abstract class BaseAgent implements ObservableAgent {
 
     @Override
     public int hashCode() {
-        return 211 * ((agentId == null ? 0: agentId.hashCode()) + (clusterId == null ? 0: clusterId.hashCode()) + (desiredParentId == null ? 0:desiredParentId.hashCode()));
+        return 211 * ((agentId == null ? 0 : agentId.hashCode()) + (clusterId == null ? 0 : clusterId.hashCode()) + (desiredParentId == null ? 0
+                : desiredParentId.hashCode()));
     }
 
 }

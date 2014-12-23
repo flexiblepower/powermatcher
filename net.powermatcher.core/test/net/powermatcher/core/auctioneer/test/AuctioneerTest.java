@@ -1,12 +1,25 @@
 package net.powermatcher.core.auctioneer.test;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.IsNull.notNullValue;
+import static org.hamcrest.core.IsNull.nullValue;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import net.powermatcher.api.Session;
 import net.powermatcher.api.data.ArrayBid;
+import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
+import net.powermatcher.api.monitoring.AgentObserver;
+import net.powermatcher.api.monitoring.events.AgentEvent;
+import net.powermatcher.api.monitoring.events.IncomingBidEvent;
+import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.sessions.SessionManager;
 import net.powermatcher.core.time.SystemTimeService;
@@ -14,194 +27,204 @@ import net.powermatcher.mock.MockAgent;
 import net.powermatcher.mock.MockScheduler;
 
 import org.junit.Before;
-import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 /**
  * JUnit test for the Auctioneer
- * 
- * Every test requires a different number agents. In setUp() NR_AGENTS are instantiated. Every test the desired number
- * of agents can be added and removed using the functions addAgents() and removeAgents().
  */
 public class AuctioneerTest {
 
-    private final static int NR_AGENTS = 21;
-
-    // This needs to be the same as the MarketBasis created in the Auctioneer
-    private final MarketBasis marketBasis = new MarketBasis("electricity", "EUR", 11, 0, 10);
-    private Map<String, Object> auctioneerProperties;
-    private MockScheduler timer;
-
-    private Auctioneer auctioneer;
-    private MockAgent[] agents;
-
-    private SessionManager sessionManager;
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
 
     private static final String AUCTIONEER_NAME = "auctioneer";
+    private Auctioneer auctioneer;
+    private Map<String, Object> auctioneerProperties;
+    private MockScheduler mockScheduler;
+    private SessionManager sessionManager;
+
+    private MarketBasis marketBasis;
+
+    private String commodity;
+    private String currency;
+    private String clusterId;
+    private int priceSteps;
+    private double minimumPrice;
+    private double maximumPrice;
+    private int bidTimeout;
+    private int priceUpdateRate;
 
     @Before
-    public void setUp() throws Exception {
-        // Init Auctioneer
-        this.auctioneer = new Auctioneer();
+    public void setUp() {
+        commodity = "electricity";
+        currency = "EUR";
+        clusterId = "testCluster";
+        priceSteps = 5;
+        minimumPrice = 0;
+        maximumPrice = 10;
+        bidTimeout = 600;
+        priceUpdateRate = 1;
 
-        auctioneerProperties = new HashMap<String, Object>();
+        marketBasis = new MarketBasis(commodity, currency, priceSteps, minimumPrice, maximumPrice);
+
+        auctioneer = new Auctioneer();
+        auctioneerProperties = new HashMap<>();
         auctioneerProperties.put("agentId", AUCTIONEER_NAME);
-        auctioneerProperties.put("clusterId", "DefaultCluster");
-        auctioneerProperties.put("matcherId", AUCTIONEER_NAME);
-        auctioneerProperties.put("commodity", "electricity");
-        auctioneerProperties.put("currency", "EUR");
-        auctioneerProperties.put("priceSteps", "11");
-        auctioneerProperties.put("minimumPrice", "0");
-        auctioneerProperties.put("maximumPrice", "10");
-        auctioneerProperties.put("bidTimeout", "600");
-        auctioneerProperties.put("priceUpdateRate", "30");
-        
-        timer = new MockScheduler();
+        auctioneerProperties.put("clusterId", clusterId);
+        auctioneerProperties.put("commodity", commodity);
+        auctioneerProperties.put("currency", currency);
+        auctioneerProperties.put("priceSteps", priceSteps);
+        auctioneerProperties.put("minimumPrice", minimumPrice);
+        auctioneerProperties.put("maximumPrice", maximumPrice);
+        auctioneerProperties.put("bidTimeout", bidTimeout);
+        auctioneerProperties.put("priceUpdateRate", priceUpdateRate);
 
-        auctioneer.setExecutorService(timer);
+        mockScheduler = new MockScheduler();
+        auctioneer.setExecutorService(mockScheduler);
         auctioneer.setTimeService(new SystemTimeService());
         auctioneer.activate(auctioneerProperties);
 
-        // Init MockAgents
-        this.agents = new MockAgent[NR_AGENTS];
-        for (int i = 0; i < NR_AGENTS; i++) {
-            String agentId = "agent" + (i + 1);
-            MockAgent newAgent = new MockAgent(agentId);
-            newAgent.setDesiredParentId(AUCTIONEER_NAME);
-            agents[i] = newAgent;
-        }
-
-        // Session
         sessionManager = new SessionManager();
         sessionManager.addMatcherEndpoint(auctioneer);
-        //sessionManager.activate();
+        sessionManager.activate();
     }
 
-    private void addAgents(int number) {
-        for (int i = 0; i < number; i++) {
-            this.sessionManager.addAgentEndpoint(agents[i]);
+    private class AuctioneerObserver implements AgentObserver {
+
+        private IncomingBidEvent incomingBidEvent;
+        private OutgoingPriceUpdateEvent outgoingPriceEvent;
+
+        @Override
+        public void update(AgentEvent event) {
+            if (event instanceof IncomingBidEvent) {
+                if (incomingBidEvent != null) {
+                    fail("IncomingBidEvent fired more than once");
+                }
+                incomingBidEvent = (IncomingBidEvent) event;
+            } else if (event instanceof OutgoingPriceUpdateEvent) {
+                if (outgoingPriceEvent != null) {
+                    fail("OutgoingPriceEvent fired more than once");
+                }
+                outgoingPriceEvent = (OutgoingPriceUpdateEvent) event;
+            } else {
+                fail("unexpected event");
+            }
         }
     }
 
-    private void removeAgents(int number) {
-        for (int i = 0; i < number; i++) {
-            this.sessionManager.removeAgentEndpoint(agents[i]);
-        }
+    @Test
+    public void testActivate() {
+
+        assertThat(mockScheduler.getMockFuture().isCancelled(), is(false));
     }
 
     @Test
-    public void noEquilibriumOnDemandSide() {
-        addAgents(3);
-        // run 1
-        agents[0].sendBid(new ArrayBid(marketBasis, 0, new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 }));
-        agents[1].sendBid(new ArrayBid(marketBasis, 0, new double[] { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 }));
-        agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 }));
-        timer.doTaskOnce();
-        assertEquals(10, agents[0].getLastPriceUpdate().getPrice().getPriceValue(), 0);
-
-        // run 2
-        agents[0].sendBid(new ArrayBid(marketBasis, 0, new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 }));
-        agents[1].sendBid(new ArrayBid(marketBasis, 0, new double[] { 4, 4, 4, 4, 4, 2, 2, 2, 2, 2, 2 }));
-        agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1 }));
-        timer.doTaskOnce();
-        assertEquals(10, agents[0].getLastPriceUpdate().getPrice().getPriceValue(), 0);
-        removeAgents(3);
+    public void testDeactivate() {
+        auctioneer.deactivate();
+        assertThat(mockScheduler.getMockFuture().isCancelled(), is(true));
     }
 
     @Test
-    public void noEquilibriumOnSupplySide() {
-        addAgents(3);
-        // run 1
-        agents[0].sendBid(new ArrayBid(marketBasis, 0, new double[] { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5 }));
-        agents[1].sendBid(new ArrayBid(marketBasis, 0, new double[] { -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4 }));
-        agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3 }));
-        timer.doTaskOnce();
-        assertEquals(0, agents[0].getLastPriceUpdate().getPrice().getPriceValue(), 0);
-
-        // run 2
-        agents[0].sendBid(new ArrayBid(marketBasis, 0, new double[] { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5 }));
-        agents[1].sendBid(new ArrayBid(marketBasis, 0, new double[] { -2, -2, -2, -2, -2, -4, -4, -4, -4, -4, -4 }));
-        agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { -1, -1, -1, -1, -1, -1, -1, -3, -3, -3, -3 }));
-        timer.doTaskOnce();
-        assertEquals(0, agents[0].getLastPriceUpdate().getPrice().getPriceValue(), 0);
-        removeAgents(3);
+    public void testConnectToAgent() {
+        List<String> agentIds = new ArrayList<String>();
+        sessionManager.setAgentIds(agentIds);
+        sessionManager.addMatcherEndpoint(auctioneer);
+        MockAgent agent = new MockAgent("agent1");
+        agent.setDesiredParentId(AUCTIONEER_NAME);
+        sessionManager.addAgentEndpoint(agent);
+        Session session = agent.getSession();
+        assertThat(session.getClusterId(), is(equalTo(auctioneer.getClusterId())));
+        assertThat(session.getMarketBasis().getCommodity(), is(equalTo(commodity)));
+        assertThat(session.getMarketBasis().getCurrency(), is(equalTo(currency)));
+        assertThat(session.getMarketBasis().getPriceSteps(), is(equalTo(priceSteps)));
+        assertThat(session.getMarketBasis().getMinimumPrice(), is(equalTo(minimumPrice)));
+        assertThat(session.getMarketBasis().getMaximumPrice(), is(equalTo(maximumPrice)));
     }
 
     @Test
-    public void equilibriumSmallNumberOfBids() {
-        addAgents(3);
-        // run 1
-        agents[0].sendBid(new ArrayBid(marketBasis, 0, new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 }));
-        agents[1].sendBid(new ArrayBid(marketBasis, 0, new double[] { 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0 }));
-        agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, 0, 0, -5, -5, -5, -5, -5, -5 }));
-        timer.doTaskOnce();
-        assertEquals(5, agents[0].getLastPriceUpdate().getPrice().getPriceValue(), 0);
+    public void testAgentEndpointDisconnected() {
+        List<String> agentIds = new ArrayList<String>();
+        sessionManager.setAgentIds(agentIds);
+        sessionManager.addMatcherEndpoint(auctioneer);
+        MockAgent agent = new MockAgent("agent1");
+        agent.setDesiredParentId(AUCTIONEER_NAME);
+        sessionManager.addAgentEndpoint(agent);
 
-        // run 2
-        agents[0].sendBid(new ArrayBid(marketBasis, 0, new double[] { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5 }));
-        agents[1].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, 0, 0, 0, 0, -4, -4, -4, -4 }));
-        agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9 }));
-        timer.doTaskOnce();
-        assertEquals(7, agents[0].getLastPriceUpdate().getPrice().getPriceValue(), 0);
-        removeAgents(3);
+        assertThat(agent.getSession(), is(notNullValue()));
+        assertThat(agent.getClusterId(), is(notNullValue()));
+
+        sessionManager.removeAgentEndpoint(agent);
+        assertThat(agent.getSession(), is(nullValue()));
+        assertThat(agent.getClusterId(), is(nullValue()));
+        assertThat(agent.getSession(), is(nullValue()));
     }
 
     @Test
-    @Ignore("Check whether there is no issue here. Changed to 7 in order to fix the tests. Original test value was 6.")
-    public void equilibriumLargeSet() {
-        addAgents(20);
-        agents[0].sendBid(new ArrayBid(marketBasis, 0, new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 }));
-        agents[1].sendBid(new ArrayBid(marketBasis, 0, new double[] { -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4 }));
-        agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 }));
-        agents[3].sendBid(new ArrayBid(marketBasis, 0, new double[] { -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2 }));
-        agents[4].sendBid(new ArrayBid(marketBasis, 0, new double[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }));
-        agents[5].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }));
-        agents[6].sendBid(new ArrayBid(marketBasis, 0, new double[] { 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0 }));
-        agents[7].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, 0, 0, 0, -4, -4, -4, -4, -4 }));
-        agents[8].sendBid(new ArrayBid(marketBasis, 0, new double[] { 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0 }));
-        agents[9].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, -2, -2, -2, -2, -2, -2, -2, -2 }));
-        agents[10].sendBid(new ArrayBid(marketBasis, 0, new double[] { 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0 }));
-        agents[11].sendBid(new ArrayBid(marketBasis, 0, new double[] { 7, 7, 7, 7, 7, 7, 7, 0, 0, 0, 0 }));
-        agents[12].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, -6, -6, -6, -6, -6, -6, -6, -6 }));
-        agents[13].sendBid(new ArrayBid(marketBasis, 0, new double[] { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 }));
-        agents[14].sendBid(new ArrayBid(marketBasis, 0, new double[] { -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9 }));
-        agents[15].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, 0, 0, 0, 0, 0, -8, -8, -8 }));
-        agents[16].sendBid(new ArrayBid(marketBasis, 0, new double[] { 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3 }));
-        agents[17].sendBid(new ArrayBid(marketBasis, 0, new double[] { 2, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0 }));
-        agents[18].sendBid(new ArrayBid(marketBasis, 0, new double[] { -1, -1, -1, -1, -2, -2, -2, -2, -3, -3, -3 }));
-        agents[19].sendBid(new ArrayBid(marketBasis, 0, new double[] { 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0 }));
-        timer.doTaskOnce();
-
-        assertEquals(6, agents[0].getLastPriceUpdate().getPrice().getPriceValue(), 0);
-        removeAgents(20);
+    public void testUpdateBidNullSession() {
+        exception.expect(IllegalStateException.class);
+        exception.expectMessage("No session found");
+        auctioneer.updateBid(null, new ArrayBid(marketBasis, 0, new double[] { 5.0, 4.0, 3.0, 1.0, 0.0 }));
     }
 
     @Test
-    public void equilibriumLargerSet() {
-        addAgents(21);
-        agents[0].sendBid(new ArrayBid(marketBasis, 0, new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 }));
-        agents[1].sendBid(new ArrayBid(marketBasis, 0, new double[] { -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4 }));
-        agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 }));
-        agents[3].sendBid(new ArrayBid(marketBasis, 0, new double[] { -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2 }));
-        agents[4].sendBid(new ArrayBid(marketBasis, 0, new double[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }));
-        agents[5].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }));
-        agents[6].sendBid(new ArrayBid(marketBasis, 0, new double[] { 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0 }));
-        agents[7].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, 0, 0, 0, -4, -4, -4, -4, -4 }));
-        agents[8].sendBid(new ArrayBid(marketBasis, 0, new double[] { 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0 }));
-        agents[9].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, -2, -2, -2, -2, -2, -2, -2, -2 }));
-        agents[10].sendBid(new ArrayBid(marketBasis, 0, new double[] { 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0 }));
-        agents[11].sendBid(new ArrayBid(marketBasis, 0, new double[] { 7, 7, 7, 7, 7, 7, 7, 0, 0, 0, 0 }));
-        agents[12].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, -6, -6, -6, -6, -6, -6, -6, -6 }));
-        agents[13].sendBid(new ArrayBid(marketBasis, 0, new double[] { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 }));
-        agents[14].sendBid(new ArrayBid(marketBasis, 0, new double[] { -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9 }));
-        agents[15].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, 0, 0, 0, 0, 0, -8, -8, -8 }));
-        agents[16].sendBid(new ArrayBid(marketBasis, 0, new double[] { 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3 }));
-        agents[17].sendBid(new ArrayBid(marketBasis, 0, new double[] { 2, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0 }));
-        agents[18].sendBid(new ArrayBid(marketBasis, 0, new double[] { -1, -1, -1, -1, -2, -2, -2, -2, -3, -3, -3 }));
-        agents[19].sendBid(new ArrayBid(marketBasis, 0, new double[] { 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0 }));
-        agents[20].sendBid(new ArrayBid(marketBasis, 0, new double[] { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 }));
-        timer.doTaskOnce();
-        assertEquals(7, agents[0].getLastPriceUpdate().getPrice().getPriceValue(), 0);
-        removeAgents(21);
+    public void testupdateBidDifferentMarketBasis() {
+        MockAgent mockAgent = new MockAgent("mockAgent");
+        mockAgent.setDesiredParentId(AUCTIONEER_NAME);
+        List<String> agentIds = new ArrayList<String>();
+        sessionManager.setAgentIds(agentIds);
+        sessionManager.addMatcherEndpoint(auctioneer);
+        sessionManager.addAgentEndpoint(mockAgent);
+
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("Marketbasis new bid differs from marketbasis auctioneer");
+        auctioneer.updateBid(mockAgent.getSession(), new ArrayBid(new MarketBasis("a", "b", 2, 0, 2), 0, new double[] {
+                5.0, 4.0 }));
+    }
+
+    @Test
+    public void testUpdateBid() {
+        String agentName = "mockAgent";
+        MockAgent mockAgent = new MockAgent(agentName);
+        mockAgent.setDesiredParentId(AUCTIONEER_NAME);
+
+        AuctioneerObserver observer = new AuctioneerObserver();
+        auctioneer.addObserver(observer);
+        List<String> agentIds = new ArrayList<String>();
+        sessionManager.setAgentIds(agentIds);
+        sessionManager.addMatcherEndpoint(auctioneer);
+        sessionManager.addAgentEndpoint(mockAgent);
+
+        double[] demandArray = new double[] { 2, 1, 0, -1, -2 };
+        Bid bid = new ArrayBid(marketBasis, 0, demandArray);
+        mockAgent.sendBid(bid);
+
+        assertThat(observer.incomingBidEvent.getClusterId(), is(equalTo(clusterId)));
+        assertThat(observer.incomingBidEvent.getAgentId(), is(equalTo(AUCTIONEER_NAME)));
+        assertThat(observer.incomingBidEvent.getFromAgentId(), is(equalTo(agentName)));
+        assertThat(observer.incomingBidEvent.getBid(), is(equalTo(bid)));
+    }
+
+    @Test
+    public void testPublishPriceUpdate() {
+        String agentName = "mockAgent";
+        MockAgent mockAgent = new MockAgent(agentName);
+        mockAgent.setDesiredParentId(AUCTIONEER_NAME);
+
+        AuctioneerObserver observer = new AuctioneerObserver();
+        auctioneer.addObserver(observer);
+        List<String> agentIds = new ArrayList<String>();
+        sessionManager.setAgentIds(agentIds);
+        sessionManager.addMatcherEndpoint(auctioneer);
+        sessionManager.addAgentEndpoint(mockAgent);
+
+        double[] demandArray = new double[] { 2, 1, 0, -1, -2 };
+        Bid bid = new ArrayBid(marketBasis, 0, demandArray);
+        mockAgent.sendBid(bid);
+        assertThat(mockAgent.getLastPriceUpdate(), is(nullValue()));
+        mockScheduler.doTaskOnce();
+        assertThat(mockAgent.getLastPriceUpdate(), is(notNullValue()));
+        assertThat(observer.outgoingPriceEvent.getPriceUpdate(), is(equalTo(mockAgent.getLastPriceUpdate())));
     }
 }

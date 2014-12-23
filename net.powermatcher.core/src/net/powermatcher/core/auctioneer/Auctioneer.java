@@ -129,7 +129,7 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
         this.marketBasis = new MarketBasis(config.commodity(), config.currency(), config.priceSteps(),
                 config.minimumPrice(), config.maximumPrice());
         this.aggregatedBids = new BidCache(this.timeService, config.bidTimeout());
-
+        this.setServicePid((String) properties.get("service.pid"));
         this.setClusterId(config.clusterId());
         this.setAgentId(config.agentId());
 

@@ -55,7 +55,7 @@ import aQute.bnd.annotation.metatype.Meta;
  * </p>
  * 
  * @author FAN
- * @version 1.0
+ * @version 2.0
  * 
  */
 @Component(designateFactory = ObjectiveAuctioneer.Config.class, immediate = true, provide = { ObservableAgent.class,
@@ -169,7 +169,7 @@ public class ObjectiveAuctioneer extends Auctioneer {
         if (this.objectiveEndpoint == objectiveEndpoint) {
             this.objectiveEndpoint = null;
             LOGGER.debug("Removed objective agent");
-        } 
+        }
     }
 
     @Override
@@ -178,7 +178,8 @@ public class ObjectiveAuctioneer extends Auctioneer {
         session.setClusterId(this.getClusterId());
 
         this.sessions.add(session);
-        this.aggregatedBids.updateBid(session.getSessionId(), new ArrayBid.Builder(this.marketBasis).setDemand(0).build());
+        this.aggregatedBids.updateBid(session.getSessionId(), new ArrayBid.Builder(this.marketBasis).setDemand(0)
+                .build());
         LOGGER.info("Agent connected with session [{}]", session.getSessionId());
         return true;
     }
@@ -210,17 +211,16 @@ public class ObjectiveAuctioneer extends Auctioneer {
 
         LOGGER.debug("Received from session [{}] bid update [{}] ", session.getSessionId(), newBid);
 
-        this.publishEvent(new IncomingBidEvent(session.getClusterId(), getAgentId(), session.getSessionId(), timeService
-                .currentDate(), session.getAgentId(), newBid, Qualifier.AGENT));
+        this.publishEvent(new IncomingBidEvent(session.getClusterId(), getAgentId(), session.getSessionId(),
+                timeService.currentDate(), session.getAgentId(), newBid, Qualifier.AGENT));
     }
-    
+
     /**
      * Generates the new price out of the aggregated bids and sends this to all listeners. The listeners can be device
-     * agents and objective agents. TODO This is temporarily made public instead of default to test some things. This
-     * should be fixed as soon as possible.
+     * agents and objective agents.
      */
     @Override
-    public synchronized void publishNewPrice() {
+    protected synchronized void publishNewPrice() {
         // aggregate bid device agents
         Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis, false);
 
@@ -239,15 +239,16 @@ public class ObjectiveAuctioneer extends Auctioneer {
             newPrice = determinePrice(aggregatedBid);
         }
 
-        for (Session session : this.sessions) {       	
-        	if(this.aggregatedBids.getLastBid(session.getAgentId()) != null) {
-        		Integer bidNumber = this.aggregatedBids.getLastBid(session.getAgentId()).getBidNumber();
-        		PriceUpdate sessionPriceUpdate = new PriceUpdate(newPrice, bidNumber);
-        		this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), getAgentId(), session.getSessionId(),
-        				timeService.currentDate(), sessionPriceUpdate, Qualifier.MATCHER));
-        		session.updatePrice(sessionPriceUpdate);
-        		LOGGER.debug("New price: {}, session {}", sessionPriceUpdate, session.getSessionId());
-        	}
+        for (Session session : this.sessions) {
+            ArrayBid lastBid = this.aggregatedBids.getLastBid(session.getAgentId());
+            if (lastBid != null) {
+                Integer bidNumber = lastBid.getBidNumber();
+                PriceUpdate sessionPriceUpdate = new PriceUpdate(newPrice, bidNumber);
+                this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), getAgentId(), session
+                        .getSessionId(), timeService.currentDate(), sessionPriceUpdate, Qualifier.MATCHER));
+                session.updatePrice(sessionPriceUpdate);
+                LOGGER.debug("New price: {}, session {}", sessionPriceUpdate, session.getSessionId());
+            }
         }
     }
 

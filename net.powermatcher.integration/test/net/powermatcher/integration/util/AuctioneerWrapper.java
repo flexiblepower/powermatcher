@@ -43,7 +43,7 @@ public class AuctioneerWrapper extends Auctioneer {
     }
 
     public Bid getAggregatedBid(MarketBasis marketBasis) {
-        return super.getAggregatedBids().getAggregatedBid(marketBasis);
+        return super.getAggregatedBids().getAggregatedBid(marketBasis, false);
     }
 
     public Bid getLastReceivedBid() {

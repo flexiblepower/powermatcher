@@ -8,6 +8,7 @@ import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import net.powermatcher.api.Session;
@@ -46,6 +47,8 @@ public class ConcentratorTest {
     private String auctioneerId;
     private String clusterId;
     private long bidUpdateRate;
+    private List<String> whiteList;
+    private SystemTimeService systemTimeService;
 
     @Before
     public void setUp() {
@@ -58,14 +61,17 @@ public class ConcentratorTest {
         auctioneerId = "auctioneer";
         clusterId = "testCluster";
         bidUpdateRate = 30;
+        whiteList = new ArrayList<>();
+        whiteList.add("testAgent");
 
         props.put("agentId", concentratorId);
         props.put("desiredParentId", auctioneerId);
         props.put("bidUpdateRate", bidUpdateRate);
-        props.put("whiteListAgents", new ArrayList<String>());
+        props.put("whiteListAgents", whiteList);
 
         concentrator.setExecutorService(mockScheduler);
-        concentrator.setTimeService(new SystemTimeService());
+        systemTimeService = new SystemTimeService();
+        concentrator.setTimeService(systemTimeService);
         concentrator.activate(props);
     }
 
@@ -73,6 +79,7 @@ public class ConcentratorTest {
     public void testActivate() {
         assertThat(concentrator.getAgentId(), is(equalTo(concentratorId)));
         assertThat(concentrator.getDesiredParentId(), is(equalTo(auctioneerId)));
+        assertThat(concentrator.getWhiteList(), is(equalTo(whiteList)));
         assertThat(mockScheduler.getUpdateRate(), is(equalTo(bidUpdateRate)));
     }
 
@@ -109,7 +116,7 @@ public class ConcentratorTest {
     public void testMatcherEndpointDisconnected() {
         MockMatcherAgent mockMatcherAgent = new MockMatcherAgent(auctioneerId);
         mockMatcherAgent.setDesiredParentId("what");
-        MockAgent mockAgent = new MockAgent("mockAgent");
+        MockAgent mockAgent = new MockAgent("testAgent");
         mockMatcherAgent.setMarketBasis(marketBasis);
         mockAgent.setDesiredParentId(concentratorId);
 
@@ -137,7 +144,7 @@ public class ConcentratorTest {
         MockMatcherAgent mockMatcherAgent = new MockMatcherAgent(auctioneerId);
         mockMatcherAgent.setDesiredParentId("test");
         mockMatcherAgent.setMarketBasis(marketBasis);
-        MockAgent mockAgent = new MockAgent("mockAgent");
+        MockAgent mockAgent = new MockAgent("testAgent");
         mockAgent.setDesiredParentId(concentratorId);
 
         SessionManager sessionManager = new SessionManager();
@@ -175,7 +182,7 @@ public class ConcentratorTest {
         MockMatcherAgent mockMatcherAgent = new MockMatcherAgent(auctioneerId);
         mockMatcherAgent.setDesiredParentId("test");
         mockMatcherAgent.setMarketBasis(marketBasis);
-        MockAgent mockAgent = new MockAgent("mockAgent");
+        MockAgent mockAgent = new MockAgent("testAgent");
         mockAgent.setDesiredParentId(concentratorId);
 
         SessionManager sessionManager = new SessionManager();
@@ -189,7 +196,8 @@ public class ConcentratorTest {
         sessionManager.addAgentEndpoint(mockAgent);
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("Marketbasis new bid differs from marketbasis auctioneer");
-        concentrator.updateBid(mockAgent.getSession(),new ArrayBid.Builder(new MarketBasis("a", "b", 2, 0, 2)).setDemand(0).build());
+        concentrator.updateBid(mockAgent.getSession(), new ArrayBid.Builder(new MarketBasis("a", "b", 2, 0, 2))
+                .setDemand(0).build());
     }
 
     @Test
@@ -197,7 +205,7 @@ public class ConcentratorTest {
         MockMatcherAgent mockMatcherAgent = new MockMatcherAgent(auctioneerId);
         mockMatcherAgent.setMarketBasis(marketBasis);
         mockMatcherAgent.setDesiredParentId("test");
-        MockAgent mockAgent = new MockAgent("mockAgent");
+        MockAgent mockAgent = new MockAgent("testAgent");
         mockAgent.setDesiredParentId(concentratorId);
 
         SessionManager sessionManager = new SessionManager();
@@ -229,7 +237,7 @@ public class ConcentratorTest {
         MockMatcherAgent mockMatcherAgent = new MockMatcherAgent(auctioneerId);
         mockMatcherAgent.setMarketBasis(marketBasis);
         mockMatcherAgent.setDesiredParentId("test");
-        MockAgent mockAgent = new MockAgent("mockAgent");
+        MockAgent mockAgent = new MockAgent("testAgent");
         mockAgent.setDesiredParentId(concentratorId);
 
         SessionManager sessionManager = new SessionManager();
@@ -250,5 +258,18 @@ public class ConcentratorTest {
         concentrator.updatePrice(expected);
         concentrator.updatePrice(error);
         assertThat(mockAgent.getLastPriceUpdate(), is(equalTo(expected)));
+    }
+
+    @Test
+    public void testEquals() {
+        assertThat(concentrator.equals(null), is(false));
+        assertThat(concentrator.equals(concentrator), is(true));
+
+        // Concentrator otherTrator = new Concentrator();
+        // concentrator.setExecutorService(mockScheduler);
+        // concentrator.setTimeService(systemTimeService);
+        // concentrator.activate(props);
+        // assertThat(concentrator.equals(otherTrator), is(true));
+        // assertThat(otherTrator.equals(concentrator), is(true));
     }
 }
