@@ -22,7 +22,7 @@ import net.powermatcher.api.data.MarketBasis;
  * @see MarketBasis
  * 
  * @author FAN
- * @version 1.0
+ * @version 2.0
  */
 public class BidCache {
     public static final long DEFAULT_BID_EXPIRATION_TIME = 300;
@@ -32,7 +32,9 @@ public class BidCache {
     private long expirationTimeMillis;
     private long lastResetTime;
     private ArrayBid aggregatedBid;
-    private AtomicInteger snapshotCounter;
+
+    private final AtomicInteger snapshotGenerator;
+
     private Map<Integer, BidCacheSnapshot> bidCacheHistory = new HashMap<Integer, BidCacheSnapshot>();
 
     /**
@@ -46,7 +48,7 @@ public class BidCache {
         this.expirationTimeMillis = expirationTime * 1000L;
         this.bidCache = new HashMap<String, BidCacheElement>();
         this.timeService = timeService;
-        this.snapshotCounter = new AtomicInteger();
+        this.snapshotGenerator = new AtomicInteger();
     }
 
     /**
@@ -143,11 +145,8 @@ public class BidCache {
      *            The market basis (<code>MarketBasis</code>) parameter.
      * @return The aggregated bid for the bids in the cache.
      */
-    public synchronized ArrayBid getAggregatedBid(final MarketBasis marketBasis) {
+    public synchronized ArrayBid getAggregatedBid(final MarketBasis marketBasis, boolean isConcentrator) {
         if (marketBasis != null) {
-
-            BidCacheSnapshot bidCacheSnapshot = new BidCacheSnapshot();
-
             if (this.aggregatedBid == null || !this.aggregatedBid.getMarketBasis().equals(marketBasis)) {
 
                 ArrayBid newAggregatedBid = new ArrayBid.Builder(marketBasis).setDemand(0).build();
@@ -159,23 +158,24 @@ public class BidCache {
                 this.aggregatedBid = newAggregatedBid;
             }
 
-            // Make a blueprint of the bidCache storing agentID - bidNumber pairs
-            Set<String> idSet = this.bidCache.keySet();
-            for (String agentId : idSet) {
-                ArrayBid bid = getLastBid(agentId);
-                bidCacheSnapshot.getBidNumbers().put(agentId, bid.getBidNumber());
+            if (isConcentrator == true) {
+
+                BidCacheSnapshot bidCacheSnapshot = new BidCacheSnapshot();
+
+                // Make a blueprint of the bidCache storing agentID - bidNumber pairs
+                Set<String> idSet = this.bidCache.keySet();
+                for (String agentId : idSet) {
+                    ArrayBid bid = getLastBid(agentId);
+                    bidCacheSnapshot.getBidNumbers().put(agentId, bid.getBidNumber());
+                }
+
+                // Update the aggregatedBid with the new bidNumber.
+                int snapshotId = snapshotGenerator.incrementAndGet();
+                ArrayBid newBidNr = new ArrayBid(this.aggregatedBid, snapshotId);
+                this.aggregatedBid = newBidNr;
+
+                bidCacheHistory.put(snapshotId, bidCacheSnapshot);
             }
-
-            // Increment the counter to create a unique bidNumber for the aggregatedBid.
-            // Save it with the BidCacheSnapshot (not used).
-            // Update the aggregatedBid with the new Bidnumber.
-            int snapShotId = snapshotCounter.incrementAndGet();
-            ArrayBid newBidNr = new ArrayBid(this.aggregatedBid, snapShotId);
-            this.aggregatedBid = newBidNr;
-
-            bidCacheSnapshot.setCount(snapShotId);
-            bidCacheSnapshot.setAggregatedBid(newBidNr);
-            bidCacheHistory.put(snapShotId, bidCacheSnapshot);
 
             return this.aggregatedBid;
         }
@@ -183,7 +183,11 @@ public class BidCache {
     }
 
     public synchronized BidCacheSnapshot getMatchingSnapshot(int bidNumber) {
-        return this.bidCacheHistory.remove(bidNumber);
+        BidCacheSnapshot matchedSnapshot = this.bidCacheHistory.remove(bidNumber);
+        if (bidNumber > 1 && matchedSnapshot != null && this.bidCacheHistory.get(bidNumber - 1) != null) {
+            this.bidCacheHistory.remove(bidNumber - 1);
+        }
+        return matchedSnapshot;
     }
 
     /**

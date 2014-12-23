@@ -49,14 +49,14 @@ public class BidCacheTest {
         ArrayBid bid2 = new ArrayBid(bid1, 2);
         Bid emptyBid = bidCache.updateBid("agent1", bid1);
         assertThat(emptyBid, is(nullValue()));
-        bidCache.getAggregatedBid(marketBasis);
+        bidCache.getAggregatedBid(marketBasis, true);
         ArrayBid updateBid = bidCache.updateBid("agent1", bid2);
         assertThat(updateBid, is(equalTo(bid1)));
     }
 
     @Test
     public void testGetAggregatedBid() {
-        ArrayBid aggregatedBid = bidCache.getAggregatedBid(null);
+        ArrayBid aggregatedBid = bidCache.getAggregatedBid(null, false);
         assertThat(aggregatedBid, is(nullValue()));
     }
 
@@ -68,7 +68,7 @@ public class BidCacheTest {
         assertThat(removeAgent, is(nullValue()));
 
         bidCache.updateBid("agent1", bid);
-        ArrayBid aggregatedBid = bidCache.getAggregatedBid(marketBasis);
+        ArrayBid aggregatedBid = bidCache.getAggregatedBid(marketBasis, true);
         assertThat(aggregatedBid.getDemand(), is(equalTo(bid.getDemand())));
         removeAgent = bidCache.removeAgent("agent1");
         assertThat(removeAgent, is(equalTo(bid)));
@@ -80,7 +80,7 @@ public class BidCacheTest {
         ArrayBid bid = new ArrayBid(marketBasis, 0, new double[] { 6, 5, 4, 3, 2 });
         bidCache.updateBid(agentId, bid);
 
-        bidCache.getAggregatedBid(marketBasis);
+        bidCache.getAggregatedBid(marketBasis, true);
         BidCacheSnapshot matchingSnapshot = bidCache.getMatchingSnapshot(1);
         Map<String, Integer> bidNumbers = matchingSnapshot.getBidNumbers();
         assertThat(bidNumbers.containsKey("agent1"), is(true));
@@ -96,7 +96,7 @@ public class BidCacheTest {
 
         ArrayBid bid = new ArrayBid(marketBasis, 0, new double[] { 6, 5, 4, 3, 2 });
         bidCache.updateBid(agentId, bid);
-        bidCache.getAggregatedBid(marketBasis);
+        bidCache.getAggregatedBid(marketBasis, true);
 
         lastBid = bidCache.getLastBid(agentId);
         assertThat(lastBid, is(equalTo(bid)));
@@ -116,7 +116,7 @@ public class BidCacheTest {
         bidCache.updateBid("agent1", bid);
         bidCache.updateBid("agent2", bid2);
 
-        ArrayBid aggregatedBid = bidCache.getAggregatedBid(marketBasis);
+        ArrayBid aggregatedBid = bidCache.getAggregatedBid(marketBasis, true);
         assertThat(aggregatedBid.getBidNumber(), is(equalTo(1)));
         assertThat(aggregatedBid.getDemand(), is(equalTo(expectedDemand)));
 

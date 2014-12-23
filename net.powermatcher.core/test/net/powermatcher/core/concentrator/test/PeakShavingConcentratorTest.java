@@ -26,8 +26,10 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 public class PeakShavingConcentratorTest {
+    
     @Rule
     public ExpectedException exception = ExpectedException.none();
+    
     private String auctioneerId;
     private String concentratorId;
 
@@ -111,12 +113,12 @@ public class PeakShavingConcentratorTest {
         sessionManager.addMatcherEndpoint(peakShavingConcentrator);
 
         sessionManager.addAgentEndpoint(mockAgent);
-
-        Bid bid = new ArrayBid(marketBasis, 0, new double[] { 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8 });
+        int bidNumber = 1;
+        Bid bid = new ArrayBid(marketBasis, bidNumber, new double[] { 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8 });
         mockAgent.sendBid(bid);
         timer.doTaskOnce();
-        PriceUpdate expected = new PriceUpdate(new Price(marketBasis, 5.0), 1);
-        PriceUpdate error = new PriceUpdate(new Price(marketBasis, 6.0), 1);
+        PriceUpdate expected = new PriceUpdate(new Price(marketBasis, 5.0), bidNumber);
+        PriceUpdate error = new PriceUpdate(new Price(marketBasis, 6.0), 2);
         peakShavingConcentrator.updatePrice(expected);
         peakShavingConcentrator.updatePrice(error);
         assertThat(mockAgent.getLastPriceUpdate(), is(equalTo(expected)));

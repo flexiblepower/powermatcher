@@ -53,7 +53,7 @@ import net.powermatcher.core.auctioneer.Auctioneer;
  * comment.
  * 
  * @author FAN
- * @version 1.0
+ * @version 2.0
  * 
  */
 @Component(designateFactory = PeakShavingConcentrator.Config.class, immediate = true, provide = {
@@ -204,9 +204,7 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
                         c.delete();
                     }
                 }
-            } catch (IOException e) {
-                LOGGER.error(e.getMessage());
-            } catch (InvalidSyntaxException e) {
+            } catch (IOException | InvalidSyntaxException e) {
                 LOGGER.error(e.getMessage());
             }
 
@@ -258,7 +256,6 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
 
     @Override
     public void updateBid(Session session, Bid newBid) {
-
         if (!sessionToAgents.contains(session)) {
             throw new IllegalStateException("No session found");
         }
@@ -276,12 +273,12 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
     }
 
     /**
-     * sends the aggregatedbids to the matcher this method has temporarily been made public due to issues with the
-     * scheduler. TODO fix this asap
+     * sends the aggregatedbids to the matcher
+     * 
      */
-    public synchronized void doBidUpdate() {
+    protected synchronized void doBidUpdate() {
         if (sessionToMatcher != null) {
-            ArrayBid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.sessionToMatcher.getMarketBasis());
+            ArrayBid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.sessionToMatcher.getMarketBasis(), true);
 
             // Peakshaving call
             ArrayBid transformedBid = transformAggregatedBid(aggregatedBid);
@@ -312,6 +309,7 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         BidCacheSnapshot bidCacheSnapshot = this.aggregatedBids.getMatchingSnapshot(priceUpdate.getBidNumber());
         if (bidCacheSnapshot == null) {
             // ignore price and log warning
+            LOGGER.warn("Received a price update for a bid that I never sent, id: {}", priceUpdate.getBidNumber());
             return;
         }
 
@@ -320,11 +318,11 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
             Integer originalAgentBid = bidCacheSnapshot.getBidNumbers().get(session.getAgentId());
             if (originalAgentBid == null) {
                 // ignore price for this agent and log warning
+                LOGGER.warn("No matching bid for agent with id: {} in snapShot", session.getAgentId());
                 continue;
             }
 
-            PriceUpdate agentPrice = new PriceUpdate(new Price(priceUpdate.getPrice().getMarketBasis(), priceUpdate
-                    .getPrice().getPriceValue()), priceUpdate.getBidNumber());
+            PriceUpdate agentPrice = new PriceUpdate(priceUpdate.getPrice(), originalAgentBid);
 
             // call peakshaving code.
             PriceUpdate adjustedPrice = adjustPrice(agentPrice);
@@ -587,34 +585,5 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
 
     protected void setFloor(double floor) {
         this.floor = floor;
-    }
-
-    public boolean canEqual(Object other) {
-        return other instanceof PeakShavingConcentrator;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        PeakShavingConcentrator that = (PeakShavingConcentrator) ((obj instanceof PeakShavingConcentrator) ? obj : null);
-        if (that == null) {
-            return false;
-        }
-
-        if (this == that) {
-            return true;
-        }
-
-        return this.canEqual(that) && super.equals(that) && this.aggregatedBidIn.equals(that.aggregatedBidIn)
-                && this.aggregatedBidOut.equals(that.aggregatedBidOut)
-                && this.aggregatedBids.equals(that.aggregatedBids)
-                && Double.valueOf(this.ceiling).equals(Double.valueOf(that.ceiling))
-                && Double.valueOf(this.floor).equals(Double.valueOf(that.floor));
-    }
-
-    @Override
-    public int hashCode() {
-        return 211 * (this.aggregatedBidIn.hashCode() + this.aggregatedBidOut.hashCode()
-                + this.aggregatedBids.hashCode() + Double.valueOf(this.ceiling).hashCode() + Double.valueOf(this.floor)
-                .hashCode());
     }
 }

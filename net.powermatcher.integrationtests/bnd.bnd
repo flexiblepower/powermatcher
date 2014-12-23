@@ -16,7 +16,5 @@
 	sun.reflect
 -runvm: -ea
 Bundle-Version: 0.0.0.${tstamp}
-Private-Package:  \
-	net.powermatcher.integration.base
 Test-Cases:  \
 	${classes;CONCRETE;EXTENDS;junit.framework.TestCase}

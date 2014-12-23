@@ -23,7 +23,6 @@ import net.powermatcher.api.monitoring.Qualifier;
 import net.powermatcher.api.monitoring.events.IncomingBidEvent;
 import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.BidCache;
-import net.powermatcher.core.BidCacheSnapshot;
 import net.powermatcher.core.concentrator.Concentrator;
 
 import org.slf4j.Logger;
@@ -56,7 +55,7 @@ import aQute.bnd.annotation.metatype.Meta;
  * </p>
  * 
  * @author FAN
- * @version 1.0
+ * @version 2.0
  * 
  */
 @Component(designateFactory = ObjectiveAuctioneer.Config.class, immediate = true, provide = { ObservableAgent.class,
@@ -218,13 +217,12 @@ public class ObjectiveAuctioneer extends Auctioneer {
 
     /**
      * Generates the new price out of the aggregated bids and sends this to all listeners. The listeners can be device
-     * agents and objective agents. TODO This is temporarily made public instead of default to test some things. This
-     * should be fixed as soon as possible.
+     * agents and objective agents.
      */
     @Override
-    public synchronized void publishNewPrice() {
+    protected synchronized void publishNewPrice() {
         // aggregate bid device agents
-        Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis);
+        Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis, false);
 
         Price newPrice;
         // check if objective agent is active
@@ -241,11 +239,10 @@ public class ObjectiveAuctioneer extends Auctioneer {
             newPrice = determinePrice(aggregatedBid);
         }
 
-        BidCacheSnapshot bidCacheSnapshot = this.aggregatedBids.getMatchingSnapshot(aggregatedBid.getBidNumber());
-
         for (Session session : this.sessions) {
-            Integer bidNumber = bidCacheSnapshot.getBidNumbers().get(session.getAgentId());
-            if (bidNumber != null) {
+            ArrayBid lastBid = this.aggregatedBids.getLastBid(session.getAgentId());
+            if (lastBid != null) {
+                Integer bidNumber = lastBid.getBidNumber();
                 PriceUpdate sessionPriceUpdate = new PriceUpdate(newPrice, bidNumber);
                 this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), getAgentId(), session
                         .getSessionId(), timeService.currentDate(), sessionPriceUpdate, Qualifier.MATCHER));

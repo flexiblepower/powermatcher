@@ -1,11 +1,16 @@
 package net.powermatcher.integration.test;
 
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.util.zip.DataFormatException;
 
+import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
+import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.integration.base.BidResilienceTest;
 
 import org.junit.Test;
@@ -37,18 +42,23 @@ public class SendReceiveBidTestCBF1 extends BidResilienceTest {
                 assertEquals(bid, this.concentrator.getLastReceivedBid());
 
                 // Check if the published bid by concentrator is received at the auctioneer
-                assertEquals(this.auctioneer.getLastReceivedBid(), this.auctioneer.getAggregatedBid(this.marketBasis));
+                ArrayBid lastReceivedBid = this.auctioneer.getLastReceivedBid().toArrayBid();
+                ArrayBid aggregatedBid = auctioneer.getAggregatedBid(marketBasis).toArrayBid();
+                assertThat(lastReceivedBid.getDemand(), is(equalTo(aggregatedBid.getDemand())));
+                assertThat(lastReceivedBid.getMarketBasis(), is(equalTo(aggregatedBid.getMarketBasis())));
 
+                auctioneer.publishPrice();
                 // Check if the price published by the auctioneer arrives at the agent
                 // concentrator.getLastReceived instead of auctioneer.getLastPublished, because
                 // lastPublished is not reliable anymore.
-                assertEquals(this.agentList.get(id).getLastPriceUpdate(),
-                        this.concentrator.getLastReceivedPriceUpdate());
+                PriceUpdate lastPriceUpdate = this.agentList.get(id).getLastPriceUpdate();
+                PriceUpdate lastReceivedPriceUpdate = this.concentrator.getLastReceivedPriceUpdate();
+                assertThat(lastPriceUpdate.getPrice(), is(equalTo(lastReceivedPriceUpdate.getPrice())));
             } else {
                 stop = true;
             }
 
             id++;
-        } while (stop != false);
+        } while (stop == false);
     }
 }

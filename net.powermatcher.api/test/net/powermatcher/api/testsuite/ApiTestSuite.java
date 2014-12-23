@@ -13,8 +13,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ ArrayBidTest.class, PointBidTest.class, PriceTest.class, PricePointTest.class,
-        PriceStepTest.class, PriceUpdateTest.class, EventTest.class, MarketBasisTest.class })
+@Suite.SuiteClasses({ ArrayBidTest.class, MarketBasisTest.class, PointBidTest.class, PricePointTest.class,
+        PriceStepTest.class, PriceTest.class, PriceUpdateTest.class, EventTest.class })
 public class ApiTestSuite {
 
 }
