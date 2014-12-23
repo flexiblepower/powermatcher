@@ -40,7 +40,7 @@ import aQute.bnd.annotation.metatype.Meta;
  * {@link HttpServlet} used by the visualizer frontend.
  * 
  * @author FAN
- * @version 1.0
+ * @version 2.0
  */
 @Component(
         provide = Servlet.class,

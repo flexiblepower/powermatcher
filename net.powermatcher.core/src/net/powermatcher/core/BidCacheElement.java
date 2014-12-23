@@ -12,7 +12,7 @@ import net.powermatcher.api.data.PricePoint;
  * </p>
  * 
  * @author FAN
- * @version 1.0
+ * @version 2.0
  */
 public class BidCacheElement {
     /**

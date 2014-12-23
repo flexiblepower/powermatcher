@@ -8,7 +8,7 @@ import java.util.TreeSet;
  * level, the Nth level has to be determined.
  * 
  * @author FAN
- * @version 1.0
+ * @version 2.0
  * 
  */
 public class LevelModel {

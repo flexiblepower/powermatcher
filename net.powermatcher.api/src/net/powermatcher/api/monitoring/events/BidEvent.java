@@ -13,10 +13,10 @@ import net.powermatcher.api.monitoring.Qualifier;
 /**
  * An {@link BidEvent} is sent when an {@link Bid} is sent or Received by an {@link AgentEndpoint} or a
  * {@link MatcherEndpoint}.
- * 
+ *
  * @author FAN
- * @version 1.0
- * 
+ * @version 2.0
+ *
  */
 public abstract class BidEvent extends AgentEvent {
 
@@ -37,7 +37,7 @@ public abstract class BidEvent extends AgentEvent {
 
     /**
      * Constructs an instance of this class.
-     * 
+     *
      * @param clusterId
      *            The id of the cluster the {@link AgentEndpoint} subclass sending the UpdateEvent is running in.
      * @param agentId

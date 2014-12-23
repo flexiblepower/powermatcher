@@ -9,7 +9,7 @@ import java.util.List;
  * {@link SubMenuItemModel}'s
  * 
  * @author FAN
- * @version 1.0
+ * @version 2.0
  */
 public class MenuItemModel {
 

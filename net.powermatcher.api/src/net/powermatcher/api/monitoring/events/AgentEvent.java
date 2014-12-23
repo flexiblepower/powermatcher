@@ -9,12 +9,12 @@ import net.powermatcher.api.monitoring.ObservableAgent;
 
 /**
  * The base class for update events.
- * 
+ *
  * {@link AgentEndpoint} subclasses implement the {@link ObservableAgent} interface and can send an {@link AgentEvent}
  * to every {@link AgentObserver} that observes this class.
- * 
+ *
  * @author FAN
- * @version 1.0
+ * @version 2.0
  */
 
 public abstract class AgentEvent {
@@ -36,7 +36,7 @@ public abstract class AgentEvent {
 
     /**
      * Constructs an instance of this class.
-     * 
+     *
      * @param clusterId
      *            The id of the cluster the {@link AgentEndpoint} subclass sending the UpdateEvent is running in.
      * @param agentId

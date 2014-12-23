@@ -7,7 +7,7 @@ import java.util.Date;
  * it could be the simulated time that is advancing at different a rate or stepwise.
  * 
  * @author FAN
- * @version 1.0
+ * @version 2.0
  */
 public interface TimeService {
 
