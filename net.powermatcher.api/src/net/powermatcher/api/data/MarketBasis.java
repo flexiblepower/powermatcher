@@ -103,8 +103,8 @@ public class MarketBasis {
      * @param priceStep
      *            The price step (<code>int</code>) parameter.
      * @return Results of the bound price step (<code>int</code>) value.
-     * @see #toPriceStep(double)
-     * @see #toPriceStep(int)
+     * @see Price#toPriceStep()
+     * @see PriceStep#toPrice()
      */
     public int boundPriceStep(final PriceStep priceStep) {
         int step = priceStep.getPriceStep();

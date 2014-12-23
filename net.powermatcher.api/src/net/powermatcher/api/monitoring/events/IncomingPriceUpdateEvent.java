@@ -9,7 +9,7 @@ import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.Qualifier;
 
 /**
- * An {@link IncomingPriceUpdateEvent} is sent when an {@link AgentEndpoint} receives a new {@link Price}.
+ * An {@link IncomingPriceUpdateEvent} is sent when an {@link AgentEndpoint} receives a new {@link PriceUpdate}.
  * 
  * @author FAN
  * @version 1.0

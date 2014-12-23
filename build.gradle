@@ -1,36 +1,5 @@
 apply from: rootProject.file("${bnd_cnf}/gradle/master.gradle")
 
-allprojects {
-    apply plugin: 'java'
-    apply plugin: 'jacoco'
-
-	repositories {
-        jcenter()
-    }
-	
-	jacoco {
-		toolVersion = "0.7.1.201405082137"
-		reportsDir = file("$buildDir/jacoco")
-	}
-
-}
- 
-test {
-    jacoco {
-        append = false
-        destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
-        classDumpFile = file("$buildDir/jacoco/classpathdumps")
-    }
-}
-
-jacocoTestReport {
-    reports {
-        xml.enabled true
-        csv.enabled false
-        html.destination "${buildDir}/jacocoHtml"
-    }
-}
-
 // Generate sonar-runner.properties containing all projects and jars
 task generatesonar << {
 

@@ -42,7 +42,8 @@ public class PointBid extends Bid implements Iterable<PricePoint> {
         /**
          * Creates a PricePoint with the supplied price and demand. Adds the point to the PricePoint array.
          * 
-         * @param pricePoint
+         * @param price
+         * @param demand
          * @return this instance of the Builder with the array
          */
         public Builder add(double price, double demand) {
