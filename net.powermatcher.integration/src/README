@@ -1,0 +1,6 @@
+This bundle contains a series of unit tests that, when ran together, form integration tests for the powermatcher
+system. The tests can be ran all at once by running the IntegrationTestSuite. As of version 2.0, the tests take
+roughly 70s to run.
+
+The tests are located in the test folder so sonar can automatically detect and run them.
+Please do not remove this readme from the src folder, the folder should not be empty.
