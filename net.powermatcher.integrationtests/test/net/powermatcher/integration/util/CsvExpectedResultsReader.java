@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.zip.DataFormatException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.MarketBasis;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CsvExpectedResultsReader {
 

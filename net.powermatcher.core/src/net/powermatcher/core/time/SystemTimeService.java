@@ -2,8 +2,8 @@ package net.powermatcher.core.time;
 
 import java.util.Date;
 
-import aQute.bnd.annotation.component.Component;
 import net.powermatcher.api.TimeService;
+import aQute.bnd.annotation.component.Component;
 
 @Component
 public class SystemTimeService implements TimeService {

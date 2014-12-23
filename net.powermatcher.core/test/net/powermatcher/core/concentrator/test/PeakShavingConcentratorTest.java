@@ -26,10 +26,10 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 public class PeakShavingConcentratorTest {
-    
+
     @Rule
     public ExpectedException exception = ExpectedException.none();
-    
+
     private String auctioneerId;
     private String concentratorId;
 

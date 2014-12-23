@@ -2,6 +2,14 @@ package net.powermatcher.examples;
 
 import java.util.Map;
 
+import net.powermatcher.api.ObjectiveEndpoint;
+import net.powermatcher.api.data.ArrayBid;
+import net.powermatcher.api.data.Bid;
+import net.powermatcher.api.data.MarketBasis;
+import net.powermatcher.api.data.PriceUpdate;
+import net.powermatcher.api.monitoring.ObservableAgent;
+import net.powermatcher.core.objectiveagent.BaseObjectiveAgent;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,13 +18,6 @@ import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
-import net.powermatcher.api.ObjectiveEndpoint;
-import net.powermatcher.api.data.ArrayBid;
-import net.powermatcher.api.data.Bid;
-import net.powermatcher.api.data.MarketBasis;
-import net.powermatcher.api.data.PriceUpdate;
-import net.powermatcher.api.monitoring.ObservableAgent;
-import net.powermatcher.core.objectiveagent.BaseObjectiveAgent;
 
 @Component(designateFactory = ObjectiveAgent.Config.class, immediate = true, provide = { ObservableAgent.class,
         ObjectiveEndpoint.class })

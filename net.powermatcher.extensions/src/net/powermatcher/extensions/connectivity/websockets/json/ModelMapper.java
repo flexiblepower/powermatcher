@@ -9,8 +9,8 @@ import net.powermatcher.api.data.PricePoint;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.extensions.connectivity.websockets.data.BidModel;
 import net.powermatcher.extensions.connectivity.websockets.data.MarketBasisModel;
-import net.powermatcher.extensions.connectivity.websockets.data.PriceUpdateModel;
 import net.powermatcher.extensions.connectivity.websockets.data.PricePointModel;
+import net.powermatcher.extensions.connectivity.websockets.data.PriceUpdateModel;
 
 /**
  * Helper class to mapp between net.powermatcher.api.data classes and model classed for wire transfer.

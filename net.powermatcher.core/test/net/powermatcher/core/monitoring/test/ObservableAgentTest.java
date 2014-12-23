@@ -8,11 +8,11 @@ import java.util.Date;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PriceUpdate;
-import net.powermatcher.mock.MockAgent;
-import net.powermatcher.mock.MockObserver;
 import net.powermatcher.api.monitoring.Qualifier;
 import net.powermatcher.api.monitoring.events.AgentEvent;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
+import net.powermatcher.mock.MockAgent;
+import net.powermatcher.mock.MockObserver;
 
 import org.junit.Test;
 

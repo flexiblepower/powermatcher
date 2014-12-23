@@ -1,12 +1,12 @@
 package net.powermatcher.integration.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.core.concentrator.Concentrator;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ConcentratorWrapper extends Concentrator {
 

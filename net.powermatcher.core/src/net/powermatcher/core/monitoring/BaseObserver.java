@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.AgentObserver;
+import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.events.AgentEvent;
 
 import org.slf4j.Logger;

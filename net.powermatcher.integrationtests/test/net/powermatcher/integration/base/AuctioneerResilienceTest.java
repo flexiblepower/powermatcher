@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.DataFormatException;
 
-import org.junit.After;
-
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.core.sessions.SessionManager;
 import net.powermatcher.core.time.SystemTimeService;
@@ -18,6 +16,8 @@ import net.powermatcher.integration.util.CsvBidReader;
 import net.powermatcher.integration.util.CsvExpectedResultsReader;
 import net.powermatcher.mock.MockAgent;
 import net.powermatcher.mock.MockScheduler;
+
+import org.junit.After;
 
 public class AuctioneerResilienceTest extends ResilienceTest {
 
