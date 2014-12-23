@@ -250,13 +250,15 @@ public class ConcentratorTest {
 
         sessionManager.addAgentEndpoint(mockAgent);
 
-        Bid bid = new ArrayBid(marketBasis, 1, new double[] { 2, 1, 0, -1, -1 });
+        int bidNumber = 1;
+        Bid bid = new ArrayBid(marketBasis, bidNumber, new double[] { 2, 1, 0, -1, -1 });
         mockAgent.sendBid(bid);
         mockScheduler.doTaskOnce();
-        PriceUpdate expected = new PriceUpdate(new Price(marketBasis, 5.0), 1);
-        PriceUpdate error = new PriceUpdate(new Price(marketBasis, 6.0), 1);
+        PriceUpdate expected = new PriceUpdate(new Price(marketBasis, 5.0), bidNumber);
+        PriceUpdate error = new PriceUpdate(new Price(marketBasis, 6.0), 2);
         concentrator.updatePrice(expected);
         concentrator.updatePrice(error);
+        assertThat(mockAgent.getLastPriceUpdate().getBidNumber(), is(equalTo(bidNumber)));
         assertThat(mockAgent.getLastPriceUpdate(), is(equalTo(expected)));
     }
 
