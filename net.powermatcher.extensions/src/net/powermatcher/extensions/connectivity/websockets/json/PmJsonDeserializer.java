@@ -16,11 +16,14 @@ import com.google.gson.JsonParseException;
 /**
  * Implementation of JsonDeserializer for a PmMessage. Handles the correct deserialization according to
  * {@link PmMessage.PayloadType}
+ * 
+ * @author FAN
+ * @version 2.0
  */
 public class PmJsonDeserializer implements JsonDeserializer<PmMessage> {
 
     /**
-     * Deserialize a JSON element according to the type.
+     * {@inheritDoc}
      */
     @Override
     public PmMessage deserialize(JsonElement json, Type desiredType, JsonDeserializationContext context)

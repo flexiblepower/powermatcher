@@ -6,8 +6,9 @@ import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
 /**
- * {@link MarketBasis} is an immutable type specifying the settings for the market. This includes the price range, the
- * commodity being exchanges, the currency being used and the number of price steps used in the demand arrays.
+ * {@link MarketBasis} is an immutable data object specifying the settings for the market. This includes the price
+ * range, the commodity being exchanges, the currency being used and the number of price steps used in the demand
+ * arrays.
  * 
  * @author FAN
  * @version 2.0
@@ -26,12 +27,45 @@ public class MarketBasis {
      */
     public static final DecimalFormat DEMAND_FORMAT = new DecimalFormat("0.###E0", ROOT_SYMBOLS);
 
+    /**
+     * The commodity that is to be handled by this market. E.g. electricity
+     */
     private final String commodity;
+
+    /**
+     * The 3 character currency code. E.g. EUR
+     */
     private final String currency;
+
+    /**
+     * The number of price steps used when converting a {@link PointBid} to an {@link ArrayBid}.
+     */
     private final int priceSteps;
+
+    /**
+     * The minimum price that is valid in this market (inclusive).
+     */
     private final double minimumPrice;
+
+    /**
+     * The maximum price that is valid in this market (inclusive).
+     */
     private final double maximumPrice;
 
+    /**
+     * A constructor used to create an instance of this class.
+     * 
+     * @param commodity
+     *            the commodity that is to be handled by this market.
+     * @param currency
+     *            the 3 character currency code.
+     * @param priceSteps
+     *            the number of price steps used when converting a {@link PointBid} to an {@link ArrayBid}
+     * @param minimumPrice
+     *            the minimum price that is valid in this market (inclusive)
+     * @param maximumPrice
+     *            the maximum price that is valid in this market (inclusive)
+     */
     public MarketBasis(final String commodity, final String currency, final int priceSteps, final double minimumPrice,
             final double maximumPrice) {
         if (commodity == null) {
@@ -56,42 +90,42 @@ public class MarketBasis {
     }
 
     /**
-     * @return The commodity that is to be handled by this market. E.g. electricity
+     * @return the current value of commodity.
      */
     public String getCommodity() {
         return this.commodity;
     }
 
     /**
-     * @return The 3 character currency code. E.g. EUR
+     * @return the current value of currency.
      */
     public String getCurrency() {
         return this.currency;
     }
 
     /**
-     * @return The maximum price that is valid in this market (inclusive)
+     * @return the current value of maximumPrice.
      */
     public double getMaximumPrice() {
         return this.maximumPrice;
     }
 
     /**
-     * @return The minimum price that is valid in this market (inclusive)
+     * @return the current value of minimumPrice.
      */
     public double getMinimumPrice() {
         return this.minimumPrice;
     }
 
     /**
-     * @return The difference in market price between a price step
+     * @return The difference in market price between a price step.
      */
     public final double getPriceIncrement() {
         return (this.maximumPrice - this.minimumPrice) / (this.priceSteps - 1);
     }
 
     /**
-     * @return The number of price steps used when converting a {@link PointBid} to an {@link ArrayBid}
+     * @return the current value of priceSteps.
      */
     public int getPriceSteps() {
         return this.priceSteps;
@@ -103,8 +137,8 @@ public class MarketBasis {
      * @param priceStep
      *            The price step (<code>int</code>) parameter.
      * @return Results of the bound price step (<code>int</code>) value.
-     * @see #toPriceStep(double)
-     * @see #toPriceStep(int)
+     * @see Price#toPriceStep(double)
+     * @see Price#toPriceStep(int)
      */
     public int boundPriceStep(final PriceStep priceStep) {
         int step = priceStep.getPriceStep();
@@ -113,6 +147,9 @@ public class MarketBasis {
         return boundedPriceStep;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean equals(final Object obj) {
         if (obj == this) {
@@ -127,6 +164,9 @@ public class MarketBasis {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -140,6 +180,9 @@ public class MarketBasis {
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder();

@@ -15,6 +15,7 @@ import net.powermatcher.api.Session;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.concentrator.Concentrator;
 
+import org.junit.experimental.theories.Theories;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -35,10 +36,10 @@ import aQute.bnd.annotation.component.Reference;
  * It is responsible for connecting and disconnecting an {@link Auctioneer}, {@link Concentrator} and agents. In
  * <code>activeSessions</code> the {@link Session} will be stored. The {@link SessionManager} will connect a
  * {@link MatcherEndpoint} to an agent and an {@link AgentEndpoint} with a {@link MatcherEndpoint}.
+ * </p>
  * 
  * @author FAN
  * @version 2.0
- * 
  */
 @Component(immediate = true)
 public class SessionManager {
@@ -100,11 +101,23 @@ public class SessionManager {
         updateConnections();
     }
 
+    /**
+     * OSGi calls this method to activate a managed service.
+     * 
+     * @param properties
+     *            the configuration properties
+     */
     @Activate
     public synchronized void activate() {
         updateConnections();
     }
 
+    /**
+     * Adds a {@link MatcherEndpoint} to the matcherEndpoints map. It will also check if the agentId is unique.
+     * 
+     * @param matcherEndpoint
+     *            the new {@link MatcherEndpoint}
+     */
     @Reference(dynamic = true, multiple = true, optional = true)
     public void addMatcherEndpoint(MatcherEndpoint matcherEndpoint) {
         Agent agent = (Agent) matcherEndpoint;
@@ -122,6 +135,9 @@ public class SessionManager {
         }
     }
 
+    /**
+     * This method is called whenever an {@link Agent} is added or removed.
+     */
     private synchronized void updateConnections() {
         for (String desiredAgentId : desiredConnections.keySet()) {
             String agentId = desiredAgentId;
@@ -153,6 +169,12 @@ public class SessionManager {
         }
     }
 
+    /**
+     * Removes the given {@link AgentEndpoint} from agentEndpoints.
+     * 
+     * @param agentEndpoint
+     *            the {@link AgentEndpoint} that will be removed.
+     */
     public void removeAgentEndpoint(AgentEndpoint agentEndpoint) {
         Agent agent = (Agent) agentEndpoint;
         String agentId = agent.getAgentId();
@@ -164,6 +186,17 @@ public class SessionManager {
         }
     }
 
+    /**
+     * Checks to see if the new agentId already exists in {@link Theories} cluster.
+     * 
+     * @param agentId
+     *            the agentId of {@link Agent} that has to be checked for uniqueness.
+     * @param agentEndpoint
+     *            the {@link AgentEndpoint} if this is an {@link AgentEndpoint}, <code>null</code> if not.
+     * @param matcherEndpoint
+     *            the {@link MatcherEndpoint} if this is an {@link MatcherEndpoint}, <code>null</code> if not.
+     * @return
+     */
     private boolean isNotUniqueAgentId(String agentId, AgentEndpoint agentEndpoint, MatcherEndpoint matcherEndpoint) {
         if (agentIds.contains(agentId)) {
             if (agentEndpoint != null && agentEndpoints.get(agentId) != null) {
@@ -185,6 +218,16 @@ public class SessionManager {
         return true;
     }
 
+    /**
+     * Removes a managed service from OSGi with the {@link ConfigurationAdmin}.
+     * 
+     * @param AgentId
+     *            the agentId of the managed service that will be removed
+     * @param agentEndpoint
+     *            the {@link AgentEndpoint} if this is an {@link AgentEndpoint}, <code>null</code> if not.
+     * @param matcherEndpoint
+     *            the {@link MatcherEndpoint} if this is an {@link MatcherEndpoint}, <code>null</code> if not.
+     */
     private void deleteAgentId(String AgentId, AgentEndpoint agentEndpoint, MatcherEndpoint matcherEndpoint) {
         String pidOldAgentEndpoint;
         try {
@@ -208,6 +251,11 @@ public class SessionManager {
         }
     }
 
+    /**
+     * Removes the given {@link MatcherEndpoint} from matcherEndpoints.
+     * 
+     * @param matcherEndpoint
+     */
     public void removeMatcherEndpoint(MatcherEndpoint matcherEndpoint) {
         Agent agent = (Agent) matcherEndpoint;
         String matcherId = agent.getAgentId();
@@ -218,32 +266,49 @@ public class SessionManager {
         }
     }
 
+    /**
+     * This is called by a {@link Session} when it disconnects.
+     * 
+     * @param sessionImpl
+     */
     void disconnected(SessionImpl sessionImpl) {
         activeSessions.remove(sessionImpl.getSessionId());
     }
 
+    /**
+     * @return a copy of agentEndpoints.
+     */
     public Map<String, AgentEndpoint> getAgentEndpoints() {
         return new HashMap<String, AgentEndpoint>(agentEndpoints);
     }
 
+    /**
+     * @return a copy of the matcherEndpoints
+     */
     public Map<String, MatcherEndpoint> getMatcherEndpoints() {
         return new HashMap<String, MatcherEndpoint>(matcherEndpoints);
     }
 
     /**
-     * Returns the active sessions from the SessionManager.
-     * 
-     * @return {@link Session}
+     * @return a copy of activeSessions.
      */
     public Map<String, Session> getActiveSessions() {
         return new HashMap<String, Session>(activeSessions);
     }
 
+    /**
+     * @param the
+     *            new {@link ConfigurationAdmin} value.
+     */
     @Reference
     protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
         this.configurationAdmin = configurationAdmin;
     }
 
+    /**
+     * @param the
+     *            new <code>List</code> of agentId <code>Strings</code>
+     */
     public void setAgentIds(List<String> agentIds) {
         this.agentIds = agentIds;
     }

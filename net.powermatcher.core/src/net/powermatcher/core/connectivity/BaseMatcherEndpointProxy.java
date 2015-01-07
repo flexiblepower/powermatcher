@@ -4,7 +4,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
+import net.powermatcher.api.connectivity.AgentEndpointProxy;
 import net.powermatcher.api.connectivity.MatcherEndpointProxy;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
@@ -16,11 +18,17 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Base implementation for remote agents. This is the "sending end" of a remote communication pair.
+ * 
+ * @author FAN
+ * @version 2.0
  */
 public abstract class BaseMatcherEndpointProxy extends BaseAgent implements MatcherEndpointProxy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseMatcherEndpointProxy.class);
 
+    /**
+     * The {@link Session} to the local {@link AgentEndpoint}.
+     */
     private Session localSession;
 
     /**
@@ -33,9 +41,18 @@ public abstract class BaseMatcherEndpointProxy extends BaseAgent implements Matc
      */
     private ScheduledFuture<?> scheduledFuture;
 
+    /**
+     * This method will be called by the annotated Activate() method of the subclasses.
+     * 
+     * @param reconnectTimeout
+     *            Time in seconds between connections to the {@link AgentEndpointProxy}.
+     */
     protected void baseActivate(int reconnectTimeout) {
         // Start connector thread
         scheduledFuture = this.scheduler.scheduleAtFixedRate(new Runnable() {
+            /**
+             * {@inheritDoc}
+             */
             @Override
             public void run() {
                 connectRemote();
@@ -43,6 +60,9 @@ public abstract class BaseMatcherEndpointProxy extends BaseAgent implements Matc
         }, 0, reconnectTimeout, TimeUnit.SECONDS);
     }
 
+    /**
+     * This method will be called by the annotated Deactivate() method of the subclasses.
+     */
     protected void baseDeactivate() {
         // Stop connector thread
         this.scheduledFuture.cancel(false);
@@ -51,15 +71,24 @@ public abstract class BaseMatcherEndpointProxy extends BaseAgent implements Matc
         this.disconnectRemote();
     }
 
+    /**
+     * @param the new value of scheduler
+     */
     public void setExecutorService(ScheduledExecutorService scheduler) {
         this.scheduler = scheduler;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isLocalConnected() {
         return this.localSession != null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void updateRemoteMarketBasis(MarketBasis marketBasis) {
         // Sync marketbasis with local session, for new connections
@@ -68,6 +97,9 @@ public abstract class BaseMatcherEndpointProxy extends BaseAgent implements Matc
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void updateRemoteClusterId(String clusterId) {
         // Sync clusterid with local session, for new connections
@@ -76,6 +108,9 @@ public abstract class BaseMatcherEndpointProxy extends BaseAgent implements Matc
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean connectToAgent(Session session) {
         this.localSession = session;
@@ -87,6 +122,9 @@ public abstract class BaseMatcherEndpointProxy extends BaseAgent implements Matc
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void agentEndpointDisconnected(Session session) {
         // Disconnect local agent
@@ -97,6 +135,9 @@ public abstract class BaseMatcherEndpointProxy extends BaseAgent implements Matc
         this.disconnectRemote();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void updateBid(Session session, Bid newBid) {
         if (this.localSession != session) {
@@ -118,6 +159,9 @@ public abstract class BaseMatcherEndpointProxy extends BaseAgent implements Matc
         this.updateBidRemote(newBid);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void updateLocalPrice(PriceUpdate priceUpdate) {
         if (!this.isLocalConnected()) {
@@ -137,6 +181,9 @@ public abstract class BaseMatcherEndpointProxy extends BaseAgent implements Matc
         return other instanceof BaseMatcherEndpointProxy;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean equals(Object obj) {
         BaseMatcherEndpointProxy that = (BaseMatcherEndpointProxy) ((obj instanceof BaseMatcherEndpointProxy) ? obj
@@ -152,6 +199,9 @@ public abstract class BaseMatcherEndpointProxy extends BaseAgent implements Matc
         return canEqual(that) && this.localSession.equals(that.localSession);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int hashCode() {
         return 211 * (this.localSession.hashCode());

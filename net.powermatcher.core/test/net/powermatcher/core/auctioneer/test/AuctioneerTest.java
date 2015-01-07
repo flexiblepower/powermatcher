@@ -32,7 +32,10 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 /**
- * JUnit test for the Auctioneer
+ * JUnit tests for the {@link Auctioneer} class.
+ * 
+ * @author FAN
+ * @version 2.0
  */
 public class AuctioneerTest {
 
@@ -96,6 +99,9 @@ public class AuctioneerTest {
         private IncomingBidEvent incomingBidEvent;
         private OutgoingPriceUpdateEvent outgoingPriceEvent;
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public void update(AgentEvent event) {
             if (event instanceof IncomingBidEvent) {

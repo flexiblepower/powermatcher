@@ -7,6 +7,11 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class CSVLogReader {
 
     private static final String CSV_LOG_DELIMITERS = ";";

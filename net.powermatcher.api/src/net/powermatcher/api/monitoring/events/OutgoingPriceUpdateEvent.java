@@ -13,7 +13,6 @@ import net.powermatcher.api.monitoring.Qualifier;
  * 
  * @author FAN
  * @version 2.0
- * 
  */
 public class OutgoingPriceUpdateEvent extends PriceUpdateEvent {
 
@@ -36,6 +35,9 @@ public class OutgoingPriceUpdateEvent extends PriceUpdateEvent {
         super(clusterId, agentId, sessionId, timestamp, priceUpdate, qualifier);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
         return OutgoingPriceUpdateEvent.class.getSimpleName() + " " + super.toString() + ", priceUpdate = "

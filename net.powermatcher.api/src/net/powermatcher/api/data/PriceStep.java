@@ -1,9 +1,31 @@
 package net.powermatcher.api.data;
 
+/**
+ * This immutable data object represents a priceStepi a Powermatcher cluster.
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class PriceStep {
+
+    /**
+     * The marketbasis of this cluster.
+     */
     private final MarketBasis marketBasis;
+
+    /**
+     * The value of the priceStep.
+     */
     private final int priceStep;
 
+    /**
+     * A constructor that creates a new {@link PricePoint} instance.
+     * 
+     * @param marketBasis
+     *            the marketbasis of this cluster.
+     * @param priceStep
+     *            the value of the priceStep.
+     */
     public PriceStep(MarketBasis marketBasis, int priceStep) {
         if (marketBasis == null) {
             throw new NullPointerException("marketBasis can not be null");
@@ -15,23 +37,40 @@ public class PriceStep {
         this.priceStep = priceStep;
     }
 
+    /**
+     * @return the current value of marketBasis.
+     */
     public MarketBasis getMarketBasis() {
         return marketBasis;
     }
 
+    /**
+     * @return the current value of priceStep.
+     */
     public int getPriceStep() {
         return priceStep;
     }
 
+    /**
+     * Creates a {@link Price}, based on the {@link MarketBasis} as the priceStep
+     * 
+     * @return the new {@link Price}
+     */
     public Price toPrice() {
         return new Price(marketBasis, marketBasis.getMinimumPrice() + priceStep * marketBasis.getPriceIncrement());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int hashCode() {
         return 16333 * marketBasis.hashCode() + 3557 * priceStep;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -44,6 +83,9 @@ public class PriceStep {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
         return "PriceStep " + Integer.toString(priceStep);

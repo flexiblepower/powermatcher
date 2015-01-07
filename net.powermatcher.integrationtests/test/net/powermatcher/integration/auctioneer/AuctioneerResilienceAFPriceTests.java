@@ -10,6 +10,8 @@ import org.junit.Test;
 /**
  * JUnit test for the Auctioneer
  * 
+ * @author FAN
+ * @version 2.0
  */
 public class AuctioneerResilienceAFPriceTests extends AuctioneerResilienceTest {
 

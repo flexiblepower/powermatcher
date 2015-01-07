@@ -1,5 +1,13 @@
 package net.powermatcher.extensions.connectivity.websockets.data;
 
+import net.powermatcher.api.data.PriceUpdate;
+
+/**
+ * PriceUpdate model class to transfer {@link PriceUpdate} data over the wire.
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class PriceUpdateModel {
 
     /**
@@ -17,6 +25,9 @@ public class PriceUpdateModel {
      */
     private double priceValue;
 
+    /**
+     * @return the current value of marketBasis.
+     */
     public MarketBasisModel getMarketBasis() {
         return marketBasis;
     }
@@ -25,6 +36,9 @@ public class PriceUpdateModel {
         this.marketBasis = marketBasis;
     }
 
+    /**
+     * @return the current value of bidNumber.
+     */
     public int getBidNumber() {
         return bidNumber;
     }
@@ -33,6 +47,9 @@ public class PriceUpdateModel {
         this.bidNumber = bidNumber;
     }
 
+    /**
+     * @return the current value of priceValue.
+     */
     public double getPriceValue() {
         return priceValue;
     }

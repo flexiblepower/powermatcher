@@ -26,6 +26,9 @@ import org.junit.rules.ExpectedException;
  * 
  * Every test requires a different number agents. In setUp() NR_AGENTS are instantiated. Every test the desired number
  * of agents can be added and removed using the functions addAgents() and removeAgents().
+ * 
+ * @author FAN
+ * @version 2.0
  */
 public class ConcentratorTest {
 

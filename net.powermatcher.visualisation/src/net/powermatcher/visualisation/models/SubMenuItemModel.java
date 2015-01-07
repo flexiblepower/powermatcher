@@ -35,7 +35,7 @@ public class SubMenuItemModel {
     }
 
     /**
-     * @return the current title <code>String</code>
+     * @return the current value of title.
      */
     public String getTitle() {
         return title;
@@ -50,7 +50,7 @@ public class SubMenuItemModel {
     }
 
     /**
-     * @return the current fpid <code>String</code>
+     * @return the current value of fpid.
      */
     public String getFpid() {
         return fpid;

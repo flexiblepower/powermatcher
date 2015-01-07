@@ -16,6 +16,9 @@ import com.google.gson.GsonBuilder;
 /**
  * Implements a serializer for the net.powermatcher.api.data data types to JSON. Items are wrapped in a
  * {@link PmMessage} and correct type is set.
+ * 
+ * @author FAN
+ * @version 2.0
  */
 public class PmJsonSerializer {
 

@@ -5,12 +5,46 @@ import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import net.powermatcher.api.Agent;
+
+/**
+ * This immutable data object represents a {@link Bid} with a {@link PricePoint} array to represent the bid curve. This is used
+ * by {@link Agent}s that have to create a {@link Bid}, because it is easier to create.
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class PointBid extends Bid implements Iterable<PricePoint> {
+
+    /**
+     * A builder class to create an {@link PointBid} instance.
+     * 
+     * @author FAN
+     * @version 2.0
+     */
     public static final class Builder {
+
+        /**
+         * The {@link MarketBasis} of the cluster.
+         */
         private final MarketBasis marketBasis;
+
+        /**
+         * The number or id of this Bid instance.
+         */
         private int bidNumber;
+
+        /**
+         * The set of {@link PointBid} values that make up the bid curve.
+         */
         private final SortedSet<PricePoint> pricePoints;
 
+        /**
+         * Constructor to create an instance of this class.
+         * 
+         * @param marketBasis
+         *            the {@link MarketBasis} of the cluster.
+         */
         public Builder(final MarketBasis marketBasis) {
             this.marketBasis = marketBasis;
             bidNumber = 0;
@@ -52,7 +86,7 @@ public class PointBid extends Bid implements Iterable<PricePoint> {
         /**
          * Uses the supplied parameters to create a new PointBid
          * 
-         * @return
+         * @return The created {@link PointBid} 
          * @throws IllegalArgumentException
          *             when the marketBasis is null
          */
@@ -61,41 +95,78 @@ public class PointBid extends Bid implements Iterable<PricePoint> {
         }
     }
 
+    /**
+     * The array of {@link PricePoint}s that make up the bid curve.
+     */
     private final PricePoint[] pricePoints;
 
+    /**
+     * The {@link ArrayBid} representation of this PointBid
+     */
     private transient ArrayBid arrayBid;
 
+    /**
+     * A constructor to create an instance of PointBid.
+     * 
+     * @param marketBasis
+     *            the {@link MarketBasis} of the cluster
+     * @param bidNumber
+     *            the number of this ArrayBid instance
+     * @param pricePoints
+     *            the {@link PointBid} Array that belongs to this bid.
+     */
     public PointBid(MarketBasis marketBasis, int bidNumber, PricePoint[] pricePoints) {
         super(marketBasis, bidNumber);
         this.pricePoints = pricePoints;
     }
 
+    /**
+     * A constructor used to create an PointBid, based on a {@link ArrayBid}.
+     * 
+     * @param base
+     *            The {@link ArrayBid} this PointBid will be based on.
+     */
     PointBid(ArrayBid base) {
         super(base.marketBasis, base.bidNumber);
         this.pricePoints = base.calculatePricePoints();
         this.arrayBid = base;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ArrayBid aggregate(Bid other) {
         return toArrayBid().aggregate(other);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Price calculateIntersection(double targetDemand) {
         return toArrayBid().calculateIntersection(targetDemand);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public double getMaximumDemand() {
         return getFirst().getDemand();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public double getMinimumDemand() {
         return getLast().getDemand();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ArrayBid toArrayBid() {
         if (arrayBid == null) {
@@ -104,11 +175,18 @@ public class PointBid extends Bid implements Iterable<PricePoint> {
         return arrayBid;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PointBid toPointBid() {
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public double getDemandAt(Price price) {
         if (pricePoints.length == 0) {
             // If there are no pricepoints, all demands are 0
@@ -140,29 +218,47 @@ public class PointBid extends Bid implements Iterable<PricePoint> {
         return (1 - factor) * lower.getDemand() + factor * higher.getDemand();
     }
 
+    /**
+     * @return the first {@link PricePoint} in the bid curve.
+     */
     private PricePoint getFirst() {
         return pricePoints[0];
     }
 
+    /**
+     * @return the last {@link PricePoint} in the bid curve.
+     */
     private PricePoint getLast() {
         return pricePoints[pricePoints.length - 1];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Iterator<PricePoint> iterator() {
         return new Iterator<PricePoint>() {
             private int nextIndex;
 
+            /**
+             * {@inheritDoc}
+             */
             @Override
             public PricePoint next() {
                 return pricePoints[nextIndex++];
             }
 
+            /**
+             * {@inheritDoc}
+             */
             @Override
             public boolean hasNext() {
                 return nextIndex < pricePoints.length;
             }
 
+            /**
+             * {@inheritDoc}
+             */
             @Override
             public void remove() {
                 throw new UnsupportedOperationException();
@@ -170,6 +266,9 @@ public class PointBid extends Bid implements Iterable<PricePoint> {
         };
     }
 
+    /**
+     * @return A <code>array[]</code> representation of the {@link PricePoint} array.
+     */
     double[] calculateDemandArray() {
         int priceSteps = marketBasis.getPriceSteps();
         double[] newDemand = new double[priceSteps];
@@ -198,15 +297,24 @@ public class PointBid extends Bid implements Iterable<PricePoint> {
         return newDemand;
     }
 
+    /**
+     * @return a copy of pricePoints.
+     */
     public PricePoint[] getPricePoints() {
         return Arrays.copyOf(pricePoints, pricePoints.length);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int hashCode() {
         return 2011 * Arrays.deepHashCode(pricePoints) + 3557 * bidNumber + marketBasis.hashCode();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean equals(Object obj) {
         PointBid other = (PointBid) ((obj instanceof PointBid) ? obj : null);
@@ -221,6 +329,9 @@ public class PointBid extends Bid implements Iterable<PricePoint> {
                 && Arrays.equals(other.getPricePoints(), this.getPricePoints());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder();

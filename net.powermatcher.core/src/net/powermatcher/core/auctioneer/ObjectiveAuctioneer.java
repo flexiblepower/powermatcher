@@ -56,7 +56,6 @@ import aQute.bnd.annotation.metatype.Meta;
  * 
  * @author FAN
  * @version 2.0
- * 
  */
 @Component(designateFactory = ObjectiveAuctioneer.Config.class, immediate = true, provide = { ObservableAgent.class,
         MatcherEndpoint.class })
@@ -129,6 +128,9 @@ public class ObjectiveAuctioneer extends Auctioneer {
      */
     private ObjectiveEndpoint objectiveEndpoint;
 
+    /**
+     * {@inheritDoc}
+     */
     @Activate
     @Override
     public void activate(final Map<String, Object> properties) {
@@ -141,6 +143,10 @@ public class ObjectiveAuctioneer extends Auctioneer {
         this.setAgentId(config.agentId());
 
         scheduledFuture = this.scheduler.scheduleAtFixedRate(new Runnable() {
+            
+            /**
+             * {@inheritDoc}
+             */
             @Override
             public void run() {
                 publishNewPrice();
@@ -148,11 +154,20 @@ public class ObjectiveAuctioneer extends Auctioneer {
         }, 0, config.priceUpdateRate(), TimeUnit.SECONDS);
     }
 
+    /**
+     * OSGi calls this method to deactivate a managed service.
+     */
     @Deactivate
     public void deactivate() {
         scheduledFuture.cancel(false);
     }
 
+    /**
+     * Used to inject an {@link ObjectiveEndpoint} instance into this class.
+     * 
+     * @param objectiveEndpoint
+     *            the new {@link ObjectiveEndpoint}
+     */
     @Reference(dynamic = true, multiple = true, optional = true)
     public void addObjectiveEndpoint(ObjectiveEndpoint objectiveEndpoint) {
         Agent agent = (Agent) objectiveEndpoint;
@@ -165,6 +180,12 @@ public class ObjectiveAuctioneer extends Auctioneer {
         }
     }
 
+    /**
+     * Removes the current {@link ObjectiveEndpoint}.
+     * 
+     * @param objectiveEndpoint
+     *            the {@link ObjectiveEndpoint} that will be removed.
+     */
     public void removeObjectiveEndpoint(ObjectiveEndpoint objectiveEndpoint) {
         if (this.objectiveEndpoint == objectiveEndpoint) {
             this.objectiveEndpoint = null;
@@ -172,6 +193,9 @@ public class ObjectiveAuctioneer extends Auctioneer {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public synchronized boolean connectToAgent(Session session) {
         session.setMarketBasis(marketBasis);
@@ -184,6 +208,9 @@ public class ObjectiveAuctioneer extends Auctioneer {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public synchronized void agentEndpointDisconnected(Session session) {
         // Find session
@@ -196,6 +223,9 @@ public class ObjectiveAuctioneer extends Auctioneer {
         LOGGER.info("Agent disconnected with session [{}]", session.getSessionId());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public synchronized void updateBid(Session session, Bid newBid) {
         if (!sessions.contains(session)) {
@@ -216,8 +246,7 @@ public class ObjectiveAuctioneer extends Auctioneer {
     }
 
     /**
-     * Generates the new price out of the aggregated bids and sends this to all listeners. The listeners can be device
-     * agents and objective agents.
+     * {@inheritDoc}
      */
     @Override
     protected synchronized void publishNewPrice() {
@@ -252,20 +281,38 @@ public class ObjectiveAuctioneer extends Auctioneer {
         }
     }
 
+    /**
+     * This method determines the {@link Price}, given the current aggregated {@link Bid}.
+     * 
+     * @param aggregatedBid
+     *            the aggregated {@link Bid} used to determin the {@link Price}
+     * @return the calculated {@link Price}
+     */
     protected Price determinePrice(Bid aggregatedBid) {
         return aggregatedBid.calculateIntersection(0);
     }
 
+    /**
+     * @param the
+     *            new {@link TimeService} implementation.
+     */
     @Reference
     public void setTimeService(TimeService timeService) {
         this.timeService = timeService;
     }
 
+    /**
+     * @param the
+     *            new {@link ScheduledExecutorService} implementation.
+     */
     @Reference
     public void setExecutorService(ScheduledExecutorService scheduler) {
         this.scheduler = scheduler;
     }
 
+    /**
+     * @return the current value of aggregatedBids.
+     */
     protected BidCache getAggregatedBids() {
         return this.aggregatedBids;
     }

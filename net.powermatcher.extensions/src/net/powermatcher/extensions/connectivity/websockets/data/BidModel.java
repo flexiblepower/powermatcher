@@ -4,6 +4,9 @@ import net.powermatcher.api.data.Bid;
 
 /**
  * Bid model class to transfer {@link Bid} data over the wire.
+ * 
+ * @author FAN
+ * @version 2.0
  */
 public class BidModel {
     /**
@@ -26,6 +29,9 @@ public class BidModel {
      */
     private int bidNumber;
 
+    /**
+     * @return the current value of marketBasis.
+     */
     public MarketBasisModel getMarketBasis() {
         return marketBasis;
     }
@@ -34,6 +40,9 @@ public class BidModel {
         this.marketBasis = marketBasis;
     }
 
+    /**
+     * @return the current value of demand.
+     */
     public double[] getDemand() {
         return demand;
     }
@@ -42,6 +51,9 @@ public class BidModel {
         this.demand = demand;
     }
 
+    /**
+     * @return the current value of pricePoints.
+     */
     public PricePointModel[] getPricePoints() {
         return pricePoints;
     }
@@ -50,6 +62,9 @@ public class BidModel {
         this.pricePoints = pricePoints;
     }
 
+    /**
+     * @return the current value of bidNumber.
+     */
     public int getBidNumber() {
         return bidNumber;
     }

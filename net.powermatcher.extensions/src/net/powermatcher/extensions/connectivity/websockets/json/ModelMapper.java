@@ -14,6 +14,9 @@ import net.powermatcher.extensions.connectivity.websockets.data.PriceUpdateModel
 
 /**
  * Helper class to mapp between net.powermatcher.api.data classes and model classed for wire transfer.
+ * 
+ * @author FAN
+ * @version 2.0
  */
 public class ModelMapper {
 

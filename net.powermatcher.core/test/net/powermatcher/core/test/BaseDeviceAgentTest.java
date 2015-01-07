@@ -22,6 +22,12 @@ import net.powermatcher.mock.MockMatcherAgent;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * JUnit tests for the {@link BaseDeviceAgent} class.
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class BaseDeviceAgentTest {
 
     private TestBaseDeviceAgent baseDeviceAgent;
@@ -32,6 +38,9 @@ public class BaseDeviceAgentTest {
         private OutgoingBidEvent outgoingBidEvent;
         private IncomingPriceUpdateEvent incomingPriceEvent;
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public void update(AgentEvent event) {
             if (event instanceof OutgoingBidEvent) {

@@ -8,6 +8,11 @@ import net.powermatcher.core.concentrator.Concentrator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class ConcentratorWrapper extends Concentrator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConcentratorWrapper.class);
@@ -17,6 +22,9 @@ public class ConcentratorWrapper extends Concentrator {
     private Bid lastReceivedBid;
     private Bid lastPublishedBid;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void updatePrice(PriceUpdate priceUpdate) {
         this.lastReceivedPriceUpdate = priceUpdate;
@@ -28,6 +36,9 @@ public class ConcentratorWrapper extends Concentrator {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void updateBid(Session session, Bid newBid) {
         try {

@@ -19,6 +19,14 @@ import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
+/**
+ * {@link ObjectiveAgent} is an example implementation of {@link BaseObjectiveAgent}. It does nothing with the
+ * {@link PriceUpdate}s it gets from {@link ObjectiveAgent#notifyPriceUpdate(PriceUpdate priceUpdate)}.
+ * {@link ObjectiveAgent#handleAggregateBid(Bid)} sends a static {@link Bid} to manipulate the cluster.
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 @Component(designateFactory = ObjectiveAgent.Config.class, immediate = true, provide = { ObservableAgent.class,
         ObjectiveEndpoint.class })
 public class ObjectiveAgent extends BaseObjectiveAgent {
@@ -39,6 +47,12 @@ public class ObjectiveAgent extends BaseObjectiveAgent {
     private static final String CURRENCY_EUR = "EUR";
     private static final String COMMODITY_ELECTRICITY = "electricity";
 
+    /**
+     * OSGi calls this method to activate a managed service.
+     * 
+     * @param properties
+     *            the configuration properties
+     */
     @Activate
     public void activate(final Map<String, Object> properties) {
         config = Configurable.createConfigurable(Config.class, properties);
@@ -47,12 +61,20 @@ public class ObjectiveAgent extends BaseObjectiveAgent {
         LOGGER.info("Objective agent activated");
     }
 
+    /**
+     * OSGi calls this method to deactivate a managed service.
+     */
     @Deactivate
     public void deactivate() {
         LOGGER.info("Objective agent deactivated");
         this.setAgentId(null);
     }
 
+    /**
+     * This specific implementation sends a static {@link Bid} to manipulate the cluster.
+     * 
+     * {@inheritDoc}
+     */
     @Override
     public Bid handleAggregateBid(Bid aggregatedBid) {
         MarketBasis marketBasis = new MarketBasis(COMMODITY_ELECTRICITY, CURRENCY_EUR, 5, -1.0d, 7.0d);
@@ -66,6 +88,9 @@ public class ObjectiveAgent extends BaseObjectiveAgent {
         return aggregatedObjectiveBid;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void notifyPriceUpdate(PriceUpdate priceUpdate) {
         LOGGER.info("ObjectiveAgent: received price update [{}] ", priceUpdate);

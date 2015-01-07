@@ -89,7 +89,10 @@ public class VisualisationPlugin extends HttpServlet {
     private Map<String, MenuItemModel> menuItems;
 
     /**
-     * The method called by OSGi to turn this instance into a managed service.
+     * OSGi calls this method to activate a managed service.
+     * 
+     * @param properties
+     *            the configuration properties
      */
     @Activate
     public void activate(Map<String, Object> properties) {
@@ -131,7 +134,7 @@ public class VisualisationPlugin extends HttpServlet {
     }
 
     /**
-     * @see HttpServlet#doGet
+     * {@inheritDoc}
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -160,7 +163,7 @@ public class VisualisationPlugin extends HttpServlet {
     }
 
     /**
-     * @see HttpServlet#doPost
+     * {@inheritDoc}
      */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

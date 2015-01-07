@@ -29,12 +29,17 @@ import aQute.bnd.annotation.component.Reference;
 
 import com.google.gson.Gson;
 
+/**
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 @Component(provide = Servlet.class, immediate = true)
 public class SettingsPeakShaver extends HttpServlet {
 
     private static final long serialVersionUID = 2215458949793062542L;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AgentWhitelist.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SettingsPeakShaver.class);
 
     /**
      * OSGI ConfigurationAdmin, stores bundle configuration data persistently.

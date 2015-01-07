@@ -11,6 +11,7 @@ import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
+import net.powermatcher.api.data.PointBid;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PricePoint;
 import net.powermatcher.api.data.PriceUpdate;
@@ -29,6 +30,13 @@ import aQute.bnd.annotation.component.Reference;
 import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
+/**
+ * {@link Freezer} is a implementation of a {@link BaseDeviceAgent}. It represents a dummy freezer. {@link Freezer} creates a
+ * {@link PointBid} with random {@link PricePoint}s at a set interval. It does nothing with the returned {@link Price}.
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 @Component(designateFactory = Freezer.Config.class, immediate = true, provide = { ObservableAgent.class,
         AgentEndpoint.class })
 public class Freezer extends BaseDeviceAgent implements AgentEndpoint {
@@ -53,12 +61,37 @@ public class Freezer extends BaseDeviceAgent implements AgentEndpoint {
         double maximumDemand();
     }
 
+    /**
+     * A delayed result-bearing action that can be cancelled.
+     */
     private ScheduledFuture<?> scheduledFuture;
+    
+    /**
+     * Scheduler that can schedule commands to run after a given delay, or to execute periodically.
+     */
     private ScheduledExecutorService scheduler;
+    
+    /**
+     * TimeService that is used for obtaining real or simulated time.
+     */
     private TimeService timeService;
+    
+    /**
+     * The mimimum value of the random demand.
+     */
     private double minimumDemand;
+    
+    /**
+     * The maximum value the random demand.
+     */
     private double maximumDemand;
 
+    /**
+     * OSGi calls this method to activate a managed service.
+     * 
+     * @param properties
+     *            the configuration properties
+     */
     @Activate
     public void activate(Map<String, Object> properties) {
         Config config = Configurable.createConfigurable(Config.class, properties);
@@ -69,6 +102,9 @@ public class Freezer extends BaseDeviceAgent implements AgentEndpoint {
         this.minimumDemand = config.minimumDemand();
         this.maximumDemand = config.maximumDemand();
         scheduledFuture = scheduler.scheduleAtFixedRate(new Runnable() {
+            /**
+             * {@inheritDoc}
+             */
             @Override
             public void run() {
                 doBidUpdate();
@@ -77,6 +113,9 @@ public class Freezer extends BaseDeviceAgent implements AgentEndpoint {
         LOGGER.info("Agent [{}], activated", config.agentId());
     }
 
+    /**
+     * OSGi calls this method to deactivate a managed service.
+     */
     @Deactivate
     public void deactivate() {
         Session session = getSession();
@@ -87,6 +126,9 @@ public class Freezer extends BaseDeviceAgent implements AgentEndpoint {
         LOGGER.info("Agent [{}], deactivated", this.getAgentId());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void doBidUpdate() {
         if (getMarketBasis() != null) {
@@ -103,6 +145,9 @@ public class Freezer extends BaseDeviceAgent implements AgentEndpoint {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public synchronized void updatePrice(PriceUpdate priceUpdate) {
         LOGGER.debug("Received price update [{}], current bidNr = {}", priceUpdate, getCurrentBidNr());
@@ -110,16 +155,25 @@ public class Freezer extends BaseDeviceAgent implements AgentEndpoint {
                 priceUpdate, Qualifier.AGENT));
     }
 
+    /**
+     * @param the new {@link ScheduledExecutorService} value
+     */
     @Reference
     public void setScheduler(ScheduledExecutorService scheduler) {
         this.scheduler = scheduler;
     }
 
+    /**
+     * @param the new {@link TimeService} value.
+     */
     @Reference
     public void setTimeService(TimeService timeService) {
         this.timeService = timeService;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected Date now() {
         return timeService.currentDate();

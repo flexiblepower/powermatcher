@@ -17,7 +17,10 @@ import net.powermatcher.mock.MockObserver;
 import org.junit.Test;
 
 /**
- * Validates the behavior of ObservableAgent as implemented by BaseAgent.
+ * JUnit tests for the {@link ObservableAgent} class.
+ * 
+ * @author FAN
+ * @version 2.0
  */
 public class ObservableAgentTest {
 

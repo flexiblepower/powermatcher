@@ -27,6 +27,8 @@ import org.junit.Test;
  * behavior can emerge when an Agent sends Bids asynchronously from the prices of the Auctioneer. If the Agent cannot
  * ascertain which Price is is corresponding to which Bid, it could start sending Bids in response to the wrong Prices.
  * 
+ * @author FAN
+ * @version 2.0
  */
 public class OscillationPreventionTest {
 

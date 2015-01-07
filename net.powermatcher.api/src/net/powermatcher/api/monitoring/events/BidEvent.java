@@ -13,10 +13,9 @@ import net.powermatcher.api.monitoring.Qualifier;
 /**
  * An {@link BidEvent} is sent when an {@link Bid} is sent or Received by an {@link AgentEndpoint} or a
  * {@link MatcherEndpoint}.
- *
+ * 
  * @author FAN
  * @version 2.0
- *
  */
 public abstract class BidEvent extends AgentEvent {
 
@@ -37,7 +36,7 @@ public abstract class BidEvent extends AgentEvent {
 
     /**
      * Constructs an instance of this class.
-     *
+     * 
      * @param clusterId
      *            The id of the cluster the {@link AgentEndpoint} subclass sending the UpdateEvent is running in.
      * @param agentId
@@ -56,18 +55,30 @@ public abstract class BidEvent extends AgentEvent {
         this.sessionId = sessionId;
     }
 
+    /**
+     * @return the current value of bid.
+     */
     public Bid getBid() {
         return bid;
     }
 
+    /**
+     * @return the current value of qualifier.
+     */
     public Qualifier getQualifier() {
         return qualifier;
     }
 
+    /**
+     * @return the current value of session.
+     */
     public String getSessionId() {
         return sessionId;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
         return BidEvent.class.getSimpleName() + " " + super.toString() + ", qualifier = " + qualifier.getDescription()

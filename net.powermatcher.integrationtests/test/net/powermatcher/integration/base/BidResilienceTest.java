@@ -24,6 +24,11 @@ import org.junit.After;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class BidResilienceTest extends ResilienceTest {
 
     private static final String AUCTIONEER_NAME = "auctioneer";
@@ -97,6 +102,9 @@ public class BidResilienceTest extends ResilienceTest {
         this.bidReader = new CsvBidReader(getBidInputFile(testID, suffix), this.marketBasis);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void sendBidsToMatcher() throws IOException, DataFormatException {
         ArrayBid bid = null;
@@ -145,6 +153,9 @@ public class BidResilienceTest extends ResilienceTest {
 
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected Bid nextBidToMatcher(int id) throws IOException, DataFormatException {
         MockAgent newAgent;

@@ -21,7 +21,6 @@ import net.powermatcher.core.concentrator.Concentrator;
  * 
  * @author FAN
  * @version 2.0
- * 
  */
 public class SessionImpl implements Session {
 
@@ -75,31 +74,49 @@ public class SessionImpl implements Session {
         this.sessionId = sessionId;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getAgentId() {
         return agentId;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getMatcherId() {
         return matcherId;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getSessionId() {
         return sessionId;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getClusterId() {
         return clusterId;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public MarketBasis getMarketBasis() {
         return marketBasis;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setClusterId(String clusterId) {
         if (this.clusterId != null) {
@@ -108,6 +125,9 @@ public class SessionImpl implements Session {
         this.clusterId = clusterId;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setMarketBasis(MarketBasis marketBasis) {
         if (this.marketBasis != null) {
@@ -116,16 +136,25 @@ public class SessionImpl implements Session {
         this.marketBasis = marketBasis;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void updatePrice(PriceUpdate priceUpdate) {
         agentEndpoint.updatePrice(priceUpdate);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void updateBid(Bid newBid) {
         matcherEndpoint.updateBid(this, newBid);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void disconnect() {
         agentEndpoint.matcherEndpointDisconnected(this);
@@ -133,14 +162,23 @@ public class SessionImpl implements Session {
         sessionManager.disconnected(this);
     }
 
+    /**
+     * @return the current value of agentEndpoint.
+     */
     public AgentEndpoint getAgentEndpoint() {
         return agentEndpoint;
     }
 
+    /**
+     * @return the current value of matcherEndpoint.
+     */
     public MatcherEndpoint getMatcherEndpoint() {
         return matcherEndpoint;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean equals(Object obj) {
         SessionImpl that = (SessionImpl) ((obj instanceof SessionImpl) ? obj : null);
@@ -158,6 +196,9 @@ public class SessionImpl implements Session {
                 && this.sessionId.equals(that.sessionId);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int hashCode() {
         return 211 * (this.agentId.hashCode() + this.matcherId.hashCode() + this.sessionId.hashCode());

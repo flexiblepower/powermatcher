@@ -6,10 +6,8 @@ import net.powermatcher.api.data.PointBid;
 import net.powermatcher.api.data.PricePoint;
 
 /**
- * <p>
  * A {@link BidCacheElement} instance consists of a {@link Bid} object associated with a time stamp to record the age of
- * the {@link Bid} object.
- * </p>
+ * the {@link Bid}.
  * 
  * @author FAN
  * @version 2.0
@@ -46,20 +44,14 @@ public class BidCacheElement {
     }
 
     /**
-     * Gets the bid value.
-     * 
-     * @return The bid (<code>Bid</code>) value.
-     * @see #setBid(Bid)
+     * @return the current value of arrayBid.
      */
     public ArrayBid getBid() {
         return this.arrayBid;
     }
 
     /**
-     * Gets the time stamp value.
-     * 
-     * @return The time stamp (<code>long</code>) value.
-     * @see #setTimestamp(long)
+     * @return the current value of timestamp.
      */
     public long getTimestamp() {
         return this.timestamp;

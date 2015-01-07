@@ -43,6 +43,9 @@ import com.google.gson.JsonSyntaxException;
 /**
  * WebSocket implementation of an {@link MatcherEndpointProxy}. Enabled two agents to communicate via WebSockets and
  * JSON over a TCP connection.
+ * 
+ * @author FAN
+ * @version 2.0
  */
 @WebSocket()
 @Component(designateFactory = MatcherEndpointProxyWebsocket.Config.class, immediate = true, provide = {
@@ -79,6 +82,12 @@ public class MatcherEndpointProxyWebsocket extends BaseMatcherEndpointProxy {
 
     private int connectTimeout;
 
+    /**
+     * OSGi calls this method to activate a managed service.
+     * 
+     * @param properties
+     *            the configuration properties
+     */
     @Activate
     public synchronized void activate(Map<String, Object> properties) {
         // Read configuration properties
@@ -97,17 +106,28 @@ public class MatcherEndpointProxyWebsocket extends BaseMatcherEndpointProxy {
         this.connectTimeout = config.connectTimeout();
     }
 
+    /**
+     * OSGi calls this method to deactivate a managed service.
+     */
     @Deactivate
     public synchronized void deactivate() {
         this.baseDeactivate();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Reference
     @Override
     public void setExecutorService(ScheduledExecutorService scheduler) {
         super.setExecutorService(scheduler);
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * This specific implementation opens a websocket.
+     */
     @Override
     public synchronized boolean connectRemote() {
         if (!this.isLocalConnected()) {
@@ -123,6 +143,11 @@ public class MatcherEndpointProxyWebsocket extends BaseMatcherEndpointProxy {
         return connectWebsocket();
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * This specific implementation closes the open websocket.
+     */
     @Override
     public synchronized boolean disconnectRemote() {
         // Terminate remote session (if any)
@@ -145,11 +170,21 @@ public class MatcherEndpointProxyWebsocket extends BaseMatcherEndpointProxy {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * This specific implementation checks to see if the websocket is open.
+     */
     @Override
     public boolean isRemoteConnected() {
         return this.remoteSession != null && this.remoteSession.isOpen();
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * This specific implementation serializes the {@link Bid} to json and sends it through the websocket.
+     */
     @Override
     public synchronized void updateBidRemote(Bid newBid) {
         // Relay bid to remote agent

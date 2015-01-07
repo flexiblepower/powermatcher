@@ -31,9 +31,11 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 /**
- * JUnit test for the Concentrator
+ * JUnit test for the {@link Concentrator} class.
  * 
- * */
+ * @author FAN
+ * @version 2.0
+ **/
 public class ConcentratorTest {
 
     @Rule

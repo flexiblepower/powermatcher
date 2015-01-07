@@ -21,8 +21,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Validate the correct behaviour of the components when incorrect prices are inserted.
- *
- *
+ * 
+ * @author FAN
+ * @version 2.0
  */
 public class SendReceivePriceTestCPQ1 extends BidResilienceTest {
 
@@ -34,9 +35,9 @@ public class SendReceivePriceTestCPQ1 extends BidResilienceTest {
     /**
      * The auctioneer is invoked to publish a null price. The auctioneer will not publish the null price but reset its
      * publish-state.
-     *
+     * 
      * Check if the value of the last published price is not the null price but the most recent valid price.
-     *
+     * 
      * @throws IOException
      * @throws DataFormatException
      */
@@ -76,7 +77,7 @@ public class SendReceivePriceTestCPQ1 extends BidResilienceTest {
     /**
      * A set of agents send a bid to the auctioneer via the concentrator. The concentrator is sent directly a null
      * price. The concentrator should reject it.
-     *
+     * 
      * @throws IOException
      * @throws DataFormatException
      */
@@ -111,9 +112,9 @@ public class SendReceivePriceTestCPQ1 extends BidResilienceTest {
      * A set of agents send a bid to the auctioneer via the concentrator. After sending a calculated (valid) price the
      * auctioneer will be forced to send an price that is outside its local price range. According to the specifications
      * this is permitted. Connected agents can have a different local price market base.
-     *
+     * 
      * Check if the auctioneer publishes the price.
-     *
+     * 
      * @throws IOException
      * @throws DataFormatException
      */
@@ -149,9 +150,9 @@ public class SendReceivePriceTestCPQ1 extends BidResilienceTest {
      * A set of agents send a bid to the auctioneer via the concentrator. After sending a calculated (valid) price the
      * auctioneer will be forced to send an price that is outside its local price range. According to the specifications
      * this is permitted. Connected agents can have a different local price market base.
-     *
+     * 
      * Check if the concentrator accepts the price.
-     *
+     * 
      * @throws IOException
      * @throws DataFormatException
      */
@@ -185,9 +186,9 @@ public class SendReceivePriceTestCPQ1 extends BidResilienceTest {
      * auctioneer will be forced to send an price that is outside its local price range. According to the specifications
      * this is permitted. Connected agents can have a different local price market base. Check if the concentrator
      * publishes this price.
-     *
-     *
-     *
+     * 
+     * 
+     * 
      * @throws IOException
      * @throws DataFormatException
      */
@@ -221,9 +222,9 @@ public class SendReceivePriceTestCPQ1 extends BidResilienceTest {
      * A set of agents send a bid to the auctioneer via the concentrator. After sending a calculated (valid) price the
      * auctioneer will be forced to send an price that is outside its local price range. According to the specifications
      * this is permitted. Connected agents can have a different local price market base.
-     *
+     * 
      * Check if the concentrator accepts the price and forwards the price to the agents.
-     *
+     * 
      * @throws IOException
      * @throws DataFormatException
      */
@@ -255,9 +256,9 @@ public class SendReceivePriceTestCPQ1 extends BidResilienceTest {
      * A set of agents send a bid to the auctioneer via the concentrator. After sending a calculated (valid) price the
      * auctioneer will be forced to send an price that is outside its local price range. Connected agents can have a
      * different local price market base.
-     *
+     * 
      * Check if the agent rejects the price.
-     *
+     * 
      * @throws IOException
      * @throws DataFormatException
      */

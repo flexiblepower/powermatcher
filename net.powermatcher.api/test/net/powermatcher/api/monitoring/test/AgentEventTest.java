@@ -13,6 +13,7 @@ import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.Qualifier;
+import net.powermatcher.api.monitoring.events.AgentEvent;
 import net.powermatcher.api.monitoring.events.IncomingBidEvent;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
@@ -21,7 +22,13 @@ import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
 import org.junit.Before;
 import org.junit.Test;
 
-public class EventTest {
+/**
+ * JUnit tests for the {@link AgentEvent} class.
+ * 
+ * @author FAN
+ * @version 2.0
+ */
+public class AgentEventTest {
     private String clusterId;
     private String agentId;
     private String sessionId;

@@ -19,6 +19,11 @@ import net.powermatcher.mock.MockScheduler;
 
 import org.junit.After;
 
+/**
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class AuctioneerResilienceTest extends ResilienceTest {
 
     // The direct upstream matcher for the agents

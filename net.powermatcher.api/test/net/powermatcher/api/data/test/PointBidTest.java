@@ -1,6 +1,7 @@
 package net.powermatcher.api.data.test;
 
 import static org.hamcrest.core.Is.is;
+
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
@@ -21,6 +22,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+/**
+ * JUnit tests for the {@link PointBid} class.
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class PointBidTest {
 
     private static final String CURRENCY_EUR = "EUR";

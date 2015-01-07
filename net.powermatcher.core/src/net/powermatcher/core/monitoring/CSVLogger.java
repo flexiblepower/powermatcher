@@ -21,6 +21,7 @@ import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.PointBid;
 import net.powermatcher.api.data.PricePoint;
 import net.powermatcher.api.monitoring.ObservableAgent;
+import net.powermatcher.api.monitoring.events.AgentEvent;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
@@ -30,7 +31,11 @@ import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
 /**
- * Example Observer which simply writes log entries of received events.
+ * {@link CSVLogger} is an implementation of {@link AgentEventLogger} where the {@link AgentEvent}s are logged to a
+ * comma separated file.
+ * 
+ * @author FAN
+ * @version 2.0
  */
 @Component(immediate = true, designateFactory = CSVLogger.Config.class)
 public class CSVLogger extends AgentEventLogger {
@@ -116,9 +121,6 @@ public class CSVLogger extends AgentEventLogger {
 
     /**
      * OSGi calls this method to deactivate a managed service.
-     * 
-     * @param properties
-     *            the configuration properties
      */
     @Deactivate
     public void deactivate() {
@@ -139,7 +141,7 @@ public class CSVLogger extends AgentEventLogger {
     }
 
     /**
-     * @see BaseObserver#addObservable(ObservableAgent, Map)
+     * {@inheritDoc}
      */
     @Override
     @Reference(dynamic = true, multiple = true, optional = true)
@@ -148,7 +150,7 @@ public class CSVLogger extends AgentEventLogger {
     }
 
     /**
-     * @see AgentEventLogger#processConfig(Map)
+     * {@inheritDoc}
      */
     @Override
     protected void processConfig(Map<String, Object> properties) {
@@ -273,7 +275,7 @@ public class CSVLogger extends AgentEventLogger {
     }
 
     /**
-     * @see AgentEventLogger#dumpLogs()
+     * {@inheritDoc}
      */
     @Override
     protected void dumpLogs() {
@@ -299,6 +301,14 @@ public class CSVLogger extends AgentEventLogger {
         getLogger().info("CSVLogger [{}] wrote to {}", getLoggerId(), logFile);
     }
 
+    /**
+     * Creates a <code>String[]</code> out of a {@link PeakShavingLogRecord} to be used in
+     * {@link CSVLogger#writeLineToCSV(String[], File)}
+     * 
+     * @param logRecord
+     *            the {@link PeakShavingLogRecord} that has to be transformed
+     * @return the <code>String[]</code> representation of logRecord
+     */
     private String[] createLineForPeakShavingLogRecor(PeakShavingLogRecord logRecord) {
 
         StringBuilder oldDemandBuilder = new StringBuilder();
@@ -327,6 +337,14 @@ public class CSVLogger extends AgentEventLogger {
                 oldDemandBuilder.toString(), newDemandBuilder.toString(), oldPrice, newPrice };
     }
 
+    /**
+     * Creates a <code>String[]</code> out of a {@link WhitelistLogRecord} to be used in
+     * {@link CSVLogger#writeLineToCSV(String[], File)}
+     * 
+     * @param logRecord
+     *            the {@link WhitelistLogRecord} that has to be transformed
+     * @return the <code>String[]</code> representation of logRecord
+     */
     private String[] createLineForWhitelistLogRecord(WhitelistLogRecord logRecord) {
         return new String[] { getDateFormat().format(logRecord.getLogTime()), logRecord.getClusterId(),
                 logRecord.getAgentId(), logRecord.getBlockedAgent(),
@@ -334,13 +352,21 @@ public class CSVLogger extends AgentEventLogger {
     }
 
     /**
-     * @see BaseObserver#getFilter()
+     * {@inheritDoc}
      */
     @Override
     protected List<String> getFilter() {
         return this.filter;
     }
 
+    /**
+     * Creates a <code>String[]</code> out of a {@link BidLogRecord} to be used in
+     * {@link CSVLogger#writeLineToCSV(String[], File)}
+     * 
+     * @param logRecord
+     *            the {@link BidLogRecord} that has to be transformed
+     * @return the <code>String[]</code> representation of logRecord
+     */
     private String[] createLineForBidLogRecord(BidLogRecord logRecord) {
 
         Bid bid = logRecord.getBid();
@@ -388,6 +414,14 @@ public class CSVLogger extends AgentEventLogger {
                 String.valueOf(bid.getBidNumber()), demandBuilder.toString(), pricePointBuiler.toString() };
     }
 
+    /**
+     * Creates a <code>String[]</code> out of a {@link PriceUpdateLogRecord} to be used in
+     * {@link CSVLogger#writeLineToCSV(String[], File)}
+     * 
+     * @param logRecord
+     *            the {@link PriceUpdateLogRecord} that has to be transformed
+     * @return the <code>String[]</code> representation of logRecord
+     */
     private String[] createLineForPriceUpdateLog(PriceUpdateLogRecord logRecord) {
         MarketBasis marketbasis = logRecord.getPriceUpdate().getPrice().getMarketBasis();
 

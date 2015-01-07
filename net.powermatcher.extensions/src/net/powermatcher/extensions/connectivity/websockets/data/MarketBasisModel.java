@@ -4,6 +4,9 @@ import net.powermatcher.api.data.MarketBasis;
 
 /**
  * MarketBasis model class to transfer {@link MarketBasis} data over the wire.
+ * 
+ * @author FAN
+ * @version 2.0
  */
 public class MarketBasisModel {
     /**
@@ -31,6 +34,9 @@ public class MarketBasisModel {
      */
     private double maximumPrice;
 
+    /**
+     * @return the current value of commodity.
+     */
     public String getCommodity() {
         return commodity;
     }
@@ -39,6 +45,9 @@ public class MarketBasisModel {
         this.commodity = commodity;
     }
 
+    /**
+     * @return the current value of currency.
+     */
     public String getCurrency() {
         return currency;
     }
@@ -47,6 +56,9 @@ public class MarketBasisModel {
         this.currency = currency;
     }
 
+    /**
+     * @return the current value of priceSteps.
+     */
     public int getPriceSteps() {
         return priceSteps;
     }
@@ -55,6 +67,9 @@ public class MarketBasisModel {
         this.priceSteps = priceSteps;
     }
 
+    /**
+     * @return the current value of minimumPrice.
+     */
     public double getMinimumPrice() {
         return minimumPrice;
     }
@@ -63,6 +78,9 @@ public class MarketBasisModel {
         this.minimumPrice = minimumPrice;
     }
 
+    /**
+     * @return the current value of maximumPrice.
+     */
     public double getMaximumPrice() {
         return maximumPrice;
     }

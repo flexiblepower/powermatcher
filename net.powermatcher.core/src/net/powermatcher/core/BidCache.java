@@ -27,14 +27,38 @@ import net.powermatcher.api.data.MarketBasis;
 public class BidCache {
     public static final long DEFAULT_BID_EXPIRATION_TIME = 300;
 
+    /**
+     * TimeService that is used for obtaining real or simulated time.
+     */
     private TimeService timeService;
+    /**
+     * A Map containing the AgentId the most recent {@link BidCacheElement}
+     */
     private Map<String, BidCacheElement> bidCache;
+
+    /**
+     * Time, in milliseconds, that is used to determin if a {@link BidCacheElement} is still valid.
+     */
     private long expirationTimeMillis;
+
+    /**
+     * Used to keep track of when the {@link BidCache} was last resetted.
+     */
     private long lastResetTime;
+
+    /**
+     * The aggregated bid of all Bids in all {@link BidCacheElement}s, contained in this BidCache.
+     */
     private ArrayBid aggregatedBid;
 
+    /**
+     * The threadSafe counter to generate new id's for {@link ArrayBid}s
+     */
     private final AtomicInteger snapshotGenerator;
 
+    /**
+     * A map containing all snapshot id's and their corresponding {@link BidCacheSnapshot}s
+     */
     private Map<Integer, BidCacheSnapshot> bidCacheHistory = new HashMap<Integer, BidCacheSnapshot>();
 
     /**
@@ -182,6 +206,13 @@ public class BidCache {
         return null;
     }
 
+    /**
+     * Returns the {@link BidCacheSnapshot} corresponding to the given bid number.
+     * 
+     * @param bidNumber
+     *            the bidnumber you want to get the BidCacheSnapshot of.
+     * @return the {@link BidCacheSnapshot} instance
+     */
     public synchronized BidCacheSnapshot getMatchingSnapshot(int bidNumber) {
         BidCacheSnapshot matchedSnapshot = this.bidCacheHistory.remove(bidNumber);
         if (bidNumber > 1 && matchedSnapshot != null && this.bidCacheHistory.get(bidNumber - 1) != null) {

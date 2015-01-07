@@ -18,11 +18,18 @@ import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
 import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.monitoring.BidLogRecord;
+import net.powermatcher.core.monitoring.LogRecord;
 import net.powermatcher.core.monitoring.PriceUpdateLogRecord;
 
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * JUnit tests for the {@link LogRecord} class.
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class LogRecordTest {
 
     private MarketBasis marketBasis;

@@ -25,6 +25,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+/**
+ * JUnit test for the {@link PeakShavingConcentrator} class.
+ * @author FAN
+ * @version 2.0
+ */
 public class PeakShavingConcentratorTest {
 
     @Rule

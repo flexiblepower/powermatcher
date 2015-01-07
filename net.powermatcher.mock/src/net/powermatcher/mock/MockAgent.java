@@ -15,6 +15,11 @@ import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.events.AgentEvent;
 
+/**
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class MockAgent implements Agent, AgentEndpoint, ObservableAgent {
 
     private Map<String, Object> agentProperties;
@@ -34,16 +39,25 @@ public class MockAgent implements Agent, AgentEndpoint, ObservableAgent {
         this.agentProperties.put("agentId", agentId);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void connectToMatcher(Session session) {
         this.session = session;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void matcherEndpointDisconnected(Session session) {
         this.session = null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void updatePrice(PriceUpdate priceUpdate) {
         this.lastPriceUpdate = priceUpdate;
@@ -53,24 +67,39 @@ public class MockAgent implements Agent, AgentEndpoint, ObservableAgent {
         this.session.updateBid(newBid);
     }
 
+    /**
+     * @return the current value of lastPriceUpdate.
+     */
     public PriceUpdate getLastPriceUpdate() {
         return lastPriceUpdate;
     }
 
+    /**
+     * @return the current value of agentProperties.
+     */
     public Map<String, Object> getAgentProperties() {
         return agentProperties;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getAgentId() {
         return (String) agentProperties.get("agentId");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getClusterId() {
         return session == null ? null : session.getClusterId();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getDesiredParentId() {
         return desiredParentId;
@@ -80,16 +109,25 @@ public class MockAgent implements Agent, AgentEndpoint, ObservableAgent {
         this.desiredParentId = desiredParentId;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void addObserver(AgentObserver observer) {
         observers.add(observer);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void removeObserver(AgentObserver observer) {
         observers.remove(observer);
     }
 
+    /**
+     * @return the current value of session.
+     */
     public Session getSession() {
         return this.session;
     }
@@ -100,6 +138,9 @@ public class MockAgent implements Agent, AgentEndpoint, ObservableAgent {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getServicePid() {
         return this.servicePid;

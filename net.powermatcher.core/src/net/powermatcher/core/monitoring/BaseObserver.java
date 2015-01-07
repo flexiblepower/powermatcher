@@ -18,6 +18,9 @@ import org.slf4j.LoggerFactory;
  * 
  * {@link ObservableAgent} services are able to call the update method of {@link AgentObserver} with {@link AgentEvent}
  * events.
+ * 
+ * @author FAN
+ * @version 2.0
  */
 public abstract class BaseObserver implements AgentObserver {
 

@@ -15,6 +15,11 @@ import net.powermatcher.integration.base.BidResilienceTest;
 
 import org.junit.Test;
 
+/**
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class SendReceiveBidTestCBF1 extends BidResilienceTest {
 
     /**

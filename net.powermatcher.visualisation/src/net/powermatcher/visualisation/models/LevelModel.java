@@ -9,7 +9,6 @@ import java.util.TreeSet;
  * 
  * @author FAN
  * @version 2.0
- * 
  */
 public class LevelModel {
 
@@ -36,7 +35,7 @@ public class LevelModel {
     }
 
     /**
-     * @return the level of this instance.
+     * @return the current value of level.
      */
     public int getLevel() {
         return level;
@@ -51,7 +50,7 @@ public class LevelModel {
     }
 
     /**
-     * @return the set of {@link NodeModel}'s of this level.
+     * @return the current value of nodes.
      */
     public Set<NodeModel> getNodes() {
         return nodes;

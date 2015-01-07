@@ -14,6 +14,12 @@ import net.powermatcher.core.time.SystemTimeService;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * JUnit tests for the {@link BidCacheElement} class.
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class BidCacheElementTest {
 
     private SystemTimeService timeService;

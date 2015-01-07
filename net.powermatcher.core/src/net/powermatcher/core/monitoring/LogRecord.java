@@ -8,6 +8,9 @@ import javax.xml.crypto.Data;
 import net.powermatcher.api.monitoring.events.AgentEvent;
 
 /**
+ * LogRecord is an abstract class that contains the basic information needed to log an {@link AgentEvent}.
+ * 
+ * @author FAN
  * @version 2.0
  */
 public abstract class LogRecord {
@@ -15,6 +18,7 @@ public abstract class LogRecord {
      * The cluster id of the agent that published the {@link AgentEvent}.
      */
     private String clusterId;
+
     /**
      * The Agent Id that published the {@link AgentEvent}.
      */
@@ -35,13 +39,13 @@ public abstract class LogRecord {
      */
     private DateFormat dateFormat;
 
-/**
+    /**
      * Constructs an instance of this class from the specified equipment ID parameter.
-     *
+     * 
      * @param clusterId
      *            The cluster id of the agent that published the {@link AgentEvent}.
      * @param agentId
-     *            The Agent Id that published the {@link AgentEven
+     *            The Agent Id that published the {@link AgentEvent}.
      * @param qualifier
      *            The qualifier of the agent that published the {@link AgentEvent}.
      */
@@ -53,22 +57,37 @@ public abstract class LogRecord {
         this.dateFormat = dateFormat;
     }
 
+    /**
+     * @return the current value of clusterId.
+     */
     public String getClusterId() {
         return clusterId;
     }
 
+    /**
+     * @return the current value of agentId.
+     */
     public String getAgentId() {
         return agentId;
     }
 
+    /**
+     * @return the current value of logTime.
+     */
     public Date getLogTime() {
         return logTime;
     }
 
+    /**
+     * @return a copy of eventTimestamp.
+     */
     public Date getEventTimestamp() {
         return new Date(eventTimestamp.getTime());
     }
 
+    /**
+     * @return the current value of className.
+     */
     public DateFormat getDateFormat() {
         return dateFormat;
     }

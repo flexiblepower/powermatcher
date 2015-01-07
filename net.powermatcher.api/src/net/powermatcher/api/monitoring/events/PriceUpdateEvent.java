@@ -53,18 +53,30 @@ public abstract class PriceUpdateEvent extends AgentEvent {
         this.sessionId = sessionId;
     }
 
+    /**
+     * @return the current value of priceUpdate.
+     */
     public PriceUpdate getPriceUpdate() {
         return priceUpdate;
     }
 
+    /**
+     * @return the current value of qualifier.
+     */
     public Qualifier getQualifier() {
         return qualifier;
     }
 
+    /**
+     * @return the current value of sessionId.
+     */
     public String getSessionId() {
         return sessionId;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
         return PriceUpdateEvent.class.getSimpleName() + " " + super.toString() + ", qualifier = "

@@ -3,8 +3,8 @@ package net.powermatcher.api;
 import java.util.Date;
 
 /**
- * The TimeService defines the interface used to obtain the current time. The current time could be the actual time, or
- * it could be the simulated time that is advancing at different a rate or stepwise.
+ * {@link TimeService} defines the interface with the basic functionality needed to obtain the current time. The current
+ * time could be the actual time, or it could be the simulated time that is advancing at different a rate or stepwise.
  * 
  * @author FAN
  * @version 2.0
@@ -21,7 +21,7 @@ public interface TimeService {
     /**
      * Returns the current time in a {@link Date} object.
      * 
-     * @return A {@link Date} object, representing the current date and time
+     * @return A {@link Date} object, representing the current date and time.
      */
     public Date currentDate();
 }

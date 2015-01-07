@@ -10,8 +10,17 @@ import net.powermatcher.api.monitoring.Qualifier;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.core.BaseDeviceAgent;
 
+/**
+ * JUnit tests for the {@link BaseDeviceAgent} class.
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class TestBaseDeviceAgent extends BaseDeviceAgent {
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected Date now() {
         return new Date();
@@ -33,12 +42,18 @@ public class TestBaseDeviceAgent extends BaseDeviceAgent {
         super.setAgentId(agentId);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void updatePrice(PriceUpdate priceUpdate) {
         publishEvent(new IncomingPriceUpdateEvent(super.getClusterId(), super.getAgentId(), super.getSession()
                 .getSessionId(), now(), priceUpdate, Qualifier.AGENT));
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void doBidUpdate() {
         // No implementation needed in this Test class.

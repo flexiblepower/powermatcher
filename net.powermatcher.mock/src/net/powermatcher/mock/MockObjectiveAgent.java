@@ -12,6 +12,11 @@ import net.powermatcher.api.data.PriceUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class MockObjectiveAgent extends MockAgent implements ObjectiveEndpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockObjectiveAgent.class);
@@ -27,11 +32,17 @@ public class MockObjectiveAgent extends MockAgent implements ObjectiveEndpoint {
         this.objectiveAgentProperties.put("objectiveagent", agentId);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void notifyPriceUpdate(PriceUpdate newPrice) {
         LOGGER.info("ObjectiveAgent: received price update [{}] ", newPrice);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Bid handleAggregateBid(Bid aggregatedBid) {
         MarketBasis marketBasis = new MarketBasis(COMMODITY_ELECTRICITY, CURRENCY_EUR, 11, 0, 10);

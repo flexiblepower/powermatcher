@@ -9,6 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+/**
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class CsvReader {
 
     private final static String DEFAULT_DELIMITER = ",";

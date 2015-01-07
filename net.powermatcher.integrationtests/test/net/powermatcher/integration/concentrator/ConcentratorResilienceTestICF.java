@@ -13,6 +13,9 @@ import org.junit.Test;
 
 /**
  * Functional tests for the Concentrator.
+ * 
+ * @author FAN
+ * @version 2.0
  */
 public class ConcentratorResilienceTestICF extends ConcentratorResilienceTest {
 

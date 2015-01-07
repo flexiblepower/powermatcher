@@ -10,6 +10,9 @@ import org.junit.Test;
 
 /**
  * Concentrator quality test with focus on scalability.
+ * 
+ * @author FAN
+ * @version 2.0
  */
 public class ConcentratorResilienceTestICQ extends ConcentratorResilienceTest {
 

@@ -9,7 +9,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import net.powermatcher.api.TimeService;
-import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.events.AgentEvent;
 import net.powermatcher.api.monitoring.events.BidEvent;
 import net.powermatcher.api.monitoring.events.PeakShavingEvent;
@@ -22,6 +21,9 @@ import org.slf4j.LoggerFactory;
 /**
  * This is the basic class to store incoming {@link AgentEvent}s. Subclasses of this abstract class implements their
  * specific logging method in the dumpLogs() method.
+ * 
+ * @author FAN
+ * @version 2.0
  */
 public abstract class AgentEventLogger extends BaseObserver {
 
@@ -43,12 +45,12 @@ public abstract class AgentEventLogger extends BaseObserver {
     private BlockingQueue<LogRecord> logRecords = new LinkedBlockingQueue<>();
 
     /**
-     * Keeps the thread alive that performs the dumpLog() at a set interval
+     * A delayed result-bearing action that can be cancelled. It's used to dump the logs at a set interval.
      */
     private ScheduledFuture<?> scheduledFuture;
 
     /**
-     * Holds the {@link ScheduledExecutorService}
+     * Scheduler that can schedule commands to run after a given delay, or to execute periodically.
      */
     private ScheduledExecutorService scheduler;
 
@@ -87,6 +89,9 @@ public abstract class AgentEventLogger extends BaseObserver {
         }
 
         scheduledFuture = scheduler.scheduleAtFixedRate(new Runnable() {
+            /**
+             * {@inheritDoc}
+             */
             @Override
             public void run() {
                 dumpLogs();
@@ -95,7 +100,7 @@ public abstract class AgentEventLogger extends BaseObserver {
     }
 
     /**
-     * The method called when an {@link ObservableAgent} when they send an {@link AgentEvent}
+     * {@inheritDoc}
      */
     @Override
     public void update(AgentEvent event) {
@@ -110,11 +115,11 @@ public abstract class AgentEventLogger extends BaseObserver {
                 logRecord = new PriceUpdateLogRecord((PriceUpdateEvent) event, timeService.currentDate(),
                         getDateFormat());
             } else if (event instanceof WhitelistEvent) {
-                logRecord = new WhitelistLogRecord(event, timeService.currentDate(), getDateFormat(),
+                logRecord = new WhitelistLogRecord((WhitelistEvent)event, timeService.currentDate(), getDateFormat(),
                         ((WhitelistEvent) event).getBlockedAgent());
             } else if (event instanceof PeakShavingEvent) {
                 PeakShavingEvent peakShavingEvent = (PeakShavingEvent) event;
-                logRecord = new PeakShavingLogRecord(event, timeService.currentDate(), getDateFormat(),
+                logRecord = new PeakShavingLogRecord(peakShavingEvent, timeService.currentDate(), getDateFormat(),
                         peakShavingEvent.getFloor(), peakShavingEvent.getCeiling(), peakShavingEvent.getOldDemand(),
                         peakShavingEvent.getNewDemand(), peakShavingEvent.getNewPrice(), peakShavingEvent.getOldPrice());
             }
@@ -143,7 +148,7 @@ public abstract class AgentEventLogger extends BaseObserver {
     }
 
     /**
-     * This method procesloggerIdses the data in de Config interfaces of the subclasses
+     * This method processes the data in the Config interfaces of the subclasses
      * 
      * @param properties
      *            the configuration properties
@@ -187,7 +192,7 @@ public abstract class AgentEventLogger extends BaseObserver {
     }
 
     /**
-     * @return the current value of loggerId
+     * @return the current value of loggerId.
      */
     protected String getLoggerId() {
         return loggerId;
@@ -202,35 +207,57 @@ public abstract class AgentEventLogger extends BaseObserver {
     }
 
     /**
-     * @return the current value of priceLogRecords
+     * @return the current value of priceLogRecords.
      */
     protected BlockingQueue<LogRecord> getPriceLogRecords() {
         return logRecords;
     }
 
     /**
-     * @return the current value of LOGGER
+     * @return the current value of LOGGER.
      */
     protected static Logger getLogger() {
         return LOGGER;
     }
 
+    /**
+     * @return the current value of logRecords.
+     */
     protected BlockingQueue<LogRecord> getLogRecords() {
         return logRecords;
     }
 
+    /**
+     * Removed the given {@link LogRecord} from logRecords.
+     * 
+     * @param logRecord
+     *            the {@link LogRecord} that will be removed.
+     */
     protected void removeLogRecord(LogRecord logRecord) {
         logRecords.remove(logRecord);
     }
 
+    /**
+     * Adds the given {@link LogRecord} from logRecords.
+     * 
+     * @param logRecord
+     *            the new {@link LogRecord}.
+     */
     protected void addLogRecord(LogRecord logRecord) {
         logRecords.add(logRecord);
     }
 
+    /**
+     * @return the current value of eventType.
+     */
     protected AgentEventType getEventType() {
         return eventType;
     }
 
+    /**
+     * @param eventType
+     *            the new {@link AgentEventType} this AgentEventLogger has to track.
+     */
     protected void setEventType(AgentEventType eventType) {
         this.eventType = eventType;
     }

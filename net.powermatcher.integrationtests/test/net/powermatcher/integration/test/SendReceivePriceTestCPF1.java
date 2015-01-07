@@ -11,6 +11,11 @@ import net.powermatcher.mock.MockAgent;
 
 import org.junit.Test;
 
+/**
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class SendReceivePriceTestCPF1 extends BidResilienceTest {
 
     /**

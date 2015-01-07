@@ -9,6 +9,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+/**
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class SendReceiveBidTestCBQ1 extends AuctioneerResilienceTest {
 
     @Rule

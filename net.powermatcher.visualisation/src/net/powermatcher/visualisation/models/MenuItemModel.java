@@ -50,7 +50,7 @@ public class MenuItemModel {
     }
 
     /**
-     * @return the <code>List</code> of {@link SubMenuItemModel}'s.
+     * @return the current value of items.
      */
     public List<SubMenuItemModel> getItemts() {
         return items;

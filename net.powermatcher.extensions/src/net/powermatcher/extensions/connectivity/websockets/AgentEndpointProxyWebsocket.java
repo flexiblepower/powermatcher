@@ -25,6 +25,9 @@ import aQute.bnd.annotation.metatype.Meta;
 /**
  * WebSocket implementation of an {@link AgentEndpointProxy}. Enabled two agents to communicate via WebSockets and JSON
  * over a TCP connection.
+ * 
+ * @author FAN
+ * @version 2.0
  */
 @Component(designateFactory = AgentEndpointProxyWebsocket.Config.class, immediate = true, provide = {
         ObservableAgent.class, AgentEndpoint.class, AgentEndpointProxy.class, AgentEndpointProxyWebsocket.class })
@@ -45,6 +48,12 @@ public class AgentEndpointProxyWebsocket extends BaseAgentEndpointProxy {
 
     private org.eclipse.jetty.websocket.api.Session remoteSession;
 
+    /**
+     * OSGi calls this method to activate a managed service.
+     * 
+     * @param properties
+     *            the configuration properties
+     */
     @Activate
     public void activate(Map<String, Object> properties) {
         Config config = Configurable.createConfigurable(Config.class, properties);
@@ -54,6 +63,9 @@ public class AgentEndpointProxyWebsocket extends BaseAgentEndpointProxy {
         this.setMatcherEndpointProxyId(config.remoteAgentEndpointId());
     }
 
+    /**
+     * OSGi calls this method to delete a managed service.
+     */
     @Deactivate
     public void deactivated() {
         if (this.isRemoteConnected()) {
@@ -77,11 +89,21 @@ public class AgentEndpointProxyWebsocket extends BaseAgentEndpointProxy {
         this.remoteSession = null;
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * This specific implementation checks the if the websocket is open.
+     */
     @Override
     public boolean isRemoteConnected() {
         return this.remoteSession != null && this.remoteSession.isOpen();
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * This specific implementation serializes the {@link PriceUpdate} to json and sends it through the websocket.
+     */
     @Override
     public void updateRemotePrice(PriceUpdate newPrice) {
         try {
@@ -94,6 +116,9 @@ public class AgentEndpointProxyWebsocket extends BaseAgentEndpointProxy {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void connectToMatcher(Session session) {
         super.connectToMatcher(session);

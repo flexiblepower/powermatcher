@@ -7,7 +7,6 @@ import net.powermatcher.api.Agent;
  * 
  * @author FAN
  * @version 2.0
- * 
  */
 public class NodeModel implements Comparable<NodeModel> {
 
@@ -52,7 +51,7 @@ public class NodeModel implements Comparable<NodeModel> {
     }
 
     /**
-     * @return the current fpid <code>String</code>.
+     * @return the current value of fpid.
      */
     public String getFpid() {
         return fpid;
@@ -67,8 +66,7 @@ public class NodeModel implements Comparable<NodeModel> {
     }
 
     /**
-     * 
-     * @return the current pid <code>String</code>.
+     * @return the current value of pid.
      */
     public String getPid() {
         return pid;
@@ -83,7 +81,7 @@ public class NodeModel implements Comparable<NodeModel> {
     }
 
     /**
-     * @return the current agentId <code>String</code>.
+     * @return the current value of agentId.
      */
     public String getAgentId() {
         return agentId;
@@ -98,7 +96,7 @@ public class NodeModel implements Comparable<NodeModel> {
     }
 
     /**
-     * @return the current desiredParentId <code>String</code>.
+     * @return the current value of desiredParentId.
      */
     public String getDesiredParentId() {
         return desiredParentId;
@@ -113,14 +111,16 @@ public class NodeModel implements Comparable<NodeModel> {
     }
 
     /**
-     * This method determines which instance is "bigger". The nodes are first sorted alphabetically by desiredParentId.
-     * If those are the same, they are sorted by alphabetically by agentId (to group them alphabetically under their
-     * parent).
+     * Compares this object with the specified object for order. Returns a negative integer, zero, or a positive integer
+     * as this object is less than, equal to, or greater than the specified object.
+     * 
+     * The nodes are first sorted alphabetically by desiredParentId. If those are the same, they are sorted by
+     * alphabetically by agentId (to group them alphabetically under their parent).
      * 
      * @param that
      *            The {@link NodeModel} instance you want to compare with this one.
      * 
-     * @return a negative value if this < that, 0 if this = that and a positive value if this > that
+     * @return a negative integer, zero, or a positive integer as this object is less than, equal to, or greater than the specified object.
      * 
      */
     @Override
@@ -145,10 +145,7 @@ public class NodeModel implements Comparable<NodeModel> {
     }
 
     /**
-     * @param obj
-     *            the {@link Object} you want to check the equality of.
-     * 
-     * @return <code>true</code> if the instances are equals and <code>false</code> if they are not.
+     * {@inheritDoc}
      */
     @Override
     public boolean equals(Object obj) {
@@ -166,7 +163,7 @@ public class NodeModel implements Comparable<NodeModel> {
     }
 
     /**
-     * @return a hash of this instance.
+     * {@inheritDoc}
      */
     @Override
     public int hashCode() {

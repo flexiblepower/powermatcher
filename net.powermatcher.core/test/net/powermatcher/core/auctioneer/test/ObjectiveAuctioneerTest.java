@@ -23,6 +23,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * JUnit test for the {@link ObjectiveAuctioneer} class.
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class ObjectiveAuctioneerTest {
     private final static int NR_AGENTS = 21;
 
@@ -42,7 +48,9 @@ public class ObjectiveAuctioneerTest {
     private static final String OBJECTIVE_AGENT_NAME = "objectiveagent";
 
     private BidCache aggregatedBids;
-
+    /**
+     * TimeService that is used for obtaining real or simulated time.
+     */
     private TimeService timeService;
 
     @Before

@@ -10,6 +10,12 @@ import net.powermatcher.api.data.PricePoint;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * JUnit tests for the {@link PricePoint} class.
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class PricePointTest {
 
     private MarketBasis marketBasis;

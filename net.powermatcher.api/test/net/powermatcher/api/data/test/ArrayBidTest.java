@@ -19,6 +19,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+/**
+ * JUnit tests for the {@link ArrayBid} class.
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class ArrayBidTest {
 
     private static final String CURRENCY_EUR = "EUR";

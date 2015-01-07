@@ -30,6 +30,9 @@ import aQute.bnd.annotation.component.Reference;
 
 /**
  * Receiving end of the WebSocket implementation for PowerMatcher.
+ * 
+ * @author FAN
+ * @version 2.0
  */
 @WebSocket
 @Component(immediate = true)
@@ -45,6 +48,9 @@ public class PowermatcherWebSocket {
     private String desiredConnectionId;
     private String remoteMatcherEndpointId;
 
+    /**
+     * OSGi calls this method to deactivate a managed service.
+     */
     @Deactivate
     public synchronized void deactivate() {
         // Disconnect every connected agent
@@ -138,13 +144,6 @@ public class PowermatcherWebSocket {
         LOGGER.info("Remote agent [{}] connected to local agent [{}]", this.remoteMatcherEndpointId,
                 this.desiredConnectionId);
     }
-
-    /**
-     * 
-     * @param session
-     * @param statusCode
-     * @param reason
-     */
 
     /**
      * Handle WebSocket connection which disconnected.

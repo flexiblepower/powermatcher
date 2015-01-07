@@ -16,6 +16,7 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PriceUpdate;
+import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.Qualifier;
 import net.powermatcher.api.monitoring.events.IncomingBidEvent;
@@ -40,19 +41,12 @@ import aQute.bnd.annotation.metatype.Meta;
  * {@link Bid} or as an aggregate {@link Bid} via one or more {@link Concentrator}.
  * </p>
  * 
- * <p>
  * It is responsible for defining and sending the {@link MarketBasis} and calculating the equilibrium based on the
  * {@link Bid} from the different agents in the topology. This equilibrium is communicated to the agents down the
  * hierarchy in the form of price update messages.
  * 
- * The {@link Price} that is communicated contains a {@link Price} and a {@link MarketBasis} which enables the
- * conversion to a normalized {@link Price} or to any other {@link MarketBasis} for other financial calculation
- * purposes.
- * </p>
- * 
  * @author FAN
  * @version 2.0
- * 
  */
 @Component(designateFactory = Auctioneer.Config.class, immediate = true, provide = { ObservableAgent.class,
         MatcherEndpoint.class })
@@ -120,11 +114,17 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
      */
     private Set<Session> sessions = new HashSet<Session>();
 
-    // TODO marketBasis, aggregatedBids and
-    // matcherId are used in synchronized methods. Do we have do synchronize
-    // activate? It's only called once, so maybe not.
+    /**
+     * OSGi calls this method to activate a managed service.
+     * 
+     * @param properties
+     *            the configuration properties
+     */
     @Activate
     public void activate(final Map<String, Object> properties) {
+        // TODO marketBasis, aggregatedBids and
+        // matcherId are used in synchronized methods. Do we have do synchronize
+        // activate? It's only called once, so maybe not.
         Config config = Configurable.createConfigurable(Config.class, properties);
         this.marketBasis = new MarketBasis(config.commodity(), config.currency(), config.priceSteps(),
                 config.minimumPrice(), config.maximumPrice());
@@ -134,6 +134,9 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
         this.setAgentId(config.agentId());
 
         scheduledFuture = this.scheduler.scheduleAtFixedRate(new Runnable() {
+            /**
+             * {@inheritDoc}
+             */
             @Override
             public void run() {
                 publishNewPrice();
@@ -141,11 +144,17 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
         }, 0, config.priceUpdateRate(), TimeUnit.SECONDS);
     }
 
+    /**
+     * OSGi calls this method to deactivate a managed service.
+     */
     @Deactivate
     public void deactivate() {
         scheduledFuture.cancel(false);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public synchronized boolean connectToAgent(Session session) {
         session.setMarketBasis(marketBasis);
@@ -157,6 +166,9 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public synchronized void agentEndpointDisconnected(Session session) {
         // Find session
@@ -169,6 +181,9 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
         LOGGER.info("Agent disconnected with session [{}]", session.getSessionId());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public synchronized void updateBid(Session session, Bid newBid) {
         if (!sessions.contains(session)) {
@@ -189,7 +204,9 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
     }
 
     /**
-     * Generates the new price out of the aggregated bids and sends this to all listeners
+     * Generates the new {@link Price}, based on the aggregated bids. The {@link Price} is sent to the
+     * {@link MatcherEndpoint} through the {@link Session}. An {@link OutgoingPriceUpdateEvent} is sent to all
+     * {@link AgentObserver} listeners.
      */
     protected synchronized void publishNewPrice() {
         Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis, false);
@@ -208,20 +225,38 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
         }
     }
 
+    /**
+     * This method determines the {@link Price}, given the current aggregated {@link Bid}.
+     * 
+     * @param aggregatedBid
+     *            the aggregated {@link Bid} used to determin the {@link Price}
+     * @return the calculated {@link Price}
+     */
     protected Price determinePrice(Bid aggregatedBid) {
         return aggregatedBid.calculateIntersection(0);
     }
 
+    /**
+     * @param the
+     *            new {@link TimeService} implementation.
+     */
     @Reference
     public void setTimeService(TimeService timeService) {
         this.timeService = timeService;
     }
 
+    /**
+     * @param the
+     *            new {@link ScheduledExecutorService} implementation.
+     */
     @Reference
     public void setExecutorService(ScheduledExecutorService scheduler) {
         this.scheduler = scheduler;
     }
 
+    /**
+     * @return the current value of aggregatedBids.
+     */
     protected BidCache getAggregatedBids() {
         return this.aggregatedBids;
     }
@@ -230,6 +265,9 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
         return other instanceof Auctioneer;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean equals(Object obj) {
         Auctioneer that = (Auctioneer) ((obj instanceof Auctioneer) ? obj : null);
@@ -245,6 +283,9 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
                 && this.marketBasis.equals(that.marketBasis) && this.sessions.equals(that.sessions);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int hashCode() {
         return 211 * (aggregatedBids.hashCode() + marketBasis.hashCode());

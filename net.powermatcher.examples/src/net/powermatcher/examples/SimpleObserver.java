@@ -19,7 +19,11 @@ import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
 /**
- * Example Observer which simply writes log entries of received events.
+ * {@link SimpleObserver} is an example implementation of the {@link BaseObserver} interface. You can add
+ * {@link ObservableAgent}s and it can receive {@link AgentEvent}s from them.
+ * 
+ * @author FAN
+ * @version 2.0
  */
 @Component(immediate = true, designateFactory = SimpleObserver.Config.class)
 public class SimpleObserver extends BaseObserver {
@@ -48,32 +52,47 @@ public class SimpleObserver extends BaseObserver {
     }
 
     /**
-     * Handle configuration modifications.
+     * OSGi calls this method to modify a managed service.
      * 
      * @param properties
-     *            updated configuration properties
+     *            the configuration properties
      */
     @Modified
     public synchronized void modified(Map<String, Object> properties) {
         processConfig(properties);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Reference(dynamic = true, multiple = true, optional = true)
     public void addObservable(ObservableAgent observable, Map<String, Object> properties) {
         super.addObservable(observable, properties);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected List<String> getFilter() {
         return this.filter;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void update(AgentEvent event) {
         LOGGER.info("Received event: {}", event);
     }
 
+    /**
+     * This method processes the data in the Config interfaces of this class.
+     * 
+     * @param properties
+     *            the configuration properties
+     */
     private void processConfig(Map<String, Object> properties) {
         Config config = Configurable.createConfigurable(Config.class, properties);
         this.filter = config.filter();

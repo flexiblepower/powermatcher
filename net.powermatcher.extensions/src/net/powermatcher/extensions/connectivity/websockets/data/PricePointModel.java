@@ -4,6 +4,9 @@ import net.powermatcher.api.data.PricePoint;
 
 /**
  * PricePoint model class to transfer {@link PricePoint} data over the wire.
+ * 
+ * @author FAN
+ * @version 2.0
  */
 public class PricePointModel {
     /**
@@ -15,6 +18,9 @@ public class PricePointModel {
      */
     private double demand;
 
+    /**
+     * @return the current value of price.
+     */
     public double getPrice() {
         return price;
     }
@@ -23,6 +29,9 @@ public class PricePointModel {
         this.price = price;
     }
 
+    /**
+     * @return the current value of demand.
+     */
     public double getDemand() {
         return demand;
     }

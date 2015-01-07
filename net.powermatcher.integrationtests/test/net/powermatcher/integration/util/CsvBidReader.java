@@ -7,6 +7,11 @@ import java.util.zip.DataFormatException;
 import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.MarketBasis;
 
+/**
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class CsvBidReader {
 
     String inputFile;

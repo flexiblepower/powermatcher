@@ -4,6 +4,9 @@ package net.powermatcher.extensions.connectivity.websockets.data;
  * PmMessage class to encapsulate {@link BidModel}, {@link PriceUpdateModel} or {@link CusterinfoModel}. WebSocket
  * communication does not contain a native RPC-style, so the same message object is used for data exchange. Therefore
  * this message contains a type indicator to allow the different objects to be transferred reliably.
+ * 
+ * @author FAN
+ * @version 2.0
  */
 public class PmMessage {
     /**
@@ -23,6 +26,9 @@ public class PmMessage {
      */
     private Object payload;
 
+    /**
+     * @return the current value of payloadType.
+     */
     public PayloadType getPayloadType() {
         return payloadType;
     }
@@ -31,6 +37,9 @@ public class PmMessage {
         this.payloadType = payloadType;
     }
 
+    /**
+     * @return the current value of payload.
+     */
     public Object getPayload() {
         return payload;
     }

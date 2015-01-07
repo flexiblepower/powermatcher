@@ -55,7 +55,6 @@ import aQute.bnd.annotation.metatype.Meta;
  * 
  * @author FAN
  * @version 2.0
- * 
  */
 @Component(designateFactory = PeakShavingConcentrator.Config.class, immediate = true, provide = {
         ObservableAgent.class, MatcherEndpoint.class, AgentEndpoint.class })
@@ -157,8 +156,17 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
      */
     protected Price priceOut = null;
 
+    /**
+     * OSGI ConfigurationAdmin, stores bundle configuration data persistently.
+     */
     private ConfigurationAdmin configurationAdmin;
 
+    /**
+     * OSGi calls this method to activate a managed service.
+     * 
+     * @param properties
+     *            the configuration properties
+     */
     @Activate
     public void activate(final Map<String, Object> properties) {
         this.processConfig(properties);
@@ -166,6 +174,9 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         this.aggregatedBids = new BidCache(this.timeService, config.bidTimeout());
 
         scheduledFuture = this.scheduler.scheduleAtFixedRate(new Runnable() {
+            /**
+             * {@inheritDoc}
+             */
             @Override
             public void run() {
                 try {
@@ -179,6 +190,9 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         LOGGER.info("Agent [{}], activated", config.agentId());
     }
 
+    /**
+     * OSGi calls this method to deactivate a managed service.
+     */
     @Deactivate
     public void deactivate() {
         if (scheduledFuture != null) {
@@ -188,6 +202,12 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         LOGGER.info("Agent [{}], deactivated", config.agentId());
     }
 
+    /**
+     * This method processes the data in the Config interfaces of this class
+     * 
+     * @param properties
+     *            the configuration properties
+     */
     protected void processConfig(Map<String, Object> properties) {
         config = Configurable.createConfigurable(Config.class, properties);
 
@@ -213,6 +233,9 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public synchronized boolean connectToAgent(Session session) {
         if (this.sessionToMatcher == null) {
@@ -229,6 +252,9 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void agentEndpointDisconnected(Session session) {
         // Find session
@@ -241,11 +267,17 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         LOGGER.info("Agent disconnected with session [{}]", session.getSessionId());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public synchronized void connectToMatcher(Session session) {
         this.sessionToMatcher = session;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public synchronized void matcherEndpointDisconnected(Session session) {
         for (Session agentSession : sessionToAgents.toArray(new Session[sessionToAgents.size()])) {
@@ -255,6 +287,9 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
 
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void updateBid(Session session, Bid newBid) {
         if (!sessionToAgents.contains(session)) {
@@ -274,8 +309,7 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
     }
 
     /**
-     * sends the aggregatedbids to the matcher
-     * 
+     * Sends the new aggregated bid to the {@link MatcherEndpoint}
      */
     protected synchronized void doBidUpdate() {
         if (sessionToMatcher != null) {
@@ -295,6 +329,9 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void updatePrice(PriceUpdate priceUpdate) {
         if (priceUpdate == null) {
@@ -338,6 +375,13 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         }
     }
 
+    /**
+     * Transforms the {@link Price} by peakshaving.
+     * 
+     * @param newPriceUpdate
+     *            The {@link PriceUpdate} whose {@link Price} has to be adjusted.
+     * @return the {@link PriceUpdate} containing the adjusted {@link Price}.
+     */
     private synchronized PriceUpdate adjustPrice(final PriceUpdate newPriceUpdate) {
         // if the given price is null, the price can't be adjusted, so we let
         // the framework handle the null price
@@ -392,6 +436,13 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         return new PriceUpdate(priceOut, newPriceUpdate.getBidNumber());
     }
 
+    /**
+     * Transforms the aggregated {@link Bid} by peakshaving.
+     * 
+     * @param newAggregatedBid
+     *            The aggregated {@link Bid} that has to be transformed.
+     * @return the transformed {@link Bid}.
+     */
     private synchronized ArrayBid transformAggregatedBid(final ArrayBid newAggregatedBid) {
         // if the given bid is null, then there is nothing to transform, so we
         // let the next framework handle the null bid
@@ -423,6 +474,9 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         return this.aggregatedBidOut;
     }
 
+    /**
+     * @return the difference between the measured flow and the allocation for the cluster.
+     */
     private synchronized double getUncontrolledFlow() {
         // the uncontrolled flow can only be calculated if the measured flow is
         // known
@@ -443,6 +497,9 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         return this.measuredFlow - allocation;
     }
 
+    /**
+     * @return the demand at the value of the priceOut in the bid curve of the aggregated {@link Bid}.
+     */
     private synchronized double getAllocation() {
         // calculating an allocation is only feasible if the aggregated bid and
         // current price are known.
@@ -557,33 +614,59 @@ public class PeakShavingConcentrator extends BaseAgent implements MatcherEndpoin
         return -1;
     }
 
+    /**
+     * @param the
+     *            new {@link TimeService} implementation.
+     */
     @Reference
     public void setTimeService(TimeService timeService) {
         this.timeService = timeService;
     }
 
+    /**
+     * @param the
+     *            new {@link ScheduledExecutorService} implementation.
+     */
     @Reference
     public void setExecutorService(ScheduledExecutorService scheduler) {
         this.scheduler = scheduler;
     }
 
+    /**
+     * @param the
+     *            new value of configurationAdmin.
+     */
     @Reference
     protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
         this.configurationAdmin = configurationAdmin;
     }
 
+    /**
+     * @return the current value of ceiling.
+     */
     protected double getCeiling() {
         return ceiling;
     }
 
+    /**
+     * @param the
+     *            new value for ceiling
+     */
     protected void setCeiling(double ceiling) {
         this.ceiling = ceiling;
     }
 
+    /**
+     * @return the current value of floor.
+     */
     protected double getFloor() {
         return floor;
     }
 
+    /**
+     * @param the
+     *            new value for floor
+     */
     protected void setFloor(double floor) {
         this.floor = floor;
     }
