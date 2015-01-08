@@ -9,78 +9,84 @@ import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.Qualifier;
 
 /**
- * An {@link PriceUpdateEvent} is sent when an {@link AgentEndpoint} receives a new {@link PriceUpdate}.
+ * An {@link PriceUpdateEvent} is sent when an {@link AgentEndpoint} receives a
+ * new {@link PriceUpdate}.
  * 
  * @author FAN
  * @version 2.0
  */
 public abstract class PriceUpdateEvent extends AgentEvent {
 
-    /**
-     * The received {@link PriceUpdate}
-     */
-    private final PriceUpdate priceUpdate;
+	/**
+	 * The received {@link PriceUpdate}
+	 */
+	private final PriceUpdate priceUpdate;
 
-    /**
-     * The qualifier of the event
-     */
-    private Qualifier qualifier;
+	/**
+	 * The qualifier of the event
+	 */
+	private Qualifier qualifier;
 
-    /**
-     * The id of the {@link Session} of the {@link AgentEndpoint} subclass sending the UpdateEvent
-     */
-    private final String sessionId;
+	/**
+	 * The id of the {@link Session} of the {@link AgentEndpoint} subclass
+	 * sending the UpdateEvent
+	 */
+	private final String sessionId;
 
-    /**
-     * Constructs an instance of this class.
-     * 
-     * @param clusterId
-     *            The id of the cluster the {@link AgentEndpoint} subclass sending the UpdateEvent is running in.
-     * @param agentId
-     *            The id of the {@link AgentEndpoint} subclass sending the UpdateEvent.
-     * @param sessionId
-     *            The id of the {@link Session} of the {@link AgentEndpoint} subclass sending the UpdateEvent
-     * @param timestamp
-     *            The {@link Date} received from the {@link TimeService}
-     * @param priceUpdate
-     *            The received {@link PriceUpdate}.
-     */
-    public PriceUpdateEvent(String clusterId, String agentId, String sessionId, Date timestamp,
-            PriceUpdate priceUpdate, Qualifier qualifier) {
-        super(clusterId, agentId, timestamp);
-        this.priceUpdate = priceUpdate;
-        this.qualifier = qualifier;
-        this.sessionId = sessionId;
-    }
+	/**
+	 * Constructs an instance of this class.
+	 * 
+	 * @param clusterId
+	 *            The id of the cluster the {@link AgentEndpoint} subclass
+	 *            sending the UpdateEvent is running in.
+	 * @param agentId
+	 *            The id of the {@link AgentEndpoint} subclass sending the
+	 *            UpdateEvent.
+	 * @param sessionId
+	 *            The id of the {@link Session} of the {@link AgentEndpoint}
+	 *            subclass sending the UpdateEvent
+	 * @param timestamp
+	 *            The {@link Date} received from the {@link TimeService}
+	 * @param priceUpdate
+	 *            The received {@link PriceUpdate}.
+	 */
+	public PriceUpdateEvent(String clusterId, String agentId, String sessionId,
+			Date timestamp, PriceUpdate priceUpdate, Qualifier qualifier) {
+		super(clusterId, agentId, timestamp);
+		this.priceUpdate = priceUpdate;
+		this.qualifier = qualifier;
+		this.sessionId = sessionId;
+	}
 
-    /**
-     * @return the current value of priceUpdate.
-     */
-    public PriceUpdate getPriceUpdate() {
-        return priceUpdate;
-    }
+	/**
+	 * @return the current value of priceUpdate.
+	 */
+	public PriceUpdate getPriceUpdate() {
+		return priceUpdate;
+	}
 
-    /**
-     * @return the current value of qualifier.
-     */
-    public Qualifier getQualifier() {
-        return qualifier;
-    }
+	/**
+	 * @return the current value of qualifier.
+	 */
+	public Qualifier getQualifier() {
+		return qualifier;
+	}
 
-    /**
-     * @return the current value of sessionId.
-     */
-    public String getSessionId() {
-        return sessionId;
-    }
+	/**
+	 * @return the current value of sessionId.
+	 */
+	public String getSessionId() {
+		return sessionId;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        return PriceUpdateEvent.class.getSimpleName() + " " + super.toString() + ", qualifier = "
-                + qualifier.getDescription() + ", sessionId = " + this.sessionId + ", priceUpdate = "
-                + priceUpdate.toString();
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String toString() {
+		return PriceUpdateEvent.class.getSimpleName() + " " + super.toString()
+				+ ", qualifier = " + qualifier.getDescription()
+				+ ", sessionId = " + this.sessionId + ", priceUpdate = "
+				+ priceUpdate.toString();
+	}
 }

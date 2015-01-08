@@ -9,67 +9,67 @@ import net.powermatcher.api.data.Bid;
  * @version 2.0
  */
 public class BidModel {
-    /**
-     * The marketBasis for bids and prices.
-     */
-    private MarketBasisModel marketBasis;
+	/**
+	 * The marketBasis for bids and prices.
+	 */
+	private MarketBasisModel marketBasis;
 
-    /**
-     * Demand array for each price step in the market basis.
-     */
-    private double[] demand;
+	/**
+	 * Demand array for each price step in the market basis.
+	 */
+	private double[] demand;
 
-    /**
-     * Price points in a bid curve .
-     */
-    private PricePointModel[] pricePoints;
+	/**
+	 * Price points in a bid curve .
+	 */
+	private PricePointModel[] pricePoints;
 
-    /**
-     * Holds the bidNumber.
-     */
-    private int bidNumber;
+	/**
+	 * Holds the bidNumber.
+	 */
+	private int bidNumber;
 
-    /**
-     * @return the current value of marketBasis.
-     */
-    public MarketBasisModel getMarketBasis() {
-        return marketBasis;
-    }
+	/**
+	 * @return the current value of marketBasis.
+	 */
+	public MarketBasisModel getMarketBasis() {
+		return marketBasis;
+	}
 
-    public void setMarketBasis(MarketBasisModel marketBasis) {
-        this.marketBasis = marketBasis;
-    }
+	public void setMarketBasis(MarketBasisModel marketBasis) {
+		this.marketBasis = marketBasis;
+	}
 
-    /**
-     * @return the current value of demand.
-     */
-    public double[] getDemand() {
-        return demand;
-    }
+	/**
+	 * @return the current value of demand.
+	 */
+	public double[] getDemand() {
+		return demand;
+	}
 
-    public void setDemand(double[] demand) {
-        this.demand = demand;
-    }
+	public void setDemand(double[] demand) {
+		this.demand = demand;
+	}
 
-    /**
-     * @return the current value of pricePoints.
-     */
-    public PricePointModel[] getPricePoints() {
-        return pricePoints;
-    }
+	/**
+	 * @return the current value of pricePoints.
+	 */
+	public PricePointModel[] getPricePoints() {
+		return pricePoints;
+	}
 
-    public void setPricePoints(PricePointModel[] pricePoints) {
-        this.pricePoints = pricePoints;
-    }
+	public void setPricePoints(PricePointModel[] pricePoints) {
+		this.pricePoints = pricePoints;
+	}
 
-    /**
-     * @return the current value of bidNumber.
-     */
-    public int getBidNumber() {
-        return bidNumber;
-    }
+	/**
+	 * @return the current value of bidNumber.
+	 */
+	public int getBidNumber() {
+		return bidNumber;
+	}
 
-    public void setBidNumber(int bidNumber) {
-        this.bidNumber = bidNumber;
-    }
+	public void setBidNumber(int bidNumber) {
+		this.bidNumber = bidNumber;
+	}
 }

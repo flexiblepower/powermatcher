@@ -10,51 +10,51 @@ import net.powermatcher.api.data.PriceUpdate;
  */
 public class PriceUpdateModel {
 
-    /**
-     * Define the market basis (MarketBasis) field.
-     */
-    private MarketBasisModel marketBasis;
+	/**
+	 * Define the market basis (MarketBasis) field.
+	 */
+	private MarketBasisModel marketBasis;
 
-    /**
-     * Define the bidNumber field.
-     */
-    private int bidNumber;
+	/**
+	 * Define the bidNumber field.
+	 */
+	private int bidNumber;
 
-    /**
-     * Define the current price (double) field.
-     */
-    private double priceValue;
+	/**
+	 * Define the current price (double) field.
+	 */
+	private double priceValue;
 
-    /**
-     * @return the current value of marketBasis.
-     */
-    public MarketBasisModel getMarketBasis() {
-        return marketBasis;
-    }
+	/**
+	 * @return the current value of marketBasis.
+	 */
+	public MarketBasisModel getMarketBasis() {
+		return marketBasis;
+	}
 
-    public void setMarketBasis(MarketBasisModel marketBasis) {
-        this.marketBasis = marketBasis;
-    }
+	public void setMarketBasis(MarketBasisModel marketBasis) {
+		this.marketBasis = marketBasis;
+	}
 
-    /**
-     * @return the current value of bidNumber.
-     */
-    public int getBidNumber() {
-        return bidNumber;
-    }
+	/**
+	 * @return the current value of bidNumber.
+	 */
+	public int getBidNumber() {
+		return bidNumber;
+	}
 
-    public void setBidNumber(int bidNumber) {
-        this.bidNumber = bidNumber;
-    }
+	public void setBidNumber(int bidNumber) {
+		this.bidNumber = bidNumber;
+	}
 
-    /**
-     * @return the current value of priceValue.
-     */
-    public double getPriceValue() {
-        return priceValue;
-    }
+	/**
+	 * @return the current value of priceValue.
+	 */
+	public double getPriceValue() {
+		return priceValue;
+	}
 
-    public void setPriceValue(double priceValue) {
-        this.priceValue = priceValue;
-    }
+	public void setPriceValue(double priceValue) {
+		this.priceValue = priceValue;
+	}
 }

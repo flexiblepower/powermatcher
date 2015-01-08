@@ -30,130 +30,136 @@ import org.slf4j.LoggerFactory;
  */
 public class ConcentratorResilienceTest extends ResilienceTest {
 
-    private static final String MATCHERAGENTNAME = "auctioneer";
-    private static final String CONCENTRATOR_NAME = "concentrator";
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConcentratorResilienceTest.class);
+	private static final String MATCHERAGENTNAME = "auctioneer";
+	private static final String CONCENTRATOR_NAME = "concentrator";
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(ConcentratorResilienceTest.class);
 
-    // The direct upstream matcher for the agents
-    protected ConcentratorWrapper concentrator;
+	// The direct upstream matcher for the agents
+	protected ConcentratorWrapper concentrator;
 
-    // mock auctioneer
-    protected MockMatcherAgent auctioneer;
+	// mock auctioneer
+	protected MockMatcherAgent auctioneer;
 
-    protected void prepareTest(String testID, String suffix) throws IOException, DataFormatException {
-        // Create agent list
-        this.agentList = new ArrayList<MockAgent>();
+	protected void prepareTest(String testID, String suffix)
+			throws IOException, DataFormatException {
+		// Create agent list
+		this.agentList = new ArrayList<MockAgent>();
 
-        // Create matcher list
-        this.matchers = new ArrayList<MatcherEndpoint>();
+		// Create matcher list
+		this.matchers = new ArrayList<MatcherEndpoint>();
 
-        // Get the expected results
-        this.resultsReader = new CsvExpectedResultsReader(getExpectedResultsFile(testID, suffix));
+		// Get the expected results
+		this.resultsReader = new CsvExpectedResultsReader(
+				getExpectedResultsFile(testID, suffix));
 
-        this.marketBasis = resultsReader.getMarketBasis();
-        this.concentrator = new ConcentratorWrapper();
-        Map<String, Object> concentratorProperties = new HashMap<>();
-        concentratorProperties.put("matcherId", CONCENTRATOR_NAME);
-        concentratorProperties.put("desiredParentId", MATCHERAGENTNAME);
-        concentratorProperties.put("bidTimeout", "600");
-        concentratorProperties.put("bidUpdateRate", "30");
-        concentratorProperties.put("agentId", CONCENTRATOR_NAME);
-        concentratorProperties.put("whiteListAgents", new ArrayList<String>());
+		this.marketBasis = resultsReader.getMarketBasis();
+		this.concentrator = new ConcentratorWrapper();
+		Map<String, Object> concentratorProperties = new HashMap<>();
+		concentratorProperties.put("matcherId", CONCENTRATOR_NAME);
+		concentratorProperties.put("desiredParentId", MATCHERAGENTNAME);
+		concentratorProperties.put("bidTimeout", "600");
+		concentratorProperties.put("bidUpdateRate", "30");
+		concentratorProperties.put("agentId", CONCENTRATOR_NAME);
+		concentratorProperties.put("whiteListAgents", new ArrayList<String>());
 
-        this.matchers.add(this.concentrator);
+		this.matchers.add(this.concentrator);
 
-        concentrator.setExecutorService(new ScheduledThreadPoolExecutor(10));
-        concentrator.setTimeService(new SystemTimeService());
-        concentrator.activate(concentratorProperties);
+		concentrator.setExecutorService(new ScheduledThreadPoolExecutor(10));
+		concentrator.setTimeService(new SystemTimeService());
+		concentrator.activate(concentratorProperties);
 
-        auctioneer = new MockMatcherAgent(MATCHERAGENTNAME);
-        auctioneer.setMarketBasis(marketBasis);
-        this.matchers.add(auctioneer);
+		auctioneer = new MockMatcherAgent(MATCHERAGENTNAME);
+		auctioneer.setMarketBasis(marketBasis);
+		this.matchers.add(auctioneer);
 
-        // Session
-        this.sessionManager = new SessionManager();
+		// Session
+		this.sessionManager = new SessionManager();
 
-        sessionManager.addMatcherEndpoint(auctioneer);
-        sessionManager.addMatcherEndpoint(concentrator);
-        sessionManager.addAgentEndpoint(concentrator);
+		sessionManager.addMatcherEndpoint(auctioneer);
+		sessionManager.addMatcherEndpoint(concentrator);
+		sessionManager.addAgentEndpoint(concentrator);
 
-        sessionManager.activate();
+		sessionManager.activate();
 
-        // Create the bid reader
-        this.bidReader = new CsvBidReader(getBidInputFile(testID, suffix), this.marketBasis);
-    }
+		// Create the bid reader
+		this.bidReader = new CsvBidReader(getBidInputFile(testID, suffix),
+				this.marketBasis);
+	}
 
-    protected void sendBidsToMatcher() throws IOException, DataFormatException {
+	protected void sendBidsToMatcher() throws IOException, DataFormatException {
 
-        ArrayBid bid = null;
-        MockAgent newAgent;
+		ArrayBid bid = null;
+		MockAgent newAgent;
 
-        double[] aggregatedDemand = new double[this.marketBasis.getPriceSteps()];
+		double[] aggregatedDemand = new double[this.marketBasis.getPriceSteps()];
 
-        boolean stop = false;
-        int i = 0;
-        do {
-            try {
-                bid = this.bidReader.nextBid();
+		boolean stop = false;
+		int i = 0;
+		do {
+			try {
+				bid = this.bidReader.nextBid();
 
-                if (bid != null) {
-                    // Aggregated demand calculation
-                    double[] demand = bid.getDemand();
-                    for (int j = 0; j < demand.length; j++) {
-                        aggregatedDemand[j] = aggregatedDemand[j] + demand[j];
-                    }
+				if (bid != null) {
+					// Aggregated demand calculation
+					double[] demand = bid.getDemand();
+					for (int j = 0; j < demand.length; j++) {
+						aggregatedDemand[j] = aggregatedDemand[j] + demand[j];
+					}
 
-                    if (agentList.size() > i) {
-                        newAgent = this.agentList.get(i);
-                    } else {
-                        newAgent = createAgent(i);
-                    }
-                    newAgent.sendBid(bid);
-                    i++;
-                } else {
-                    stop = true;
-                }
-            } catch (IllegalArgumentException e) {
-                LOGGER.error("Incorrect bid specification caught: " + e.getMessage());
-                bid = null;
-            }
-        } while (!stop);
-        concentrator.doBidUpdate();
-        // Write aggregated demand array
-        LOGGER.info("Aggregated demand: ");
-        for (int j = 0; j < aggregatedDemand.length; j++) {
-            if (j == (aggregatedDemand.length - 1)) {
-                LOGGER.info(String.valueOf(aggregatedDemand[j]));
-            } else {
-                LOGGER.info(String.valueOf((aggregatedDemand[j] + ",")));
-            }
-        }
-    }
+					if (agentList.size() > i) {
+						newAgent = this.agentList.get(i);
+					} else {
+						newAgent = createAgent(i);
+					}
+					newAgent.sendBid(bid);
+					i++;
+				} else {
+					stop = true;
+				}
+			} catch (IllegalArgumentException e) {
+				LOGGER.error("Incorrect bid specification caught: "
+						+ e.getMessage());
+				bid = null;
+			}
+		} while (!stop);
+		concentrator.doBidUpdate();
+		// Write aggregated demand array
+		LOGGER.info("Aggregated demand: ");
+		for (int j = 0; j < aggregatedDemand.length; j++) {
+			if (j == (aggregatedDemand.length - 1)) {
+				LOGGER.info(String.valueOf(aggregatedDemand[j]));
+			} else {
+				LOGGER.info(String.valueOf((aggregatedDemand[j] + ",")));
+			}
+		}
+	}
 
-    private MockAgent createAgent(int i) {
-        String agentId = "agent" + (i + 1);
-        MockAgent newAgent = new MockAgent(agentId);
-        this.agentList.add(i, newAgent);
+	private MockAgent createAgent(int i) {
+		String agentId = "agent" + (i + 1);
+		MockAgent newAgent = new MockAgent(agentId);
+		this.agentList.add(i, newAgent);
 
-        newAgent.setDesiredParentId(CONCENTRATOR_NAME);
-        addAgent(newAgent);
-        return newAgent;
-    }
+		newAgent.setDesiredParentId(CONCENTRATOR_NAME);
+		addAgent(newAgent);
+		return newAgent;
+	}
 
-    protected void checkEquilibriumPrice() {
-        double expPrice = this.resultsReader.getEquilibriumPrice();
+	protected void checkEquilibriumPrice() {
+		double expPrice = this.resultsReader.getEquilibriumPrice();
 
-        // Verify the price received by the agents
-        for (MockAgent agent : agentList) {
-            assertEquals(expPrice, agent.getLastPriceUpdate().getPrice().getPriceValue(), 0);
-        }
-    }
+		// Verify the price received by the agents
+		for (MockAgent agent : agentList) {
+			assertEquals(expPrice, agent.getLastPriceUpdate().getPrice()
+					.getPriceValue(), 0);
+		}
+	}
 
-    @After
-    public void tearDown() throws IOException {
-        if (this.bidReader != null) {
-            this.bidReader.closeFile();
-        }
-        removeAgents(agentList, this.concentrator);
-    }
+	@After
+	public void tearDown() throws IOException {
+		if (this.bidReader != null) {
+			this.bidReader.closeFile();
+		}
+		removeAgents(agentList, this.concentrator);
+	}
 }

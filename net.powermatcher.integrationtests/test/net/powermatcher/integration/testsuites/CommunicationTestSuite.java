@@ -14,7 +14,8 @@ import org.junit.runners.Suite;
  * @version 2.0
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ SendReceivePriceTestCPF1.class, SendReceivePriceTestCPQ1.class, SendReceiveBidTestCBF1.class,
-        SendReceiveBidTestCBQ1.class })
+@Suite.SuiteClasses({ SendReceivePriceTestCPF1.class,
+		SendReceivePriceTestCPQ1.class, SendReceiveBidTestCBF1.class,
+		SendReceiveBidTestCBQ1.class })
 public class CommunicationTestSuite {
 }

@@ -31,151 +31,160 @@ import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
 /**
- * {@link Freezer} is a implementation of a {@link BaseDeviceAgent}. It represents a dummy freezer. {@link Freezer} creates a
- * {@link PointBid} with random {@link PricePoint}s at a set interval. It does nothing with the returned {@link Price}.
+ * {@link Freezer} is a implementation of a {@link BaseDeviceAgent}. It
+ * represents a dummy freezer. {@link Freezer} creates a {@link PointBid} with
+ * random {@link PricePoint}s at a set interval. It does nothing with the
+ * returned {@link Price}.
  * 
  * @author FAN
  * @version 2.0
  */
-@Component(designateFactory = Freezer.Config.class, immediate = true, provide = { ObservableAgent.class,
-        AgentEndpoint.class })
+@Component(designateFactory = Freezer.Config.class, immediate = true, provide = {
+		ObservableAgent.class, AgentEndpoint.class })
 public class Freezer extends BaseDeviceAgent implements AgentEndpoint {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Freezer.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(Freezer.class);
 
-    private static Random generator = new Random();
+	private static Random generator = new Random();
 
-    public static interface Config {
-        @Meta.AD(deflt = "concentrator")
-        String desiredParentId();
+	public static interface Config {
+		@Meta.AD(deflt = "concentrator")
+		String desiredParentId();
 
-        @Meta.AD(deflt = "freezer")
-        String agentId();
+		@Meta.AD(deflt = "freezer")
+		String agentId();
 
-        @Meta.AD(deflt = "30", description = "Number of seconds between bid updates")
-        long bidUpdateRate();
+		@Meta.AD(deflt = "30", description = "Number of seconds between bid updates")
+		long bidUpdateRate();
 
-        @Meta.AD(deflt = "100", description = "The mimimum value of the random demand.")
-        double minimumDemand();
+		@Meta.AD(deflt = "100", description = "The mimimum value of the random demand.")
+		double minimumDemand();
 
-        @Meta.AD(deflt = "121", description = "The maximum value the random demand.")
-        double maximumDemand();
-    }
+		@Meta.AD(deflt = "121", description = "The maximum value the random demand.")
+		double maximumDemand();
+	}
 
-    /**
-     * A delayed result-bearing action that can be cancelled.
-     */
-    private ScheduledFuture<?> scheduledFuture;
-    
-    /**
-     * Scheduler that can schedule commands to run after a given delay, or to execute periodically.
-     */
-    private ScheduledExecutorService scheduler;
-    
-    /**
-     * TimeService that is used for obtaining real or simulated time.
-     */
-    private TimeService timeService;
-    
-    /**
-     * The mimimum value of the random demand.
-     */
-    private double minimumDemand;
-    
-    /**
-     * The maximum value the random demand.
-     */
-    private double maximumDemand;
+	/**
+	 * A delayed result-bearing action that can be cancelled.
+	 */
+	private ScheduledFuture<?> scheduledFuture;
 
-    /**
-     * OSGi calls this method to activate a managed service.
-     * 
-     * @param properties
-     *            the configuration properties
-     */
-    @Activate
-    public void activate(Map<String, Object> properties) {
-        Config config = Configurable.createConfigurable(Config.class, properties);
-        this.setAgentId(config.agentId());
-        this.setDesiredParentId(config.desiredParentId());
-        this.setServicePid((String) properties.get("service.pid"));
+	/**
+	 * Scheduler that can schedule commands to run after a given delay, or to
+	 * execute periodically.
+	 */
+	private ScheduledExecutorService scheduler;
 
-        this.minimumDemand = config.minimumDemand();
-        this.maximumDemand = config.maximumDemand();
-        scheduledFuture = scheduler.scheduleAtFixedRate(new Runnable() {
-            /**
-             * {@inheritDoc}
-             */
-            @Override
-            public void run() {
-                doBidUpdate();
-            }
-        }, 0, config.bidUpdateRate(), TimeUnit.SECONDS);
-        LOGGER.info("Agent [{}], activated", config.agentId());
-    }
+	/**
+	 * TimeService that is used for obtaining real or simulated time.
+	 */
+	private TimeService timeService;
 
-    /**
-     * OSGi calls this method to deactivate a managed service.
-     */
-    @Deactivate
-    public void deactivate() {
-        Session session = getSession();
-        if (session != null) {
-            session.disconnect();
-        }
-        scheduledFuture.cancel(false);
-        LOGGER.info("Agent [{}], deactivated", this.getAgentId());
-    }
+	/**
+	 * The mimimum value of the random demand.
+	 */
+	private double minimumDemand;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void doBidUpdate() {
-        if (getMarketBasis() != null) {
-            double demand = minimumDemand + (maximumDemand - minimumDemand) * generator.nextDouble();
+	/**
+	 * The maximum value the random demand.
+	 */
+	private double maximumDemand;
 
-            PricePoint pricePoint1 = new PricePoint(new Price(getMarketBasis(), getMarketBasis().getMinimumPrice()),
-                    demand);
-            PricePoint pricePoint2 = new PricePoint(new Price(getMarketBasis(), getMarketBasis().getMaximumPrice()),
-                    minimumDemand);
+	/**
+	 * OSGi calls this method to activate a managed service.
+	 * 
+	 * @param properties
+	 *            the configuration properties
+	 */
+	@Activate
+	public void activate(Map<String, Object> properties) {
+		Config config = Configurable.createConfigurable(Config.class,
+				properties);
+		this.setAgentId(config.agentId());
+		this.setDesiredParentId(config.desiredParentId());
+		this.setServicePid((String) properties.get("service.pid"));
 
-            Bid newBid = createBid(pricePoint1, pricePoint2);
-            LOGGER.debug("updateBid({})", newBid);
-            publishBid(newBid);
-        }
-    }
+		this.minimumDemand = config.minimumDemand();
+		this.maximumDemand = config.maximumDemand();
+		scheduledFuture = scheduler.scheduleAtFixedRate(new Runnable() {
+			/**
+			 * {@inheritDoc}
+			 */
+			@Override
+			public void run() {
+				doBidUpdate();
+			}
+		}, 0, config.bidUpdateRate(), TimeUnit.SECONDS);
+		LOGGER.info("Agent [{}], activated", config.agentId());
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public synchronized void updatePrice(PriceUpdate priceUpdate) {
-        LOGGER.debug("Received price update [{}], current bidNr = {}", priceUpdate, getCurrentBidNr());
-        publishEvent(new IncomingPriceUpdateEvent(getClusterId(), getAgentId(), getSession().getSessionId(), now(),
-                priceUpdate, Qualifier.AGENT));
-    }
+	/**
+	 * OSGi calls this method to deactivate a managed service.
+	 */
+	@Deactivate
+	public void deactivate() {
+		Session session = getSession();
+		if (session != null) {
+			session.disconnect();
+		}
+		scheduledFuture.cancel(false);
+		LOGGER.info("Agent [{}], deactivated", this.getAgentId());
+	}
 
-    /**
-     * @param the new {@link ScheduledExecutorService} value
-     */
-    @Reference
-    public void setScheduler(ScheduledExecutorService scheduler) {
-        this.scheduler = scheduler;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void doBidUpdate() {
+		if (getMarketBasis() != null) {
+			double demand = minimumDemand + (maximumDemand - minimumDemand)
+					* generator.nextDouble();
 
-    /**
-     * @param the new {@link TimeService} value.
-     */
-    @Reference
-    public void setTimeService(TimeService timeService) {
-        this.timeService = timeService;
-    }
+			PricePoint pricePoint1 = new PricePoint(new Price(getMarketBasis(),
+					getMarketBasis().getMinimumPrice()), demand);
+			PricePoint pricePoint2 = new PricePoint(new Price(getMarketBasis(),
+					getMarketBasis().getMaximumPrice()), minimumDemand);
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected Date now() {
-        return timeService.currentDate();
-    }
+			Bid newBid = createBid(pricePoint1, pricePoint2);
+			LOGGER.debug("updateBid({})", newBid);
+			publishBid(newBid);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public synchronized void updatePrice(PriceUpdate priceUpdate) {
+		LOGGER.debug("Received price update [{}], current bidNr = {}",
+				priceUpdate, getCurrentBidNr());
+		publishEvent(new IncomingPriceUpdateEvent(getClusterId(), getAgentId(),
+				getSession().getSessionId(), now(), priceUpdate,
+				Qualifier.AGENT));
+	}
+
+	/**
+	 * @param the
+	 *            new {@link ScheduledExecutorService} value
+	 */
+	@Reference
+	public void setScheduler(ScheduledExecutorService scheduler) {
+		this.scheduler = scheduler;
+	}
+
+	/**
+	 * @param the
+	 *            new {@link TimeService} value.
+	 */
+	@Reference
+	public void setTimeService(TimeService timeService) {
+		this.timeService = timeService;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected Date now() {
+		return timeService.currentDate();
+	}
 }

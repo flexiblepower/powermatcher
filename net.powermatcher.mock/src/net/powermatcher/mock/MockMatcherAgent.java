@@ -16,70 +16,70 @@ import net.powermatcher.api.data.PriceUpdate;
  */
 public class MockMatcherAgent extends MockAgent implements MatcherEndpoint {
 
-    private Map<String, Object> matcherProperties;
-    private Bid lastReceivedBid;
-    private MarketBasis marketBasis;
+	private Map<String, Object> matcherProperties;
+	private Bid lastReceivedBid;
+	private MarketBasis marketBasis;
 
-    public MockMatcherAgent(String agentId) {
-        super(agentId);
-        this.matcherProperties = new HashMap<String, Object>();
-        this.matcherProperties.put("matcherId", agentId);
-    }
+	public MockMatcherAgent(String agentId) {
+		super(agentId);
+		this.matcherProperties = new HashMap<String, Object>();
+		this.matcherProperties.put("matcherId", agentId);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean connectToAgent(Session session) {
-        session.setMarketBasis(this.marketBasis);
-        session.setClusterId(this.matcherProperties.get("matcherId").toString());
-        this.session = session;
-        return true;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean connectToAgent(Session session) {
+		session.setMarketBasis(this.marketBasis);
+		session.setClusterId(this.matcherProperties.get("matcherId").toString());
+		this.session = session;
+		return true;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void agentEndpointDisconnected(Session session) {
-        this.session = null;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void agentEndpointDisconnected(Session session) {
+		this.session = null;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void updateBid(Session session, Bid newBid) {
-        this.lastReceivedBid = newBid;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void updateBid(Session session, Bid newBid) {
+		this.lastReceivedBid = newBid;
+	}
 
-    /**
-     * @return the current value of lastReceivedBid.
-     */
-    public Bid getLastReceivedBid() {
-        return lastReceivedBid;
-    }
+	/**
+	 * @return the current value of lastReceivedBid.
+	 */
+	public Bid getLastReceivedBid() {
+		return lastReceivedBid;
+	}
 
-    /**
-     * @return the current value of matcherProperties.
-     */
-    public Map<String, Object> getMatcherProperties() {
-        return matcherProperties;
-    }
+	/**
+	 * @return the current value of matcherProperties.
+	 */
+	public Map<String, Object> getMatcherProperties() {
+		return matcherProperties;
+	}
 
-    /**
-     * @return the current value of marketBasis.
-     */
-    public MarketBasis getMarketBasis() {
-        return marketBasis;
-    }
+	/**
+	 * @return the current value of marketBasis.
+	 */
+	public MarketBasis getMarketBasis() {
+		return marketBasis;
+	}
 
-    public void setMarketBasis(MarketBasis marketBasis) {
-        this.marketBasis = marketBasis;
-    }
+	public void setMarketBasis(MarketBasis marketBasis) {
+		this.marketBasis = marketBasis;
+	}
 
-    public void publishPrice(PriceUpdate priceUpdate) {
-        session.updatePrice(priceUpdate);
-    }
+	public void publishPrice(PriceUpdate priceUpdate) {
+		session.updatePrice(priceUpdate);
+	}
 
 }

@@ -20,35 +20,37 @@ import org.junit.rules.ExpectedException;
  */
 public class MarketBasisTest {
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+	@Rule
+	public ExpectedException expectedException = ExpectedException.none();
 
-    @Test
-    public void testMarketBasisMaximumPrice() {
-        String commodity = "tests";
-        String currency = "assertions";
-        int priceSteps = 100;
-        double minValue = -10.0;
-        double maxValue = 10.0;
-        MarketBasis testBasis = new MarketBasis(commodity, currency, priceSteps, minValue, maxValue);
-        assertThat(testBasis.getCommodity(), is(equalTo(commodity)));
-        assertThat(testBasis.getCurrency(), is(equalTo(currency)));
-        assertThat(testBasis.getPriceSteps(), is(equalTo(priceSteps)));
-        assertThat(testBasis.getMinimumPrice(), is(equalTo(minValue)));
-        assertThat(testBasis.getMaximumPrice(), is(equalTo(maxValue)));
-    }
+	@Test
+	public void testMarketBasisMaximumPrice() {
+		String commodity = "tests";
+		String currency = "assertions";
+		int priceSteps = 100;
+		double minValue = -10.0;
+		double maxValue = 10.0;
+		MarketBasis testBasis = new MarketBasis(commodity, currency,
+				priceSteps, minValue, maxValue);
+		assertThat(testBasis.getCommodity(), is(equalTo(commodity)));
+		assertThat(testBasis.getCurrency(), is(equalTo(currency)));
+		assertThat(testBasis.getPriceSteps(), is(equalTo(priceSteps)));
+		assertThat(testBasis.getMinimumPrice(), is(equalTo(minValue)));
+		assertThat(testBasis.getMaximumPrice(), is(equalTo(maxValue)));
+	}
 
-    @Test
-    public void testMarketBasisNegativeMinimum() {
-        expectedException.expect(InvalidParameterException.class);
-        expectedException.expectMessage("Price steps must be > 0.");
-        new MarketBasis("electricity", "EUR", -1, 0, 1);
-    }
+	@Test
+	public void testMarketBasisNegativeMinimum() {
+		expectedException.expect(InvalidParameterException.class);
+		expectedException.expectMessage("Price steps must be > 0.");
+		new MarketBasis("electricity", "EUR", -1, 0, 1);
+	}
 
-    @Test
-    public void testMarketBasisMaximumPriceTooSmall() {
-        expectedException.expect(InvalidParameterException.class);
-        expectedException.expectMessage("Maximum price must be > minimum price.");
-        new MarketBasis("electricity", "EUR", 10, 2, 1);
-    }
+	@Test
+	public void testMarketBasisMaximumPriceTooSmall() {
+		expectedException.expect(InvalidParameterException.class);
+		expectedException
+				.expectMessage("Maximum price must be > minimum price.");
+		new MarketBasis("electricity", "EUR", 10, 2, 1);
+	}
 }

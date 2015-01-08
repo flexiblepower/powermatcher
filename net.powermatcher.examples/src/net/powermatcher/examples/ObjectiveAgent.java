@@ -20,79 +20,85 @@ import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
 /**
- * {@link ObjectiveAgent} is an example implementation of {@link BaseObjectiveAgent}. It does nothing with the
- * {@link PriceUpdate}s it gets from {@link ObjectiveAgent#notifyPriceUpdate(PriceUpdate priceUpdate)}.
- * {@link ObjectiveAgent#handleAggregateBid(Bid)} sends a static {@link Bid} to manipulate the cluster.
+ * {@link ObjectiveAgent} is an example implementation of
+ * {@link BaseObjectiveAgent}. It does nothing with the {@link PriceUpdate}s it
+ * gets from {@link ObjectiveAgent#notifyPriceUpdate(PriceUpdate priceUpdate)}.
+ * {@link ObjectiveAgent#handleAggregateBid(Bid)} sends a static {@link Bid} to
+ * manipulate the cluster.
  * 
  * @author FAN
  * @version 2.0
  */
-@Component(designateFactory = ObjectiveAgent.Config.class, immediate = true, provide = { ObservableAgent.class,
-        ObjectiveEndpoint.class })
+@Component(designateFactory = ObjectiveAgent.Config.class, immediate = true, provide = {
+		ObservableAgent.class, ObjectiveEndpoint.class })
 public class ObjectiveAgent extends BaseObjectiveAgent {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ObjectiveAgent.class);
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(ObjectiveAgent.class);
 
-    @Meta.OCD
-    public static interface Config {
-        @Meta.AD(deflt = "objectiveagent")
-        String agentId();
-    }
+	@Meta.OCD
+	public static interface Config {
+		@Meta.AD(deflt = "objectiveagent")
+		String agentId();
+	}
 
-    /**
-     * OSGI configuration meta type with info about the objective agent.
-     */
-    private Config config;
+	/**
+	 * OSGI configuration meta type with info about the objective agent.
+	 */
+	private Config config;
 
-    private static final String CURRENCY_EUR = "EUR";
-    private static final String COMMODITY_ELECTRICITY = "electricity";
+	private static final String CURRENCY_EUR = "EUR";
+	private static final String COMMODITY_ELECTRICITY = "electricity";
 
-    /**
-     * OSGi calls this method to activate a managed service.
-     * 
-     * @param properties
-     *            the configuration properties
-     */
-    @Activate
-    public void activate(final Map<String, Object> properties) {
-        config = Configurable.createConfigurable(Config.class, properties);
-        this.setAgentId(config.agentId());
+	/**
+	 * OSGi calls this method to activate a managed service.
+	 * 
+	 * @param properties
+	 *            the configuration properties
+	 */
+	@Activate
+	public void activate(final Map<String, Object> properties) {
+		config = Configurable.createConfigurable(Config.class, properties);
+		this.setAgentId(config.agentId());
 
-        LOGGER.info("Objective agent activated");
-    }
+		LOGGER.info("Objective agent activated");
+	}
 
-    /**
-     * OSGi calls this method to deactivate a managed service.
-     */
-    @Deactivate
-    public void deactivate() {
-        LOGGER.info("Objective agent deactivated");
-        this.setAgentId(null);
-    }
+	/**
+	 * OSGi calls this method to deactivate a managed service.
+	 */
+	@Deactivate
+	public void deactivate() {
+		LOGGER.info("Objective agent deactivated");
+		this.setAgentId(null);
+	}
 
-    /**
-     * This specific implementation sends a static {@link Bid} to manipulate the cluster.
-     * 
-     * {@inheritDoc}
-     */
-    @Override
-    public Bid handleAggregateBid(Bid aggregatedBid) {
-        MarketBasis marketBasis = new MarketBasis(COMMODITY_ELECTRICITY, CURRENCY_EUR, 5, -1.0d, 7.0d);
-        double[] demand = new double[] { 100.0d, 50.0d, 50.0d, 0.0d, 0.0d };
+	/**
+	 * This specific implementation sends a static {@link Bid} to manipulate the
+	 * cluster.
+	 * 
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Bid handleAggregateBid(Bid aggregatedBid) {
+		MarketBasis marketBasis = new MarketBasis(COMMODITY_ELECTRICITY,
+				CURRENCY_EUR, 5, -1.0d, 7.0d);
+		double[] demand = new double[] { 100.0d, 50.0d, 50.0d, 0.0d, 0.0d };
 
-        ArrayBid objectiveBid = new ArrayBid(marketBasis, 1, demand);
+		ArrayBid objectiveBid = new ArrayBid(marketBasis, 1, demand);
 
-        ArrayBid aggregatedObjectiveBid = objectiveBid.aggregate(aggregatedBid);
+		ArrayBid aggregatedObjectiveBid = objectiveBid.aggregate(aggregatedBid);
 
-        LOGGER.info("ObjectiveAgent: new aggregated bid: [{}] ", aggregatedObjectiveBid.getDemand());
-        return aggregatedObjectiveBid;
-    }
+		LOGGER.info("ObjectiveAgent: new aggregated bid: [{}] ",
+				aggregatedObjectiveBid.getDemand());
+		return aggregatedObjectiveBid;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void notifyPriceUpdate(PriceUpdate priceUpdate) {
-        LOGGER.info("ObjectiveAgent: received price update [{}] ", priceUpdate);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void notifyPriceUpdate(PriceUpdate priceUpdate) {
+		LOGGER.info("ObjectiveAgent: received price update [{}] ", priceUpdate);
+	}
 }

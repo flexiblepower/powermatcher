@@ -10,17 +10,17 @@ import net.powermatcher.api.monitoring.events.AgentEvent;
  */
 public class MockObserver implements AgentObserver {
 
-    private boolean hasReceivedEvent;
+	private boolean hasReceivedEvent;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void update(AgentEvent event) {
-        this.hasReceivedEvent = true;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void update(AgentEvent event) {
+		this.hasReceivedEvent = true;
+	}
 
-    public boolean hasReceivedEvent() {
-        return hasReceivedEvent;
-    }
+	public boolean hasReceivedEvent() {
+		return hasReceivedEvent;
+	}
 }
