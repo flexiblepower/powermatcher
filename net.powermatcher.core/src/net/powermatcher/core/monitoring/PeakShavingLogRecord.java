@@ -5,49 +5,123 @@ import java.util.Arrays;
 import java.util.Date;
 
 import net.powermatcher.api.data.Price;
-import net.powermatcher.api.monitoring.events.AgentEvent;
+import net.powermatcher.api.monitoring.events.PeakShavingEvent;
 
+/**
+ * {@link PeakShavingLogRecord} is an implementation of {@link LogRecord} that
+ * stores a {@link PeakShavingEvent}.
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class PeakShavingLogRecord extends LogRecord {
 
-    private double floor;
-    private double ceiling;
-    private double[] oldDemand;
-    private double[] newDemand;
-    private Price oldPrice;
-    private Price newPrice;
+	/**
+	 * Minimum power level applied in 'peak shaving'.
+	 */
+	private double floor;
 
-    public PeakShavingLogRecord(AgentEvent event, Date logTime, DateFormat dateFormat, double floor, double ceiling,
-            double[] oldDemand, double[] newDemand, Price newPrice, Price oldPrice) {
-        super(event.getClusterId(), event.getAgentId(), logTime, event.getTimestamp(), dateFormat);
-        this.floor = floor;
-        this.ceiling = ceiling;
-        this.oldDemand = Arrays.copyOf(oldDemand, oldDemand.length);
-        this.newDemand = Arrays.copyOf(newDemand, newDemand.length);
-        this.newPrice = newPrice;
-        this.oldPrice = oldPrice;
-    }
+	/**
+	 * Maximum power level applied in 'peak shaving'.
+	 */
+	private double ceiling;
 
-    public double getFloor() {
-        return floor;
-    }
+	/**
+	 * The demand array before the peakshaving.
+	 */
+	private double[] oldDemand;
 
-    public double getCeiling() {
-        return ceiling;
-    }
+	/**
+	 * The transformed demand array after the peakshaving.
+	 */
+	private double[] newDemand;
 
-    public double[] getOldDemand() {
-        return Arrays.copyOf(oldDemand, oldDemand.length);
-    }
+	/**
+	 * The {@link Price} before the peakshaving.
+	 */
+	private Price oldPrice;
 
-    public double[] getNewDemand() {
-        return Arrays.copyOf(newDemand, newDemand.length);
-    }
+	/**
+	 * The adjusted {@link Price} after the peakshaving.
+	 */
+	private Price newPrice;
 
-    public Price getOldPrice() {
-        return oldPrice;
-    }
+	/**
+	 * A constructor that creates an instance of this class.
+	 * 
+	 * @param event
+	 *            the {@link PeakShavingEvent} that needs to be logged
+	 * @param logTime
+	 *            the time the event was logged
+	 * @param dateFormat
+	 *            the {@link DateFormat} that will be used to log the
+	 *            {@link LogRecord}
+	 * @param floor
+	 *            minimum power level applied in 'peak shaving'.
+	 * @param ceiling
+	 *            maximum power level applied in 'peak shaving'.
+	 * @param oldDemand
+	 *            the demand array before the peakshaving.
+	 * @param newDemand
+	 *            the transformed demand array after the peakshaving.
+	 * @param newPrice
+	 *            the {@link Price} before the peakshaving.
+	 * @param oldPrice
+	 *            the adjusted {@link Price} after the peakshaving.
+	 */
+	public PeakShavingLogRecord(PeakShavingEvent event, Date logTime,
+			DateFormat dateFormat, double floor, double ceiling,
+			double[] oldDemand, double[] newDemand, Price newPrice,
+			Price oldPrice) {
+		super(event.getClusterId(), event.getAgentId(), logTime, event
+				.getTimestamp(), dateFormat);
+		this.floor = floor;
+		this.ceiling = ceiling;
+		this.oldDemand = Arrays.copyOf(oldDemand, oldDemand.length);
+		this.newDemand = Arrays.copyOf(newDemand, newDemand.length);
+		this.newPrice = newPrice;
+		this.oldPrice = oldPrice;
+	}
 
-    public Price getNewPrice() {
-        return newPrice;
-    }
+	/**
+	 * @return the current value of floor.
+	 */
+	public double getFloor() {
+		return floor;
+	}
+
+	/**
+	 * @return the current value of ceiling.
+	 */
+	public double getCeiling() {
+		return ceiling;
+	}
+
+	/**
+	 * @return a copy of oldDemand.
+	 */
+	public double[] getOldDemand() {
+		return Arrays.copyOf(oldDemand, oldDemand.length);
+	}
+
+	/**
+	 * @return a copy of newDemand.
+	 */
+	public double[] getNewDemand() {
+		return Arrays.copyOf(newDemand, newDemand.length);
+	}
+
+	/**
+	 * @return the current value of oldPrice.
+	 */
+	public Price getOldPrice() {
+		return oldPrice;
+	}
+
+	/**
+	 * @return the current value of newPrice.
+	 */
+	public Price getNewPrice() {
+		return newPrice;
+	}
 }

@@ -1,59 +1,122 @@
 package net.powermatcher.api.data;
 
+/**
+ * PricePoint represents a Price and the demand that goes with it.
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class PricePoint implements Comparable<PricePoint> {
-    private final Price price;
-    private final double demand;
+	/**
+	 * The {@link Price} value of this instance.
+	 */
+	private final Price price;
 
-    public PricePoint(Price price, double demand) {
-        this.price = price;
-        this.demand = demand;
-    }
+	/**
+	 * The <code>double</code> value of the demand
+	 */
+	private final double demand;
 
-    public PricePoint(MarketBasis marketBasis, double price, double demand) {
-        this(new Price(marketBasis, price), demand);
-    }
+	/**
+	 * A constructor to create an instance of PricePoint.
+	 * 
+	 * @param price
+	 *            the {@link Price} value
+	 * @param demand
+	 *            the <code>double</code> value of the demand
+	 */
+	public PricePoint(Price price, double demand) {
+		this.price = price;
+		this.demand = demand;
+	}
 
-    public Price getPrice() {
-        return price;
-    }
+	/**
+	 * A copy constructor used to create a PricePoint with a new
+	 * {@link MarketBasis}
+	 * 
+	 * @param marketBasis
+	 *            the new {@link MarketBasis}
+	 * @param price
+	 *            the {@link Price} value
+	 * @param demand
+	 *            the <code>double</code> value of the demand
+	 */
+	public PricePoint(MarketBasis marketBasis, double price, double demand) {
+		this(new Price(marketBasis, price), demand);
+	}
 
-    public double getDemand() {
-        return demand;
-    }
+	/**
+	 * @return the current value of price.
+	 */
+	public Price getPrice() {
+		return price;
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        } else if (obj == null || obj.getClass() != getClass()) {
-            return false;
-        } else {
-            PricePoint other = (PricePoint) obj;
-            return other.price.equals(price) && other.demand == demand;
-        }
-    }
+	/**
+	 * @return the current value of demand.
+	 */
+	public double getDemand() {
+		return demand;
+	}
 
-    @Override
-    public int hashCode() {
-        return 31 * price.hashCode() + Double.valueOf(demand).hashCode();
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		} else if (obj == null || obj.getClass() != getClass()) {
+			return false;
+		} else {
+			PricePoint other = (PricePoint) obj;
+			return other.price.equals(price) && other.demand == demand;
+		}
+	}
 
-    @Override
-    public String toString() {
-        return "PricePoint{" + price + ", demand = " + demand + ")";
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int hashCode() {
+		return 31 * price.hashCode() + Double.valueOf(demand).hashCode();
+	}
 
-    @Override
-    public int compareTo(PricePoint o) {
-        int cmpPrice = this.price.compareTo(o.price);
-        if (cmpPrice != 0) {
-            return cmpPrice;
-        } else if (this.demand < o.demand) {
-            return -1;
-        } else if (this.demand > o.demand) {
-            return 1;
-        } else {
-            return 0;
-        }
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String toString() {
+		return "PricePoint{" + price + ", demand = " + demand + ")";
+	}
+
+	/**
+	 * Compares this object with the specified object for order. Returns a
+	 * negative integer, zero, or a positive integer as this object is less
+	 * than, equal to, or greater than the specified object.
+	 * 
+	 * This method first compares the {@link Price} values of both
+	 * {@link PricePoint}s. Then it compares the demand values of both
+	 * instances. The one with the highest value is the greatest.
+	 * 
+	 * @param that
+	 *            The {@link PricePoint} instance you want to compare with this
+	 *            one.
+	 * 
+	 * @return a negative integer, zero, or a positive integer as this object is
+	 *         less than, equal to, or greater than the specified object.
+	 */
+	@Override
+	public int compareTo(PricePoint that) {
+		int cmpPrice = this.price.compareTo(that.price);
+		if (cmpPrice != 0) {
+			return cmpPrice;
+		} else if (this.demand < that.demand) {
+			return -1;
+		} else if (this.demand > that.demand) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
 }
