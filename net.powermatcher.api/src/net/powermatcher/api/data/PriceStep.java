@@ -1,51 +1,97 @@
 package net.powermatcher.api.data;
 
+/**
+ * This immutable data object represents a priceStepi a Powermatcher cluster.
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class PriceStep {
-    private final MarketBasis marketBasis;
-    private final int priceStep;
 
-    public PriceStep(MarketBasis marketBasis, int priceStep) {
-        if (marketBasis == null) {
-            throw new NullPointerException("marketBasis can not be null");
-        } else if (priceStep < 0 || priceStep >= marketBasis.getPriceSteps()) {
-            throw new IllegalArgumentException("PriceStep " + priceStep + " is out of bounds [0, "
-                    + marketBasis.getPriceSteps() + ")");
-        }
-        this.marketBasis = marketBasis;
-        this.priceStep = priceStep;
-    }
+	/**
+	 * The marketbasis of this cluster.
+	 */
+	private final MarketBasis marketBasis;
 
-    public MarketBasis getMarketBasis() {
-        return marketBasis;
-    }
+	/**
+	 * The value of the priceStep.
+	 */
+	private final int priceStep;
 
-    public int getPriceStep() {
-        return priceStep;
-    }
+	/**
+	 * A constructor that creates a new {@link PricePoint} instance.
+	 * 
+	 * @param marketBasis
+	 *            the marketbasis of this cluster.
+	 * @param priceStep
+	 *            the value of the priceStep.
+	 */
+	public PriceStep(MarketBasis marketBasis, int priceStep) {
+		if (marketBasis == null) {
+			throw new NullPointerException("marketBasis can not be null");
+		} else if (priceStep < 0 || priceStep >= marketBasis.getPriceSteps()) {
+			throw new IllegalArgumentException("PriceStep " + priceStep
+					+ " is out of bounds [0, " + marketBasis.getPriceSteps()
+					+ ")");
+		}
+		this.marketBasis = marketBasis;
+		this.priceStep = priceStep;
+	}
 
-    public Price toPrice() {
-        return new Price(marketBasis, marketBasis.getMinimumPrice() + priceStep * marketBasis.getPriceIncrement());
-    }
+	/**
+	 * @return the current value of marketBasis.
+	 */
+	public MarketBasis getMarketBasis() {
+		return marketBasis;
+	}
 
-    @Override
-    public int hashCode() {
-        return 16333 * marketBasis.hashCode() + 3557 * priceStep;
-    }
+	/**
+	 * @return the current value of priceStep.
+	 */
+	public int getPriceStep() {
+		return priceStep;
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        } else if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        } else {
-            PriceStep other = (PriceStep) obj;
-            return marketBasis.equals(other.marketBasis) && priceStep == other.priceStep;
-        }
-    }
+	/**
+	 * Creates a {@link Price}, based on the {@link MarketBasis} as the
+	 * priceStep
+	 * 
+	 * @return the new {@link Price}
+	 */
+	public Price toPrice() {
+		return new Price(marketBasis, marketBasis.getMinimumPrice() + priceStep
+				* marketBasis.getPriceIncrement());
+	}
 
-    @Override
-    public String toString() {
-        return "PriceStep " + Integer.toString(priceStep);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int hashCode() {
+		return 16333 * marketBasis.hashCode() + 3557 * priceStep;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		} else if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		} else {
+			PriceStep other = (PriceStep) obj;
+			return marketBasis.equals(other.marketBasis)
+					&& priceStep == other.priceStep;
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String toString() {
+		return "PriceStep " + Integer.toString(priceStep);
+	}
 }

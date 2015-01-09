@@ -15,93 +15,134 @@ import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.events.AgentEvent;
 
+/**
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class MockAgent implements Agent, AgentEndpoint, ObservableAgent {
 
-    private Map<String, Object> agentProperties;
-    private PriceUpdate lastPriceUpdate;
-    protected Session session;
-    private String desiredParentId;
+	private Map<String, Object> agentProperties;
+	private PriceUpdate lastPriceUpdate;
+	protected Session session;
+	private String desiredParentId;
 
-    private String servicePid;
+	private String servicePid;
 
-    /**
-     * Collection of {@link Observer} services.
-     */
-    private final Set<AgentObserver> observers = new CopyOnWriteArraySet<AgentObserver>();
+	/**
+	 * Collection of {@link Observer} services.
+	 */
+	private final Set<AgentObserver> observers = new CopyOnWriteArraySet<AgentObserver>();
 
-    public MockAgent(String agentId) {
-        this.agentProperties = new HashMap<String, Object>();
-        this.agentProperties.put("agentId", agentId);
-    }
+	public MockAgent(String agentId) {
+		this.agentProperties = new HashMap<String, Object>();
+		this.agentProperties.put("agentId", agentId);
+	}
 
-    @Override
-    public void connectToMatcher(Session session) {
-        this.session = session;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void connectToMatcher(Session session) {
+		this.session = session;
+	}
 
-    @Override
-    public void matcherEndpointDisconnected(Session session) {
-        this.session = null;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void matcherEndpointDisconnected(Session session) {
+		this.session = null;
+	}
 
-    @Override
-    public void updatePrice(PriceUpdate priceUpdate) {
-        this.lastPriceUpdate = priceUpdate;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void updatePrice(PriceUpdate priceUpdate) {
+		this.lastPriceUpdate = priceUpdate;
+	}
 
-    public void sendBid(Bid newBid) {
-        this.session.updateBid(newBid);
-    }
+	public void sendBid(Bid newBid) {
+		this.session.updateBid(newBid);
+	}
 
-    public PriceUpdate getLastPriceUpdate() {
-        return lastPriceUpdate;
-    }
+	/**
+	 * @return the current value of lastPriceUpdate.
+	 */
+	public PriceUpdate getLastPriceUpdate() {
+		return lastPriceUpdate;
+	}
 
-    public Map<String, Object> getAgentProperties() {
-        return agentProperties;
-    }
+	/**
+	 * @return the current value of agentProperties.
+	 */
+	public Map<String, Object> getAgentProperties() {
+		return agentProperties;
+	}
 
-    @Override
-    public String getAgentId() {
-        return (String) agentProperties.get("agentId");
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getAgentId() {
+		return (String) agentProperties.get("agentId");
+	}
 
-    @Override
-    public String getClusterId() {
-        return session == null ? null : session.getClusterId();
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getClusterId() {
+		return session == null ? null : session.getClusterId();
+	}
 
-    @Override
-    public String getDesiredParentId() {
-        return desiredParentId;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getDesiredParentId() {
+		return desiredParentId;
+	}
 
-    public void setDesiredParentId(String desiredParentId) {
-        this.desiredParentId = desiredParentId;
-    }
+	public void setDesiredParentId(String desiredParentId) {
+		this.desiredParentId = desiredParentId;
+	}
 
-    @Override
-    public void addObserver(AgentObserver observer) {
-        observers.add(observer);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void addObserver(AgentObserver observer) {
+		observers.add(observer);
+	}
 
-    @Override
-    public void removeObserver(AgentObserver observer) {
-        observers.remove(observer);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void removeObserver(AgentObserver observer) {
+		observers.remove(observer);
+	}
 
-    public Session getSession() {
-        return this.session;
-    }
+	/**
+	 * @return the current value of session.
+	 */
+	public Session getSession() {
+		return this.session;
+	}
 
-    public void publishEvent(AgentEvent event) {
-        for (AgentObserver observer : observers) {
-            observer.update(event);
-        }
-    }
+	public void publishEvent(AgentEvent event) {
+		for (AgentObserver observer : observers) {
+			observer.update(event);
+		}
+	}
 
-    @Override
-    public String getServicePid() {
-        return this.servicePid;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getServicePid() {
+		return this.servicePid;
+	}
 }

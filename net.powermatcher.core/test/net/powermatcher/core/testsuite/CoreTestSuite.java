@@ -14,10 +14,18 @@ import net.powermatcher.core.test.BidCacheTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+/**
+ * A testSuite class used to run all test in this eclipse project.
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ AuctioneerTest.class, ObjectiveAuctioneerTest.class, ConcentratorTest.class,
-        PeakShavingConcentratorTest.class, LogRecordTest.class, ObservableAgentTest.class, SessionManagerTest.class,
-        BaseDeviceAgentTest.class, BidCacheElementTest.class, BidCacheTest.class })
+@Suite.SuiteClasses({ AuctioneerTest.class, ObjectiveAuctioneerTest.class,
+		ConcentratorTest.class, PeakShavingConcentratorTest.class,
+		LogRecordTest.class, ObservableAgentTest.class,
+		SessionManagerTest.class, BaseDeviceAgentTest.class,
+		BidCacheElementTest.class, BidCacheTest.class })
 public class CoreTestSuite {
 
 }

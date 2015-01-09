@@ -4,70 +4,88 @@ import net.powermatcher.api.data.MarketBasis;
 
 /**
  * MarketBasis model class to transfer {@link MarketBasis} data over the wire.
+ * 
+ * @author FAN
+ * @version 2.0
  */
 public class MarketBasisModel {
-    /**
-     * Define the commodity (String) field.
-     */
-    private String commodity;
+	/**
+	 * Define the commodity (String) field.
+	 */
+	private String commodity;
 
-    /**
-     * Define the currency (String) field.
-     */
-    private String currency;
+	/**
+	 * Define the currency (String) field.
+	 */
+	private String currency;
 
-    /**
-     * Define the price steps (int) field.
-     */
-    private int priceSteps;
+	/**
+	 * Define the price steps (int) field.
+	 */
+	private int priceSteps;
 
-    /**
-     * Define the minimum price (double) field.
-     */
-    private double minimumPrice;
+	/**
+	 * Define the minimum price (double) field.
+	 */
+	private double minimumPrice;
 
-    /**
-     * Define the maximum price (double) field.
-     */
-    private double maximumPrice;
+	/**
+	 * Define the maximum price (double) field.
+	 */
+	private double maximumPrice;
 
-    public String getCommodity() {
-        return commodity;
-    }
+	/**
+	 * @return the current value of commodity.
+	 */
+	public String getCommodity() {
+		return commodity;
+	}
 
-    public void setCommodity(String commodity) {
-        this.commodity = commodity;
-    }
+	public void setCommodity(String commodity) {
+		this.commodity = commodity;
+	}
 
-    public String getCurrency() {
-        return currency;
-    }
+	/**
+	 * @return the current value of currency.
+	 */
+	public String getCurrency() {
+		return currency;
+	}
 
-    public void setCurrency(String currency) {
-        this.currency = currency;
-    }
+	public void setCurrency(String currency) {
+		this.currency = currency;
+	}
 
-    public int getPriceSteps() {
-        return priceSteps;
-    }
+	/**
+	 * @return the current value of priceSteps.
+	 */
+	public int getPriceSteps() {
+		return priceSteps;
+	}
 
-    public void setPriceSteps(int priceSteps) {
-        this.priceSteps = priceSteps;
-    }
+	public void setPriceSteps(int priceSteps) {
+		this.priceSteps = priceSteps;
+	}
 
-    public double getMinimumPrice() {
-        return minimumPrice;
-    }
+	/**
+	 * @return the current value of minimumPrice.
+	 */
+	public double getMinimumPrice() {
+		return minimumPrice;
+	}
 
-    public void setMinimumPrice(double minimumPrice) {
-        this.minimumPrice = minimumPrice;
-    }
+	public void setMinimumPrice(double minimumPrice) {
+		this.minimumPrice = minimumPrice;
+	}
 
-    public double getMaximumPrice() {
-        return maximumPrice;
-    }
+	/**
+	 * @return the current value of maximumPrice.
+	 */
+	public double getMaximumPrice() {
+		return maximumPrice;
+	}
 
-    public void setMaximumPrice(double maximumPrice) {
-        this.maximumPrice = maximumPrice;
-    }
+	public void setMaximumPrice(double maximumPrice) {
+		this.maximumPrice = maximumPrice;
+	}
 }
