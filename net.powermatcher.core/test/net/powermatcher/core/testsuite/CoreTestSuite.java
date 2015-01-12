@@ -21,11 +21,9 @@ import org.junit.runners.Suite;
  * @version 2.0
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ AuctioneerTest.class, ObjectiveAuctioneerTest.class,
-		ConcentratorTest.class, PeakShavingConcentratorTest.class,
-		LogRecordTest.class, ObservableAgentTest.class,
-		SessionManagerTest.class, BaseDeviceAgentTest.class,
-		BidCacheElementTest.class, BidCacheTest.class })
+@Suite.SuiteClasses({ AuctioneerTest.class, ObjectiveAuctioneerTest.class, ConcentratorTest.class,
+        PeakShavingConcentratorTest.class, LogRecordTest.class, ObservableAgentTest.class, SessionManagerTest.class,
+        BaseDeviceAgentTest.class, BidCacheElementTest.class, BidCacheTest.class })
 public class CoreTestSuite {
 
 }
