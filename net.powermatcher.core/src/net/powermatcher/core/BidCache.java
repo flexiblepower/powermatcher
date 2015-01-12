@@ -1,6 +1,7 @@
 package net.powermatcher.core;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -57,9 +58,23 @@ public class BidCache {
     private final AtomicInteger snapshotGenerator;
 
     /**
-     * A map containing all snapshot id's and their corresponding {@link BidCacheSnapshot}s
+     * The maximum allowed items in the bidCache
      */
-    private Map<Integer, BidCacheSnapshot> bidCacheHistory = new HashMap<Integer, BidCacheSnapshot>();
+    private static final int MAXENTRIES = 10;
+
+    /**
+     * A map containing all snapshot id's and their corresponding {@link BidCacheSnapshot}s. It implements
+     * {@link LinkedHashMap} and overrides removeEldestEntry to make sure the history does not get too big.
+     */
+    private Map<Integer, BidCacheSnapshot> bidCacheHistory = new LinkedHashMap<Integer, BidCacheSnapshot>(
+            MAXENTRIES * 3 / 2, 0.7f, true) {
+        private static final long serialVersionUID = -669163620418640116L;
+
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<Integer, BidCacheSnapshot> eldest) {
+            return size() > MAXENTRIES;
+        }
+    };
 
     /**
      * @param timeService
