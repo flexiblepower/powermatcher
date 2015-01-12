@@ -8,7 +8,6 @@ import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.PointBid;
-import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PricePoint;
 import net.powermatcher.api.monitoring.Qualifier;
 import net.powermatcher.api.monitoring.events.OutgoingBidEvent;

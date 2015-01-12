@@ -1,7 +1,9 @@
 package net.powermatcher.api.data;
 
 /**
- * This immutable data object represents a priceStepi a Powermatcher cluster.
+ * This immutable data object represents a priceStep and its {@link MarketBasis}. A priceStep is the index in the demand
+ * array. This is an integer and can be any value between 0 and marketbasis.priceSteps. The value 0 corresponds to the
+ * minimal price and marketbasis.priceStep - 1 corresponds to the the maximal price.
  * 
  * @author FAN
  * @version 2.0

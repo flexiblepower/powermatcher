@@ -7,7 +7,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PricePoint;
 
 /**

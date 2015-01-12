@@ -1,6 +1,5 @@
 package net.powermatcher.core.connectivity;
 
-import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.connectivity.AgentEndpointProxy;
