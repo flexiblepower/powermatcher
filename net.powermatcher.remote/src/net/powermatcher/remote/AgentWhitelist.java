@@ -115,7 +115,11 @@ public class AgentWhitelist extends HttpServlet {
 		for (Map.Entry<String, WhitelistableMatcherEndpoint> agent : concentrators
 				.entrySet()) {
 			Concentrator whiteListAgent = (Concentrator) agent.getValue();
-			whiteListAgent.setWhiteList(whiteListAgents);
+			if (whiteListAgents.contains("null")) {
+				whiteListAgent.setWhiteList(null);
+			} else {
+				whiteListAgent.setWhiteList(whiteListAgents);
+			}
 		}
 	}
 
@@ -125,7 +129,11 @@ public class AgentWhitelist extends HttpServlet {
 				.entrySet()) {
 			Concentrator whiteListAgent = (Concentrator) agent.getValue();
 			if (agentId.equals(whiteListAgent.getAgentId())) {
-				whiteListAgent.setWhiteList(whiteListAgents);
+				if (whiteListAgents.contains("null")) {
+					whiteListAgent.setWhiteList(null);
+				} else {
+					whiteListAgent.setWhiteList(whiteListAgents);
+				}
 			}
 		}
 	}

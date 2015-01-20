@@ -493,6 +493,8 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint,
 	public void setWhiteList(List<String> whiteList) {
 		if (whiteList == null) {
 			this.validAgents.clear();
+			this.validAgents.add("");
+			this.updateConfigurationAdmin();
 			return;
 		}
 
