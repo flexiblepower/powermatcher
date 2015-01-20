@@ -37,107 +37,99 @@ import com.google.gson.Gson;
 @Component(provide = Servlet.class, immediate = true)
 public class SettingsPeakShaver extends HttpServlet {
 
-	private static final long serialVersionUID = 2215458949793062542L;
+    private static final long serialVersionUID = 2215458949793062542L;
 
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(SettingsPeakShaver.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SettingsPeakShaver.class);
 
-	/**
-	 * OSGI ConfigurationAdmin, stores bundle configuration data persistently.
-	 */
-	private static ConfigurationAdmin configurationAdmin;
+    /**
+     * OSGI ConfigurationAdmin, stores bundle configuration data persistently.
+     */
+    private static ConfigurationAdmin configurationAdmin;
 
-	/**
-	 * Set remote new borders (floor and ceiling) for
-	 * {@link PeakShavingConcentrator}
-	 */
-	@Override
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
-		updateBordersPeakShaver(req, resp);
-	}
+    /**
+     * Set remote new borders (floor and ceiling) for {@link PeakShavingConcentrator}
+     */
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        updateBordersPeakShaver(req, resp);
+    }
 
-	private void updateBordersPeakShaver(HttpServletRequest req,
-			HttpServletResponse resp) {
-		ConcurrentMap<String, List<String>> settingsConcentrators = new ConcurrentHashMap<String, List<String>>();
+    private void updateBordersPeakShaver(HttpServletRequest req, HttpServletResponse resp) {
+        ConcurrentMap<String, List<String>> settingsConcentrators = new ConcurrentHashMap<String, List<String>>();
 
-		try {
-			for (Configuration c : configurationAdmin.listConfigurations(null)) {
-				Dictionary<String, Object> properties = c.getProperties();
+        try {
+            for (Configuration c : configurationAdmin.listConfigurations(null)) {
+                Dictionary<String, Object> properties = c.getProperties();
 
-				if (c.getFactoryPid()
-						.equals("net.powermatcher.core.concentrator.PeakShavingConcentrator")) {
+                if (c.getFactoryPid().equals("net.powermatcher.core.concentrator.PeakShavingConcentrator")) {
 
-					List<String> borderPeakShaver = getFloorAndCeiling(getPayload(req));
-					properties.put("floor", borderPeakShaver.get(0));
-					properties.put("ceiling", borderPeakShaver.get(1));
-					c.update(properties);
+                    List<String> borderPeakShaver = getFloorAndCeiling(getPayload(req));
+                    properties.put("floor", borderPeakShaver.get(0));
+                    properties.put("ceiling", borderPeakShaver.get(1));
+                    c.update(properties);
 
-					settingsConcentrators.put(
-							(String) properties.get("agentid"),
-							borderPeakShaver);
+                    settingsConcentrators.put((String) properties.get("agentid"), borderPeakShaver);
 
-					LOGGER.info("PeakShaver updated with floor: "
-							+ properties.get("floor") + " and ceiling: "
-							+ properties.get("ceiling"));
+                    LOGGER.info("PeakShaver updated with floor: " + properties.get("floor") + " and ceiling: "
+                            + properties.get("ceiling"));
 
-					Gson gson = new Gson();
-					resp.getWriter().print(gson.toJson(settingsConcentrators));
-				}
-			}
-		} catch (IOException e) {
-			LOGGER.error(e.getMessage());
-		} catch (InvalidSyntaxException e) {
-			LOGGER.error(e.getMessage());
-		}
-	}
+                    Gson gson = new Gson();
+                    resp.getWriter().print(gson.toJson(settingsConcentrators));
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage());
+        } catch (InvalidSyntaxException e) {
+            LOGGER.error(e.getMessage());
+        }
+    }
 
-	private List<String> getFloorAndCeiling(String payload) {
-		String floor = null;
-		String ceiling = null;
-		List<String> bordersPeakshaver = new ArrayList<String>();
+    private List<String> getFloorAndCeiling(String payload) {
+        String floor = null;
+        String ceiling = null;
+        List<String> bordersPeakshaver = new ArrayList<String>();
 
-		payload = payload.replace("[", "").replace("]", "");
-		payload = payload.replace("{", "").replace("}", "");
-		String[] newAgentsLst = payload.split(",");
+        payload = payload.replace("[", "").replace("]", "");
+        payload = payload.replace("{", "").replace("}", "");
+        String[] newAgentsLst = payload.split(",");
 
-		String strFloor = newAgentsLst[0].replace("\"", "");
-		String strCeiling = newAgentsLst[1].replace("\"", "");
+        String strFloor = newAgentsLst[0].replace("\"", "");
+        String strCeiling = newAgentsLst[1].replace("\"", "");
 
-		final Pattern pattern = Pattern.compile("-?\\d+");
-		final Matcher matcherFloor = pattern.matcher(strFloor);
+        final Pattern pattern = Pattern.compile("-?\\d+");
+        final Matcher matcherFloor = pattern.matcher(strFloor);
 
-		while (matcherFloor.find()) {
-			floor = matcherFloor.group();
-			bordersPeakshaver.add(floor);
-		}
+        while (matcherFloor.find()) {
+            floor = matcherFloor.group();
+            bordersPeakshaver.add(floor);
+        }
 
-		final Matcher matcherCeiling = pattern.matcher(strCeiling);
-		while (matcherCeiling.find()) {
-			ceiling = matcherCeiling.group();
-			bordersPeakshaver.add(ceiling);
-		}
+        final Matcher matcherCeiling = pattern.matcher(strCeiling);
+        while (matcherCeiling.find()) {
+            ceiling = matcherCeiling.group();
+            bordersPeakshaver.add(ceiling);
+        }
 
-		return bordersPeakshaver;
-	}
+        return bordersPeakshaver;
+    }
 
-	private String getPayload(HttpServletRequest req) {
-		StringBuilder buffer = new StringBuilder();
-		String line;
-		try (BufferedReader reader = req.getReader()) {
-			while ((line = reader.readLine()) != null) {
-				buffer.append(line);
-			}
-		} catch (IOException e) {
-			LOGGER.error(e.getMessage());
-		}
+    private String getPayload(HttpServletRequest req) {
+        StringBuilder buffer = new StringBuilder();
+        String line;
+        try (BufferedReader reader = req.getReader()) {
+            while ((line = reader.readLine()) != null) {
+                buffer.append(line);
+            }
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage());
+        }
 
-		return buffer.toString();
-	}
+        return buffer.toString();
+    }
 
-	@SuppressWarnings("static-access")
-	@Reference
-	protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-		this.configurationAdmin = configurationAdmin;
-	}
+    @SuppressWarnings("static-access")
+    @Reference
+    protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
+        this.configurationAdmin = configurationAdmin;
+    }
 }

@@ -367,42 +367,6 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint,
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public List<String> createWhiteList(List<String> whiteList) {
-		this.validAgents = whiteList;
-		this.updateConfigurationAdmin();
-		return this.validAgents;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public List<String> updateWhitelist(List<String> whiteList) {
-		for (String agent : whiteList) {
-			this.validAgents.add(agent);
-		}
-		this.updateConfigurationAdmin();
-		return this.validAgents;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public List<String> removeWhiteList(List<String> whiteList) {
-		for (String agent : whiteList) {
-			if (this.validAgents.contains(agent)) {
-				this.validAgents.remove(agent);
-			}
-		}
-		this.updateConfigurationAdmin();
-		return this.validAgents;
-	}
-
-	/**
 	 * Used to update the whiteListAgents property in the
 	 * {@link ConfigurationAdmin}'s properties. It is set to the current value
 	 * of validAgents.
@@ -471,14 +435,6 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint,
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public List<String> getWhiteList() {
-		return this.validAgents;
-	}
-
 	public boolean canEqual(Object other) {
 		return other instanceof Concentrator;
 	}
@@ -520,5 +476,34 @@ public class Concentrator extends BaseAgent implements MatcherEndpoint,
 						+ (this.aggregatedBids == null ? 0 : aggregatedBids
 								.hashCode()) + (this.validAgents == null ? 0
 							: validAgents.hashCode()));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public List<String> getWhiteList() {
+		return this.validAgents;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setWhiteList(List<String> whiteList) {
+		if (whiteList == null) {
+			this.validAgents.clear();
+			this.validAgents.add("");
+			this.updateConfigurationAdmin();
+			return;
+		}
+
+		for (String agent : whiteList) {
+			if (!this.validAgents.contains(agent)) {
+				this.validAgents.add(agent);
+			}
+		}
+
+		this.updateConfigurationAdmin();
 	}
 }

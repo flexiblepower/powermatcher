@@ -13,9 +13,7 @@ import org.junit.runners.Suite;
  * @version 2.0
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ ConcentratorTest.class,
-		ConcentratorResilienceTestICF.class,
-		ConcentratorResilienceTestICQ.class })
+@Suite.SuiteClasses({ ConcentratorTest.class, ConcentratorResilienceTestICF.class, ConcentratorResilienceTestICQ.class })
 public class ConcentratorTestSuite {
 
 }

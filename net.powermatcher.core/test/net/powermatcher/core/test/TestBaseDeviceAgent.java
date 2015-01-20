@@ -18,45 +18,44 @@ import net.powermatcher.core.BaseDeviceAgent;
  */
 public class TestBaseDeviceAgent extends BaseDeviceAgent {
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected Date now() {
-		return new Date();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected Date now() {
+        return new Date();
+    }
 
-	public PointBid testCreateBid(PricePoint[] pricePoints) {
-		return super.createBid(pricePoints);
-	}
+    public PointBid testCreateBid(PricePoint[] pricePoints) {
+        return super.createBid(pricePoints);
+    }
 
-	public MarketBasis testGetMarketBasis() {
-		return super.getMarketBasis();
-	}
+    public MarketBasis testGetMarketBasis() {
+        return super.getMarketBasis();
+    }
 
-	public int testGetCurrenBidNumber() {
-		return super.getCurrentBidNr();
-	}
+    public int testGetCurrenBidNumber() {
+        return super.getCurrentBidNr();
+    }
 
-	public void testSetAgentId(String agentId) {
-		super.setAgentId(agentId);
-	}
+    public void testSetAgentId(String agentId) {
+        super.setAgentId(agentId);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void updatePrice(PriceUpdate priceUpdate) {
-		publishEvent(new IncomingPriceUpdateEvent(super.getClusterId(),
-				super.getAgentId(), super.getSession().getSessionId(), now(),
-				priceUpdate, Qualifier.AGENT));
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void updatePrice(PriceUpdate priceUpdate) {
+        publishEvent(new IncomingPriceUpdateEvent(super.getClusterId(), super.getAgentId(), super.getSession()
+                .getSessionId(), now(), priceUpdate, Qualifier.AGENT));
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void doBidUpdate() {
-		// No implementation needed in this Test class.
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void doBidUpdate() {
+        // No implementation needed in this Test class.
+    }
 }

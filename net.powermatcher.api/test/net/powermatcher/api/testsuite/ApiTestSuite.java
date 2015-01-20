@@ -19,9 +19,8 @@ import org.junit.runners.Suite;
  * @version 2.0
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ ArrayBidTest.class, MarketBasisTest.class,
-		PointBidTest.class, PricePointTest.class, PriceStepTest.class,
-		PriceTest.class, PriceUpdateTest.class, AgentEventTest.class })
+@Suite.SuiteClasses({ ArrayBidTest.class, MarketBasisTest.class, PointBidTest.class, PricePointTest.class,
+        PriceStepTest.class, PriceTest.class, PriceUpdateTest.class, AgentEventTest.class })
 public class ApiTestSuite {
 
 }
