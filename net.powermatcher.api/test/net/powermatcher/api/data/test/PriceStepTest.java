@@ -18,53 +18,53 @@ import org.junit.Test;
  */
 public class PriceStepTest {
 
-	private MarketBasis marketBasis;
-	private int step;
+    private MarketBasis marketBasis;
+    private int step;
 
-	@Before
-	public void setUp() throws Exception {
-		marketBasis = new MarketBasis("electricity", "EURO", 5, 0, 10);
-		step = 4;
-	}
+    @Before
+    public void setUp() throws Exception {
+        marketBasis = new MarketBasis("electricity", "EURO", 5, 0, 10);
+        step = 4;
+    }
 
-	@Test
-	public void testHashCode() {
-		PriceStep priceStep = new PriceStep(marketBasis, step);
-		PriceStep other = new PriceStep(marketBasis, step);
-		assertThat(priceStep.hashCode(), is(equalTo(other.hashCode())));
-	}
+    @Test
+    public void testHashCode() {
+        PriceStep priceStep = new PriceStep(marketBasis, step);
+        PriceStep other = new PriceStep(marketBasis, step);
+        assertThat(priceStep.hashCode(), is(equalTo(other.hashCode())));
+    }
 
-	@Test
-	public void testConstructor() {
-		PriceStep priceStep = new PriceStep(marketBasis, step);
-		assertThat(priceStep.getMarketBasis(), is(equalTo(marketBasis)));
-		assertThat(priceStep.getPriceStep(), is(equalTo(step)));
-	}
+    @Test
+    public void testConstructor() {
+        PriceStep priceStep = new PriceStep(marketBasis, step);
+        assertThat(priceStep.getMarketBasis(), is(equalTo(marketBasis)));
+        assertThat(priceStep.getPriceStep(), is(equalTo(step)));
+    }
 
-	@Test
-	public void testToPrice() {
-		PriceStep priceStep = new PriceStep(marketBasis, step);
-		Price expected = new Price(marketBasis, 10);
-		Price price = priceStep.toPrice();
-		assertThat(price, is(equalTo(expected)));
-	}
+    @Test
+    public void testToPrice() {
+        PriceStep priceStep = new PriceStep(marketBasis, step);
+        Price expected = new Price(marketBasis, 10);
+        Price price = priceStep.toPrice();
+        assertThat(price, is(equalTo(expected)));
+    }
 
-	@Test
-	public void testEquals() {
-		PriceStep priceStep = new PriceStep(marketBasis, step);
-		PriceStep other = new PriceStep(marketBasis, step);
-		assertThat(priceStep.equals(null), is(false));
-		assertThat(priceStep.equals(priceStep), is(true));
-		assertThat(priceStep.equals(other), is(true));
-		assertThat(other.equals(priceStep), is(true));
-	}
+    @Test
+    public void testEquals() {
+        PriceStep priceStep = new PriceStep(marketBasis, step);
+        PriceStep other = new PriceStep(marketBasis, step);
+        assertThat(priceStep.equals(null), is(false));
+        assertThat(priceStep.equals(priceStep), is(true));
+        assertThat(priceStep.equals(other), is(true));
+        assertThat(other.equals(priceStep), is(true));
+    }
 
-	@Test
-	public void testToString() {
-		PriceStep priceStep = new PriceStep(marketBasis, step);
-		String string = priceStep.toString();
-		assertThat(string.startsWith("PriceStep"), is(true));
-		assertThat(string.contains(Integer.toString(step)), is(true));
-	}
+    @Test
+    public void testToString() {
+        PriceStep priceStep = new PriceStep(marketBasis, step);
+        String string = priceStep.toString();
+        assertThat(string.startsWith("PriceStep"), is(true));
+        assertThat(string.contains(Integer.toString(step)), is(true));
+    }
 
 }

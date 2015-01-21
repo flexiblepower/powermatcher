@@ -15,66 +15,65 @@ import org.slf4j.LoggerFactory;
  */
 public class ConcentratorWrapper extends Concentrator {
 
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(ConcentratorWrapper.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConcentratorWrapper.class);
 
-	private PriceUpdate lastPublishedPriceUpdate;
-	private PriceUpdate lastReceivedPriceUpdate;
-	private Bid lastReceivedBid;
-	private Bid lastPublishedBid;
+    private PriceUpdate lastPublishedPriceUpdate;
+    private PriceUpdate lastReceivedPriceUpdate;
+    private Bid lastReceivedBid;
+    private Bid lastPublishedBid;
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void updatePrice(PriceUpdate priceUpdate) {
-		this.lastReceivedPriceUpdate = priceUpdate;
-		super.updatePrice(priceUpdate);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void updatePrice(PriceUpdate priceUpdate) {
+        this.lastReceivedPriceUpdate = priceUpdate;
+        super.updatePrice(priceUpdate);
 
-		// This should reflect the check in Concentrator.updatePrice
-		if (priceUpdate != null) {
-			this.lastPublishedPriceUpdate = priceUpdate;
-		}
-	}
+        // This should reflect the check in Concentrator.updatePrice
+        if (priceUpdate != null) {
+            this.lastPublishedPriceUpdate = priceUpdate;
+        }
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void updateBid(Session session, Bid newBid) {
-		try {
-			// Exceptions can be thrown in updateBid, if so, lastPublishedBid is
-			// not set.
-			this.lastReceivedBid = newBid;
-			super.updateBid(session, newBid);
-			this.lastPublishedBid = newBid;
-		} catch (IllegalArgumentException | IllegalStateException e) {
-			LOGGER.error("Illegal argument or state in updateBid.", e);
-			throw e;
-		}
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void updateBid(Session session, Bid newBid) {
+        try {
+            // Exceptions can be thrown in updateBid, if so, lastPublishedBid is
+            // not set.
+            this.lastReceivedBid = newBid;
+            super.updateBid(session, newBid);
+            this.lastPublishedBid = newBid;
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            LOGGER.error("Illegal argument or state in updateBid.", e);
+            throw e;
+        }
+    }
 
-	public synchronized void doBidUpdate() {
-		super.doBidUpdate();
-	}
+    public synchronized void doBidUpdate() {
+        super.doBidUpdate();
+    }
 
-	public PriceUpdate getLastPublishedPriceUpdate() {
-		return this.lastPublishedPriceUpdate;
-	}
+    public PriceUpdate getLastPublishedPriceUpdate() {
+        return this.lastPublishedPriceUpdate;
+    }
 
-	public PriceUpdate getLastReceivedPriceUpdate() {
-		return this.lastReceivedPriceUpdate;
-	}
+    public PriceUpdate getLastReceivedPriceUpdate() {
+        return this.lastReceivedPriceUpdate;
+    }
 
-	public PriceUpdate getLastPrice() {
-		return this.lastPublishedPriceUpdate;
-	}
+    public PriceUpdate getLastPrice() {
+        return this.lastPublishedPriceUpdate;
+    }
 
-	public Bid getLastReceivedBid() {
-		return this.lastReceivedBid;
-	}
+    public Bid getLastReceivedBid() {
+        return this.lastReceivedBid;
+    }
 
-	public Bid getLastPublishedBid() {
-		return this.lastPublishedBid;
-	}
+    public Bid getLastPublishedBid() {
+        return this.lastPublishedBid;
+    }
 }

@@ -48,7 +48,7 @@ public class AgentWhitelist extends HttpServlet {
 	private static Map<String, WhitelistableMatcherEndpoint> concentrators = new HashMap<String, WhitelistableMatcherEndpoint>();
 
 	/**
-	 * Retreives remote all whiteList agents on {@link Concentrator} id or for
+	 * Retrieves remote all whiteList agents on {@link Concentrator} id or for
 	 * all {@link Concentrator}.
 	 */
 	@Override
@@ -69,73 +69,23 @@ public class AgentWhitelist extends HttpServlet {
 	}
 
 	/**
-	 * Create remote new whiteList with agents on {@link Concentrator} id or for
-	 * all {@link Concentrator}.
+	 * Set remote whiteList agents on {@link Concentrator} id or for all
+	 * {@link Concentrator}.
 	 */
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		ConcurrentMap<String, List<String>> whiteListAgents = null;
-		String path = req.getPathInfo();
-		String payload = getPayload(req);
-		if (path != null) {
-			// call for concentratorId
-			String agentId = getAgentParam(path);
-			whiteListAgents = createConcentratorWhiteList(
-					getPayloadAgents(payload), agentId);
-		} else {
-			// call for all concentrators
-			whiteListAgents = createWhiteList(getPayloadAgents(payload));
-		}
-		returnGson(whiteListAgents, resp);
-	}
-
-	/**
-	 * Update remote whiteList agents on {@link Concentrator} id or for all
-	 * {@link Concentrator}.
-	 */
-	@Override
-	protected void doPut(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
-		ConcurrentMap<String, List<String>> whiteListAgents = null;
 		String path = req.getPathInfo();
 		String payload = getPayload(req);
 
 		if (path != null) {
 			// call for concentratorId
 			String agentId = getAgentParam(path);
-			whiteListAgents = addConcentratorWhiteList(
-					getPayloadAgents(payload), agentId);
+			updateConcentratorWhiteList(getPayloadAgents(payload), agentId);
 		} else {
 			// call for all concentrators
-			whiteListAgents = addWhiteList(getPayloadAgents(payload));
+			updateWhiteList(getPayloadAgents(payload));
 		}
-
-		returnGson(whiteListAgents, resp);
-	}
-
-	/**
-	 * Delete remote agentId's on whiteList for {@link Concentrator} id or for
-	 * all {@link Concentrator}.
-	 */
-	@Override
-	protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
-		ConcurrentMap<String, List<String>> whiteListAgents = null;
-		String path = req.getPathInfo();
-		String payload = getPayload(req);
-
-		if (path != null) {
-			// call for concentrator
-			String agentId = getAgentParam(path);
-			whiteListAgents = deleteConcentratorWhiteList(
-					getPayloadAgents(payload), agentId);
-		} else {
-			// call for all concentrators
-			whiteListAgents = deleteWhiteList(getPayloadAgents(payload));
-		}
-
-		returnGson(whiteListAgents, resp);
 	}
 
 	private ConcurrentMap<String, List<String>> getAllAgentsWhiteList() {
@@ -161,87 +111,31 @@ public class AgentWhitelist extends HttpServlet {
 		return validAgents;
 	}
 
-	private ConcurrentMap<String, List<String>> createWhiteList(
-			List<String> whiteListAgents) {
-		ConcurrentMap<String, List<String>> validAgents = new ConcurrentHashMap<String, List<String>>();
+	private void updateWhiteList(List<String> whiteListAgents) {
 		for (Map.Entry<String, WhitelistableMatcherEndpoint> agent : concentrators
 				.entrySet()) {
 			Concentrator whiteListAgent = (Concentrator) agent.getValue();
-			validAgents.put(agent.getKey(),
-					whiteListAgent.createWhiteList(whiteListAgents));
-		}
-		return validAgents;
-	}
-
-	private ConcurrentMap<String, List<String>> createConcentratorWhiteList(
-			List<String> whiteListAgents, String agentId) {
-		ConcurrentMap<String, List<String>> validAgents = new ConcurrentHashMap<String, List<String>>();
-		for (Map.Entry<String, WhitelistableMatcherEndpoint> agent : concentrators
-				.entrySet()) {
-			Concentrator whiteListAgent = (Concentrator) agent.getValue();
-
-			if (agentId.equals(whiteListAgent.getAgentId())) {
-				validAgents.put(agent.getKey(),
-						whiteListAgent.createWhiteList(whiteListAgents));
+			if (whiteListAgents.contains("null")) {
+				whiteListAgent.setWhiteList(null);
+			} else {
+				whiteListAgent.setWhiteList(whiteListAgents);
 			}
 		}
-		return validAgents;
 	}
 
-	private ConcurrentMap<String, List<String>> addWhiteList(
-			List<String> whiteListAgents) {
-		ConcurrentMap<String, List<String>> validAgents = new ConcurrentHashMap<String, List<String>>();
+	private void updateConcentratorWhiteList(List<String> whiteListAgents,
+			String agentId) {
 		for (Map.Entry<String, WhitelistableMatcherEndpoint> agent : concentrators
 				.entrySet()) {
 			Concentrator whiteListAgent = (Concentrator) agent.getValue();
-			validAgents.put(agent.getKey(),
-					whiteListAgent.updateWhitelist(whiteListAgents));
-		}
-		return validAgents;
-	}
-
-	private ConcurrentMap<String, List<String>> addConcentratorWhiteList(
-			List<String> whiteListAgents, String agentId) {
-		ConcurrentMap<String, List<String>> validAgents = new ConcurrentHashMap<String, List<String>>();
-		for (Map.Entry<String, WhitelistableMatcherEndpoint> agent : concentrators
-				.entrySet()) {
-			Concentrator whiteListAgent = (Concentrator) agent.getValue();
-
 			if (agentId.equals(whiteListAgent.getAgentId())) {
-				validAgents.put(agent.getKey(),
-						whiteListAgent.updateWhitelist(whiteListAgents));
+				if (whiteListAgents.contains("null")) {
+					whiteListAgent.setWhiteList(null);
+				} else {
+					whiteListAgent.setWhiteList(whiteListAgents);
+				}
 			}
 		}
-
-		return validAgents;
-	}
-
-	private ConcurrentMap<String, List<String>> deleteConcentratorWhiteList(
-			List<String> whiteListAgents, String agentId) {
-		ConcurrentMap<String, List<String>> validAgents = new ConcurrentHashMap<String, List<String>>();
-		for (Map.Entry<String, WhitelistableMatcherEndpoint> agent : concentrators
-				.entrySet()) {
-			Concentrator whiteListAgent = (Concentrator) agent.getValue();
-
-			if (agentId.equals(whiteListAgent.getAgentId())) {
-				validAgents.put(agent.getKey(),
-						whiteListAgent.removeWhiteList(whiteListAgents));
-			}
-		}
-		return validAgents;
-	}
-
-	private ConcurrentMap<String, List<String>> deleteWhiteList(
-			List<String> whiteListAgents) {
-		ConcurrentMap<String, List<String>> validAgents = new ConcurrentHashMap<String, List<String>>();
-		for (Map.Entry<String, WhitelistableMatcherEndpoint> agent : concentrators
-				.entrySet()) {
-			Concentrator whiteListAgent = (Concentrator) agent.getValue();
-
-			validAgents.put(agent.getKey(),
-					whiteListAgent.removeWhiteList(whiteListAgents));
-		}
-		return validAgents;
 	}
 
 	private String getPayload(HttpServletRequest req) {
