@@ -5,9 +5,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import net.powermatcher.api.AgentEndpoint;
+import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
-import net.powermatcher.api.connectivity.AgentEndpointProxy;
-import net.powermatcher.api.connectivity.MatcherEndpointProxy;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.PriceUpdate;
@@ -23,8 +22,7 @@ import org.slf4j.LoggerFactory;
  * @author FAN
  * @version 2.0
  */
-public abstract class BaseMatcherEndpointProxy extends BaseAgent implements
-		MatcherEndpointProxy {
+public abstract class BaseMatcherEndpointProxy extends BaseAgent implements MatcherEndpoint {
 
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(BaseMatcherEndpointProxy.class);
@@ -79,25 +77,51 @@ public abstract class BaseMatcherEndpointProxy extends BaseAgent implements
 	}
 
 	/**
-	 * @param the
-	 *            new value of scheduler
+	 * @param the new value of scheduler
 	 */
 	public void setExecutorService(ScheduledExecutorService scheduler) {
 		this.scheduler = scheduler;
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Creates a {@link Session} and a connection to the remote
+	 * {@link AgentEndpointProxy}.
+	 * 
+	 * @return <code>true</code> if the connection was created successfully.
 	 */
-	@Override
+	public abstract boolean connectRemote();
+
+	/**
+	 * @return <code>true</code> if {@link Session} and the connection to the
+	 *         remote {@link AgentEndpointProxy} is active.
+	 */
+	public abstract boolean isRemoteConnected();
+
+
+	/**
+	 * Closes the {@link Session} and the connection to the remote
+	 * {@link AgentEndpointProxy}.
+	 * 
+	 * @return <code>true</code> if the disconnecting was successful.
+	 */
+	public abstract boolean disconnectRemote();
+
+	/**
+	 * @return <code>true</code> isf the local {@link Session} is not
+	 *         <code>null</code>.
+	 */
 	public boolean isLocalConnected() {
 		return this.localSession != null;
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * This method sets the {@link MarketBasis} of the local {@link Session}. It
+	 * is called when the {@link AgentEndpointProxy} communicates with this
+	 * instance.
+	 * 
+	 * @param marketBasis
+	 *            the new {@link MarketBasis}
 	 */
-	@Override
 	public void updateRemoteMarketBasis(MarketBasis marketBasis) {
 		// Sync marketbasis with local session, for new connections
 		if (this.isLocalConnected()
@@ -107,9 +131,12 @@ public abstract class BaseMatcherEndpointProxy extends BaseAgent implements
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * This method sets the clusterId of the local {@link Session}. It is called
+	 * when the {@link AgentEndpointProxy} communicates with this instance.
+	 * 
+	 * @param clusterId
+	 *            the id of the new cluster.
 	 */
-	@Override
 	public void updateRemoteClusterId(String clusterId) {
 		// Sync clusterid with local session, for new connections
 		if (this.isLocalConnected()
@@ -171,9 +198,23 @@ public abstract class BaseMatcherEndpointProxy extends BaseAgent implements
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Sends the {@link Bid} it receives through from the local
+	 * {@link AgentEndpoint} to the remote {@link AgentEndpoint} through he
+	 * {@link AgentEndpointProxy}.
+	 * 
+	 * @param newBid
+	 *            the new {@link Bid} sent by the {@link AgentEndpointProxy}.
 	 */
-	@Override
+	protected abstract void updateBidRemote(Bid newBid);
+	
+	/**
+	 * Sends the {@link PriceUpdate} it receives from the remote
+	 * {@link AgentEndpoint} through the {@link AgentEndpoint} to the local
+	 * {@link AgentEndpoint} through the local {@link Session}.
+	 * 
+	 * @param priceUpdate
+	 *            the new {@link PriceUpdate}
+	 */
 	public void updateLocalPrice(PriceUpdate priceUpdate) {
 		if (!this.isLocalConnected()) {
 			LOGGER.info("Skip price update to local agent, not connected.");
