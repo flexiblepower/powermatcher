@@ -1,9 +1,8 @@
 package net.powermatcher.core.connectivity;
 
+import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
-import net.powermatcher.api.connectivity.AgentEndpointProxy;
-import net.powermatcher.api.connectivity.MatcherEndpointProxy;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.PriceUpdate;
@@ -18,7 +17,7 @@ import org.slf4j.LoggerFactory;
  * @author FAN
  * @version 2.0
  */
-public abstract class BaseAgentEndpointProxy extends BaseAgent implements AgentEndpointProxy {
+public abstract class BaseAgentEndpointProxy extends BaseAgent implements AgentEndpoint {
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseAgentEndpointProxy.class);
 
     /**
@@ -32,17 +31,25 @@ public abstract class BaseAgentEndpointProxy extends BaseAgent implements AgentE
     private Session localSession;
 
     /**
-     * {@inheritDoc}
+     * @return <code>true</code> if the local {@link Session} is not <code>null</code>.
      */
-    @Override
     public boolean isLocalConnected() {
         return this.localSession != null;
     }
 
     /**
-     * {@inheritDoc}
+     * @return <code>true</code> if {@link Session} and the connection to the remote {@link MatcherEndpointProxy} is
+     *         active.
      */
-    @Override
+    public abstract boolean isRemoteConnected();
+
+    /**
+     * Sends the {@link Bid} it receives from the remote {@link MatcherEndpoint} through the
+     * {@link MatcherEndpointProxy} to the local {@link MatcherEndpoint} through the local {@link Session}.
+     * 
+     * @param priceUpdate
+     *            the new {@link PriceUpdate}
+     */
     public void updateLocalBid(Bid newBid) {
         if (!this.isLocalConnected()) {
             LOGGER.warn("Desired parent agent not connected, skip sendingg bid update");
@@ -110,6 +117,15 @@ public abstract class BaseAgentEndpointProxy extends BaseAgent implements AgentE
 
         this.updateRemotePrice(priceUpdate);
     }
+
+    /**
+     * Sends the {@link PriceUpdate} it receives through from the local {@link MatcherEndpoint} to the remote
+     * {@link MatcherEndpoint} through he {@link MatcherEndpointProxy}.
+     * 
+     * @param priceUpdate
+     *            the new {@link PriceUpdate}
+     */
+    public abstract void updateRemotePrice(PriceUpdate priceUpdate);
 
     public boolean canEqual(Object other) {
         return other instanceof BaseAgentEndpointProxy;

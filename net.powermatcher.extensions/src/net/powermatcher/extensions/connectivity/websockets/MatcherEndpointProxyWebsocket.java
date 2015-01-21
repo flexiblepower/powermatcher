@@ -9,7 +9,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import net.powermatcher.api.MatcherEndpoint;
-import net.powermatcher.api.connectivity.MatcherEndpointProxy;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
@@ -49,7 +48,7 @@ import com.google.gson.JsonSyntaxException;
  */
 @WebSocket()
 @Component(designateFactory = MatcherEndpointProxyWebsocket.Config.class, immediate = true, provide = {
-        ObservableAgent.class, MatcherEndpoint.class, MatcherEndpointProxy.class })
+        ObservableAgent.class, MatcherEndpoint.class, BaseMatcherEndpointProxy.class })
 public class MatcherEndpointProxyWebsocket extends BaseMatcherEndpointProxy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MatcherEndpointProxyWebsocket.class);
