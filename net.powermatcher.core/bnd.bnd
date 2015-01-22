@@ -16,6 +16,5 @@ Export-Package:  \
 	${junit},\
 	slf4j.simple,\
 	net.powermatcher.mock;version=latest,\
-	javax.websocket-api;version=1.0,\
 	osgi.cmpn,\
 	osgi.core

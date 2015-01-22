@@ -20,6 +20,7 @@ import net.powermatcher.api.Session;
 import net.powermatcher.core.sessions.SessionManager;
 import net.powermatcher.core.time.SystemTimeService;
 import net.powermatcher.mock.MockAgent;
+import net.powermatcher.mock.MockMatcherAgent;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -42,27 +43,28 @@ public class SessionManagerTest {
 	private static final String AGENT_ID = "testAgent";
 
 	private SessionManager sessionManager;
-	private Auctioneer auctioneer;
+	private MockMatcherAgent auctioneer;
 	private MockAgent testAgent;
 
 	@Before
 	public void setUp() {
-		this.auctioneer = new Auctioneer();
-		Map<String, Object> auctioneerProperties = new HashMap<String, Object>();
-		auctioneerProperties.put("agentId", AUCTIONEER_NAME);
-		auctioneerProperties.put("clusterId", CLUSTER_ID);
-		auctioneerProperties.put("matcherId", AUCTIONEER_NAME);
-		auctioneerProperties.put("commodity", "electricity");
-		auctioneerProperties.put("currency", "EUR");
-		auctioneerProperties.put("priceSteps", "11");
-		auctioneerProperties.put("minimumPrice", "0");
-		auctioneerProperties.put("maximumPrice", "10");
-		auctioneerProperties.put("bidTimeout", "600");
-		auctioneerProperties.put("priceUpdateRate", "1");
+		this.auctioneer = new MockMatcherAgent(AUCTIONEER_NAME);
+		// Map<String, Object> auctioneerProperties = new HashMap<String,
+		// Object>();
+		// auctioneerProperties.put("agentId", AUCTIONEER_NAME);
+		// auctioneerProperties.put("clusterId", CLUSTER_ID);
+		// auctioneerProperties.put("matcherId", AUCTIONEER_NAME);
+		// auctioneerProperties.put("commodity", "electricity");
+		// auctioneerProperties.put("currency", "EUR");
+		// auctioneerProperties.put("priceSteps", "11");
+		// auctioneerProperties.put("minimumPrice", "0");
+		// auctioneerProperties.put("maximumPrice", "10");
+		// auctioneerProperties.put("bidTimeout", "600");
+		// auctioneerProperties.put("priceUpdateRate", "1");
 
 		auctioneer.setExecutorService(new ScheduledThreadPoolExecutor(10));
 		auctioneer.setTimeService(new SystemTimeService());
-		auctioneer.activate(auctioneerProperties);
+		// auctioneer.activate(auctioneerProperties);
 		this.sessionManager = new SessionManager();
 
 		testAgent = new MockAgent(AGENT_ID);
@@ -101,7 +103,6 @@ public class SessionManagerTest {
 
 		Session agentSession = testAgent.getSession();
 		assertEquals(AUCTIONEER_NAME, agentSession.getMatcherId());
-		assertEquals(CLUSTER_ID, agentSession.getClusterId());
 	}
 
 	@Test
@@ -114,7 +115,6 @@ public class SessionManagerTest {
 
 		Session agentSession = testAgent.getSession();
 		assertEquals(AUCTIONEER_NAME, agentSession.getMatcherId());
-		assertEquals(CLUSTER_ID, agentSession.getClusterId());
 	}
 
 	@Test
