@@ -25,7 +25,6 @@ import aQute.bnd.annotation.component.Deactivate;
  * @author FAN
  * @version 2.0
  */
-@Component
 public class LoggingScheduler implements ScheduledExecutorService {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggingScheduler.class);
 

@@ -16,7 +16,7 @@ import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.events.AgentEvent;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
-import net.powermatcher.core.sessions.SessionImpl;
+import net.powermatcher.core.BaseDeviceAgent;
 import net.powermatcher.mock.MockMatcherAgent;
 
 import org.junit.Before;

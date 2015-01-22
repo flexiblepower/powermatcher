@@ -12,8 +12,6 @@ import net.powermatcher.api.Agent;
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
-import net.powermatcher.core.auctioneer.Auctioneer;
-import net.powermatcher.core.concentrator.Concentrator;
 
 import org.junit.experimental.theories.Theories;
 import org.osgi.framework.InvalidSyntaxException;

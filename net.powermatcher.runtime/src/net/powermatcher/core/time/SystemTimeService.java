@@ -3,7 +3,6 @@ package net.powermatcher.core.time;
 import java.util.Date;
 
 import net.powermatcher.api.TimeService;
-import aQute.bnd.annotation.component.Component;
 
 /**
  * The {@link SystemTimeService} is an implementation of the {@link TimeService} interface. The "current time" in this
@@ -12,7 +11,6 @@ import aQute.bnd.annotation.component.Component;
  * @author FAN
  * @version 2.0
  */
-@Component
 public class SystemTimeService implements TimeService {
 
     /**
