@@ -9,7 +9,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -39,7 +38,6 @@ public class SessionManagerTest {
 	public ExpectedException expectedException = ExpectedException.none();
 
 	private static final String AUCTIONEER_NAME = "auctioneer";
-	private static final String CLUSTER_ID = "testCluster";
 	private static final String AGENT_ID = "testAgent";
 
 	private SessionManager sessionManager;
@@ -49,18 +47,6 @@ public class SessionManagerTest {
 	@Before
 	public void setUp() {
 		this.auctioneer = new MockMatcherAgent(AUCTIONEER_NAME);
-		// Map<String, Object> auctioneerProperties = new HashMap<String,
-		// Object>();
-		// auctioneerProperties.put("agentId", AUCTIONEER_NAME);
-		// auctioneerProperties.put("clusterId", CLUSTER_ID);
-		// auctioneerProperties.put("matcherId", AUCTIONEER_NAME);
-		// auctioneerProperties.put("commodity", "electricity");
-		// auctioneerProperties.put("currency", "EUR");
-		// auctioneerProperties.put("priceSteps", "11");
-		// auctioneerProperties.put("minimumPrice", "0");
-		// auctioneerProperties.put("maximumPrice", "10");
-		// auctioneerProperties.put("bidTimeout", "600");
-		// auctioneerProperties.put("priceUpdateRate", "1");
 
 		auctioneer.setExecutorService(new ScheduledThreadPoolExecutor(10));
 		auctioneer.setTimeService(new SystemTimeService());
