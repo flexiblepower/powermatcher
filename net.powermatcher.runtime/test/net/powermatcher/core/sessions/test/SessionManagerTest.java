@@ -39,6 +39,7 @@ public class SessionManagerTest {
 
 	private static final String AUCTIONEER_NAME = "auctioneer";
 	private static final String AGENT_ID = "testAgent";
+	private static final String CLUSTER_ID = "testCluster";
 
 	private SessionManager sessionManager;
 	private MockMatcherAgent auctioneer;
@@ -46,7 +47,7 @@ public class SessionManagerTest {
 
 	@Before
 	public void setUp() {
-		this.auctioneer = new MockMatcherAgent(AUCTIONEER_NAME);
+		this.auctioneer = new MockMatcherAgent(AUCTIONEER_NAME, CLUSTER_ID);
 
 		auctioneer.setExecutorService(new ScheduledThreadPoolExecutor(10));
 		auctioneer.setTimeService(new SystemTimeService());
