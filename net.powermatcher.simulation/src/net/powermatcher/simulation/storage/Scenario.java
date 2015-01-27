@@ -7,15 +7,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
-import org.osgi.framework.Bundle;
-import org.osgi.framework.FrameworkUtil;
+import org.osgi.service.cm.ConfigurationAdmin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 
 public class Scenario {
-	public List<Configuration> configurations;
-	public List<Connection> connections;
-
+	private static final transient Logger logger = LoggerFactory.getLogger(Scenario.class);
+	
+	public List<ScenarioConfiguration> configurations;
+    
 	public static Scenario load(File file) throws IOException {
 		FileReader fileReader = new FileReader(file);
 		BufferedReader bufferedReader = new BufferedReader(fileReader);
@@ -47,17 +49,23 @@ public class Scenario {
 		}
 	}
 	
-	public void init() {
-		
+	public void start(ConfigurationAdmin configurationAdmin) {
+		for (ScenarioConfiguration configuration : configurations) {
+			try {
+				configuration.start(configurationAdmin);
+			} catch (Exception ex) {
+				logger.error("Could not start scenario %s: %s", configuration.factoryId, ex.getMessage());
+			}
+		}
 	}
 	
-	
-	private Bundle getBundle(String bundleId) {
-        for (Bundle bundle : FrameworkUtil.getBundle(getClass()).getBundleContext().getBundles()) {
-            if (bundleId.equals(bundle.getSymbolicName())) {
-                return bundle;
-            }
-        }
-        return null;
-    }
+	public void clean() {
+		for (ScenarioConfiguration configuration : configurations) {
+			try {
+				configuration.delete();
+			} catch (Exception ex) {
+				logger.error("Could not delete scenario %s: %s", configuration.factoryId, ex.getMessage());
+			}
+		}
+	}
 }
