@@ -11,4 +11,4 @@ Service-Component:  *
 	osgi.core;version="[4.3,5.0)",\
 	osgi.cmpn;version="[4.3,5.0)"
 Export-Package:  \
-	net.powermatcher.simulation.storage
+	net.powermatcher.scenarios

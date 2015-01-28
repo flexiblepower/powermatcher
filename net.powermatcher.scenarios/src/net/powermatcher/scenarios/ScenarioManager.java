@@ -1,4 +1,4 @@
-package net.powermatcher.simulation.storage;
+package net.powermatcher.scenarios;
 
 import java.io.File;
 import java.io.IOException;
