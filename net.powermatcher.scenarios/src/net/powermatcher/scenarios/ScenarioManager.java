@@ -28,7 +28,6 @@ public class ScenarioManager {
     private static final Logger logger = LoggerFactory.getLogger(ScenarioManager.class);
     private Config config;
     private ConfigurationAdmin configurationAdmin;
-    
     private List<Scenario> scenarios;
 
     @Activate
