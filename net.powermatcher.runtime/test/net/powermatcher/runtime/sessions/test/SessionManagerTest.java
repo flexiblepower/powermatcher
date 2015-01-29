@@ -1,4 +1,4 @@
-package net.powermatcher.core.sessions.test;
+package net.powermatcher.runtime.sessions.test;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -16,10 +16,10 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
-import net.powermatcher.core.sessions.SessionManager;
-import net.powermatcher.core.time.SystemTimeService;
 import net.powermatcher.mock.MockAgent;
 import net.powermatcher.mock.MockMatcherAgent;
+import net.powermatcher.runtime.sessions.SessionManager;
+import net.powermatcher.runtime.time.SystemTimeService;
 
 import org.junit.Before;
 import org.junit.Rule;

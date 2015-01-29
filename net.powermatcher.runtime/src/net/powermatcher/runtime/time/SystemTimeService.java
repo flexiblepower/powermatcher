@@ -1,4 +1,4 @@
-package net.powermatcher.core.time;
+package net.powermatcher.runtime.time;
 
 import java.util.Date;
 

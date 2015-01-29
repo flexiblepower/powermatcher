@@ -1,4 +1,4 @@
-package net.powermatcher.core.sessions;
+package net.powermatcher.runtime.sessions;
 
 import java.io.IOException;
 import java.util.ArrayList;

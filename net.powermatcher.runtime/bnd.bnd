@@ -10,5 +10,6 @@ Service-Component:  *
 	osgi.cmpn,\
 	osgi.core
 Private-Package:  \
-	net.powermatcher.core.sessions,\
-	net.powermatcher.core.time
+	net.powermatcher.runtime.sessions,\
+	net.powermatcher.runtime.time,\
+	net.powermatcher.runtime.agents
