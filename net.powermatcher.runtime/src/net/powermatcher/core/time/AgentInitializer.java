@@ -1,7 +1,7 @@
 package net.powermatcher.core.time;
 
+import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
 import net.powermatcher.api.Agent;
 import net.powermatcher.api.AgentEndpoint;
@@ -14,7 +14,7 @@ import aQute.bnd.annotation.component.Reference;
 @Component(immediate = true)
 public class AgentInitializer {
 
-	private Set<Agent> agents = new TreeSet<Agent>();
+	private Set<Agent> agents = new HashSet<Agent>();
 	private LoggingScheduler scheduler = new LoggingScheduler();
 	private TimeService timeService = new SystemTimeService();
 

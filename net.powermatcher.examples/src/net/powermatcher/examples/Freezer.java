@@ -1,6 +1,5 @@
 package net.powermatcher.examples;
 
-import java.util.Date;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ScheduledExecutorService;
@@ -9,7 +8,6 @@ import java.util.concurrent.TimeUnit;
 
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
-import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.PointBid;
 import net.powermatcher.api.data.Price;
@@ -26,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
-import aQute.bnd.annotation.component.Reference;
 import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
@@ -69,17 +66,6 @@ public class Freezer extends BaseDeviceAgent implements AgentEndpoint {
 	private ScheduledFuture<?> scheduledFuture;
 
 	/**
-	 * Scheduler that can schedule commands to run after a given delay, or to
-	 * execute periodically.
-	 */
-	private ScheduledExecutorService scheduler;
-
-	/**
-	 * TimeService that is used for obtaining real or simulated time.
-	 */
-	private TimeService timeService;
-
-	/**
 	 * The mimimum value of the random demand.
 	 */
 	private double minimumDemand;
@@ -89,6 +75,8 @@ public class Freezer extends BaseDeviceAgent implements AgentEndpoint {
 	 */
 	private double maximumDemand;
 
+	private Config config;
+
 	/**
 	 * OSGi calls this method to activate a managed service.
 	 * 
@@ -97,23 +85,14 @@ public class Freezer extends BaseDeviceAgent implements AgentEndpoint {
 	 */
 	@Activate
 	public void activate(Map<String, Object> properties) {
-		Config config = Configurable.createConfigurable(Config.class,
-				properties);
+		this.config = Configurable.createConfigurable(Config.class, properties);
 		this.setAgentId(config.agentId());
 		this.setDesiredParentId(config.desiredParentId());
 		this.setServicePid((String) properties.get("service.pid"));
 
 		this.minimumDemand = config.minimumDemand();
 		this.maximumDemand = config.maximumDemand();
-		scheduledFuture = scheduler.scheduleAtFixedRate(new Runnable() {
-			/**
-			 * {@inheritDoc}
-			 */
-			@Override
-			public void run() {
-				doBidUpdate();
-			}
-		}, 0, config.bidUpdateRate(), TimeUnit.SECONDS);
+
 		LOGGER.info("Agent [{}], activated", config.agentId());
 	}
 
@@ -154,33 +133,25 @@ public class Freezer extends BaseDeviceAgent implements AgentEndpoint {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public synchronized void updatePrice(PriceUpdate priceUpdate) {
+	public void updatePrice(PriceUpdate priceUpdate) {
 		LOGGER.debug("Received price update [{}], current bidNr = {}",
-				priceUpdate, getCurrentBidNr());
+				priceUpdate, getBidNumberGenerator().get());
 		publishEvent(new IncomingPriceUpdateEvent(getClusterId(), getAgentId(),
 				getSession().getSessionId(), now(), priceUpdate,
 				Qualifier.AGENT));
 	}
 
-	/**
-	 * @param the
-	 *            new {@link TimeService} value.
-	 */
-	@Override
-	public void setTimeService(TimeService timeService) {
-		this.timeService = timeService;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected Date now() {
-		return timeService.currentDate();
-	}
-
 	@Override
 	public void setExecutorService(ScheduledExecutorService executorService) {
-		this.scheduler = executorService;
+		this.executorService = executorService;
+		scheduledFuture = executorService.scheduleAtFixedRate(new Runnable() {
+			/**
+			 * {@inheritDoc}
+			 */
+			@Override
+			public void run() {
+				doBidUpdate();
+			}
+		}, 0, config.bidUpdateRate(), TimeUnit.SECONDS);
 	}
 }

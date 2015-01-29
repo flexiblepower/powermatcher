@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
-import aQute.bnd.annotation.component.Reference;
 import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
@@ -70,12 +69,6 @@ public class PVPanelAgent extends BaseDeviceAgent implements AgentEndpoint {
 	private ScheduledFuture<?> scheduledFuture;
 
 	/**
-	 * Scheduler that can schedule commands to run after a given delay, or to
-	 * execute periodically.
-	 */
-	private ScheduledExecutorService scheduler;
-
-	/**
 	 * TimeService that is used for obtaining real or simulated time.
 	 */
 	private TimeService timeService;
@@ -90,6 +83,8 @@ public class PVPanelAgent extends BaseDeviceAgent implements AgentEndpoint {
 	 */
 	private double maximumDemand;
 
+	private Config config;
+
 	/**
 	 * OSGi calls this method to activate a managed service.
 	 * 
@@ -98,23 +93,14 @@ public class PVPanelAgent extends BaseDeviceAgent implements AgentEndpoint {
 	 */
 	@Activate
 	public void activate(Map<String, Object> properties) {
-		Config config = Configurable.createConfigurable(Config.class,
-				properties);
+		this.config = Configurable.createConfigurable(Config.class, properties);
 		this.setAgentId(config.agentId());
 		this.setDesiredParentId(config.desiredParentId());
 		this.setServicePid((String) properties.get("service.pid"));
 
 		this.minimumDemand = config.minimumDemand();
 		this.maximumDemand = config.maximumDemand();
-		scheduledFuture = scheduler.scheduleAtFixedRate(new Runnable() {
-			/**
-			 * {@inheritDoc}
-			 */
-			@Override
-			public void run() {
-				doBidUpdate();
-			}
-		}, 0, config.bidUpdateRate(), TimeUnit.SECONDS);
+
 		LOGGER.info("Agent [{}], activated", config.agentId());
 	}
 
@@ -136,7 +122,7 @@ public class PVPanelAgent extends BaseDeviceAgent implements AgentEndpoint {
 	 */
 	@Override
 	protected void doBidUpdate() {
-		if (getMarketBasis() != null) {
+		if (getMarketBasis() != null && isInitialized()) {
 			double demand = minimumDemand + (maximumDemand - minimumDemand)
 					* generator.nextDouble();
 
@@ -157,7 +143,7 @@ public class PVPanelAgent extends BaseDeviceAgent implements AgentEndpoint {
 	@Override
 	public synchronized void updatePrice(PriceUpdate priceUpdate) {
 		LOGGER.debug("Received price update [{}], current bidNr = {}",
-				priceUpdate, getCurrentBidNr());
+				priceUpdate, getBidNumberGenerator());
 		publishEvent(new IncomingPriceUpdateEvent(getClusterId(), getAgentId(),
 				getSession().getSessionId(), now(), priceUpdate,
 				Qualifier.AGENT));
@@ -169,7 +155,16 @@ public class PVPanelAgent extends BaseDeviceAgent implements AgentEndpoint {
 	 */
 	@Override
 	public void setExecutorService(ScheduledExecutorService scheduler) {
-		this.scheduler = scheduler;
+		this.executorService = scheduler;
+		scheduledFuture = executorService.scheduleAtFixedRate(new Runnable() {
+			/**
+			 * {@inheritDoc}
+			 */
+			@Override
+			public void run() {
+				doBidUpdate();
+			}
+		}, 0, this.config.bidUpdateRate(), TimeUnit.SECONDS);
 	}
 
 	/**
