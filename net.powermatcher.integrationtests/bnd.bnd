@@ -16,5 +16,4 @@
 	sun.reflect
 -runvm: -ea
 Bundle-Version: 0.0.0.${tstamp}
-Test-Cases:  \
-	${classes;CONCRETE;EXTENDS;junit.framework.TestCase}
+Test-Cases: ${classes;CONCRETE;EXTENDS;junit.framework.TestCase},${classes;ANNOTATION;org.junit.Test}

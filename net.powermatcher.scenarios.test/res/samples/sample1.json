@@ -1,0 +1,12 @@
+{
+    "configurations": [
+        {
+            "bundleId": "net.powermatcher.core",
+            "factoryId": "net.powermatcher.core.auctioneer.Auctioneer",
+            "properties": {
+                "agentId": "auctioneer",
+                "clusterId": "DefaultCluster"
+            }
+        }
+    ]
+}
