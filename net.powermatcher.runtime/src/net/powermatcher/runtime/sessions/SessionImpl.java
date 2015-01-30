@@ -1,4 +1,4 @@
-package net.powermatcher.core.sessions;
+package net.powermatcher.runtime.sessions;
 
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;

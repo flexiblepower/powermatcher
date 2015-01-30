@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
-import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
@@ -31,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
-import aQute.bnd.annotation.component.Reference;
 import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
@@ -88,17 +86,6 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
 	}
 
 	/**
-	 * TimeService that is used for obtaining real or simulated time.
-	 */
-	private TimeService timeService;
-
-	/**
-	 * Scheduler that can schedule commands to run after a given delay, or to
-	 * execute periodically.
-	 */
-	private ScheduledExecutorService scheduler;
-
-	/**
 	 * A delayed result-bearing action that can be cancelled.
 	 */
 	private ScheduledFuture<?> scheduledFuture;
@@ -119,6 +106,8 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
 	 */
 	private Set<Session> sessions = new HashSet<Session>();
 
+	private Config config;
+
 	/**
 	 * OSGi calls this method to activate a managed service.
 	 * 
@@ -130,8 +119,7 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
 		// TODO marketBasis, aggregatedBids and
 		// matcherId are used in synchronized methods. Do we have do synchronize
 		// activate? It's only called once, so maybe not.
-		Config config = Configurable.createConfigurable(Config.class,
-				properties);
+		this.config = Configurable.createConfigurable(Config.class, properties);
 		this.marketBasis = new MarketBasis(config.commodity(),
 				config.currency(), config.priceSteps(), config.minimumPrice(),
 				config.maximumPrice());
@@ -140,16 +128,6 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
 		this.setServicePid((String) properties.get("service.pid"));
 		this.setClusterId(config.clusterId());
 		this.setAgentId(config.agentId());
-
-		scheduledFuture = this.scheduler.scheduleAtFixedRate(new Runnable() {
-			/**
-			 * {@inheritDoc}
-			 */
-			@Override
-			public void run() {
-				publishNewPrice();
-			}
-		}, 0, config.priceUpdateRate(), TimeUnit.SECONDS);
 	}
 
 	/**
@@ -260,20 +238,21 @@ public class Auctioneer extends BaseAgent implements MatcherEndpoint {
 
 	/**
 	 * @param the
-	 *            new {@link TimeService} implementation.
-	 */
-	@Override
-	public void setTimeService(TimeService timeService) {
-		this.timeService = timeService;
-	}
-
-	/**
-	 * @param the
 	 *            new {@link ScheduledExecutorService} implementation.
 	 */
 	@Override
 	public void setExecutorService(ScheduledExecutorService scheduler) {
-		this.scheduler = scheduler;
+		this.executorService = scheduler;
+		scheduledFuture = this.executorService.scheduleAtFixedRate(
+				new Runnable() {
+					/**
+					 * {@inheritDoc}
+					 */
+					@Override
+					public void run() {
+						publishNewPrice();
+					}
+				}, 0, config.priceUpdateRate(), TimeUnit.SECONDS);
 	}
 
 	/**

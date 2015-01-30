@@ -1,6 +1,5 @@
 package net.powermatcher.core;
 
-import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.powermatcher.api.AgentEndpoint;
@@ -18,152 +17,170 @@ import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
  * @author FAN
  * @version 2.0
  */
-public abstract class BaseDeviceAgent extends BaseAgent implements AgentEndpoint, Comparable<BaseDeviceAgent> {
-    private final AtomicInteger bidNumberGenerator = new AtomicInteger();
+public abstract class BaseDeviceAgent extends BaseAgent implements
+		AgentEndpoint, Comparable<BaseDeviceAgent> {
 
-    /**
-     * The last {@link Bid} received by this BaseDeviceAgent
-     */
-    private Bid lastBid;
+	private AtomicInteger bidNumberGenerator;
 
-    /**
-     * The current {@link Session} this BaseDeviceAgent is linked in.
-     */
-    private Session session;
+	/**
+	 * The last {@link Bid} received by this BaseDeviceAgent
+	 */
+	private Bid lastBid;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final synchronized void connectToMatcher(Session session) {
-        this.session = session;
-    }
+	/**
+	 * The current {@link Session} this BaseDeviceAgent is linked in.
+	 */
+	private Session session;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final synchronized void matcherEndpointDisconnected(Session session) {
-        this.session = null;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public final synchronized void connectToMatcher(Session session) {
+		this.session = session;
+		this.bidNumberGenerator = new AtomicInteger(0);
+	}
 
-    /**
-     * @return the current value of session.
-     */
-    public final Session getSession() {
-        return session;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public final synchronized void matcherEndpointDisconnected(Session session) {
+		this.session = null;
+		this.bidNumberGenerator = null;
+	}
 
-    /**
-     * @return the current value of the marketBasis of the session.
-     */
-    protected final synchronized MarketBasis getMarketBasis() {
-        if (session == null) {
-            return null;
-        } else {
-            return session.getMarketBasis();
-        }
-    }
+	/**
+	 * @return the current value of session.
+	 */
+	public synchronized final Session getSession() {
+		return session;
+	}
 
-    /**
-     * Creates a new {@link PointBid}, based on the parameter, {@link MarketBasis} and a new nidnumber.
-     * 
-     * @param pricePoints
-     *            The {@link PricePoint} array, used to create the {@link PointBid}
-     * @return A new {@link PointBid}
-     */
-    protected final synchronized PointBid createBid(PricePoint... pricePoints) {
-        if (session == null) {
-            return null;
-        } else {
-            return new PointBid(session.getMarketBasis(), bidNumberGenerator.incrementAndGet(), pricePoints);
-        }
-    }
+	/**
+	 * @return the current value of the marketBasis of the session.
+	 */
+	protected final MarketBasis getMarketBasis() {
+		Session session = getSession();
+		if (session == null) {
+			return null;
+		} else {
+			return session.getMarketBasis();
+		}
+	}
 
-    /**
-     * @return the current value of lastBid.
-     */
-    public final Bid getLastBid() {
-        return lastBid;
-    }
+	/**
+	 * Creates a new {@link PointBid}, based on the parameter,
+	 * {@link MarketBasis} and a new nidnumber.
+	 * 
+	 * @param pricePoints
+	 *            The {@link PricePoint} array, used to create the
+	 *            {@link PointBid}
+	 * @return A new {@link PointBid}
+	 */
+	protected final PointBid createBid(PricePoint... pricePoints) {
+		Session session = getSession();
+		if (session == null) {
+			return null;
+		} else {
+			return new PointBid(session.getMarketBasis(),
+					bidNumberGenerator.incrementAndGet(), pricePoints);
+		}
+	}
 
-    /**
-     * Handles a new {@link Bid} being created by the subclasses.
-     * 
-     * @param newBid
-     */
-    public final synchronized void publishBid(Bid newBid) {
-        if (session != null) {
-            lastBid = newBid;
-            session.updateBid(newBid);
-            publishEvent(new OutgoingBidEvent(getClusterId(), getAgentId(), session.getSessionId(), now(), newBid,
-                    Qualifier.AGENT));
-        }
-    }
+	/**
+	 * @return the current value of lastBid.
+	 */
+	public final Bid getLastBid() {
+		return lastBid;
+	}
 
-    /**
-     * @return creates a new threadsafe bidNumber.
-     */
-    protected int getCurrentBidNr() {
-        return bidNumberGenerator.get();
-    }
+	/**
+	 * Handles a new {@link Bid} being created by the subclasses.
+	 * 
+	 * @param newBid
+	 */
+	public final void publishBid(Bid newBid) {
+		Session session = getSession();
+		if (session != null) {
+			lastBid = newBid;
+			session.updateBid(newBid);
+			publishEvent(new OutgoingBidEvent(getClusterId(), getAgentId(),
+					session.getSessionId(), now(), newBid, Qualifier.AGENT));
+		}
+	}
 
-    /**
-     * Returns the current time in a {@link Date} object.
-     * 
-     * @return A {@link Date} object, representing the current date and time
-     */
-    protected abstract Date now();
+	/**
+	 * @return returns the bid number generator
+	 */
+	protected AtomicInteger getBidNumberGenerator() {
+		return bidNumberGenerator;
+	}
 
-    /**
-     * Contains the logic to create a new {@link Bid} and then calls {@link BaseDeviceAgent}{@link #publishBid(Bid)}
-     */
-    protected abstract void doBidUpdate();
+	/**
+	 * Contains the logic to create a new {@link Bid} and then calls
+	 * {@link BaseDeviceAgent}{@link #publishBid(Bid)}
+	 */
+	protected abstract void doBidUpdate();
 
-    /**
-     * Compares this object with the specified object for order. Returns a negative integer, zero, or a positive integer
-     * as this object is less than, equal to, or greater than the specified object.
-     * 
-     * This method compares the agentId values of both instances. They are compared alphabetically.
-     * 
-     * @param that
-     *            The {@link PricePoint} instance you want to compare with this one.
-     * 
-     * @return a negative integer, zero, or a positive integer as this object is less than, equal to, or greater than
-     *         the specified object.
-     */
-    @Override
-    public int compareTo(BaseDeviceAgent that) {
-        return getAgentId().compareTo(that.getAgentId());
-    }
+	/**
+	 * Compares this object with the specified object for order. Returns a
+	 * negative integer, zero, or a positive integer as this object is less
+	 * than, equal to, or greater than the specified object.
+	 * 
+	 * This method compares the agentId values of both instances. They are
+	 * compared alphabetically.
+	 * 
+	 * @param that
+	 *            The {@link PricePoint} instance you want to compare with this
+	 *            one.
+	 * 
+	 * @return a negative integer, zero, or a positive integer as this object is
+	 *         less than, equal to, or greater than the specified object.
+	 */
+	@Override
+	public int compareTo(BaseDeviceAgent that) {
+		return getAgentId().compareTo(that.getAgentId());
+	}
 
-    public boolean canEqual(Object other) {
-        return other instanceof BaseDeviceAgent;
-    }
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime
+				* result
+				+ ((bidNumberGenerator == null) ? 0 : bidNumberGenerator
+						.hashCode());
+		result = prime * result + ((lastBid == null) ? 0 : lastBid.hashCode());
+		result = prime * result + ((session == null) ? 0 : session.hashCode());
+		return result;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean equals(Object obj) {
-        BaseDeviceAgent other = (BaseDeviceAgent) ((obj instanceof BaseDeviceAgent) ? obj : null);
-        if (other == null) {
-            return false;
-        }
-
-        if (this == other) {
-            return true;
-        }
-
-        return this.canEqual(other) && super.equals(other) && this.lastBid.equals(other.lastBid);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int hashCode() {
-        return 211 * (super.hashCode() + lastBid.hashCode() + session.hashCode());
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		BaseDeviceAgent other = (BaseDeviceAgent) obj;
+		if (bidNumberGenerator == null) {
+			if (other.bidNumberGenerator != null)
+				return false;
+		} else if (!bidNumberGenerator.equals(other.bidNumberGenerator))
+			return false;
+		if (lastBid == null) {
+			if (other.lastBid != null)
+				return false;
+		} else if (!lastBid.equals(other.lastBid))
+			return false;
+		if (session == null) {
+			if (other.session != null)
+				return false;
+		} else if (!session.equals(other.session))
+			return false;
+		return true;
+	}
 
 }
