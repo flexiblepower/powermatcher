@@ -1,6 +1,5 @@
 package net.powermatcher.runtime.sessions;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,8 +13,6 @@ import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 
 import org.junit.experimental.theories.Theories;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,13 +26,13 @@ import aQute.bnd.annotation.component.Reference;
  * This class represents a {@link SessionManager} component which will store the active sessions between an an
  * {@link AgentEndpoint} and a {@link MatcherEndpoint} object.
  * </p>
- * 
+ *
  * <p>
  * It is responsible for connecting and disconnecting an {@link Auctioneer}, {@link Concentrator} and agents. In
  * <code>activeSessions</code> the {@link Session} will be stored. The {@link SessionManager} will connect a
  * {@link MatcherEndpoint} to an agent and an {@link AgentEndpoint} with a {@link MatcherEndpoint}.
  * </p>
- * 
+ *
  * @author FAN
  * @version 2.0
  */
@@ -47,22 +44,22 @@ public class SessionManager {
     /**
      * Holds the agentEndpoints
      */
-    private ConcurrentMap<String, AgentEndpoint> agentEndpoints = new ConcurrentHashMap<String, AgentEndpoint>();
+    private final ConcurrentMap<String, AgentEndpoint> agentEndpoints = new ConcurrentHashMap<String, AgentEndpoint>();
 
     /**
      * Holds the matcherEndpoints
      */
-    private ConcurrentMap<String, MatcherEndpoint> matcherEndpoints = new ConcurrentHashMap<String, MatcherEndpoint>();
+    private final ConcurrentMap<String, MatcherEndpoint> matcherEndpoints = new ConcurrentHashMap<String, MatcherEndpoint>();
 
     /**
      * Holds the activeSessions
      */
-    private Map<String, Session> activeSessions = new ConcurrentHashMap<String, Session>();
+    private final Map<String, Session> activeSessions = new ConcurrentHashMap<String, Session>();
 
     /**
      * Holds the desiredConnections
      */
-    private Map<String, String> desiredConnections = new ConcurrentHashMap<String, String>();
+    private final Map<String, String> desiredConnections = new ConcurrentHashMap<String, String>();
 
     /**
      * Holds the agentId's in the cluster
@@ -76,7 +73,7 @@ public class SessionManager {
 
     @Reference(dynamic = true, multiple = true, optional = true)
     public void addAgentEndpoint(AgentEndpoint agentEndpoint) {
-        Agent agent = (Agent) agentEndpoint;
+        Agent agent = agentEndpoint;
         String agentId = agent.getAgentId();
 
         if (isNotUniqueAgentId(agentId, agentEndpoint, null)) {
@@ -101,7 +98,7 @@ public class SessionManager {
 
     /**
      * OSGi calls this method to activate a managed service.
-     * 
+     *
      * @param properties
      *            the configuration properties
      */
@@ -112,13 +109,13 @@ public class SessionManager {
 
     /**
      * Adds a {@link MatcherEndpoint} to the matcherEndpoints map. It will also check if the agentId is unique.
-     * 
+     *
      * @param matcherEndpoint
      *            the new {@link MatcherEndpoint}
      */
     @Reference(dynamic = true, multiple = true, optional = true)
     public void addMatcherEndpoint(MatcherEndpoint matcherEndpoint) {
-        Agent agent = (Agent) matcherEndpoint;
+        Agent agent = matcherEndpoint;
         String agentId = agent.getAgentId();
 
         if (isNotUniqueAgentId(agentId, null, matcherEndpoint)) {
@@ -169,12 +166,12 @@ public class SessionManager {
 
     /**
      * Removes the given {@link AgentEndpoint} from agentEndpoints.
-     * 
+     *
      * @param agentEndpoint
      *            the {@link AgentEndpoint} that will be removed.
      */
     public void removeAgentEndpoint(AgentEndpoint agentEndpoint) {
-        Agent agent = (Agent) agentEndpoint;
+        Agent agent = agentEndpoint;
         String agentId = agent.getAgentId();
         if (agentId != null && agentEndpoints.get(agentId) == agentEndpoint) {
             agentEndpoints.remove(agentId);
@@ -186,7 +183,7 @@ public class SessionManager {
 
     /**
      * Checks to see if the new agentId already exists in {@link Theories} cluster.
-     * 
+     *
      * @param agentId
      *            the agentId of {@link Agent} that has to be checked for uniqueness.
      * @param agentEndpoint
@@ -218,7 +215,7 @@ public class SessionManager {
 
     /**
      * Removes a managed service from OSGi with the {@link ConfigurationAdmin}.
-     * 
+     *
      * @param AgentId
      *            the agentId of the managed service that will be removed
      * @param agentEndpoint
@@ -227,35 +224,35 @@ public class SessionManager {
      *            the {@link MatcherEndpoint} if this is an {@link MatcherEndpoint}, <code>null</code> if not.
      */
     private void deleteAgentId(String AgentId, AgentEndpoint agentEndpoint, MatcherEndpoint matcherEndpoint) {
-        String pidOldAgentEndpoint;
-        try {
-            for (Configuration c : configurationAdmin.listConfigurations(null)) {
-                if (agentEndpoint != null) {
-                    pidOldAgentEndpoint = agentEndpoint.getServicePid();
-                } else {
-                    pidOldAgentEndpoint = matcherEndpoint.getServicePid();
-                }
-                String pidConfigAgentEndpoint = (String) c.getProperties().get("service.pid");
-                if ((agentEndpoint.getAgentId().equals((String) c.getProperties().get("agentId")))
-                        && (!pidOldAgentEndpoint.equals(pidConfigAgentEndpoint))) {
-                    LOGGER.error("AgentId " + agentEndpoint.getAgentId() + "was already registered.");
-                    c.delete();
-                }
-            }
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage());
-        } catch (InvalidSyntaxException e) {
-            LOGGER.error(e.getMessage());
-        }
+        // String pidOldAgentEndpoint;
+        // try {
+        // for (Configuration c : configurationAdmin.listConfigurations(null)) {
+        // if (agentEndpoint != null) {
+        // pidOldAgentEndpoint = agentEndpoint.getServicePid();
+        // } else {
+        // pidOldAgentEndpoint = matcherEndpoint.getServicePid();
+        // }
+        // String pidConfigAgentEndpoint = (String) c.getProperties().get("service.pid");
+        // if ((agentEndpoint.getAgentId().equals((String) c.getProperties().get("agentId")))
+        // && (!pidOldAgentEndpoint.equals(pidConfigAgentEndpoint))) {
+        // LOGGER.error("AgentId " + agentEndpoint.getAgentId() + "was already registered.");
+        // c.delete();
+        // }
+        // }
+        // } catch (IOException e) {
+        // LOGGER.error(e.getMessage());
+        // } catch (InvalidSyntaxException e) {
+        // LOGGER.error(e.getMessage());
+        // }
     }
 
     /**
      * Removes the given {@link MatcherEndpoint} from matcherEndpoints.
-     * 
+     *
      * @param matcherEndpoint
      */
     public void removeMatcherEndpoint(MatcherEndpoint matcherEndpoint) {
-        Agent agent = (Agent) matcherEndpoint;
+        Agent agent = matcherEndpoint;
         String matcherId = agent.getAgentId();
 
         if (matcherId != null && matcherEndpoints.get(matcherId) == matcherEndpoint) {
@@ -266,7 +263,7 @@ public class SessionManager {
 
     /**
      * This is called by a {@link Session} when it disconnects.
-     * 
+     *
      * @param sessionImpl
      */
     void disconnected(SessionImpl sessionImpl) {

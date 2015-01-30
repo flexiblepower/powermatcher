@@ -27,11 +27,6 @@ public interface Agent {
     String getDesiredParentId();
 
     /**
-     * @return the service Pid of the managed service of this instance in the OSGi container.
-     */
-    String getServicePid();
-
-    /**
      * Give the agent a reference to a {@link TimeService}. This should be done by the runtime bundle after the
      * component is activated.
      *

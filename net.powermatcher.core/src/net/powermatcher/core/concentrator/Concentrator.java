@@ -132,7 +132,7 @@ public class Concentrator
     @Activate
     public void activate(final Map<String, Object> properties) {
         config = Configurable.createConfigurable(Config.class, properties);
-        setServicePid((String) properties.get("service.pid"));
+        servicePid = (String) properties.get("service.pid");
         setAgentId(config.agentId());
         setDesiredParentId(config.desiredParentId());
         setWhiteListAgents(config.whiteListAgents());
@@ -357,7 +357,7 @@ public class Concentrator
     private synchronized void updateConfigurationAdmin() {
         try {
             Configuration config = configurationAdmin
-                                                     .getConfiguration(getServicePid());
+                                                     .getConfiguration(servicePid);
 
             Dictionary<String, Object> properties = config.getProperties();
             properties.put("whiteListAgents", validAgents);
@@ -428,50 +428,6 @@ public class Concentrator
         }
     }
 
-    @Override
-    public boolean canEqual(Object other) {
-        return other instanceof Concentrator;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean equals(Object obj) {
-        Concentrator other = (Concentrator) ((obj instanceof Concentrator) ? obj
-                                                                          : null);
-        if (other == null) {
-            return false;
-        }
-
-        if (this == other) {
-            return true;
-        }
-
-        // TODO Find a better way to implement this equals.
-        // This ones fails when any field is null
-        return aggregatedBids.equals(other.aggregatedBids)
-               && sessionToMatcher.equals(other.sessionToMatcher)
-               && aggregatedBids.equals(other.aggregatedBids)
-               && sessionToAgents.equals(other.sessionToAgents)
-               && validAgents.equals(other.validAgents);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int hashCode() {
-        return super.hashCode()
-               + 211
-               * ((aggregatedBids == null ? 0 : aggregatedBids.hashCode())
-                  + (servicePid == null ? 0 : servicePid.hashCode())
-                  + sessionToMatcher.hashCode()
-                  + (aggregatedBids == null ? 0 : aggregatedBids
-                                                                .hashCode()) + (validAgents == null ? 0
-                                                                                                   : validAgents.hashCode()));
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -500,4 +456,5 @@ public class Concentrator
 
         updateConfigurationAdmin();
     }
+
 }

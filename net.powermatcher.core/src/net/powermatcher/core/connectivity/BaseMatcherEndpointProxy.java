@@ -203,34 +203,4 @@ public abstract class BaseMatcherEndpointProxy
         localSession.updatePrice(priceUpdate);
     }
 
-    @Override
-    public boolean canEqual(Object other) {
-        return other instanceof BaseMatcherEndpointProxy;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean equals(Object obj) {
-        BaseMatcherEndpointProxy that = (BaseMatcherEndpointProxy) ((obj instanceof BaseMatcherEndpointProxy) ? obj
-                                                                                                             : null);
-        if (that == null) {
-            return false;
-        }
-
-        if (this == that) {
-            return true;
-        }
-
-        return canEqual(that) && localSession.equals(that.localSession);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int hashCode() {
-        return 211 * (localSession.hashCode());
-    }
 }

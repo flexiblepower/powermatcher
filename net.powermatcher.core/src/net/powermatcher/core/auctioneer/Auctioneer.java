@@ -125,7 +125,6 @@ public class Auctioneer
                                       config.maximumPrice());
         aggregatedBids = new BidCache(timeService,
                                       config.bidTimeout());
-        setServicePid((String) properties.get("service.pid"));
         setClusterId(config.clusterId());
         setAgentId(config.agentId());
     }
@@ -262,37 +261,4 @@ public class Auctioneer
         return aggregatedBids;
     }
 
-    @Override
-    public boolean canEqual(Object other) {
-        return other instanceof Auctioneer;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean equals(Object obj) {
-        Auctioneer that = (Auctioneer) ((obj instanceof Auctioneer) ? obj
-                                                                   : null);
-        if (that == null) {
-            return false;
-        }
-
-        if (this == that) {
-            return true;
-        }
-
-        return canEqual(that)
-               && aggregatedBids.equals(that.aggregatedBids)
-               && marketBasis.equals(that.marketBasis)
-               && sessions.equals(that.sessions);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int hashCode() {
-        return 211 * (aggregatedBids.hashCode() + marketBasis.hashCode());
-    }
 }

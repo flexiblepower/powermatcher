@@ -13,11 +13,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Base implementation for remote agents. This is the "receiving end" of a remote communication pair.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
-public abstract class BaseAgentEndpointProxy extends BaseAgent implements AgentEndpoint {
+public abstract class BaseAgentEndpointProxy
+    extends BaseAgent
+    implements AgentEndpoint {
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseAgentEndpointProxy.class);
 
     /**
@@ -34,7 +36,7 @@ public abstract class BaseAgentEndpointProxy extends BaseAgent implements AgentE
      * @return <code>true</code> if the local {@link Session} is not <code>null</code>.
      */
     public boolean isLocalConnected() {
-        return this.localSession != null;
+        return localSession != null;
     }
 
     /**
@@ -46,17 +48,17 @@ public abstract class BaseAgentEndpointProxy extends BaseAgent implements AgentE
     /**
      * Sends the {@link Bid} it receives from the remote {@link MatcherEndpoint} through the
      * {@link MatcherEndpointProxy} to the local {@link MatcherEndpoint} through the local {@link Session}.
-     * 
+     *
      * @param priceUpdate
      *            the new {@link PriceUpdate}
      */
     public void updateLocalBid(Bid newBid) {
-        if (!this.isLocalConnected()) {
+        if (!isLocalConnected()) {
             LOGGER.warn("Desired parent agent not connected, skip sendingg bid update");
             return;
         }
 
-        this.localSession.updateBid(newBid);
+        localSession.updateBid(newBid);
         return;
     }
 
@@ -72,15 +74,15 @@ public abstract class BaseAgentEndpointProxy extends BaseAgent implements AgentE
      * @return the current value of the matcherEndpointProxyId.
      */
     public String getMatcherEndpointProxyId() {
-        return this.matcherEndpointProxyId;
+        return matcherEndpointProxyId;
     }
 
     /**
      * @return the {@link MarketBasis} of the local {@link Session}
      */
     public MarketBasis getLocalMarketBasis() {
-        if (this.isLocalConnected()) {
-            return this.localSession.getMarketBasis();
+        if (isLocalConnected()) {
+            return localSession.getMarketBasis();
         }
 
         return null;
@@ -91,8 +93,8 @@ public abstract class BaseAgentEndpointProxy extends BaseAgent implements AgentE
      */
     @Override
     public void connectToMatcher(Session session) {
-        this.setClusterId(session.getClusterId());
-        this.localSession = session;
+        setClusterId(session.getClusterId());
+        localSession = session;
     }
 
     /**
@@ -100,7 +102,7 @@ public abstract class BaseAgentEndpointProxy extends BaseAgent implements AgentE
      */
     @Override
     public void matcherEndpointDisconnected(Session session) {
-        this.localSession = null;
+        localSession = null;
     }
 
     /**
@@ -108,52 +110,23 @@ public abstract class BaseAgentEndpointProxy extends BaseAgent implements AgentE
      */
     @Override
     public synchronized void handlePriceUpdate(PriceUpdate priceUpdate) {
-        if (!this.isRemoteConnected()) {
+        if (!isRemoteConnected()) {
             LOGGER.warn("Remote agent not connected, skip sending price update");
             return;
         }
 
         LOGGER.info("Sending price update to remote agent {}", priceUpdate);
 
-        this.updateRemotePrice(priceUpdate);
+        updateRemotePrice(priceUpdate);
     }
 
     /**
      * Sends the {@link PriceUpdate} it receives through from the local {@link MatcherEndpoint} to the remote
      * {@link MatcherEndpoint} through he {@link MatcherEndpointProxy}.
-     * 
+     *
      * @param priceUpdate
      *            the new {@link PriceUpdate}
      */
     public abstract void updateRemotePrice(PriceUpdate priceUpdate);
 
-    public boolean canEqual(Object other) {
-        return other instanceof BaseAgentEndpointProxy;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean equals(Object obj) {
-        BaseAgentEndpointProxy that = (BaseAgentEndpointProxy) ((obj instanceof BaseAgentEndpointProxy) ? obj : null);
-        if (that == null) {
-            return false;
-        }
-
-        if (this == that) {
-            return true;
-        }
-
-        return canEqual(that) && this.localSession.equals(that.localSession)
-                && this.matcherEndpointProxyId.equals(that.matcherEndpointProxyId);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int hashCode() {
-        return 211 * (this.localSession.hashCode() + this.matcherEndpointProxyId.hashCode());
-    }
 }
