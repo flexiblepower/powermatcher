@@ -53,7 +53,7 @@ public class AuctioneerWrapper extends Auctioneer {
     @Override
     public synchronized void updateBid(Session session, Bid newBid) {
         this.lastReceivedBid = newBid;
-        super.updateBid(session, newBid);
+        super.handleBidUpdate(session, newBid);
     }
 
     public Bid getAggregatedBid(MarketBasis marketBasis) {

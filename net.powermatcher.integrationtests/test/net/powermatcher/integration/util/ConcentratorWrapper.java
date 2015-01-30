@@ -28,7 +28,7 @@ public class ConcentratorWrapper extends Concentrator {
     @Override
     public void updatePrice(PriceUpdate priceUpdate) {
         this.lastReceivedPriceUpdate = priceUpdate;
-        super.updatePrice(priceUpdate);
+        super.handlePriceUpdate(priceUpdate);
 
         // This should reflect the check in Concentrator.updatePrice
         if (priceUpdate != null) {
@@ -45,7 +45,7 @@ public class ConcentratorWrapper extends Concentrator {
             // Exceptions can be thrown in updateBid, if so, lastPublishedBid is
             // not set.
             this.lastReceivedBid = newBid;
-            super.updateBid(session, newBid);
+            super.handleBidUpdate(session, newBid);
             this.lastPublishedBid = newBid;
         } catch (IllegalArgumentException | IllegalStateException e) {
             LOGGER.error("Illegal argument or state in updateBid.", e);

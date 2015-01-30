@@ -133,7 +133,7 @@ public class Freezer extends BaseDeviceAgent implements AgentEndpoint {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void updatePrice(PriceUpdate priceUpdate) {
+	public void handlePriceUpdate(PriceUpdate priceUpdate) {
 		LOGGER.debug("Received price update [{}], current bidNr = {}",
 				priceUpdate, getBidNumberGenerator().get());
 		publishEvent(new IncomingPriceUpdateEvent(getClusterId(), getAgentId(),

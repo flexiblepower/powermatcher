@@ -176,7 +176,7 @@ public class ConcentratorTest {
 		exception.expect(IllegalStateException.class);
 		exception.expectMessage("No session found");
 		Concentrator concentrator = new Concentrator();
-		concentrator.updateBid(null, new ArrayBid.Builder(marketBasis)
+		concentrator.handleBidUpdate(null, new ArrayBid.Builder(marketBasis)
 				.setDemand(0).build());
 	}
 
@@ -205,7 +205,7 @@ public class ConcentratorTest {
 		exception.expect(IllegalArgumentException.class);
 		exception
 				.expectMessage("Marketbasis new bid differs from marketbasis auctioneer");
-		concentrator.updateBid(mockAgent.getSession(), new ArrayBid.Builder(
+		concentrator.handleBidUpdate(mockAgent.getSession(), new ArrayBid.Builder(
 				new MarketBasis("a", "b", 2, 0, 2)).setDemand(0).build());
 	}
 
@@ -244,7 +244,7 @@ public class ConcentratorTest {
 	public void testUpdatePriceNull() {
 		exception.expect(IllegalArgumentException.class);
 		exception.expectMessage("Price cannot be null");
-		concentrator.updatePrice(null);
+		concentrator.handlePriceUpdate(null);
 	}
 
 	@Test
@@ -277,8 +277,8 @@ public class ConcentratorTest {
 		PriceUpdate expected = new PriceUpdate(new Price(marketBasis, 5.0),
 				bidNumber);
 		PriceUpdate error = new PriceUpdate(new Price(marketBasis, 6.0), 2);
-		concentrator.updatePrice(expected);
-		concentrator.updatePrice(error);
+		concentrator.handlePriceUpdate(expected);
+		concentrator.handlePriceUpdate(error);
 		assertThat(mockAgent.getLastPriceUpdate().getBidNumber(),
 				is(equalTo(bidNumber)));
 		assertThat(mockAgent.getLastPriceUpdate(), is(equalTo(expected)));

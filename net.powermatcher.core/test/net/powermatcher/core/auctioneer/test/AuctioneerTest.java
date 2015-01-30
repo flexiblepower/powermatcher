@@ -167,7 +167,7 @@ public class AuctioneerTest {
 	public void testUpdateBidNullSession() {
 		exception.expect(IllegalStateException.class);
 		exception.expectMessage("No session found");
-		auctioneer.updateBid(null, new ArrayBid(marketBasis, 0, new double[] {
+		auctioneer.handleBidUpdate(null, new ArrayBid(marketBasis, 0, new double[] {
 				5.0, 4.0, 3.0, 1.0, 0.0 }));
 	}
 
@@ -180,7 +180,7 @@ public class AuctioneerTest {
 		exception.expect(IllegalArgumentException.class);
 		exception
 				.expectMessage("Marketbasis new bid differs from marketbasis auctioneer");
-		auctioneer.updateBid(mockAgent.getSession(), new ArrayBid(
+		auctioneer.handleBidUpdate(mockAgent.getSession(), new ArrayBid(
 				new MarketBasis("a", "b", 2, 0, 2), 0,
 				new double[] { 5.0, 4.0 }));
 	}

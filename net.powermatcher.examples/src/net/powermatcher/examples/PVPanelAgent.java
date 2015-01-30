@@ -141,7 +141,7 @@ public class PVPanelAgent extends BaseDeviceAgent implements AgentEndpoint {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public synchronized void updatePrice(PriceUpdate priceUpdate) {
+	public synchronized void handlePriceUpdate(PriceUpdate priceUpdate) {
 		LOGGER.debug("Received price update [{}], current bidNr = {}",
 				priceUpdate, getBidNumberGenerator());
 		publishEvent(new IncomingPriceUpdateEvent(getClusterId(), getAgentId(),

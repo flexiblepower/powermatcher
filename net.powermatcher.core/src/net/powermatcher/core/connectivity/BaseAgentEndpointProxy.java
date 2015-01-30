@@ -107,7 +107,7 @@ public abstract class BaseAgentEndpointProxy extends BaseAgent implements AgentE
      * {@inheritDoc}
      */
     @Override
-    public synchronized void updatePrice(PriceUpdate priceUpdate) {
+    public synchronized void handlePriceUpdate(PriceUpdate priceUpdate) {
         if (!this.isRemoteConnected()) {
             LOGGER.warn("Remote agent not connected, skip sending price update");
             return;

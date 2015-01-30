@@ -7,7 +7,7 @@ import net.powermatcher.api.data.PriceUpdate;
 /**
  * {@link Session} defines the interface for a link between an {@link AgentEndpoint} with a {@link MatcherEndpoint} in a
  * Powermatcher cluster.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
@@ -39,12 +39,6 @@ public interface Session {
     MarketBasis getMarketBasis();
 
     /**
-     * @param clusterId
-     *            the new <code>String</code> id of the cluster.
-     */
-    void setClusterId(String clusterId);
-
-    /**
      * @param marketBasis
      *            the new marketBasis used in this {@link Session}.
      */
@@ -52,8 +46,8 @@ public interface Session {
 
     /**
      * Passes the {@link PriceUpdate} sent by the {@link MatcherEndpoint} to the {@link AgentEndpoint} of this
-     * {@link Session}. It calls {@link AgentEndpoint#updatePrice(PriceUpdate)}.
-     * 
+     * {@link Session}. It calls {@link AgentEndpoint#handlePriceUpdate(PriceUpdate)}.
+     *
      * @param priceUpdate
      *            The {@link PriceUpdate} passed by the {@link MatcherEndpoint} of this {@link Session}.
      */
@@ -62,7 +56,7 @@ public interface Session {
     /**
      * Passes the {@link Bid} sent by the {@link AgentEndpoint} to the {@link MatcherEndpoint} of this session. It calls @see
      * {@link AgentEndpoint#updateBid(Bid)}.
-     * 
+     *
      * @param newBid
      *            The {@link Bid} passed by the {@link AgentEndpoint} of this {@link Session}.
      */

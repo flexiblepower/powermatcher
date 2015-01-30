@@ -61,7 +61,7 @@ public class MockAgent implements Agent, AgentEndpoint, ObservableAgent {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void updatePrice(PriceUpdate priceUpdate) {
+	public void handlePriceUpdate(PriceUpdate priceUpdate) {
 		this.lastPriceUpdate = priceUpdate;
 	}
 

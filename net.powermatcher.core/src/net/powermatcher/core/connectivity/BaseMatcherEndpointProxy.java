@@ -17,11 +17,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Base implementation for remote agents. This is the "sending end" of a remote communication pair.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
-public abstract class BaseMatcherEndpointProxy extends BaseAgent implements MatcherEndpoint {
+public abstract class BaseMatcherEndpointProxy
+    extends BaseAgent
+    implements MatcherEndpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseMatcherEndpointProxy.class);
 
@@ -42,13 +44,13 @@ public abstract class BaseMatcherEndpointProxy extends BaseAgent implements Matc
 
     /**
      * This method will be called by the annotated Activate() method of the subclasses.
-     * 
+     *
      * @param reconnectTimeout
      *            Time in seconds between connections to the {@link AgentEndpointProxy}.
      */
     protected void baseActivate(int reconnectTimeout) {
         // Start connector thread
-        scheduledFuture = this.scheduler.scheduleAtFixedRate(new Runnable() {
+        scheduledFuture = scheduler.scheduleAtFixedRate(new Runnable() {
             /**
              * {@inheritDoc}
              */
@@ -64,23 +66,24 @@ public abstract class BaseMatcherEndpointProxy extends BaseAgent implements Matc
      */
     protected void baseDeactivate() {
         // Stop connector thread
-        this.scheduledFuture.cancel(false);
+        scheduledFuture.cancel(false);
 
         // Disconnect the agent
-        this.disconnectRemote();
+        disconnectRemote();
     }
 
     /**
      * @param the
      *            new value of scheduler
      */
+    @Override
     public void setExecutorService(ScheduledExecutorService scheduler) {
         this.scheduler = scheduler;
     }
 
     /**
      * Creates a {@link Session} and a connection to the remote {@link AgentEndpointProxy}.
-     * 
+     *
      * @return <code>true</code> if the connection was created successfully.
      */
     public abstract boolean connectRemote();
@@ -93,7 +96,7 @@ public abstract class BaseMatcherEndpointProxy extends BaseAgent implements Matc
 
     /**
      * Closes the {@link Session} and the connection to the remote {@link AgentEndpointProxy}.
-     * 
+     *
      * @return <code>true</code> if the disconnecting was successful.
      */
     public abstract boolean disconnectRemote();
@@ -102,34 +105,20 @@ public abstract class BaseMatcherEndpointProxy extends BaseAgent implements Matc
      * @return <code>true</code> isf the local {@link Session} is not <code>null</code>.
      */
     public boolean isLocalConnected() {
-        return this.localSession != null;
+        return localSession != null;
     }
 
     /**
      * This method sets the {@link MarketBasis} of the local {@link Session}. It is called when the
      * {@link AgentEndpointProxy} communicates with this instance.
-     * 
+     *
      * @param marketBasis
      *            the new {@link MarketBasis}
      */
     public void updateRemoteMarketBasis(MarketBasis marketBasis) {
         // Sync marketbasis with local session, for new connections
-        if (this.isLocalConnected() && this.localSession.getMarketBasis() == null) {
-            this.localSession.setMarketBasis(marketBasis);
-        }
-    }
-
-    /**
-     * This method sets the clusterId of the local {@link Session}. It is called when the {@link AgentEndpointProxy}
-     * communicates with this instance.
-     * 
-     * @param clusterId
-     *            the id of the new cluster.
-     */
-    public void updateRemoteClusterId(String clusterId) {
-        // Sync clusterid with local session, for new connections
-        if (this.isLocalConnected() && this.localSession.getMarketBasis() == null) {
-            this.localSession.setClusterId(clusterId);
+        if (isLocalConnected() && localSession.getMarketBasis() == null) {
+            localSession.setMarketBasis(marketBasis);
         }
     }
 
@@ -138,7 +127,7 @@ public abstract class BaseMatcherEndpointProxy extends BaseAgent implements Matc
      */
     @Override
     public boolean connectToAgent(Session session) {
-        this.localSession = session;
+        localSession = session;
         LOGGER.info("Agent connected with session [{}]", session.getSessionId());
 
         // Initiate a remote connection
@@ -153,19 +142,19 @@ public abstract class BaseMatcherEndpointProxy extends BaseAgent implements Matc
     @Override
     public void agentEndpointDisconnected(Session session) {
         // Disconnect local agent
-        this.localSession = null;
+        localSession = null;
         LOGGER.info("Agent disconnected with session [{}]", session.getSessionId());
 
         // Disconnect remote agent
-        this.disconnectRemote();
+        disconnectRemote();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void updateBid(Session session, Bid newBid) {
-        if (this.localSession != session) {
+    public void handleBidUpdate(Session session, Bid newBid) {
+        if (localSession != session) {
             LOGGER.warn("Received bid update for unknown session.");
             return;
         }
@@ -175,19 +164,19 @@ public abstract class BaseMatcherEndpointProxy extends BaseAgent implements Matc
             return;
         }
 
-        if (this.localSession.getMarketBasis() == null) {
+        if (localSession.getMarketBasis() == null) {
             LOGGER.info("Skip bid update to local agent, no marketbasis available.");
             return;
         }
 
         // Relay bid to remote agent
-        this.updateBidRemote(newBid);
+        updateBidRemote(newBid);
     }
 
     /**
      * Sends the {@link Bid} it receives through from the local {@link AgentEndpoint} to the remote
      * {@link AgentEndpoint} through he {@link AgentEndpointProxy}.
-     * 
+     *
      * @param newBid
      *            the new {@link Bid} sent by the {@link AgentEndpointProxy}.
      */
@@ -196,24 +185,25 @@ public abstract class BaseMatcherEndpointProxy extends BaseAgent implements Matc
     /**
      * Sends the {@link PriceUpdate} it receives from the remote {@link AgentEndpoint} through the {@link AgentEndpoint}
      * to the local {@link AgentEndpoint} through the local {@link Session}.
-     * 
+     *
      * @param priceUpdate
      *            the new {@link PriceUpdate}
      */
     public void updateLocalPrice(PriceUpdate priceUpdate) {
-        if (!this.isLocalConnected()) {
+        if (!isLocalConnected()) {
             LOGGER.info("Skip price update to local agent, not connected.");
             return;
         }
 
-        if (this.localSession.getMarketBasis() == null) {
+        if (localSession.getMarketBasis() == null) {
             LOGGER.info("Skip price update to local agent, no marketbasis available.");
             return;
         }
 
-        this.localSession.updatePrice(priceUpdate);
+        localSession.updatePrice(priceUpdate);
     }
 
+    @Override
     public boolean canEqual(Object other) {
         return other instanceof BaseMatcherEndpointProxy;
     }
@@ -224,7 +214,7 @@ public abstract class BaseMatcherEndpointProxy extends BaseAgent implements Matc
     @Override
     public boolean equals(Object obj) {
         BaseMatcherEndpointProxy that = (BaseMatcherEndpointProxy) ((obj instanceof BaseMatcherEndpointProxy) ? obj
-                : null);
+                                                                                                             : null);
         if (that == null) {
             return false;
         }
@@ -233,7 +223,7 @@ public abstract class BaseMatcherEndpointProxy extends BaseAgent implements Matc
             return true;
         }
 
-        return canEqual(that) && this.localSession.equals(that.localSession);
+        return canEqual(that) && localSession.equals(that.localSession);
     }
 
     /**
@@ -241,6 +231,6 @@ public abstract class BaseMatcherEndpointProxy extends BaseAgent implements Matc
      */
     @Override
     public int hashCode() {
-        return 211 * (this.localSession.hashCode());
+        return 211 * (localSession.hashCode());
     }
 }

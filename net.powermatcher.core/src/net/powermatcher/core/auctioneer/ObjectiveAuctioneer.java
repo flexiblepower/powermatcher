@@ -42,24 +42,25 @@ import aQute.bnd.annotation.metatype.Meta;
  * are active, the {@link ObjectiveAuctioneer} will also receive a {@link Bid} from the {@link ObjectiveAgent} as a
  * single {@link Bid} .
  * </p>
- * 
+ *
  * <p>
  * It is responsible for defining and sending the {@link MarketBasis} and calculating the equilibrium based on the
  * {@link Bid} from the different agents in the topology and the objective agent. This equilibrium is communicated to
  * the agents down the hierarchy in the form of price update messages and to the objective agent.
- * 
+ *
  * In order of aggregation the {@link Bid} from the device agents and objective agents, the {@link ObjectiveAuctioneer}
  * will first aggregate the device agents bid and secondly aggregate the {@link Bid} from the objective agent. After the
  * aggregation the {@link ObjectiveAuctioneer} will determine the price and sends it to the {@link Concentrator} /
  * device agents and the objective agent.
  * </p>
- * 
+ *
  * @author FAN
  * @version 2.0
  */
 @Component(designateFactory = ObjectiveAuctioneer.Config.class, immediate = true, provide = { ObservableAgent.class,
-        MatcherEndpoint.class })
-public class ObjectiveAuctioneer extends Auctioneer {
+                                                                                             MatcherEndpoint.class })
+public class ObjectiveAuctioneer
+    extends Auctioneer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ObjectiveAuctioneer.class);
 
@@ -121,7 +122,7 @@ public class ObjectiveAuctioneer extends Auctioneer {
     /**
      * Holds the sessions from the agents.
      */
-    private Set<Session> sessions = new HashSet<Session>();
+    private final Set<Session> sessions = new HashSet<Session>();
 
     /**
      * Holds the objective agent
@@ -135,14 +136,14 @@ public class ObjectiveAuctioneer extends Auctioneer {
     @Override
     public void activate(final Map<String, Object> properties) {
         Config config = Configurable.createConfigurable(Config.class, properties);
-        this.marketBasis = new MarketBasis(config.commodity(), config.currency(), config.priceSteps(),
-                config.minimumPrice(), config.maximumPrice());
-        this.aggregatedBids = new BidCache(this.timeService, config.bidTimeout());
+        marketBasis = new MarketBasis(config.commodity(), config.currency(), config.priceSteps(),
+                                      config.minimumPrice(), config.maximumPrice());
+        aggregatedBids = new BidCache(timeService, config.bidTimeout());
 
-        this.setClusterId(config.clusterId());
-        this.setAgentId(config.agentId());
+        setClusterId(config.clusterId());
+        setAgentId(config.agentId());
 
-        scheduledFuture = this.scheduler.scheduleAtFixedRate(new Runnable() {
+        scheduledFuture = scheduler.scheduleAtFixedRate(new Runnable() {
 
             /**
              * {@inheritDoc}
@@ -157,6 +158,7 @@ public class ObjectiveAuctioneer extends Auctioneer {
     /**
      * OSGi calls this method to deactivate a managed service.
      */
+    @Override
     @Deactivate
     public void deactivate() {
         scheduledFuture.cancel(false);
@@ -164,7 +166,7 @@ public class ObjectiveAuctioneer extends Auctioneer {
 
     /**
      * Used to inject an {@link ObjectiveEndpoint} instance into this class.
-     * 
+     *
      * @param objectiveEndpoint
      *            the new {@link ObjectiveEndpoint}
      */
@@ -182,7 +184,7 @@ public class ObjectiveAuctioneer extends Auctioneer {
 
     /**
      * Removes the current {@link ObjectiveEndpoint}.
-     * 
+     *
      * @param objectiveEndpoint
      *            the {@link ObjectiveEndpoint} that will be removed.
      */
@@ -199,11 +201,10 @@ public class ObjectiveAuctioneer extends Auctioneer {
     @Override
     public synchronized boolean connectToAgent(Session session) {
         session.setMarketBasis(marketBasis);
-        session.setClusterId(this.getClusterId());
 
-        this.sessions.add(session);
-        this.aggregatedBids.updateBid(session.getSessionId(), new ArrayBid.Builder(this.marketBasis).setDemand(0)
-                .build());
+        sessions.add(session);
+        aggregatedBids.updateBid(session.getSessionId(), new ArrayBid.Builder(marketBasis).setDemand(0)
+                                                                                          .build());
         LOGGER.info("Agent connected with session [{}]", session.getSessionId());
         return true;
     }
@@ -218,7 +219,7 @@ public class ObjectiveAuctioneer extends Auctioneer {
             return;
         }
 
-        this.aggregatedBids.removeAgent(session.getSessionId());
+        aggregatedBids.removeAgent(session.getSessionId());
 
         LOGGER.info("Agent disconnected with session [{}]", session.getSessionId());
     }
@@ -227,22 +228,22 @@ public class ObjectiveAuctioneer extends Auctioneer {
      * {@inheritDoc}
      */
     @Override
-    public synchronized void updateBid(Session session, Bid newBid) {
+    public synchronized void handleBidUpdate(Session session, Bid newBid) {
         if (!sessions.contains(session)) {
             throw new IllegalStateException("No session found");
         }
 
-        if (!newBid.getMarketBasis().equals(this.marketBasis)) {
+        if (!newBid.getMarketBasis().equals(marketBasis)) {
             throw new InvalidParameterException("Marketbasis new bid differs from marketbasis auctioneer");
         }
 
         // Update agent in aggregatedBids
-        this.aggregatedBids.updateBid(session.getAgentId(), newBid);
+        aggregatedBids.updateBid(session.getAgentId(), newBid);
 
         LOGGER.debug("Received from session [{}] bid update [{}] ", session.getSessionId(), newBid);
 
-        this.publishEvent(new IncomingBidEvent(session.getClusterId(), getAgentId(), session.getSessionId(),
-                timeService.currentDate(), session.getAgentId(), newBid, Qualifier.AGENT));
+        publishEvent(new IncomingBidEvent(session.getClusterId(), getAgentId(), session.getSessionId(),
+                                          timeService.currentDate(), session.getAgentId(), newBid, Qualifier.AGENT));
     }
 
     /**
@@ -251,13 +252,13 @@ public class ObjectiveAuctioneer extends Auctioneer {
     @Override
     protected synchronized void publishNewPrice() {
         // aggregate bid device agents
-        Bid aggregatedBid = this.aggregatedBids.getAggregatedBid(this.marketBasis, false);
+        Bid aggregatedBid = aggregatedBids.getAggregatedBid(marketBasis, false);
 
         Price newPrice;
         // check if objective agent is active
-        if (this.objectiveEndpoint != null) {
+        if (objectiveEndpoint != null) {
             // receive the aggregate bid from the objective agent
-            Bid aggregatedObjectiveBid = this.objectiveEndpoint.handleAggregateBid(aggregatedBid);
+            Bid aggregatedObjectiveBid = objectiveEndpoint.handleAggregateBid(aggregatedBid);
             // aggregate again with device agent bid.
             Bid finalAggregatedBid = aggregatedBid.aggregate(aggregatedObjectiveBid);
 
@@ -268,13 +269,18 @@ public class ObjectiveAuctioneer extends Auctioneer {
             newPrice = determinePrice(aggregatedBid);
         }
 
-        for (Session session : this.sessions) {
-            ArrayBid lastBid = this.aggregatedBids.getLastBid(session.getAgentId());
+        for (Session session : sessions) {
+            ArrayBid lastBid = aggregatedBids.getLastBid(session.getAgentId());
             if (lastBid != null) {
                 Integer bidNumber = lastBid.getBidNumber();
                 PriceUpdate sessionPriceUpdate = new PriceUpdate(newPrice, bidNumber);
-                this.publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(), getAgentId(), session
-                        .getSessionId(), timeService.currentDate(), sessionPriceUpdate, Qualifier.MATCHER));
+                publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(),
+                                                          getAgentId(),
+                                                          session
+                                                                 .getSessionId(),
+                                                          timeService.currentDate(),
+                                                          sessionPriceUpdate,
+                                                          Qualifier.MATCHER));
                 session.updatePrice(sessionPriceUpdate);
                 LOGGER.debug("New price: {}, session {}", sessionPriceUpdate, session.getSessionId());
             }
@@ -283,11 +289,12 @@ public class ObjectiveAuctioneer extends Auctioneer {
 
     /**
      * This method determines the {@link Price}, given the current aggregated {@link Bid}.
-     * 
+     *
      * @param aggregatedBid
      *            the aggregated {@link Bid} used to determin the {@link Price}
      * @return the calculated {@link Price}
      */
+    @Override
     protected Price determinePrice(Bid aggregatedBid) {
         return aggregatedBid.calculateIntersection(0);
     }
@@ -296,6 +303,7 @@ public class ObjectiveAuctioneer extends Auctioneer {
      * @param the
      *            new {@link TimeService} implementation.
      */
+    @Override
     @Reference
     public void setTimeService(TimeService timeService) {
         this.timeService = timeService;
@@ -305,6 +313,7 @@ public class ObjectiveAuctioneer extends Auctioneer {
      * @param the
      *            new {@link ScheduledExecutorService} implementation.
      */
+    @Override
     @Reference
     public void setExecutorService(ScheduledExecutorService scheduler) {
         this.scheduler = scheduler;
@@ -313,7 +322,8 @@ public class ObjectiveAuctioneer extends Auctioneer {
     /**
      * @return the current value of aggregatedBids.
      */
+    @Override
     protected BidCache getAggregatedBids() {
-        return this.aggregatedBids;
+        return aggregatedBids;
     }
 }

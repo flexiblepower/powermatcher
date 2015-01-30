@@ -50,7 +50,7 @@ public class MockMatcherAgent extends MockAgent implements MatcherEndpoint {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void updateBid(Session session, Bid newBid) {
+	public void handleBidUpdate(Session session, Bid newBid) {
 		this.lastReceivedBid = newBid;
 	}
 
