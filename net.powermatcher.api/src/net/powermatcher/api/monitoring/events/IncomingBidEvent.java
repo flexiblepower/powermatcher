@@ -6,24 +6,24 @@ import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
-import net.powermatcher.api.monitoring.Qualifier;
 
 /**
  * An {@link IncomingBidEvent} is sent when an {@link AgentEndpoint} receives a new {@link Bid}.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
-public class IncomingBidEvent extends BidEvent {
+public class IncomingBidEvent
+    extends BidEvent {
 
     /**
      * The id of the Agent that sent the {@link Bid}
      */
-    private String fromAgentId;
+    private final String fromAgentId;
 
     /**
      * Constructs an instance of this class.
-     * 
+     *
      * @param clusterId
      *            The id of the cluster the {@link AgentEndpoint} subclass sending the UpdateEvent is running in.
      * @param agentId
@@ -38,8 +38,8 @@ public class IncomingBidEvent extends BidEvent {
      *            The received {@link Bid}.
      */
     public IncomingBidEvent(String clusterId, String agentId, String sessionId, Date timestamp, String fromAgentId,
-            Bid bid, Qualifier qualifier) {
-        super(clusterId, agentId, sessionId, timestamp, bid, qualifier);
+                            Bid bid) {
+        super(clusterId, agentId, sessionId, timestamp, bid);
         this.fromAgentId = fromAgentId;
     }
 
@@ -55,7 +55,6 @@ public class IncomingBidEvent extends BidEvent {
      */
     @Override
     public String toString() {
-        return IncomingBidEvent.class.getSimpleName() + " " + super.toString() + ", fromAgentId = " + this.fromAgentId
-                + ", bid = " + getBid().toString();
+        return super.toString() + ", fromAgentId = " + fromAgentId;
     }
 }

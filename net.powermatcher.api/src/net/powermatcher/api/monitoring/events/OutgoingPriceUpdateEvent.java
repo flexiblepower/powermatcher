@@ -6,19 +6,19 @@ import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.PriceUpdate;
-import net.powermatcher.api.monitoring.Qualifier;
 
 /**
  * An {@link OutgoingPriceUpdateEvent} is sent when an {@link AgentEndpoint} sends a new {@link PriceUpdate}.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
-public class OutgoingPriceUpdateEvent extends PriceUpdateEvent {
+public class OutgoingPriceUpdateEvent
+    extends PriceUpdateEvent {
 
     /**
      * Constructs an instance of this class.
-     * 
+     *
      * @param clusterId
      *            The id of the cluster the {@link AgentEndpoint} subclass sending the UpdateEvent is running in.
      * @param agentId
@@ -31,16 +31,7 @@ public class OutgoingPriceUpdateEvent extends PriceUpdateEvent {
      *            The new {@link PriceUpdate} created by the {@link AgentEndpoint} subclass.
      */
     public OutgoingPriceUpdateEvent(String clusterId, String agentId, String sessionId, Date timestamp,
-            PriceUpdate priceUpdate, Qualifier qualifier) {
-        super(clusterId, agentId, sessionId, timestamp, priceUpdate, qualifier);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        return OutgoingPriceUpdateEvent.class.getSimpleName() + " " + super.toString() + ", priceUpdate = "
-                + getPriceUpdate().toString();
+                                    PriceUpdate priceUpdate) {
+        super(clusterId, agentId, sessionId, timestamp, priceUpdate);
     }
 }

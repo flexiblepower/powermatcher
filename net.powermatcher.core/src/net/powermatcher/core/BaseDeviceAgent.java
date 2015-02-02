@@ -8,7 +8,6 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.PointBid;
 import net.powermatcher.api.data.PricePoint;
-import net.powermatcher.api.monitoring.Qualifier;
 import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
 
 /**
@@ -19,8 +18,7 @@ import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
  */
 public abstract class BaseDeviceAgent
     extends BaseAgent
-    implements
-    AgentEndpoint, Comparable<BaseDeviceAgent> {
+    implements AgentEndpoint {
 
     private AtomicInteger bidNumberGenerator;
 
@@ -106,7 +104,7 @@ public abstract class BaseDeviceAgent
             lastBid = newBid;
             session.updateBid(newBid);
             publishEvent(new OutgoingBidEvent(getClusterId(), getAgentId(),
-                                              session.getSessionId(), now(), newBid, Qualifier.AGENT));
+                                              session.getSessionId(), now(), newBid));
         }
     }
 
@@ -121,22 +119,4 @@ public abstract class BaseDeviceAgent
      * Contains the logic to create a new {@link Bid} and then calls {@link BaseDeviceAgent}{@link #publishBid(Bid)}
      */
     protected abstract void doBidUpdate();
-
-    /**
-     * Compares this object with the specified object for order. Returns a negative integer, zero, or a positive integer
-     * as this object is less than, equal to, or greater than the specified object.
-     *
-     * This method compares the agentId values of both instances. They are compared alphabetically.
-     *
-     * @param that
-     *            The {@link PricePoint} instance you want to compare with this one.
-     *
-     * @return a negative integer, zero, or a positive integer as this object is less than, equal to, or greater than
-     *         the specified object.
-     */
-    @Override
-    public int compareTo(BaseDeviceAgent that) {
-        return getAgentId().compareTo(that.getAgentId());
-    }
-
 }

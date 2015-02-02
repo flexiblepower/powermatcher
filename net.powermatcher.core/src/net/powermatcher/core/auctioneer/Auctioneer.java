@@ -17,7 +17,6 @@ import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.ObservableAgent;
-import net.powermatcher.api.monitoring.Qualifier;
 import net.powermatcher.api.monitoring.events.IncomingBidEvent;
 import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.BaseAgent;
@@ -189,8 +188,7 @@ public class Auctioneer
 
         publishEvent(new IncomingBidEvent(session.getClusterId(),
                                           getAgentId(), session.getSessionId(),
-                                          timeService.currentDate(), session.getAgentId(), newBid,
-                                          Qualifier.AGENT));
+                                          timeService.currentDate(), session.getAgentId(), newBid));
     }
 
     /**
@@ -210,13 +208,11 @@ public class Auctioneer
                 Integer bidNumber = lastBid.getBidNumber();
                 PriceUpdate sessionPriceUpdate = new PriceUpdate(newPrice,
                                                                  bidNumber);
-                publishEvent(new OutgoingPriceUpdateEvent(session
-                                                                 .getClusterId(),
+                publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(),
                                                           getAgentId(),
                                                           session.getSessionId(),
                                                           timeService.currentDate(),
-                                                          sessionPriceUpdate,
-                                                          Qualifier.MATCHER));
+                                                          sessionPriceUpdate));
                 session.updatePrice(sessionPriceUpdate);
                 LOGGER.debug("New price: {}, session {}", sessionPriceUpdate,
                              session.getSessionId());
@@ -242,16 +238,16 @@ public class Auctioneer
     @Override
     public void setExecutorService(ScheduledExecutorService scheduler) {
         executorService = scheduler;
-        scheduledFuture = executorService.scheduleAtFixedRate(
-                                                              new Runnable() {
-                                                                  /**
-                                                                   * {@inheritDoc}
-                                                                   */
-                                                                  @Override
-                                                                  public void run() {
-                                                                      publishNewPrice();
-                                                                  }
-                                                              }, 0, config.priceUpdateRate(), TimeUnit.SECONDS);
+        Runnable command = new Runnable() {
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void run() {
+                publishNewPrice();
+            }
+        };
+        scheduledFuture = executorService.scheduleAtFixedRate(command, 0, config.priceUpdateRate(), TimeUnit.SECONDS);
     }
 
     /**
@@ -260,5 +256,4 @@ public class Auctioneer
     protected BidCache getAggregatedBids() {
         return aggregatedBids;
     }
-
 }

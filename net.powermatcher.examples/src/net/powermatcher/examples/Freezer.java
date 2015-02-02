@@ -14,7 +14,6 @@ import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PricePoint;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
-import net.powermatcher.api.monitoring.Qualifier;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.core.BaseDeviceAgent;
 
@@ -35,9 +34,9 @@ import aQute.bnd.annotation.metatype.Meta;
  * @author FAN
  * @version 2.0
  */
-@Component(designateFactory = Freezer.Config.class, immediate = true, provide = {
-                                                                                 ObservableAgent.class,
-                                                                                 AgentEndpoint.class })
+@Component(designateFactory = Freezer.Config.class,
+           immediate = true,
+           provide = { ObservableAgent.class, AgentEndpoint.class })
 public class Freezer
     extends BaseDeviceAgent
     implements AgentEndpoint {
@@ -137,9 +136,11 @@ public class Freezer
     public void handlePriceUpdate(PriceUpdate priceUpdate) {
         LOGGER.debug("Received price update [{}], current bidNr = {}",
                      priceUpdate, getBidNumberGenerator().get());
-        publishEvent(new IncomingPriceUpdateEvent(getClusterId(), getAgentId(),
-                                                  getSession().getSessionId(), now(), priceUpdate,
-                                                  Qualifier.AGENT));
+        publishEvent(new IncomingPriceUpdateEvent(getClusterId(),
+                                                  getAgentId(),
+                                                  getSession().getSessionId(),
+                                                  now(),
+                                                  priceUpdate));
     }
 
     @Override

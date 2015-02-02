@@ -19,7 +19,6 @@ import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
-import net.powermatcher.api.monitoring.Qualifier;
 import net.powermatcher.api.monitoring.events.IncomingBidEvent;
 import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.BidCache;
@@ -242,8 +241,12 @@ public class ObjectiveAuctioneer
 
         LOGGER.debug("Received from session [{}] bid update [{}] ", session.getSessionId(), newBid);
 
-        publishEvent(new IncomingBidEvent(session.getClusterId(), getAgentId(), session.getSessionId(),
-                                          timeService.currentDate(), session.getAgentId(), newBid, Qualifier.AGENT));
+        publishEvent(new IncomingBidEvent(session.getClusterId(),
+                                          getAgentId(),
+                                          session.getSessionId(),
+                                          timeService.currentDate(),
+                                          session.getAgentId(),
+                                          newBid));
     }
 
     /**
@@ -276,11 +279,9 @@ public class ObjectiveAuctioneer
                 PriceUpdate sessionPriceUpdate = new PriceUpdate(newPrice, bidNumber);
                 publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(),
                                                           getAgentId(),
-                                                          session
-                                                                 .getSessionId(),
+                                                          session.getSessionId(),
                                                           timeService.currentDate(),
-                                                          sessionPriceUpdate,
-                                                          Qualifier.MATCHER));
+                                                          sessionPriceUpdate));
                 session.updatePrice(sessionPriceUpdate);
                 LOGGER.debug("New price: {}, session {}", sessionPriceUpdate, session.getSessionId());
             }

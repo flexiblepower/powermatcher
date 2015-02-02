@@ -12,7 +12,6 @@ import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PriceUpdate;
-import net.powermatcher.api.monitoring.Qualifier;
 import net.powermatcher.api.monitoring.events.IncomingBidEvent;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
@@ -26,7 +25,7 @@ import org.junit.Test;
 
 /**
  * JUnit tests for the {@link LogRecord} class.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
@@ -41,7 +40,6 @@ public class LogRecordTest {
     private SimpleDateFormat dateFormat;
     private int bidNumber;
     private double[] demand;
-    private Qualifier qualifier;
     private IncomingBidEvent incomingBidEvent;
     private OutgoingBidEvent outgoingBidEvent;
     private IncomingPriceUpdateEvent incomingPriceUpdateEvent;
@@ -58,18 +56,15 @@ public class LogRecordTest {
         sessionId = "testsessionId";
         timeStamp = new Date();
         bidNumber = 1;
-        qualifier = Qualifier.AGENT;
         demand = new double[] { 4.0, 3.0, 2.0, 1.0, 0.0 };
         dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         bid = new ArrayBid(marketBasis, bidNumber, demand);
         price = new Price(marketBasis, 10);
         priceUpdate = new PriceUpdate(price, bidNumber);
-        incomingBidEvent = new IncomingBidEvent(clusterId, agentId, sessionId, timeStamp, fromAgentId, bid, qualifier);
-        outgoingBidEvent = new OutgoingBidEvent(clusterId, agentId, sessionId, timeStamp, bid, qualifier);
-        incomingPriceUpdateEvent = new IncomingPriceUpdateEvent(clusterId, agentId, sessionId, timeStamp, priceUpdate,
-                qualifier);
-        outgoingPriceUpdateEvent = new OutgoingPriceUpdateEvent(clusterId, agentId, sessionId, timeStamp, priceUpdate,
-                qualifier);
+        incomingBidEvent = new IncomingBidEvent(clusterId, agentId, sessionId, timeStamp, fromAgentId, bid);
+        outgoingBidEvent = new OutgoingBidEvent(clusterId, agentId, sessionId, timeStamp, bid);
+        incomingPriceUpdateEvent = new IncomingPriceUpdateEvent(clusterId, agentId, sessionId, timeStamp, priceUpdate);
+        outgoingPriceUpdateEvent = new OutgoingPriceUpdateEvent(clusterId, agentId, sessionId, timeStamp, priceUpdate);
     }
 
     @Test
@@ -83,7 +78,6 @@ public class LogRecordTest {
         assertThat(bidLogRecord.getEventTimestamp(), is(equalTo(timeStamp)));
         assertThat((SimpleDateFormat) bidLogRecord.getDateFormat(), is(equalTo(dateFormat)));
         assertThat(bidLogRecord.getLogTime(), is(equalTo(logTime)));
-        assertThat(bidLogRecord.getQualifier(), is(equalTo(qualifier)));
         assertThat(bidLogRecord.getBid().toArrayBid(), is(equalTo(bid)));
     }
 
@@ -98,7 +92,6 @@ public class LogRecordTest {
         assertThat(bidLogRecord.getEventTimestamp(), is(equalTo(timeStamp)));
         assertThat((SimpleDateFormat) bidLogRecord.getDateFormat(), is(equalTo(dateFormat)));
         assertThat(bidLogRecord.getLogTime(), is(equalTo(logTime)));
-        assertThat(bidLogRecord.getQualifier(), is(equalTo(qualifier)));
         assertThat(bidLogRecord.getBid().toArrayBid(), is(equalTo(bid)));
     }
 
@@ -108,13 +101,12 @@ public class LogRecordTest {
         c.set(2014, 12, 12);
         Date logTime = c.getTime();
         PriceUpdateLogRecord priceUpdateLogRecord = new PriceUpdateLogRecord(incomingPriceUpdateEvent, logTime,
-                dateFormat);
+                                                                             dateFormat);
         assertThat(priceUpdateLogRecord.getClusterId(), is(equalTo(clusterId)));
         assertThat(priceUpdateLogRecord.getAgentId(), is(equalTo(agentId)));
         assertThat(priceUpdateLogRecord.getEventTimestamp(), is(equalTo(timeStamp)));
         assertThat((SimpleDateFormat) priceUpdateLogRecord.getDateFormat(), is(equalTo(dateFormat)));
         assertThat(priceUpdateLogRecord.getLogTime(), is(equalTo(logTime)));
-        assertThat(priceUpdateLogRecord.getQualifier(), is(equalTo(qualifier)));
         assertThat(priceUpdateLogRecord.getPriceUpdate(), is(equalTo(priceUpdate)));
     }
 
@@ -124,13 +116,12 @@ public class LogRecordTest {
         c.set(2014, 12, 12);
         Date logTime = c.getTime();
         PriceUpdateLogRecord priceUpdateLogRecord = new PriceUpdateLogRecord(outgoingPriceUpdateEvent, logTime,
-                dateFormat);
+                                                                             dateFormat);
         assertThat(priceUpdateLogRecord.getClusterId(), is(equalTo(clusterId)));
         assertThat(priceUpdateLogRecord.getAgentId(), is(equalTo(agentId)));
         assertThat(priceUpdateLogRecord.getEventTimestamp(), is(equalTo(timeStamp)));
         assertThat((SimpleDateFormat) priceUpdateLogRecord.getDateFormat(), is(equalTo(dateFormat)));
         assertThat(priceUpdateLogRecord.getLogTime(), is(equalTo(logTime)));
-        assertThat(priceUpdateLogRecord.getQualifier(), is(equalTo(qualifier)));
         assertThat(priceUpdateLogRecord.getPriceUpdate(), is(equalTo(priceUpdate)));
     }
 

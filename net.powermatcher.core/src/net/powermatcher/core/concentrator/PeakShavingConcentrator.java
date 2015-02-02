@@ -18,7 +18,6 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
-import net.powermatcher.api.monitoring.Qualifier;
 import net.powermatcher.api.monitoring.events.IncomingBidEvent;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
@@ -315,13 +314,11 @@ public class PeakShavingConcentrator
         }
 
         publishEvent(new IncomingBidEvent(session.getClusterId(),
-                                          config
-                                                .agentId(),
+                                          config.agentId(),
                                           session.getSessionId(),
                                           timeService.currentDate(),
                                           "agentId",
-                                          newBid,
-                                          Qualifier.AGENT));
+                                          newBid));
 
         // Update agent in aggregatedBids
         aggregatedBids.updateBid(session.getAgentId(), newBid);
@@ -348,8 +345,10 @@ public class PeakShavingConcentrator
                                               transformedBid.getDemand(), null, null));
 
             publishEvent(new OutgoingBidEvent(sessionToMatcher.getClusterId(),
-                                              config.agentId(), sessionToMatcher.getSessionId(),
-                                              timeService.currentDate(), aggregatedBid, Qualifier.MATCHER));
+                                              config.agentId(),
+                                              sessionToMatcher.getSessionId(),
+                                              timeService.currentDate(),
+                                              aggregatedBid));
 
             LOGGER.debug("Updating aggregated bid [{}]", aggregatedBid);
         }
@@ -366,14 +365,11 @@ public class PeakShavingConcentrator
         }
 
         LOGGER.debug("Received price update [{}]", priceUpdate);
-        publishEvent(new IncomingPriceUpdateEvent(sessionToMatcher
-                                                                  .getClusterId(),
+        publishEvent(new IncomingPriceUpdateEvent(sessionToMatcher.getClusterId(),
                                                   config.agentId(),
-                                                  sessionToMatcher
-                                                                  .getSessionId(),
+                                                  sessionToMatcher.getSessionId(),
                                                   timeService.currentDate(),
-                                                  priceUpdate,
-                                                  Qualifier.AGENT));
+                                                  priceUpdate));
 
         // Find bidCacheSnapshot belonging to the newly received price update
         BidCacheSnapshot bidCacheSnapshot = aggregatedBids
@@ -410,14 +406,11 @@ public class PeakShavingConcentrator
                                               ceiling, new double[0], new double[0],
                                               agentPrice.getPrice(), adjustedPrice.getPrice()));
 
-            publishEvent(new OutgoingPriceUpdateEvent(session
-                                                             .getClusterId(),
+            publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(),
                                                       config.agentId(),
-                                                      session
-                                                             .getSessionId(),
+                                                      session.getSessionId(),
                                                       timeService.currentDate(),
-                                                      priceUpdate,
-                                                      Qualifier.MATCHER));
+                                                      priceUpdate));
         }
     }
 

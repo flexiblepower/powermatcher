@@ -7,19 +7,19 @@ import net.powermatcher.api.Session;
 import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
-import net.powermatcher.api.monitoring.Qualifier;
 
 /**
  * An {@link OutgoingBidEvent} is sent when an {@link AgentEndpoint} sends a new {@link Bid}.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
-public class OutgoingBidEvent extends BidEvent {
+public class OutgoingBidEvent
+    extends BidEvent {
 
     /**
      * Constructs an instance of this class.
-     * 
+     *
      * @param clusterId
      *            The id of the cluster the {@link AgentEndpoint} subclass sending the UpdateEvent is running in.
      * @param agentId
@@ -31,16 +31,7 @@ public class OutgoingBidEvent extends BidEvent {
      * @param bid
      *            The new {@link Price} created by the {@link AgentEndpoint} subclass.
      */
-    public OutgoingBidEvent(String clusterId, String agentId, String sessionId, Date timestamp, Bid bid,
-            Qualifier qualifier) {
-        super(clusterId, agentId, sessionId, timestamp, bid, qualifier);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        return OutgoingBidEvent.class.getSimpleName() + " " + super.toString() + ", bid = " + getBid().toString();
+    public OutgoingBidEvent(String clusterId, String agentId, String sessionId, Date timestamp, Bid bid) {
+        super(clusterId, agentId, sessionId, timestamp, bid);
     }
 }

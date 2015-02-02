@@ -19,7 +19,6 @@ import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
-import net.powermatcher.api.monitoring.Qualifier;
 import net.powermatcher.api.monitoring.events.IncomingBidEvent;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
@@ -244,13 +243,11 @@ public class Concentrator
         }
 
         publishEvent(new IncomingBidEvent(session.getClusterId(),
-                                          config
-                                                .agentId(),
+                                          config.agentId(),
                                           session.getSessionId(),
                                           timeService.currentDate(),
                                           "agentId",
-                                          newBid,
-                                          Qualifier.AGENT));
+                                          newBid));
 
         // Update agent in aggregatedBids
         aggregatedBids.updateBid(session.getAgentId(), newBid);
@@ -271,14 +268,11 @@ public class Concentrator
         }
 
         LOGGER.debug("Received price update [{}]", priceUpdate);
-        publishEvent(new IncomingPriceUpdateEvent(sessionToMatcher
-                                                                  .getClusterId(),
+        publishEvent(new IncomingPriceUpdateEvent(sessionToMatcher.getClusterId(),
                                                   config.agentId(),
-                                                  sessionToMatcher
-                                                                  .getSessionId(),
+                                                  sessionToMatcher.getSessionId(),
                                                   timeService.currentDate(),
-                                                  priceUpdate,
-                                                  Qualifier.AGENT));
+                                                  priceUpdate));
 
         // Find bidCacheSnapshot belonging to the newly received price update
         BidCacheSnapshot bidCacheSnapshot = aggregatedBids
@@ -308,15 +302,11 @@ public class Concentrator
 
             session.updatePrice(agentPriceUpdate);
 
-            publishEvent(new OutgoingPriceUpdateEvent(session
-                                                             .getClusterId(),
+            publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(),
                                                       config.agentId(),
-                                                      session
-                                                             .getSessionId(),
+                                                      session.getSessionId(),
                                                       timeService.currentDate(),
-                                                      priceUpdate,
-                                                      Qualifier.MATCHER));
-
+                                                      priceUpdate));
         }
     }
 
@@ -332,8 +322,10 @@ public class Concentrator
 
             sessionToMatcher.updateBid(aggregatedBid);
             publishEvent(new OutgoingBidEvent(sessionToMatcher.getClusterId(),
-                                              config.agentId(), sessionToMatcher.getSessionId(), now(),
-                                              aggregatedBid, Qualifier.MATCHER));
+                                              config.agentId(),
+                                              sessionToMatcher.getSessionId(),
+                                              now(),
+                                              aggregatedBid));
 
             LOGGER.debug("Updating aggregated bid [{}]", aggregatedBid);
         }

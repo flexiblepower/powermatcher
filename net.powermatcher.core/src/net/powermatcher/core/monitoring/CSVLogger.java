@@ -33,47 +33,76 @@ import aQute.bnd.annotation.metatype.Meta;
 /**
  * {@link CSVLogger} is an implementation of {@link AgentEventLogger} where the {@link AgentEvent}s are logged to a
  * comma separated file.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
 @Component(immediate = true, designateFactory = CSVLogger.Config.class)
-public class CSVLogger extends AgentEventLogger {
+public class CSVLogger
+    extends AgentEventLogger {
 
     /**
      * The header for the bidlog file
      */
-    private static final String[] BID_HEADER_ROW = new String[] { "logTime", "clusterId", "agentId", "qualifier",
-            "commodity", "currency", "minimumPrice", "maximumPrice", "minimumDemand", "maximumDemand",
-            "effectiveDemand", "effectivePrice", "lastUpdateTime", "bidNumber", "demand", "pricePoints" };
+    private static final String[] BID_HEADER_ROW = new String[] { "logTime",
+                                                                 "clusterId",
+                                                                 "agentId",
+                                                                 "commodity",
+                                                                 "currency",
+                                                                 "minimumPrice",
+                                                                 "maximumPrice",
+                                                                 "minimumDemand",
+                                                                 "maximumDemand",
+                                                                 "effectiveDemand",
+                                                                 "effectivePrice",
+                                                                 "lastUpdateTime",
+                                                                 "bidNumber",
+                                                                 "demand",
+                                                                 "pricePoints" };
 
     /**
      * The header for the pricelog file
      */
-    private static final String[] PRICE_HEADER_ROW = new String[] { "logTime", "clusterId", "id", "qualifier",
-            "commodity", "currency", "minimumPrice", "maximumPrice", "priceValue", "lastUpdateTime" };
+    private static final String[] PRICE_HEADER_ROW = new String[] { "logTime",
+                                                                   "clusterId",
+                                                                   "id",
+                                                                   "commodity",
+                                                                   "currency",
+                                                                   "minimumPrice",
+                                                                   "maximumPrice",
+                                                                   "priceValue",
+                                                                   "lastUpdateTime" };
 
-    private static final String[] WHITELIST_HEADER_ROW = new String[] { "logTime", "clusterId", "agentId",
-            "blockedAgentId", "lastUpdateTime" };
+    private static final String[] WHITELIST_HEADER_ROW = new String[] { "logTime",
+                                                                       "clusterId",
+                                                                       "agentId",
+                                                                       "blockedAgentId",
+                                                                       "lastUpdateTime" };
 
-    private static final String[] PEAKSHAVING_HEADER_ROW = new String[] { "logTime", "clusterId", "agentId", "floor",
-            "ceiling", "oldDemand", "newDemand", "oldPrice", "newPrice" };
+    private static final String[] PEAKSHAVING_HEADER_ROW = new String[] { "logTime",
+                                                                         "clusterId",
+                                                                         "agentId",
+                                                                         "floor",
+                                                                         "ceiling",
+                                                                         "oldDemand",
+                                                                         "newDemand",
+                                                                         "oldPrice",
+                                                                         "newPrice" };
 
     /**
      * OSGI configuration of the {@link CSVLogger}
      */
     public static interface Config {
-        @Meta.AD(
-                required = false,
-                description = "Filter for specific agentId's. When no filters are supplied, it will log everything.")
+        @Meta.AD(required = false,
+                 description = "Filter for specific agentId's. When no filters are supplied, it will log everything.")
         List<String> filter();
 
         @Meta.AD(name = "eventType", description = "The AgentEventType this logger has to log.")
         AgentEventType eventType();
 
-        @Meta.AD(
-                deflt = "event_log_::yyyyMMdd::.csv",
-                description = "The pattern for the file name of the log file. Dataformat strings are placed between the delimeter '::'")
+        @Meta.AD(deflt = "event_log_::yyyyMMdd::.csv",
+                 description = "The pattern for the file name of the log file. "
+                               + "Dataformat strings are placed between the delimeter '::'")
         String logFilenamePattern();
 
         @Meta.AD(deflt = "yyyy-MM-dd HH:mm:ss", description = "The date format for the timestamps in the log.")
@@ -109,7 +138,7 @@ public class CSVLogger extends AgentEventLogger {
 
     /**
      * OSGi calls this method to activate a managed service.
-     * 
+     *
      * @param properties
      *            the configuration properties
      */
@@ -130,7 +159,7 @@ public class CSVLogger extends AgentEventLogger {
 
     /**
      * OSGi calls this method to modify a managed service.
-     * 
+     *
      * @param properties
      *            the configuration properties
      */
@@ -156,21 +185,21 @@ public class CSVLogger extends AgentEventLogger {
     protected void processConfig(Map<String, Object> properties) {
         Config config = Configurable.createConfigurable(Config.class, properties);
 
-        this.filter = config.filter();
+        filter = config.filter();
 
         // ConfigAdmin will sometimes generate a filter with 1 empty element.
         // Ignore it.
         if (filter != null && !filter.isEmpty() && filter.get(0).isEmpty()) {
-            this.filter = new ArrayList<String>();
+            filter = new ArrayList<String>();
         }
 
         setEventType(config.eventType());
         setLogUpdateRate(config.logUpdateRate());
         setLoggerId(config.loggerId());
         setDateFormat(new SimpleDateFormat(config.dateFormat()));
-        this.separator = config.separator();
+        separator = config.separator();
 
-        this.logFile = createLogFile(config.logFilenamePattern(), config.logLocation());
+        logFile = createLogFile(config.logFilenamePattern(), config.logLocation());
         if (!logFile.exists()) {
             String[] header = null;
 
@@ -200,7 +229,7 @@ public class CSVLogger extends AgentEventLogger {
     /**
      * Creates a new {@link File} to write the csv lines to. It also parses possible {@link DateFormat} strings in the
      * fileName parameter.
-     * 
+     *
      * @param fileName
      *            the name of the {@link File} that has to be created
      * @param logLocation
@@ -230,7 +259,7 @@ public class CSVLogger extends AgentEventLogger {
 
     /**
      * Write a comma separated line to a specified file
-     * 
+     *
      * @param line
      *            the comma separated line that has to be written to the outputFile
      * @param outputFile
@@ -255,10 +284,11 @@ public class CSVLogger extends AgentEventLogger {
 
     /**
      * OSGI calls this method to set the scheduler
-     * 
+     *
      * @param scheduler
      *            The {@link ScheduledExecutorService} implementation to be injected
      */
+    @Override
     @Reference
     public void setScheduler(ScheduledExecutorService scheduler) {
         super.setScheduler(scheduler);
@@ -266,7 +296,7 @@ public class CSVLogger extends AgentEventLogger {
 
     /**
      * OSGI calls this method to set the timeService
-     * 
+     *
      * @param timeService
      *            The {@link TimeService} implementation to be injected
      */
@@ -305,7 +335,7 @@ public class CSVLogger extends AgentEventLogger {
     /**
      * Creates a <code>String[]</code> out of a {@link PeakShavingLogRecord} to be used in
      * {@link CSVLogger#writeLineToCSV(String[], File)}
-     * 
+     *
      * @param logRecord
      *            the {@link PeakShavingLogRecord} that has to be transformed
      * @return the <code>String[]</code> representation of logRecord
@@ -333,23 +363,29 @@ public class CSVLogger extends AgentEventLogger {
         String oldPrice = logRecord.getOldPrice() == null ? "" : String.valueOf(logRecord.getOldPrice());
         String newPrice = logRecord.getNewPrice() == null ? "" : String.valueOf(logRecord.getNewPrice());
 
-        return new String[] { getDateFormat().format(logRecord.getLogTime()), logRecord.getClusterId(),
-                logRecord.getAgentId(), String.valueOf(logRecord.getFloor()), String.valueOf(logRecord.getCeiling()),
-                oldDemandBuilder.toString(), newDemandBuilder.toString(), oldPrice, newPrice };
+        return new String[] { getDateFormat().format(logRecord.getLogTime()),
+                             logRecord.getClusterId(),
+                             logRecord.getAgentId(),
+                             String.valueOf(logRecord.getFloor()),
+                             String.valueOf(logRecord.getCeiling()),
+                             oldDemandBuilder.toString(),
+                             newDemandBuilder.toString(),
+                             oldPrice,
+                             newPrice };
     }
 
     /**
      * Creates a <code>String[]</code> out of a {@link WhitelistLogRecord} to be used in
      * {@link CSVLogger#writeLineToCSV(String[], File)}
-     * 
+     *
      * @param logRecord
      *            the {@link WhitelistLogRecord} that has to be transformed
      * @return the <code>String[]</code> representation of logRecord
      */
     private String[] createLineForWhitelistLogRecord(WhitelistLogRecord logRecord) {
         return new String[] { getDateFormat().format(logRecord.getLogTime()), logRecord.getClusterId(),
-                logRecord.getAgentId(), logRecord.getBlockedAgent(),
-                getDateFormat().format(logRecord.getEventTimestamp()) };
+                             logRecord.getAgentId(), logRecord.getBlockedAgent(),
+                             getDateFormat().format(logRecord.getEventTimestamp()) };
     }
 
     /**
@@ -357,13 +393,13 @@ public class CSVLogger extends AgentEventLogger {
      */
     @Override
     protected List<String> getFilter() {
-        return this.filter;
+        return filter;
     }
 
     /**
      * Creates a <code>String[]</code> out of a {@link BidLogRecord} to be used in
      * {@link CSVLogger#writeLineToCSV(String[], File)}
-     * 
+     *
      * @param logRecord
      *            the {@link BidLogRecord} that has to be transformed
      * @return the <code>String[]</code> representation of logRecord
@@ -402,23 +438,29 @@ public class CSVLogger extends AgentEventLogger {
             }
         }
 
-        return new String[] { getDateFormat().format(logRecord.getLogTime()), logRecord.getClusterId(),
-                logRecord.getAgentId(), logRecord.getQualifier().getDescription(), marketBasis.getCommodity(),
-                marketBasis.getCurrency(), MarketBasis.PRICE_FORMAT.format(marketBasis.getMinimumPrice()),
-                MarketBasis.PRICE_FORMAT.format(marketBasis.getMaximumPrice()),
-                MarketBasis.DEMAND_FORMAT.format(bid.getMinimumDemand()),
-                MarketBasis.DEMAND_FORMAT.format(bid.getMaximumDemand()),
-                // TODO where/what is the "effective demand"?
-                MarketBasis.DEMAND_FORMAT.format(0),
-                // TODO where/what is the "effective price"?
-                MarketBasis.PRICE_FORMAT.format(0), getDateFormat().format(logRecord.getEventTimestamp()),
-                String.valueOf(bid.getBidNumber()), demandBuilder.toString(), pricePointBuiler.toString() };
+        return new String[] { getDateFormat().format(logRecord.getLogTime()),
+                             logRecord.getClusterId(),
+                             logRecord.getAgentId(),
+                             marketBasis.getCommodity(),
+                             marketBasis.getCurrency(),
+                             MarketBasis.PRICE_FORMAT.format(marketBasis.getMinimumPrice()),
+                             MarketBasis.PRICE_FORMAT.format(marketBasis.getMaximumPrice()),
+                             MarketBasis.DEMAND_FORMAT.format(bid.getMinimumDemand()),
+                             MarketBasis.DEMAND_FORMAT.format(bid.getMaximumDemand()),
+                             // TODO where/what is the "effective demand"?
+                             MarketBasis.DEMAND_FORMAT.format(0),
+                             // TODO where/what is the "effective price"?
+                             MarketBasis.PRICE_FORMAT.format(0),
+                             getDateFormat().format(logRecord.getEventTimestamp()),
+                             String.valueOf(bid.getBidNumber()),
+                             demandBuilder.toString(),
+                             pricePointBuiler.toString() };
     }
 
     /**
      * Creates a <code>String[]</code> out of a {@link PriceUpdateLogRecord} to be used in
      * {@link CSVLogger#writeLineToCSV(String[], File)}
-     * 
+     *
      * @param logRecord
      *            the {@link PriceUpdateLogRecord} that has to be transformed
      * @return the <code>String[]</code> representation of logRecord
@@ -426,11 +468,14 @@ public class CSVLogger extends AgentEventLogger {
     private String[] createLineForPriceUpdateLog(PriceUpdateLogRecord logRecord) {
         MarketBasis marketbasis = logRecord.getPriceUpdate().getPrice().getMarketBasis();
 
-        return new String[] { getDateFormat().format(logRecord.getLogTime()), logRecord.getClusterId(),
-                logRecord.getAgentId(), logRecord.getQualifier().getDescription(), marketbasis.getCommodity(),
-                marketbasis.getCurrency(), MarketBasis.PRICE_FORMAT.format(marketbasis.getMinimumPrice()),
-                MarketBasis.PRICE_FORMAT.format(marketbasis.getMaximumPrice()),
-                MarketBasis.PRICE_FORMAT.format(logRecord.getPriceUpdate().getPrice().getPriceValue()),
-                getDateFormat().format(logRecord.getEventTimestamp()) };
+        return new String[] { getDateFormat().format(logRecord.getLogTime()),
+                             logRecord.getClusterId(),
+                             logRecord.getAgentId(),
+                             marketbasis.getCommodity(),
+                             marketbasis.getCurrency(),
+                             MarketBasis.PRICE_FORMAT.format(marketbasis.getMinimumPrice()),
+                             MarketBasis.PRICE_FORMAT.format(marketbasis.getMaximumPrice()),
+                             MarketBasis.PRICE_FORMAT.format(logRecord.getPriceUpdate().getPrice().getPriceValue()),
+                             getDateFormat().format(logRecord.getEventTimestamp()) };
     }
 }

@@ -8,7 +8,7 @@ import java.util.Date;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PriceUpdate;
-import net.powermatcher.api.monitoring.Qualifier;
+import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.events.AgentEvent;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.mock.MockAgent;
@@ -18,7 +18,7 @@ import org.junit.Test;
 
 /**
  * JUnit tests for the {@link ObservableAgent} class.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
@@ -89,7 +89,6 @@ public class ObservableAgentTest {
     private AgentEvent createDummyEvent() {
         MarketBasis marketBasis = new MarketBasis("Electicity", "EUR", 10, 0.0, 100.0);
         PriceUpdate priceUpdate = new PriceUpdate(new Price(marketBasis, 0), 0);
-        return new IncomingPriceUpdateEvent("defaultCluster", "agent1", "sessionId", new Date(), priceUpdate,
-                Qualifier.AGENT);
+        return new IncomingPriceUpdateEvent("defaultCluster", "agent1", "sessionId", new Date(), priceUpdate);
     }
 }
