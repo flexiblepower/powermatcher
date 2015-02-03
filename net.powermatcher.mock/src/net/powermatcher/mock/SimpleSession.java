@@ -24,8 +24,8 @@ public class SimpleSession
     }
 
     public void connect() {
-        agent.connectToMatcher(this);
         matcher.connectToAgent(this);
+        agent.connectToMatcher(this);
     }
 
     @Override

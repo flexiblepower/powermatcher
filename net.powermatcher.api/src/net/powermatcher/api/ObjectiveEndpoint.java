@@ -2,7 +2,6 @@ package net.powermatcher.api;
 
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
-import net.powermatcher.api.data.PriceUpdate;
 
 /**
  * {@link ObjectiveEndpoint} defines the interface for Objective Agents. Objective Agents are objects that can
@@ -14,12 +13,12 @@ import net.powermatcher.api.data.PriceUpdate;
 public interface ObjectiveEndpoint {
 
     /**
-     * This method is called by the Auctioneer when it receives a {@link PriceUpdate}.
+     * This method is called by the Auctioneer when it will send the price
      *
-     * @param priceUpdate
-     *            the {@link PriceUpdate} sent by the Auctioneer.
+     * @param price
+     *            the {@link Price} sent by the Auctioneer.
      */
-    void notifyPriceUpdate(PriceUpdate priceUpdate);
+    void notifyPrice(Price price);
 
     /**
      * This method will calculate a new Aggregated {@link Bid} to manipulate the cluster.

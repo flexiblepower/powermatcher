@@ -8,10 +8,10 @@ import java.util.Map;
 import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.core.auctioneer.Auctioneer;
-import net.powermatcher.core.sessions.SessionManager;
-import net.powermatcher.core.time.SystemTimeService;
 import net.powermatcher.mock.MockAgent;
 import net.powermatcher.mock.MockScheduler;
+import net.powermatcher.mock.MockTimeService;
+import net.powermatcher.mock.SimpleSession;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -19,10 +19,10 @@ import org.junit.Test;
 
 /**
  * JUnit test for the Auctioneer
- * 
+ *
  * Every test requires a different number agents. In setUp() NR_AGENTS are instantiated. Every test the desired number
  * of agents can be added and removed using the functions addAgents() and removeAgents().
- * 
+ *
  * @author FAN
  * @version 2.0
  */
@@ -37,15 +37,14 @@ public class AuctioneerTest {
 
     private Auctioneer auctioneer;
     private MockAgent[] agents;
-
-    private SessionManager sessionManager;
+    private SimpleSession[] sessions;
 
     private static final String AUCTIONEER_NAME = "auctioneer";
 
     @Before
     public void setUp() throws Exception {
         // Init Auctioneer
-        this.auctioneer = new Auctioneer();
+        auctioneer = new Auctioneer();
 
         auctioneerProperties = new HashMap<String, Object>();
         auctioneerProperties.put("agentId", AUCTIONEER_NAME);
@@ -60,34 +59,31 @@ public class AuctioneerTest {
 
         timer = new MockScheduler();
 
-        auctioneer.setExecutorService(timer);
-        auctioneer.setTimeService(new SystemTimeService());
         auctioneer.activate(auctioneerProperties);
+        auctioneer.setExecutorService(timer);
+        auctioneer.setTimeService(new MockTimeService(0));
 
         // Init MockAgents
-        this.agents = new MockAgent[NR_AGENTS];
+        agents = new MockAgent[NR_AGENTS];
+        sessions = new SimpleSession[NR_AGENTS];
         for (int i = 0; i < NR_AGENTS; i++) {
             String agentId = "agent" + (i + 1);
             MockAgent newAgent = new MockAgent(agentId);
             newAgent.setDesiredParentId(AUCTIONEER_NAME);
             agents[i] = newAgent;
+            sessions[i] = new SimpleSession(newAgent, auctioneer);
         }
-
-        // Session
-        sessionManager = new SessionManager();
-        sessionManager.addMatcherEndpoint(auctioneer);
-        sessionManager.activate();
     }
 
     private void addAgents(int number) {
         for (int i = 0; i < number; i++) {
-            this.sessionManager.addAgentEndpoint(agents[i]);
+            sessions[i].connect();
         }
     }
 
     private void removeAgents(int number) {
         for (int i = 0; i < number; i++) {
-            this.sessionManager.removeAgentEndpoint(agents[i]);
+            sessions[i].disconnect();
         }
     }
 

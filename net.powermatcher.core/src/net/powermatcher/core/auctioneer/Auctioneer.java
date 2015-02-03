@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
-import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
@@ -20,7 +19,8 @@ import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.events.IncomingBidEvent;
 import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.BaseAgent;
-import net.powermatcher.core.BidCache;
+import net.powermatcher.core.bidcache.AggregatedBid;
+import net.powermatcher.core.bidcache.BidCache;
 import net.powermatcher.core.concentrator.Concentrator;
 
 import org.slf4j.Logger;
@@ -45,15 +45,14 @@ import aQute.bnd.annotation.metatype.Meta;
  * @author FAN
  * @version 2.0
  */
-@Component(designateFactory = Auctioneer.Config.class, immediate = true, provide = {
-                                                                                    ObservableAgent.class,
-                                                                                    MatcherEndpoint.class })
+@Component(designateFactory = Auctioneer.Config.class,
+           immediate = true,
+           provide = { ObservableAgent.class, MatcherEndpoint.class })
 public class Auctioneer
     extends BaseAgent
     implements MatcherEndpoint {
 
-    private static final Logger LOGGER = LoggerFactory
-                                                      .getLogger(Auctioneer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Auctioneer.class);
 
     @Meta.OCD
     public static interface Config {
@@ -122,8 +121,7 @@ public class Auctioneer
         marketBasis = new MarketBasis(config.commodity(),
                                       config.currency(), config.priceSteps(), config.minimumPrice(),
                                       config.maximumPrice());
-        aggregatedBids = new BidCache(timeService,
-                                      config.bidTimeout());
+        aggregatedBids = new BidCache(marketBasis);
         setClusterId(config.clusterId());
         setAgentId(config.agentId());
     }
@@ -142,10 +140,7 @@ public class Auctioneer
     @Override
     public synchronized boolean connectToAgent(Session session) {
         session.setMarketBasis(marketBasis);
-
         sessions.add(session);
-        aggregatedBids.updateBid(getAgentId(), new ArrayBid.Builder(
-                                                                    marketBasis).setDemand(0).build());
         LOGGER.info("Agent connected with session [{}]", session.getSessionId());
         return true;
     }
@@ -160,7 +155,7 @@ public class Auctioneer
             return;
         }
 
-        aggregatedBids.removeAgent(session.getSessionId());
+        aggregatedBids.removeBidOfAgent(session.getAgentId());
 
         LOGGER.info("Agent disconnected with session [{}]",
                     session.getSessionId());
@@ -181,7 +176,7 @@ public class Auctioneer
         }
 
         // Update agent in aggregatedBids
-        aggregatedBids.updateBid(session.getAgentId(), newBid);
+        aggregatedBids.updateAgentBid(session.getAgentId(), newBid);
 
         LOGGER.debug("Received from session [{}] bid update [{}] ",
                      session.getSessionId(), newBid);
@@ -197,24 +192,21 @@ public class Auctioneer
      * {@link AgentObserver} listeners.
      */
     protected synchronized void publishNewPrice() {
-        Bid aggregatedBid = aggregatedBids.getAggregatedBid(
-                                                            marketBasis, false);
-        Price newPrice = determinePrice(aggregatedBid);
+        AggregatedBid aggregatedBid = aggregatedBids.aggregate();
+        Map<String, Integer> bidReferences = aggregatedBid.getAgentBidReferences();
 
+        Price newPrice = determinePrice(aggregatedBid.getAggregatedBid());
         for (Session session : sessions) {
-            ArrayBid lastBid = aggregatedBids.getLastBid(session
-                                                                .getAgentId());
-            if (lastBid != null) {
-                Integer bidNumber = lastBid.getBidNumber();
-                PriceUpdate sessionPriceUpdate = new PriceUpdate(newPrice,
-                                                                 bidNumber);
+            Integer bidReference = bidReferences.get(session.getAgentId());
+
+            if (bidReference != null) {
+                PriceUpdate sessionPriceUpdate = new PriceUpdate(newPrice, bidReference);
                 publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(),
                                                           getAgentId(),
                                                           session.getSessionId(),
                                                           timeService.currentDate(),
                                                           sessionPriceUpdate));
-                LOGGER.debug("New price: {}, session {}", sessionPriceUpdate,
-                             session.getSessionId());
+                LOGGER.debug("New price: {}, session {}", sessionPriceUpdate, session.getSessionId());
                 session.updatePrice(sessionPriceUpdate);
             }
         }
@@ -248,12 +240,5 @@ public class Auctioneer
             }
         };
         scheduledFuture = executorService.scheduleAtFixedRate(command, 0, config.priceUpdateRate(), TimeUnit.SECONDS);
-    }
-
-    /**
-     * @return the current value of aggregatedBids.
-     */
-    protected BidCache getAggregatedBids() {
-        return aggregatedBids;
     }
 }

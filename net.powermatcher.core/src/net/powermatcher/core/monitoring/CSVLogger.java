@@ -4,7 +4,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -266,19 +265,23 @@ public class CSVLogger
      *            the csv log file where to line has to be written to
      */
     private void writeLineToCSV(String[] line, File outputFile) {
-        try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(outputFile, true)))) {
-            StringBuilder sb = new StringBuilder();
+        BufferedWriter w = null;
+        try {
+            w = new BufferedWriter(new FileWriter(outputFile, true));
 
             for (String s : line) {
-                if (sb.length() > 0) {
-                    sb.append(separator);
-                }
-                sb.append(s);
+                w.write(s);
+                w.write(separator);
             }
-            out.println(sb.toString());
-
+            w.write(System.lineSeparator());
         } catch (IOException e) {
-            getLogger().error(e.getMessage());
+        } finally {
+            if (w != null) {
+                try {
+                    w.close();
+                } catch (IOException e) {
+                }
+            }
         }
     }
 

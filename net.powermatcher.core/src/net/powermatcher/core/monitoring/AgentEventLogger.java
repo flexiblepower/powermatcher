@@ -21,11 +21,12 @@ import org.slf4j.LoggerFactory;
 /**
  * This is the basic class to store incoming {@link AgentEvent}s. Subclasses of this abstract class implements their
  * specific logging method in the dumpLogs() method.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
-public abstract class AgentEventLogger extends BaseObserver {
+public abstract class AgentEventLogger
+    extends BaseObserver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AgentEventLogger.class);
 
@@ -42,7 +43,7 @@ public abstract class AgentEventLogger extends BaseObserver {
     /**
      * A set containing all {@link PriceLogRecord} instances that haven't been written to file yet.
      */
-    private BlockingQueue<LogRecord> logRecords = new LinkedBlockingQueue<>();
+    private final BlockingQueue<LogRecord> logRecords = new LinkedBlockingQueue<LogRecord>();
 
     /**
      * A delayed result-bearing action that can be cancelled. It's used to dump the logs at a set interval.
@@ -71,7 +72,7 @@ public abstract class AgentEventLogger extends BaseObserver {
 
     /**
      * This method will be called by the annotated Activate() method of the subclasses.
-     * 
+     *
      * @param properties
      *            the configuration properties
      */
@@ -113,15 +114,21 @@ public abstract class AgentEventLogger extends BaseObserver {
                 logRecord = new BidLogRecord((BidEvent) event, timeService.currentDate(), getDateFormat());
             } else if (event instanceof PriceUpdateEvent) {
                 logRecord = new PriceUpdateLogRecord((PriceUpdateEvent) event, timeService.currentDate(),
-                        getDateFormat());
+                                                     getDateFormat());
             } else if (event instanceof WhitelistEvent) {
                 logRecord = new WhitelistLogRecord((WhitelistEvent) event, timeService.currentDate(), getDateFormat(),
-                        ((WhitelistEvent) event).getBlockedAgent());
+                                                   ((WhitelistEvent) event).getBlockedAgent());
             } else if (event instanceof PeakShavingEvent) {
                 PeakShavingEvent peakShavingEvent = (PeakShavingEvent) event;
-                logRecord = new PeakShavingLogRecord(peakShavingEvent, timeService.currentDate(), getDateFormat(),
-                        peakShavingEvent.getFloor(), peakShavingEvent.getCeiling(), peakShavingEvent.getOldDemand(),
-                        peakShavingEvent.getNewDemand(), peakShavingEvent.getNewPrice(), peakShavingEvent.getOldPrice());
+                logRecord = new PeakShavingLogRecord(peakShavingEvent,
+                                                     timeService.currentDate(),
+                                                     getDateFormat(),
+                                                     peakShavingEvent.getFloor(),
+                                                     peakShavingEvent.getCeiling(),
+                                                     peakShavingEvent.getOldDemand(),
+                                                     peakShavingEvent.getNewDemand(),
+                                                     peakShavingEvent.getNewPrice(),
+                                                     peakShavingEvent.getOldPrice());
             }
 
             addLogRecord(logRecord);
@@ -138,7 +145,7 @@ public abstract class AgentEventLogger extends BaseObserver {
 
     /**
      * This method will be called by the annotated Modfied() method of the subclasses.
-     * 
+     *
      * @param properties
      *            the configuration properties
      */
@@ -149,7 +156,7 @@ public abstract class AgentEventLogger extends BaseObserver {
 
     /**
      * This method processes the data in the Config interfaces of the subclasses
-     * 
+     *
      * @param properties
      *            the configuration properties
      */
@@ -229,7 +236,7 @@ public abstract class AgentEventLogger extends BaseObserver {
 
     /**
      * Removed the given {@link LogRecord} from logRecords.
-     * 
+     *
      * @param logRecord
      *            the {@link LogRecord} that will be removed.
      */
@@ -239,7 +246,7 @@ public abstract class AgentEventLogger extends BaseObserver {
 
     /**
      * Adds the given {@link LogRecord} from logRecords.
-     * 
+     *
      * @param logRecord
      *            the new {@link LogRecord}.
      */
