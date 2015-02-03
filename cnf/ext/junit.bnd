@@ -1,3 +1,0 @@
-junit:\
-	junit;version=latest,\
-	org.hamcrest.core;version=latest

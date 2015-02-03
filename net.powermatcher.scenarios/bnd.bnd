@@ -1,13 +1,10 @@
 Bundle-Version: 1.0.0.${tstamp}
 Service-Component:  *
 -buildpath:  \
-	net.powermatcher.api;version=latest,\
-	slf4j.api,\
-	${junit},\
+	${default-buildpath},\
+	${test},\
 	com.google.gson,\
 	org.apache.felix.metatype,\
-	biz.aQute.bnd.annotation;version="[1.43,3.0)",\
-	osgi.core;version="[4.3,5.0)",\
-	osgi.cmpn;version="[4.3,5.0)"
+	net.powermatcher.api;version=latest
 Export-Package:  \
 	net.powermatcher.scenarios

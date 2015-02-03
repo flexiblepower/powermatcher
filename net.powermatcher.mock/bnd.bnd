@@ -1,10 +1,7 @@
 -buildpath:  \
-	osgi.core,\
-	osgi.cmpn,\
-	biz.aQute.bnd.annotation,\
-	${junit},\
-	net.powermatcher.api;version=latest,\
-	slf4j.api
+	${default-buildpath},\
+	${test},\
+	net.powermatcher.api;version=latest
 Bundle-Version: 0.0.0.${tstamp}
 Private-Package:  \
 	net.powermatcher.mock

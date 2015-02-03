@@ -1,13 +1,9 @@
 -buildpath:  \
-	osgi.core;version='[4.2,5)',\
-	osgi.cmpn,\
-	${junit},\
-	org.mockito.mockito-all;version=latest,\
-	biz.aQute.bnd.annotation;version=latest,\
+	${default-buildpath},\
+	${test},\
 	net.powermatcher.api;version=latest,\
 	net.powermatcher.core;version=latest,\
-	net.powermatcher.mock;version=latest,\
-	slf4j.api
+	net.powermatcher.mock;version=latest
 -runpath:  \
 	org.mockito.mockito-all
 -runee: JavaSE-1.6

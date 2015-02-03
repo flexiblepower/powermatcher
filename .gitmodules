@@ -1,0 +1,4 @@
+[submodule "cnf/gradle"]
+	path = cnf/gradle
+	url = https://github.com/flexiblepower/fpai-shared-config.git
+	branch = gradle

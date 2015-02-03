@@ -1,6 +1,4 @@
-plugindir: ${workspace}/cnf/plugins
-
--pluginpath: ${plugindir}/biz.aQute.repository/biz.aQute.repository.jar
+-pluginpath: ${workspace}/cnf/gradle/bnd/biz.aQute.repository.jar
 
 -plugin: \
      aQute.bnd.deployer.repository.LocalIndexedRepo;\
@@ -18,6 +16,6 @@ plugindir: ${workspace}/cnf/plugins
      aQute.bnd.deployer.repository.FixedIndexedRepo;\
             name=FlexiblePower Bundle Hub - Test;\
             locations=https://raw.githubusercontent.com/flexiblepower/bundle-hub/split-repos-pm/test/index.xml;\
-            cache=${workspace}/cnf/cache,\
+            cache=${workspace}/cnf/cache
 
 -releaserepo: Release
