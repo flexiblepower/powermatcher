@@ -4,7 +4,6 @@ Service-Component:  *
 	net.powermatcher.api;version=latest,\
 	slf4j.api,\
 	${junit},\
-	slf4j.simple,\
 	com.google.gson,\
 	org.apache.felix.metatype,\
 	biz.aQute.bnd.annotation;version="[1.43,3.0)",\

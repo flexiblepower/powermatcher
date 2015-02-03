@@ -1,3 +1,3 @@
 junit:\
 	junit;version=latest,\
-	hamcrest-core;version=latest
+	org.hamcrest.core;version=latest

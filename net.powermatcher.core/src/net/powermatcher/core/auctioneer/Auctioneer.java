@@ -206,8 +206,8 @@ public class Auctioneer
                                                           session.getSessionId(),
                                                           timeService.currentDate(),
                                                           sessionPriceUpdate));
-                session.updatePrice(sessionPriceUpdate);
                 LOGGER.debug("New price: {}, session {}", sessionPriceUpdate, session.getSessionId());
+                session.updatePrice(sessionPriceUpdate);
             }
         }
     }

@@ -5,7 +5,6 @@ Service-Component:  *
 	biz.aQute.bnd.annotation,\
 	slf4j.api,\
 	${junit},\
-	slf4j.simple,\
 	net.powermatcher.mock;version=latest,\
 	osgi.cmpn,\
 	osgi.core

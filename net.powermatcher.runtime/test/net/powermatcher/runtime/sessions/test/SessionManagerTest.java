@@ -1,18 +1,14 @@
 package net.powermatcher.runtime.sessions.test;
 
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
-import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
-import net.powermatcher.api.AgentEndpoint;
-import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.mock.MockAgent;
 import net.powermatcher.mock.MockMatcherAgent;
@@ -126,36 +122,4 @@ public class SessionManagerTest {
         assertThat(session, is(notNullValue()));
     }
 
-    @Test
-    public void testGetAgentEndPoints() {
-        sessionManager.addAgentEndpoint(testAgent);
-        Map<String, AgentEndpoint> agentEndpoints = sessionManager
-                                                                  .getAgentEndpoints();
-        assertThat(agentEndpoints.containsKey(testAgent.getAgentId()), is(true));
-    }
-
-    @Test
-    public void testGetMatcherEndPoints() {
-        sessionManager.addAgentEndpoint(testAgent);
-        sessionManager.addMatcherEndpoint(auctioneer);
-        Map<String, MatcherEndpoint> matcherEndpoints = sessionManager
-                                                                      .getMatcherEndpoints();
-        assertThat(matcherEndpoints.containsKey(testAgent.getAgentId()),
-                   is(false));
-        assertThat(matcherEndpoints.containsKey(auctioneer.getAgentId()),
-                   is(true));
-    }
-
-    @Test
-    public void testActiveSessions() {
-        sessionManager.addAgentEndpoint(testAgent);
-        sessionManager.addMatcherEndpoint(auctioneer);
-        Map<String, Session> activeSessions = sessionManager
-                                                            .getActiveSessions();
-        assertThat(activeSessions.size(), is(equalTo(1)));
-        assertThat(activeSessions.get(AGENT_ID + ":" + AUCTIONEER_NAME)
-                                 .getMatcherId(), is(equalTo(auctioneer.getAgentId())));
-        assertThat(activeSessions.get(AGENT_ID + ":" + AUCTIONEER_NAME)
-                                 .getAgentId(), is(equalTo(testAgent.getAgentId())));
-    }
 }

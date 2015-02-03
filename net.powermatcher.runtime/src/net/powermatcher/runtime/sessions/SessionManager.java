@@ -2,36 +2,25 @@ package net.powermatcher.runtime.sessions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
-import net.powermatcher.api.Agent;
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 
-import org.junit.experimental.theories.Theories;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 
 /**
- * <p>
- * This class represents a {@link SessionManager} component which will store the active sessions between an an
- * {@link AgentEndpoint} and a {@link MatcherEndpoint} object.
- * </p>
- *
- * <p>
- * It is responsible for connecting and disconnecting an {@link Auctioneer}, {@link Concentrator} and agents. In
- * <code>activeSessions</code> the {@link Session} will be stored. The {@link SessionManager} will connect a
- * {@link MatcherEndpoint} to an agent and an {@link AgentEndpoint} with a {@link MatcherEndpoint}.
- * </p>
+ * The SessionManager is an OSGi Component which is responsible for connecting PowerMatcher Agents. To be specific, it
+ * will connect {@link MatcherEndpoint}s with {@link AgentEndpoint}. Connections are based on the agentId of the
+ * {@link MatcherEndpoint} and the desiredParentId of the {@link AgentEndpoint}. Connections are represented by an
+ * {@link Session} instance.
  *
  * @author FAN
  * @version 2.0
@@ -42,269 +31,139 @@ public class SessionManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionManager.class);
 
     /**
-     * Holds the agentEndpoints
+     * Data structure with all the {@link PotentialSession}s. Key of the map is the matcherId, the value is a list with
+     * all the {@link PotentialSession}s with that matcher.
      */
-    private final ConcurrentMap<String, AgentEndpoint> agentEndpoints = new ConcurrentHashMap<String, AgentEndpoint>();
+    private final Map<String, List<PotentialSession>> potentialSessions = new HashMap<String, List<PotentialSession>>();
 
     /**
-     * Holds the matcherEndpoints
+     * Map with references to all the known {@link MatcherEndpoint}s. Key of the map is the agentId.
      */
-    private final ConcurrentMap<String, MatcherEndpoint> matcherEndpoints = new ConcurrentHashMap<String, MatcherEndpoint>();
+    private final Map<String, MatcherEndpoint> matcherEndpoints = new HashMap<String, MatcherEndpoint>();
 
     /**
-     * Holds the activeSessions
-     */
-    private final Map<String, Session> activeSessions = new ConcurrentHashMap<String, Session>();
-
-    /**
-     * Holds the desiredConnections
-     */
-    private final Map<String, String> desiredConnections = new ConcurrentHashMap<String, String>();
-
-    /**
-     * Holds the agentId's in the cluster
-     */
-    private List<String> agentIds = new ArrayList<String>();
-
-    /**
-     * OSGI ConfigurationAdmin, stores bundle configuration data persistently.
-     */
-    private ConfigurationAdmin configurationAdmin;
-
-    @Reference(dynamic = true, multiple = true, optional = true)
-    public void addAgentEndpoint(AgentEndpoint agentEndpoint) {
-        Agent agent = agentEndpoint;
-        String agentId = agent.getAgentId();
-
-        if (isNotUniqueAgentId(agentId, agentEndpoint, null)) {
-            // Modified agent
-            if (desiredConnections.containsKey(agentId)) {
-                desiredConnections.remove(agentId);
-            }
-
-            desiredConnections.put(agentId, agent.getDesiredParentId());
-            LOGGER.debug("Added new wanted connection: [{}]", agentId + ":" + agent.getDesiredParentId());
-
-            if (agentId == null) {
-                LOGGER.warn("Registered an agent with no agentId: " + agentEndpoint);
-            } else if (agentEndpoints.putIfAbsent(agentId, agentEndpoint) != null) {
-                LOGGER.warn("An agent with the id " + agentId + " was already registered");
-            } else {
-                updateConnections();
-            }
-        }
-        updateConnections();
-    }
-
-    /**
-     * OSGi calls this method to activate a managed service.
-     *
-     * @param properties
-     *            the configuration properties
-     */
-    @Activate
-    public synchronized void activate() {
-        updateConnections();
-    }
-
-    /**
-     * Adds a {@link MatcherEndpoint} to the matcherEndpoints map. It will also check if the agentId is unique.
+     * Informs the SessionManager that there is a new {@link MatcherEndpoint}.
      *
      * @param matcherEndpoint
      *            the new {@link MatcherEndpoint}
      */
     @Reference(dynamic = true, multiple = true, optional = true)
     public void addMatcherEndpoint(MatcherEndpoint matcherEndpoint) {
-        Agent agent = matcherEndpoint;
-        String agentId = agent.getAgentId();
+        String agentId = matcherEndpoint.getAgentId();
 
-        if (isNotUniqueAgentId(agentId, null, matcherEndpoint)) {
+        synchronized (this) {
+            // Check for duplicate
+            if (matcherEndpoints.containsKey(agentId)) {
+                LOGGER.warn("MatcherEndpoint added with agentId " + agentId
+                            + ", but it already exists. Ignoring the new one...");
+                return;
+            }
 
-            if (agentId == null) {
-                LOGGER.warn("Registered an matcher with no matcherId: " + matcherEndpoint);
-            } else if (matcherEndpoints.putIfAbsent(agentId, matcherEndpoint) != null) {
-                LOGGER.warn("An matcher with the id " + agentId + " was already registered");
-            } else {
-                updateConnections();
+            if (!potentialSessions.containsKey(agentId)) {
+                potentialSessions.put(agentId, new ArrayList<PotentialSession>());
+            }
+            matcherEndpoints.put(agentId, matcherEndpoint);
+
+            for (PotentialSession ps : potentialSessions.get(agentId)) {
+                ps.setMatcherEndpoint(matcherEndpoint);
             }
         }
+
+        tryConnect();
     }
 
     /**
-     * This method is called whenever an {@link Agent} is added or removed.
-     */
-    private synchronized void updateConnections() {
-        for (String desiredAgentId : desiredConnections.keySet()) {
-            String agentId = desiredAgentId;
-            String matcherId = desiredConnections.get(desiredAgentId);
-
-            AgentEndpoint agentEndpoint = agentEndpoints.get(desiredAgentId);
-            MatcherEndpoint matcherEndpoint = matcherEndpoints.get(matcherId);
-
-            if (agentEndpoint != null && matcherEndpoint != null) {
-                final String sessionId = agentId + ":" + matcherId;
-                if (activeSessions.containsKey(sessionId)) {
-                    // session already exists
-                    continue;
-                }
-                LOGGER.info("Connecting session: [{}]", agentId + ":" + matcherId);
-                Session session = new SessionImpl(this, agentEndpoint, agentId, matcherEndpoint, matcherId, sessionId);
-                if (matcherEndpoint.connectToAgent(session)) {
-                    agentEndpoint.connectToMatcher(session);
-                    activeSessions.put(sessionId, session);
-                    LOGGER.info("Added new active session: {}", sessionId);
-                }
-            } else {
-                final String removeSessionId = desiredAgentId + ":" + matcherId;
-                if (activeSessions.containsKey(removeSessionId)) {
-                    Session session = activeSessions.remove(removeSessionId);
-                    session.disconnect();
-                }
-            }
-        }
-    }
-
-    /**
-     * Removes the given {@link AgentEndpoint} from agentEndpoints.
-     *
-     * @param agentEndpoint
-     *            the {@link AgentEndpoint} that will be removed.
-     */
-    public void removeAgentEndpoint(AgentEndpoint agentEndpoint) {
-        Agent agent = agentEndpoint;
-        String agentId = agent.getAgentId();
-        if (agentId != null && agentEndpoints.get(agentId) == agentEndpoint) {
-            agentEndpoints.remove(agentId);
-            updateConnections();
-            desiredConnections.remove(agentId);
-            LOGGER.info("Removed agentEndpoint: {}", agentId);
-        }
-    }
-
-    /**
-     * Checks to see if the new agentId already exists in {@link Theories} cluster.
-     *
-     * @param agentId
-     *            the agentId of {@link Agent} that has to be checked for uniqueness.
-     * @param agentEndpoint
-     *            the {@link AgentEndpoint} if this is an {@link AgentEndpoint}, <code>null</code> if not.
-     * @param matcherEndpoint
-     *            the {@link MatcherEndpoint} if this is an {@link MatcherEndpoint}, <code>null</code> if not.
-     * @return
-     */
-    private boolean isNotUniqueAgentId(String agentId, AgentEndpoint agentEndpoint, MatcherEndpoint matcherEndpoint) {
-        if (agentIds.contains(agentId)) {
-            if (agentEndpoint != null && agentEndpoints.get(agentId) != null) {
-                AgentEndpoint oldAgentEndpoint = agentEndpoints.get(agentId);
-                deleteAgentId(agentId, oldAgentEndpoint, null);
-
-                return false;
-            } else if (matcherEndpoint != null && (matcherEndpoints.get(agentId) != null)) {
-                MatcherEndpoint oldMatcherEndpoint = matcherEndpoints.get(agentId);
-                deleteAgentId(agentId, null, oldMatcherEndpoint);
-
-                return false;
-            }
-        } else {
-            if (!agentIds.contains(agentId)) {
-                agentIds.add(agentId);
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Removes a managed service from OSGi with the {@link ConfigurationAdmin}.
-     *
-     * @param AgentId
-     *            the agentId of the managed service that will be removed
-     * @param agentEndpoint
-     *            the {@link AgentEndpoint} if this is an {@link AgentEndpoint}, <code>null</code> if not.
-     * @param matcherEndpoint
-     *            the {@link MatcherEndpoint} if this is an {@link MatcherEndpoint}, <code>null</code> if not.
-     */
-    private void deleteAgentId(String AgentId, AgentEndpoint agentEndpoint, MatcherEndpoint matcherEndpoint) {
-        // String pidOldAgentEndpoint;
-        // try {
-        // for (Configuration c : configurationAdmin.listConfigurations(null)) {
-        // if (agentEndpoint != null) {
-        // pidOldAgentEndpoint = agentEndpoint.getServicePid();
-        // } else {
-        // pidOldAgentEndpoint = matcherEndpoint.getServicePid();
-        // }
-        // String pidConfigAgentEndpoint = (String) c.getProperties().get("service.pid");
-        // if ((agentEndpoint.getAgentId().equals((String) c.getProperties().get("agentId")))
-        // && (!pidOldAgentEndpoint.equals(pidConfigAgentEndpoint))) {
-        // LOGGER.error("AgentId " + agentEndpoint.getAgentId() + "was already registered.");
-        // c.delete();
-        // }
-        // }
-        // } catch (IOException e) {
-        // LOGGER.error(e.getMessage());
-        // } catch (InvalidSyntaxException e) {
-        // LOGGER.error(e.getMessage());
-        // }
-    }
-
-    /**
-     * Removes the given {@link MatcherEndpoint} from matcherEndpoints.
+     * Informs the SessionManager that a {@link MatcherEndpoint} has been removed. It will disconnect any existing
+     * Sessions with the {@link MatcherEndpoint}.
      *
      * @param matcherEndpoint
+     *            the {@link MatcherEndpoint} to be removed
      */
     public void removeMatcherEndpoint(MatcherEndpoint matcherEndpoint) {
-        Agent agent = matcherEndpoint;
-        String matcherId = agent.getAgentId();
+        String agentId = matcherEndpoint.getAgentId();
 
-        if (matcherId != null && matcherEndpoints.get(matcherId) == matcherEndpoint) {
-            matcherEndpoints.remove(matcherId);
-            updateConnections();
+        for (PotentialSession ps : potentialSessions.get(agentId)) {
+            // PotentialSessions are disconnected, but are not removed
+            ps.disconnect();
+            ps.setMatcherEndpoint(null);
+        }
+        synchronized (this) {
+            matcherEndpoints.remove(agentId);
         }
     }
 
     /**
-     * This is called by a {@link Session} when it disconnects.
+     * Informs the SessionManager that there is a new {@link AgentEndpoint}.
      *
-     * @param sessionImpl
+     * @param agentEndpoint
+     *            the new {@link AgentEndpoint}
      */
-    void disconnected(SessionImpl sessionImpl) {
-        activeSessions.remove(sessionImpl.getSessionId());
+    @Reference(dynamic = true, multiple = true, optional = true)
+    public void addAgentEndpoint(AgentEndpoint agentEndpoint) {
+        String agentId = agentEndpoint.getAgentId();
+        String matcherId = agentEndpoint.getDesiredParentId();
+        synchronized (this) {
+            if (!potentialSessions.containsKey(matcherId)) {
+                potentialSessions.put(matcherId, new ArrayList<PotentialSession>());
+            }
+            // Check if it already exists
+            for (PotentialSession ps : potentialSessions.get(matcherId)) {
+                if (agentId.equals(ps.getAgentId())) {
+                    LOGGER.warn("AgentEndpoint added with agentId " + agentId
+                                + ", but it already exists. Ignoring the new one...");
+                    return;
+                }
+            }
+
+            PotentialSession ps = new PotentialSession();
+            ps.setAgentEndpoint(agentEndpoint);
+            ps.setMatcherEndpoint(matcherEndpoints.get(matcherId));
+            potentialSessions.get(matcherId).add(ps);
+        }
+        tryConnect();
     }
 
     /**
-     * @return a copy of agentEndpoints.
+     * Informs the SessionManager that an {@link AgentEndpoint} has been removed. It will disconnect any existing
+     * Sessions with the {@link AgentEndpoint}.
+     *
+     * @param agentEndpoint
+     *            the {@link AgentEndpoint} to be removed
      */
-    public Map<String, AgentEndpoint> getAgentEndpoints() {
-        return new HashMap<String, AgentEndpoint>(agentEndpoints);
+    public void removeAgentEndpoint(AgentEndpoint agentEndpoint) {
+        String agentId = agentEndpoint.getAgentId();
+        String matcherId = agentEndpoint.getDesiredParentId();
+        PotentialSession currentSession = null;
+        synchronized (this) {
+            Iterator<PotentialSession> it = potentialSessions.get(matcherId).iterator();
+            while (it.hasNext()) {
+                PotentialSession ps = it.next();
+                if (agentId.equals(ps.getAgentId())) {
+                    currentSession = ps;
+                    it.remove();
+                    break;
+                }
+            }
+        }
+        currentSession.disconnect();
     }
 
     /**
-     * @return a copy of the matcherEndpoints
+     * See if there is a {@link PotentialSession} that can be connected. Since one new Session can lead to another, this
+     * is tried until nothing changes.
      */
-    public Map<String, MatcherEndpoint> getMatcherEndpoints() {
-        return new HashMap<String, MatcherEndpoint>(matcherEndpoints);
-    }
-
-    /**
-     * @return a copy of activeSessions.
-     */
-    public Map<String, Session> getActiveSessions() {
-        return new HashMap<String, Session>(activeSessions);
-    }
-
-    /**
-     * @param the
-     *            new {@link ConfigurationAdmin} value.
-     */
-    @Reference
-    protected void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
-    }
-
-    /**
-     * @param the
-     *            new <code>List</code> of agentId <code>Strings</code>
-     */
-    public void setAgentIds(List<String> agentIds) {
-        this.agentIds = agentIds;
+    private void tryConnect() {
+        // TODO do something more efficient? We could build some tree and try to connect agents from top to bottom.
+        boolean somethingChanged;
+        do {
+            somethingChanged = false;
+            for (List<PotentialSession> list : potentialSessions.values()) {
+                for (PotentialSession ps : list) {
+                    if (ps.tryConnect()) {
+                        somethingChanged = true;
+                    }
+                }
+            }
+        } while (somethingChanged);
     }
 }
