@@ -10,15 +10,17 @@ import net.powermatcher.api.Agent;
 /**
  * This immutable data object represents a {@link Bid} with a {@link PricePoint} array to represent the bid curve. This
  * is used by {@link Agent}s that have to create a {@link Bid}, because it is easier to create.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
-public class PointBid extends Bid implements Iterable<PricePoint> {
+public class PointBid
+    extends Bid
+    implements Iterable<PricePoint> {
 
     /**
      * A builder class to create an {@link PointBid} instance.
-     * 
+     *
      * @author FAN
      * @version 2.0
      */
@@ -41,19 +43,19 @@ public class PointBid extends Bid implements Iterable<PricePoint> {
 
         /**
          * Constructor to create an instance of this class.
-         * 
+         *
          * @param marketBasis
          *            the {@link MarketBasis} of the cluster.
          */
         public Builder(final MarketBasis marketBasis) {
             this.marketBasis = marketBasis;
             bidNumber = 0;
-            this.pricePoints = new TreeSet<PricePoint>();
+            pricePoints = new TreeSet<PricePoint>();
         }
 
         /**
          * Sets the bidNumber with the specified bidNumber
-         * 
+         *
          * @param bidNumber
          * @return this instance of the Builder with the set bidNumber
          */
@@ -64,7 +66,7 @@ public class PointBid extends Bid implements Iterable<PricePoint> {
 
         /**
          * Adds the supplied pricePoint the PricePoint array
-         * 
+         *
          * @param pricePoint
          * @return this instance of the Builder with the array
          */
@@ -75,7 +77,7 @@ public class PointBid extends Bid implements Iterable<PricePoint> {
 
         /**
          * Creates a PricePoint with the supplied price and demand. Adds the point to the PricePoint array.
-         * 
+         *
          * @param pricePoint
          * @return this instance of the Builder with the array
          */
@@ -85,7 +87,7 @@ public class PointBid extends Bid implements Iterable<PricePoint> {
 
         /**
          * Uses the supplied parameters to create a new PointBid
-         * 
+         *
          * @return The created {@link PointBid}
          * @throws IllegalArgumentException
          *             when the marketBasis is null
@@ -107,7 +109,7 @@ public class PointBid extends Bid implements Iterable<PricePoint> {
 
     /**
      * A constructor to create an instance of PointBid.
-     * 
+     *
      * @param marketBasis
      *            the {@link MarketBasis} of the cluster
      * @param bidNumber
@@ -122,14 +124,14 @@ public class PointBid extends Bid implements Iterable<PricePoint> {
 
     /**
      * A constructor used to create an PointBid, based on a {@link ArrayBid}.
-     * 
+     *
      * @param base
      *            The {@link ArrayBid} this PointBid will be based on.
      */
     PointBid(ArrayBid base) {
         super(base.marketBasis, base.bidNumber);
-        this.pricePoints = base.calculatePricePoints();
-        this.arrayBid = base;
+        pricePoints = base.calculatePricePoints();
+        arrayBid = base;
     }
 
     /**
@@ -170,7 +172,7 @@ public class PointBid extends Bid implements Iterable<PricePoint> {
     @Override
     public ArrayBid toArrayBid() {
         if (arrayBid == null) {
-            this.arrayBid = new ArrayBid(this);
+            arrayBid = new ArrayBid(this);
         }
         return arrayBid;
     }
@@ -215,7 +217,7 @@ public class PointBid extends Bid implements Iterable<PricePoint> {
         // Now calculate the demand between the 2 points
         // First the factor (between 0 and 1) of where the price is on the line
         double factor = (price.getPriceValue() - lower.getPrice().getPriceValue())
-                / (higher.getPrice().getPriceValue() - lower.getPrice().getPriceValue());
+                        / (higher.getPrice().getPriceValue() - lower.getPrice().getPriceValue());
         // Now calculate the demand
         return (1 - factor) * lower.getDemand() + factor * higher.getDemand();
     }
@@ -319,16 +321,15 @@ public class PointBid extends Bid implements Iterable<PricePoint> {
      */
     @Override
     public boolean equals(Object obj) {
-        PointBid other = (PointBid) ((obj instanceof PointBid) ? obj : null);
-        if (other == null) {
-            return false;
-        }
-
-        if (this == other) {
+        if (this == obj) {
             return true;
+        } else if (obj == null || !(obj instanceof PointBid)) {
+            return false;
+        } else {
+            PointBid other = ((PointBid) obj);
+            return other.bidNumber == bidNumber && marketBasis.equals(other.marketBasis)
+                   && Arrays.equals(other.getPricePoints(), getPricePoints());
         }
-        return other.bidNumber == this.bidNumber && this.marketBasis.equals(other.marketBasis)
-                && Arrays.equals(other.getPricePoints(), this.getPricePoints());
     }
 
     /**
@@ -337,12 +338,12 @@ public class PointBid extends Bid implements Iterable<PricePoint> {
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder();
-        b.append("PointBid{bidNumber=").append(this.bidNumber);
+        b.append("PointBid{bidNumber=").append(bidNumber);
         PricePoint[] points = getPricePoints();
         /*
          * Print price points if available, and if the most compact representation
          */
-        if (points != null && points.length < this.marketBasis.getPriceSteps() / 2) {
+        if (points != null && points.length < marketBasis.getPriceSteps() / 2) {
             b.append(", PricePoint[]{");
             for (int i = 0; i < points.length; i++) {
                 if (i > 0) {
@@ -352,7 +353,7 @@ public class PointBid extends Bid implements Iterable<PricePoint> {
             }
         }
         b.append("}, ");
-        b.append(this.marketBasis);
+        b.append(marketBasis);
         b.append('}');
         return b.toString();
     }

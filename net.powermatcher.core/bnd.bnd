@@ -3,6 +3,7 @@ Service-Component:  *
 Export-Package:  \
 	net.powermatcher.core,\
 	net.powermatcher.core.auctioneer,\
+	net.powermatcher.core.bidcache,\
 	net.powermatcher.core.concentrator,\
 	net.powermatcher.core.connectivity,\
 	net.powermatcher.core.monitoring,\

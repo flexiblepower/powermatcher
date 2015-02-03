@@ -9,14 +9,6 @@
 	net.powermatcher.api;version=latest,\
 	net.powermatcher.core;version=latest,\
 	org.apache.felix.metatype
-Bundle-Version: 0.0.0.${tstamp}
-Private-Package:  \
-	net.powermatcher.remote
-Service-Component:  \
-	*
-Export-Package:  \
-	net.powermatcher.remote
-	
--includeresource: WEB-INF/web.xml=${project}/web.xml
-
-Web-ContextPath: /agents
+Bundle-Version: 1.0.0.${tstamp}
+Private-Package:  net.powermatcher.remote*
+Service-Component:  *
