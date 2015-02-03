@@ -136,7 +136,9 @@ public class Concentrator
             public void run() {
                 try {
                     doBidUpdate();
-                } catch (IllegalStateException | IllegalArgumentException e) {
+                } catch (IllegalStateException e) {
+                    LOGGER.error("doBidUpate failed for Concentrator " + config.agentId(), e);
+                } catch (IllegalArgumentException e) {
                     LOGGER.error("doBidUpate failed for Concentrator " + config.agentId(), e);
                 }
             }

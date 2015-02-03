@@ -55,7 +55,7 @@ public class ConcentratorTest {
         concentrator = new Concentrator();
         mockScheduler = new MockScheduler();
 
-        props = new HashMap<>();
+        props = new HashMap<String, Object>();
         concentratorId = "concentrator";
         auctioneerId = "auctioneer";
         clusterId = "testCluster";
