@@ -7,10 +7,6 @@ plugindir: ${workspace}/cnf/plugins
             name=FlexiblePower Bundle Hub;\
             locations=https://raw.githubusercontent.com/flexiblepower/bundle-hub/master/index.xml.gz;\
             cache=${workspace}/cnf/cache,\
-	aQute.bnd.deployer.repository.FixedIndexedRepo;\
-            name=FPAI 14.10;\
-            locations=https://github.com/flexiblepower/fpai-core/releases/download/v14.10/index.xml;\
-            cache=${workspace}/cnf/cache,\
 	aQute.lib.deployer.FileRepo;name=Build;\
 			location=${workspace}/cnf/buildrepo,\
 	aQute.lib.deployer.FileRepo;name=Jetty 9.2 Bundles;\

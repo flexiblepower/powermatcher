@@ -4,6 +4,7 @@ bin/
 generated/
 .svn/
 cnf/cache/
+cnf/releaserepo/
 .gradle/
 .sonar/
 build/
