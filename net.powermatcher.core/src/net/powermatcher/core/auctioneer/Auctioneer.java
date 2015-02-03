@@ -1,9 +1,8 @@
 package net.powermatcher.core.auctioneer;
 
 import java.security.InvalidParameterException;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -92,7 +91,7 @@ public class Auctioneer
     /**
      * The bid cache maintains an aggregated {@link Bid}, where bids can be added and removed explicitly.
      */
-    private BidCache aggregatedBids;
+    protected BidCache aggregatedBids;
 
     /**
      * The {@link MarketBasis} for {@link Bid} and {@link Price}.
@@ -102,7 +101,7 @@ public class Auctioneer
     /**
      * Holds the sessions from the agents.
      */
-    private final Set<Session> sessions = new HashSet<Session>();
+    private final Map<String, Session> sessions = new ConcurrentHashMap<String, Session>();
 
     private Config config;
 
@@ -138,52 +137,60 @@ public class Auctioneer
      * {@inheritDoc}
      */
     @Override
-    public synchronized boolean connectToAgent(Session session) {
-        session.setMarketBasis(marketBasis);
-        sessions.add(session);
-        LOGGER.info("Agent connected with session [{}]", session.getSessionId());
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public synchronized void agentEndpointDisconnected(Session session) {
-        // Find session
-        if (!sessions.remove(session)) {
-            return;
+    public boolean connectToAgent(Session session) {
+        if (!sessions.containsKey(session.getAgentId())) {
+            session.setMarketBasis(marketBasis);
+            sessions.put(session.getAgentId(), session);
+            LOGGER.info("Agent connected with session [{}]", session.getSessionId());
+            return true;
+        } else {
+            LOGGER.warn("An agent with id [{}] was already connected", session.getAgentId());
+            return false;
         }
-
-        aggregatedBids.removeBidOfAgent(session.getAgentId());
-
-        LOGGER.info("Agent disconnected with session [{}]",
-                    session.getSessionId());
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public synchronized void handleBidUpdate(Session session, Bid newBid) {
-        if (!sessions.contains(session)) {
+    public void agentEndpointDisconnected(Session session) {
+        // Find session
+        Session foundSession = sessions.get(session.getAgentId());
+        if (!foundSession.equals(session)) {
+            return;
+        } else {
+            sessions.remove(session.getAgentId());
+
+            aggregatedBids.removeBidOfAgent(session.getAgentId());
+
+            LOGGER.info("Agent disconnected with session [{}]", session.getSessionId());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void handleBidUpdate(Session session, Bid newBid) {
+        if (!sessions.containsKey(session.getAgentId())) {
             throw new IllegalStateException("No session found");
         }
 
         if (!newBid.getMarketBasis().equals(marketBasis)) {
-            throw new InvalidParameterException(
-                                                "Marketbasis new bid differs from marketbasis auctioneer");
+            throw new InvalidParameterException("Marketbasis new bid differs from marketbasis auctioneer");
         }
 
         // Update agent in aggregatedBids
         aggregatedBids.updateAgentBid(session.getAgentId(), newBid);
 
-        LOGGER.debug("Received from session [{}] bid update [{}] ",
-                     session.getSessionId(), newBid);
+        LOGGER.debug("Received from session [{}] bid update [{}] ", session.getSessionId(), newBid);
 
         publishEvent(new IncomingBidEvent(session.getClusterId(),
-                                          getAgentId(), session.getSessionId(),
-                                          timeService.currentDate(), session.getAgentId(), newBid));
+                                          getAgentId(),
+                                          session.getSessionId(),
+                                          timeService.currentDate(),
+                                          session.getAgentId(),
+                                          newBid));
     }
 
     /**
@@ -191,12 +198,12 @@ public class Auctioneer
      * {@link MatcherEndpoint} through the {@link Session}. An {@link OutgoingPriceUpdateEvent} is sent to all
      * {@link AgentObserver} listeners.
      */
-    protected synchronized void publishNewPrice() {
+    protected void publishNewPrice() {
         AggregatedBid aggregatedBid = aggregatedBids.aggregate();
         Map<String, Integer> bidReferences = aggregatedBid.getAgentBidReferences();
 
         Price newPrice = determinePrice(aggregatedBid.getAggregatedBid());
-        for (Session session : sessions) {
+        for (Session session : sessions.values()) {
             Integer bidReference = bidReferences.get(session.getAgentId());
 
             if (bidReference != null) {
