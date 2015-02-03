@@ -10,16 +10,16 @@ import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
-import net.powermatcher.core.sessions.SessionManager;
 import net.powermatcher.integration.util.CsvBidReader;
 import net.powermatcher.integration.util.CsvExpectedResultsReader;
 import net.powermatcher.mock.MockAgent;
+import net.powermatcher.mock.SimpleSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ *
  * @author FAN
  * @version 2.0
  */
@@ -43,26 +43,13 @@ public class ResilienceTest {
     // List of agents sending bids from
     protected List<MockAgent> agentList;
 
-    // SessionManager to handle the connections between matcher and agents
-    protected SessionManager sessionManager;
-
-    protected void addAgent(MockAgent agent) {
-        sessionManager.addAgentEndpoint(agent);
-    }
-
-    protected void removeAgents(List<MockAgent> agents, MatcherEndpoint matcher) {
-        for (MockAgent agent : agents) {
-            sessionManager.removeAgentEndpoint(agent);
-        }
-    }
-
     protected void setMarketBasis(MarketBasis marketBasis) {
         this.marketBasis = marketBasis;
     }
 
     protected Bid nextBidToMatcher(int id) throws IOException, DataFormatException {
         MockAgent newAgent;
-        Bid bid = this.bidReader.nextBid();
+        Bid bid = bidReader.nextBid();
 
         if (bid != null) {
             newAgent = createAgent(id);
@@ -76,13 +63,13 @@ public class ResilienceTest {
         ArrayBid bid = null;
         MockAgent newAgent;
 
-        double[] aggregatedDemand = new double[this.marketBasis.getPriceSteps()];
+        double[] aggregatedDemand = new double[marketBasis.getPriceSteps()];
 
         boolean stop = false;
         int i = 0;
         do {
             try {
-                bid = this.bidReader.nextBid();
+                bid = bidReader.nextBid();
 
                 if (bid != null) {
                     // Aggregated demand calculation
@@ -91,7 +78,7 @@ public class ResilienceTest {
                         aggregatedDemand[j] = aggregatedDemand[j] + demand[j];
                     }
                     if (agentList.size() > i) {
-                        newAgent = this.agentList.get(i);
+                        newAgent = agentList.get(i);
                     } else {
                         newAgent = createAgent(i);
                     }
@@ -117,13 +104,13 @@ public class ResilienceTest {
         }
     }
 
-    private MockAgent createAgent(int i) {
+    private MockAgent createAgent(int i, MatcherEndpoint matcher) {
         String agentId = "agent" + (i + 1);
         MockAgent newAgent = new MockAgent(agentId);
-        this.agentList.add(i, newAgent);
+        agentList.add(i, newAgent);
 
-        newAgent.setDesiredParentId(MATCHERNAME);
-        addAgent(newAgent);
+        newAgent.setDesiredParentId(matcher.getAgentId());
+        new SimpleSession(newAgent, matcher).connect();
 
         return newAgent;
     }
@@ -149,6 +136,6 @@ public class ResilienceTest {
     }
 
     protected void checkAggregatedBid(ArrayBid aggregatedBid) {
-        assertArrayEquals(this.resultsReader.getAggregatedBid().getDemand(), aggregatedBid.getDemand(), 0);
+        assertArrayEquals(resultsReader.getAggregatedBid().getDemand(), aggregatedBid.getDemand(), 0);
     }
 }

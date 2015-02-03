@@ -3,6 +3,7 @@ package net.powermatcher.integration.oscillation;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
@@ -14,10 +15,10 @@ import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.concentrator.Concentrator;
-import net.powermatcher.core.sessions.SessionManager;
-import net.powermatcher.core.time.SystemTimeService;
 import net.powermatcher.mock.MockAgent;
 import net.powermatcher.mock.MockScheduler;
+import net.powermatcher.mock.MockTimeService;
+import net.powermatcher.mock.SimpleSession;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,7 +27,7 @@ import org.junit.Test;
  * This test is created to assert that features added to prevent oscillating behavior are in place and work. Oscillating
  * behavior can emerge when an Agent sends Bids asynchronously from the prices of the Auctioneer. If the Agent cannot
  * ascertain which Price is is corresponding to which Bid, it could start sending Bids in response to the wrong Prices.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
@@ -49,12 +50,10 @@ public class OscillationPreventionTest {
     private MockAgent agent2;
     private MockAgent agent3;
 
-    private SessionManager sessionManager;
-
     @Before
     public void setUpCluster() {
         // Create auctioneer
-        this.auctioneer = new Auctioneer();
+        auctioneer = new Auctioneer();
         auctioneerProperties = new HashMap<String, Object>();
         auctioneerProperties.put("agentId", AUCTIONEER_ID);
         auctioneerProperties.put("clusterId", "DefaultCluster");
@@ -68,9 +67,9 @@ public class OscillationPreventionTest {
 
         auctioneerScheduler = new MockScheduler();
 
-        auctioneer.setExecutorService(auctioneerScheduler);
-        auctioneer.setTimeService(new SystemTimeService());
         auctioneer.activate(auctioneerProperties);
+        auctioneer.setExecutorService(auctioneerScheduler);
+        auctioneer.setTimeService(new MockTimeService(0));
 
         // create concentrator
         concentrator = new Concentrator();
@@ -83,9 +82,9 @@ public class OscillationPreventionTest {
         concentratorProperties.put("whiteListAgents", new ArrayList<String>());
 
         concentratorScheduler = new MockScheduler();
-        concentrator.setExecutorService(concentratorScheduler);
-        concentrator.setTimeService(new SystemTimeService());
         concentrator.activate(concentratorProperties);
+        concentrator.setExecutorService(concentratorScheduler);
+        concentrator.setTimeService(new MockTimeService(0));
 
         // create agents
         agent1 = new MockAgent(AGENT_ID + "1");
@@ -95,15 +94,10 @@ public class OscillationPreventionTest {
         agent3 = new MockAgent(AGENT_ID + "3");
         agent3.setDesiredParentId(CONCENTRATOR_ID);
 
-        // create sessionManager
-        sessionManager = new SessionManager();
-        sessionManager.addMatcherEndpoint(auctioneer);
-        sessionManager.addAgentEndpoint(concentrator);
-        sessionManager.addMatcherEndpoint(concentrator);
-        sessionManager.addAgentEndpoint(agent1);
-        sessionManager.addAgentEndpoint(agent2);
-        sessionManager.addAgentEndpoint(agent3);
-        sessionManager.activate();
+        new SimpleSession(concentrator, auctioneer).connect();
+        new SimpleSession(agent1, concentrator).connect();
+        new SimpleSession(agent2, concentrator).connect();
+        new SimpleSession(agent3, concentrator).connect();
     }
 
     /**
@@ -191,15 +185,16 @@ public class OscillationPreventionTest {
         assertThat(lastPriceUpdate1.getPrice(), is(equalTo(lastPriceUpdate2.getPrice())));
         assertThat(lastPriceUpdate1.getBidNumber(), is(equalTo(bidNumber1)));
         assertThat(lastPriceUpdate2.getBidNumber(), is(equalTo(bidNumber2)));
-        assertThat(agent3.getLastPriceUpdate().getBidNumber(), is(0));
+        assertNull(agent3.getLastPriceUpdate());
 
         concentratorDoBidUpdate();
         auctioneerPublishNewPrice();
         PriceUpdate lastPriceUpdate3 = agent3.getLastPriceUpdate();
 
         // agent3 bid has effect on price
-        assertThat(agent1.getLastPriceUpdate().getPrice().getPriceValue(), is(not(equalTo(lastPriceUpdate1.getPrice()
-                .getPriceValue()))));
+        assertThat(agent1.getLastPriceUpdate().getPrice().getPriceValue(),
+                   is(not(equalTo(lastPriceUpdate1.getPrice()
+                                                  .getPriceValue()))));
         // assertThat(agent1.getLastPriceUpdate().getPrice().getPriceValue(),
         // is(equalTo(2.0)));
         assertThat(agent1.getLastPriceUpdate().getBidNumber(), is(equalTo(bidNumber1)));
@@ -223,7 +218,7 @@ public class OscillationPreventionTest {
         PriceUpdate newAgent1Price = agent1.getLastPriceUpdate();
         assertThat(newAgent1Price.getBidNumber(), is(equalTo(bidNumber1)));
         assertThat(newAgent1Price.getPrice().getPriceValue(), is(not(equalTo(lastPriceUpdate1.getPrice()
-                .getPriceValue()))));
+                                                                                             .getPriceValue()))));
         assertThat(agent2.getLastPriceUpdate().getBidNumber(), is(equalTo(bidNumber2)));
 
         // check agent3 included in new Price
@@ -238,7 +233,7 @@ public class OscillationPreventionTest {
      * concentratorScheduler, the concentrators doBidUpdate is called
      */
     private void concentratorDoBidUpdate() {
-        this.concentratorScheduler.doTaskOnce();
+        concentratorScheduler.doTaskOnce();
     }
 
     /*
@@ -246,7 +241,6 @@ public class OscillationPreventionTest {
      * auctioneerScheduler, the auctioneers publishNewPrice is called
      */
     private void auctioneerPublishNewPrice() {
-        this.auctioneerScheduler.doTaskOnce();
+        auctioneerScheduler.doTaskOnce();
     }
-
 }
