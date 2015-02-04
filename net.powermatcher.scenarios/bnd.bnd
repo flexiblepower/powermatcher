@@ -7,4 +7,5 @@ Service-Component:  *
 	org.apache.felix.metatype,\
 	net.powermatcher.api;version=latest
 Export-Package:  \
-	net.powermatcher.scenarios
+	net.powermatcher.scenarios,\
+	net.powermatcher.scenarios.data

@@ -1,4 +1,4 @@
-package net.powermatcher.scenarios;
+package net.powermatcher.scenarios.data;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -14,9 +14,11 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 
 public class Scenario {
-    private static final transient Logger logger = LoggerFactory.getLogger(Scenario.class);
-
+    // JSON variables
     public List<ScenarioConfiguration> configurations;
+
+    // Transient variables (non-JSON)
+    private static final transient Logger logger = LoggerFactory.getLogger(Scenario.class);
 
     public Scenario(List<ScenarioConfiguration> configurations) {
         this.configurations = configurations;

@@ -1,4 +1,4 @@
-package net.powermatcher.scenarios;
+package net.powermatcher.scenarios.data;
 
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -11,12 +11,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ScenarioConfiguration {
-    private static final transient Logger logger = LoggerFactory.getLogger(ScenarioConfiguration.class);
-    private transient Configuration configuration;
-
+    // JSON variables
     public String bundleId;
     public String factoryId;
     public HashMap<String, String> properties;
+
+    // Transient variables (non-JSON)
+    private static final transient Logger logger = LoggerFactory.getLogger(ScenarioConfiguration.class);
+    private transient Configuration configuration;
 
     public ScenarioConfiguration(String bundleId, String factoryId, HashMap<String, String> properties) {
         this.bundleId = bundleId;
