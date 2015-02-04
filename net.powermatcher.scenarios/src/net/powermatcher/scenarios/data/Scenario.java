@@ -20,6 +20,9 @@ public class Scenario {
     // Transient variables (non-JSON)
     private static final transient Logger logger = LoggerFactory.getLogger(Scenario.class);
 
+    public Scenario() {
+    }
+
     public Scenario(List<ScenarioConfiguration> configurations) {
         this.configurations = configurations;
     }

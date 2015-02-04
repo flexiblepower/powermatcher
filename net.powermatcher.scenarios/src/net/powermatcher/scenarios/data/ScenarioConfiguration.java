@@ -20,6 +20,9 @@ public class ScenarioConfiguration {
     private static final transient Logger logger = LoggerFactory.getLogger(ScenarioConfiguration.class);
     private transient Configuration configuration;
 
+    public ScenarioConfiguration() {
+    }
+
     public ScenarioConfiguration(String bundleId, String factoryId, HashMap<String, String> properties) {
         this.bundleId = bundleId;
         this.factoryId = factoryId;
