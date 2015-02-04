@@ -38,7 +38,7 @@ public class ScenarioManager {
         config = Configurable.createConfigurable(Config.class, properties);
         for (String filename : config.filenames()) {
             try {
-                start(Scenario.load(new File(filename)));
+                start(Scenario.load(new File(filename).toURI().toURL()));
             } catch (IOException ex) {
                 logger.error("Could not load scenario %s: %s", filename, ex.getMessage());
             }

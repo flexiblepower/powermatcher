@@ -1,12 +1,12 @@
 package net.powermatcher.scenarios.data;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,20 +27,8 @@ public class Scenario {
         this.configurations = configurations;
     }
 
-    public static Scenario load(File file) throws IOException {
-        FileReader fileReader = new FileReader(file);
-        BufferedReader bufferedReader = new BufferedReader(fileReader);
-        try {
-            StringBuffer fileContents = new StringBuffer();
-            String line = bufferedReader.readLine();
-            while (line != null) {
-                fileContents.append(line);
-                line = bufferedReader.readLine();
-            }
-            return load(fileContents.toString());
-        } finally {
-            bufferedReader.close();
-        }
+    public static Scenario load(URL url) throws IOException {
+        return load(IOUtils.toString(url));
     }
 
     public static Scenario load(String json) {

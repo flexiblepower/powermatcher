@@ -3,6 +3,7 @@ package net.powermatcher.scenarios.test;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -12,19 +13,15 @@ import net.powermatcher.scenarios.data.ScenarioConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 
-import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 
 @Component
 public class ScenarioTest {
-    private BundleContext context;
-    private Scenario sample;
+    private final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 
-    @Activate
-    public void activate(BundleContext context) {
-        this.context = context;
-    }
+    private Scenario sample;
 
     @Before
     public void setUp() {
@@ -69,13 +66,13 @@ public class ScenarioTest {
 
     @Test
     public void testLoadingFromJsonFile() throws IOException {
-        // // Arrange
-        // File file = new File(context.getBundle().getResource("sample/sample1.json").getFile());
-        //
-        // // Act
-        // Scenario scenario = Scenario.load(file);
-        //
-        // // Assert
-        // assertEquals(scenario.configurations.size(), 1);
+        // Arrange
+        URL sample = context.getBundle().getEntry("samples/sample1.json");
+
+        // Act
+        Scenario scenario = Scenario.load(sample);
+
+        // Assert
+        assertEquals(scenario.configurations.size(), 1);
     }
 }
