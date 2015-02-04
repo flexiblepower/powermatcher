@@ -11,7 +11,7 @@ Private-Package:  \
 -runee: JavaSE-1.6
 -runfw: org.apache.felix.framework;version='[4.4.0,4.4.0]'
 -runvm: -ea
--runtrace:true
+#-runtrace: true
 -runrequires:  \
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.scenarios)'
 -runbundles:  \
