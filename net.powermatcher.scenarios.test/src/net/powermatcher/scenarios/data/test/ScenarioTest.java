@@ -15,9 +15,6 @@ import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 
-import aQute.bnd.annotation.component.Component;
-
-@Component
 public class ScenarioTest {
     private final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 
