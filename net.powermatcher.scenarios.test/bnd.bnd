@@ -4,7 +4,8 @@ Bundle-Version: 1.0.0.${tstamp}
 	${test},\
 	com.google.gson,\
 	org.apache.felix.metatype,\
-	net.powermatcher.scenarios;version=latest
+	net.powermatcher.scenarios;version=latest,\
+	org.apache.commons.io
 Test-Cases: ${classes;ANNOTATION;org.junit.Test}
 Private-Package:  \
 	net.powermatcher.scenarios.test
@@ -20,5 +21,6 @@ Private-Package:  \
 	ch.qos.logback.core;version='[1.1.2,1.1.3)',\
 	com.google.gson;version='[2.3.0,2.3.1)',\
 	net.powermatcher.scenarios;version=latest,\
+	org.apache.commons.io;version='[2.4.0,2.4.1)',\
 	org.apache.felix.configadmin;version='[1.8.0,1.8.1)',\
 	slf4j.api;version='[1.7.7,1.7.8)'
