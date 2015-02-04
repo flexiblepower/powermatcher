@@ -8,7 +8,7 @@ Bundle-Version: 1.0.0.${tstamp}
 	org.apache.commons.io
 Test-Cases: ${classes;ANNOTATION;org.junit.Test}
 Private-Package:  \
-	net.powermatcher.scenarios.test
+	net.powermatcher.scenarios.data.test
 -runee: JavaSE-1.6
 -runfw: org.apache.felix.framework;version='[4.4.0,4.4.0]'
 -runvm: -ea

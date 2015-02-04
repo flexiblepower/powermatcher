@@ -1,4 +1,4 @@
-package net.powermatcher.scenarios.test;
+package net.powermatcher.scenarios.data.test;
 
 import static org.junit.Assert.assertEquals;
 
@@ -74,5 +74,6 @@ public class ScenarioTest {
 
         // Assert
         assertEquals(scenario.configurations.size(), 1);
+        assertEquals(scenario.configurations.get(0).bundleId, "net.powermatcher.core");
     }
 }
