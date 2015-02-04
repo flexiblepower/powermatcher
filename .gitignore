@@ -12,3 +12,4 @@ sonar-runner.properties
 RemoteSystemsTempFiles/.project
 */bin_test/*
 .recommenders/
+testdir/
