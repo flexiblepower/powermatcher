@@ -1,11 +1,11 @@
 package net.powermatcher.scenarios.data;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
@@ -39,14 +39,8 @@ public class Scenario {
         return new Gson().toJson(this);
     }
 
-    public void save(File file) {
-        try {
-            FileWriter writer = new FileWriter(file);
-            writer.write(save());
-            writer.close();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+    public void save(File file) throws IOException {
+        FileUtils.writeStringToFile(file, save());
     }
 
     public void start(ConfigurationAdmin configurationAdmin) {
