@@ -1,11 +1,24 @@
 Bundle-Version: 1.0.0.${tstamp}
-Service-Component:  *
 -buildpath:  \
 	${default-buildpath},\
 	${test},\
 	com.google.gson,\
 	org.apache.felix.metatype,\
-	net.powermatcher.api;version=latest,\
 	net.powermatcher.scenarios;version=latest
-Private-Package: net.powermatcher.scenarios.test
-Test-Cases: ${classes;CONCRETE;EXTENDS;junit.framework.TestCase}
+Test-Cases: ${classes;ANNOTATION;org.junit.Test}
+Private-Package:  \
+	net.powermatcher.scenarios.test
+-runee: JavaSE-1.6
+-runfw: org.apache.felix.framework;version='[4.4.0,4.4.0]'
+-runvm: -ea
+-runtrace:true
+-runrequires:  \
+	osgi.identity;filter:='(osgi.identity=net.powermatcher.scenarios)'
+-runbundles:  \
+	biz.aQute.bnd.annotation;version='[2.4.0,2.4.1)',\
+	ch.qos.logback.classic;version='[1.1.2,1.1.3)',\
+	ch.qos.logback.core;version='[1.1.2,1.1.3)',\
+	com.google.gson;version='[2.3.0,2.3.1)',\
+	net.powermatcher.scenarios;version=latest,\
+	org.apache.felix.configadmin;version='[1.8.0,1.8.1)',\
+	slf4j.api;version='[1.7.7,1.7.8)'
