@@ -1,13 +1,10 @@
 Bundle-Version: 1.0.0.${tstamp}
 Service-Component:  *
 -buildpath:  \
+	${default-buildpath},\
+	${test},\
 	net.powermatcher.api;version=latest,\
-	biz.aQute.bnd.annotation,\
-	slf4j.api,\
-	${junit},\
-	net.powermatcher.mock;version=latest,\
-	osgi.cmpn,\
-	osgi.core
+	net.powermatcher.mock;version=latest
 Private-Package:  \
 	net.powermatcher.runtime.sessions,\
 	net.powermatcher.runtime.time,\

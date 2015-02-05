@@ -1,11 +1,8 @@
 -buildpath:  \
-	osgi.core,\
-	osgi.cmpn,\
-	org.apache.felix.http.servlet-api,\
+	${default-buildpath},\
+	${test},\
 	com.google.gson,\
-	slf4j.api,\
-	biz.aQute.bnd.annotation,\
-	${junit},\
+	org.apache.felix.http.servlet-api,\
 	net.powermatcher.api;version=latest,\
 	net.powermatcher.core;version=latest,\
 	org.apache.felix.metatype

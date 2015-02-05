@@ -1,38 +1,32 @@
-package net.powermatcher.scenarios.test;
+package net.powermatcher.scenarios.data.test;
 
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import net.powermatcher.scenarios.Scenario;
-import net.powermatcher.scenarios.ScenarioConfiguration;
+import net.powermatcher.scenarios.data.Scenario;
+import net.powermatcher.scenarios.data.ScenarioConfiguration;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 
-import aQute.bnd.annotation.component.Activate;
-import aQute.bnd.annotation.component.Component;
-
-@Component
 public class ScenarioTest {
+    private final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+
     private Scenario sample;
-    private BundleContext context;
 
-    @Activate
-    public void activate(BundleContext context) {
-        this.context = context;
-    }
-
-    @SuppressWarnings("serial")
     @Before
     public void setUp() {
         sample = new Scenario(Arrays.asList(
                                     new ScenarioConfiguration("net.powermatcher.core",
                                                               "net.powermatcher.core.auctioneer.Auctioneer",
                                                               new HashMap<String, String>() {
+                                                                  private static final long serialVersionUID = 1L;
                                                                   {
                                                                       put("agentId", "auctioneer");
                                                                       put("clusterId", "DefaultCluster");
@@ -69,13 +63,14 @@ public class ScenarioTest {
 
     @Test
     public void testLoadingFromJsonFile() throws IOException {
-        // // Arrange
-        // File file = new File(context.getBundle().getResource("sample/sample1.json").getFile());
-        //
-        // // Act
-        // Scenario scenario = Scenario.load(file);
-        //
-        // // Assert
-        // assertEquals(scenario.configurations.size(), 1);
+        // Arrange
+        URL sample = context.getBundle().getEntry("samples/sample1.json");
+
+        // Act
+        Scenario scenario = Scenario.load(sample);
+
+        // Assert
+        assertEquals(scenario.configurations.size(), 1);
+        assertEquals(scenario.configurations.get(0).bundleId, "net.powermatcher.core");
     }
 }

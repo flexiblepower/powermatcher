@@ -38,17 +38,18 @@ import com.google.gson.JsonObject;
 
 /**
  * {@link HttpServlet} used by the visualizer frontend.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
 @Component(
-        provide = Servlet.class,
-        properties = { "felix.webconsole.title=Powermatcher cluster visualizer",
-                "felix.webconsole.label=pm-cluster-visualizer" },
-        immediate = true,
-        designateFactory = VisualisationPlugin.Config.class)
-public class VisualisationPlugin extends HttpServlet {
+           provide = Servlet.class,
+           properties = { "felix.webconsole.title=Powermatcher cluster visualizer",
+                         "felix.webconsole.label=pm-cluster-visualizer" },
+           immediate = true,
+           designateFactory = VisualisationPlugin.Config.class)
+public class VisualisationPlugin
+    extends HttpServlet {
     private static final long serialVersionUID = -3582669073153236495L;
 
     /**
@@ -66,11 +67,12 @@ public class VisualisationPlugin extends HttpServlet {
      */
     public static interface Config {
         @Meta.AD(
-                required = true,
-                deflt = "Auctioneer::net.powermatcher.core.auctioneer.Auctioneer, Concentrator::net.powermatcher.core.concentrator.Concentrator,"
-                        + "DeviceAgent::net.powermatcher.examples.Freezer, DeviceAgent::net.powermatcher.examples.PVPanelAgent",
-                description = "A list of all the OSGi Menu items that have to be used. It's menu::submenu")
-        List<String> menu();
+                 required = true,
+                 deflt = "Auctioneer::net.powermatcher.core.auctioneer.Auctioneer, Concentrator::net.powermatcher.core.concentrator.Concentrator,"
+                         + "DeviceAgent::net.powermatcher.examples.Freezer, DeviceAgent::net.powermatcher.examples.PVPanelAgent",
+                 description = "A list of all the OSGi Menu items that have to be used. It's menu::submenu")
+                List<String>
+                menu();
     }
 
     /**
@@ -81,7 +83,7 @@ public class VisualisationPlugin extends HttpServlet {
     /**
      * The filter used to alert observables
      */
-    private List<String> filter = new ArrayList<>();
+    private final List<String> filter = new ArrayList<String>();
 
     /**
      * The {@link MenuItemModel} items
@@ -90,7 +92,7 @@ public class VisualisationPlugin extends HttpServlet {
 
     /**
      * OSGi calls this method to activate a managed service.
-     * 
+     *
      * @param properties
      *            the configuration properties
      */
@@ -98,14 +100,14 @@ public class VisualisationPlugin extends HttpServlet {
     public void activate(Map<String, Object> properties) {
         Config config = Configurable.createConfigurable(Config.class, properties);
 
-        menuItems = new HashMap<>();
+        menuItems = new HashMap<String, MenuItemModel>();
         fillMenuItems(config.menu());
         LOGGER.info("VisualisationPlugin [{}], activated");
     }
 
     /**
      * Fills the menuItems Map.
-     * 
+     *
      * @param input
      *            the List containing String values, separated with ::
      */
@@ -209,8 +211,8 @@ public class VisualisationPlugin extends HttpServlet {
         Gson gson = new GsonBuilder().serializeNulls().create();
         JsonObject output = new JsonObject();
 
-        Map<Integer, LevelModel> levelMap = new HashMap<>();
-        Map<String, NodeModel> nodes = new HashMap<>();
+        Map<Integer, LevelModel> levelMap = new HashMap<Integer, LevelModel>();
+        Map<String, NodeModel> nodes = new HashMap<String, NodeModel>();
 
         NodeModel node;
         LevelModel levelModel;
@@ -260,7 +262,7 @@ public class VisualisationPlugin extends HttpServlet {
     /**
      * OSGi calls this method to get a resource before calling this.doGet. If this method returns en URL, it returns the
      * resource. If it returns <code>null</code>, it calls this.doGet
-     * 
+     *
      * @param path
      *            the path of the requested resource
      * @return the {@link URL} if the resource exists or <code>null</code> if it's not an accepted file format.
@@ -276,7 +278,7 @@ public class VisualisationPlugin extends HttpServlet {
 
     /**
      * This method is used by OSGi to inject the {@link ConfigurationAdmin}.
-     * 
+     *
      * @param the
      *            {@link ConfigurationAdmin} instance.
      */
