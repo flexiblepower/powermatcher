@@ -9,11 +9,11 @@ import java.util.Map;
 import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.core.concentrator.Concentrator;
-import net.powermatcher.core.sessions.SessionManager;
-import net.powermatcher.core.time.SystemTimeService;
 import net.powermatcher.mock.MockAgent;
 import net.powermatcher.mock.MockMatcherAgent;
 import net.powermatcher.mock.MockScheduler;
+import net.powermatcher.mock.MockTimeService;
+import net.powermatcher.mock.SimpleSession;
 
 import org.junit.After;
 import org.junit.Before;
@@ -23,10 +23,10 @@ import org.junit.rules.ExpectedException;
 
 /**
  * JUnit test for the Concentrator
- * 
+ *
  * Every test requires a different number agents. In setUp() NR_AGENTS are instantiated. Every test the desired number
  * of agents can be added and removed using the functions addAgents() and removeAgents().
- * 
+ *
  * @author FAN
  * @version 2.0
  */
@@ -37,7 +37,6 @@ public class ConcentratorTest {
 
     private final static int NR_AGENTS = 21;
     private final MarketBasis marketBasis = new MarketBasis("electricity", "EUR", 11, 0, 10);
-    private SessionManager sessionManager;
     private MockScheduler timer;
 
     private Concentrator concentrator;
@@ -45,6 +44,7 @@ public class ConcentratorTest {
 
     private MockMatcherAgent matcher;
     private MockAgent[] agents;
+    private SimpleSession[] sessions;
 
     private static final String AUCTIONEER_NAME = "auctioneer";
 
@@ -63,47 +63,44 @@ public class ConcentratorTest {
         concentratorProperties.put("whiteListAgents", new ArrayList<String>());
 
         timer = new MockScheduler();
-        concentrator.setExecutorService(timer);
-        concentrator.setTimeService(new SystemTimeService());
         concentrator.activate(concentratorProperties);
+        concentrator.setExecutorService(timer);
+        concentrator.setTimeService(new MockTimeService(0));
 
         // Matcher
-        matcher = new MockMatcherAgent(AUCTIONEER_NAME);
+        matcher = new MockMatcherAgent(AUCTIONEER_NAME, "testCluster");
         matcher.setMarketBasis(marketBasis);
 
-        sessionManager = new SessionManager();
-        sessionManager.addMatcherEndpoint(matcher);
-        sessionManager.addMatcherEndpoint(concentrator);
-        sessionManager.addAgentEndpoint(concentrator);
+        new SimpleSession(concentrator, matcher).connect();
 
         // Init MockAgents
         agents = new MockAgent[NR_AGENTS];
+        sessions = new SimpleSession[NR_AGENTS];
         for (int i = 0; i < NR_AGENTS; i++) {
             String agentId = "agent" + (i + 1);
             MockAgent newAgent = new MockAgent(agentId);
             newAgent.setDesiredParentId(CONCENTRATOR_NAME);
             agents[i] = newAgent;
+            sessions[i] = new SimpleSession(newAgent, concentrator);
         }
-
-        sessionManager.activate();
-
     }
 
     @After
     public void tearDown() throws Exception {
-        sessionManager.removeAgentEndpoint(concentrator);
-        sessionManager.removeMatcherEndpoint(matcher);
+        for (SimpleSession session : sessions) {
+            session.disconnect();
+        }
     }
 
     private void addAgents(int number) {
         for (int i = 0; i < number; i++) {
-            this.sessionManager.addAgentEndpoint(agents[i]);
+            sessions[i].connect();
         }
     }
 
     private void removeAgents(int number) {
         for (int i = 0; i < number; i++) {
-            this.sessionManager.removeAgentEndpoint(agents[i]);
+            sessions[i].disconnect();
         }
     }
 
@@ -112,29 +109,29 @@ public class ConcentratorTest {
         addAgents(3);
         int counter = 0;
         // Run 1
-        agents[0].sendBid(new ArrayBid(marketBasis, counter++, new double[] { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5,
-                -5 }));
-        agents[1].sendBid(new ArrayBid(marketBasis, counter++, new double[] { -2, -2, -2, -2, -2, -4, -4, -4, -4, -4,
-                -4 }));
-        agents[2].sendBid(new ArrayBid(marketBasis, counter++, new double[] { -1, -1, -1, -1, -1, -1, -1, -3, -3, -3,
-                -3 }));
+        agents[0].sendBid(new ArrayBid(marketBasis, counter++,
+                                       new double[] { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5 }));
+        agents[1].sendBid(new ArrayBid(marketBasis, counter++,
+                                       new double[] { -2, -2, -2, -2, -2, -4, -4, -4, -4, -4, -4 }));
+        agents[2].sendBid(new ArrayBid(marketBasis, counter++,
+                                       new double[] { -1, -1, -1, -1, -1, -1, -1, -3, -3, -3, -3 }));
         timer.doTaskOnce();
         assertArrayEquals(new double[] { -8, -8, -8, -8, -8, -10, -10, -12, -12, -12, -12 },
-                ((ArrayBid) this.matcher.getLastReceivedBid()).getDemand(), 0);
+                          ((ArrayBid) matcher.getLastReceivedBid()).getDemand(), 0);
         // Run 2
         agents[0].sendBid(new ArrayBid(marketBasis, counter++, new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 }));
         agents[1].sendBid(new ArrayBid(marketBasis, counter++, new double[] { 4, 4, 4, 4, 4, 2, 2, 2, 2, 2, 2 }));
         agents[2].sendBid(new ArrayBid(marketBasis, counter++, new double[] { 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1 }));
         timer.doTaskOnce();
         assertArrayEquals(new double[] { 12, 12, 12, 12, 12, 8, 8, 8, 8, 8, 8 },
-                ((ArrayBid) this.matcher.getLastReceivedBid()).getDemand(), 0);
+                          ((ArrayBid) matcher.getLastReceivedBid()).getDemand(), 0);
         // Run 3
         agents[0].sendBid(new ArrayBid(marketBasis, counter++, new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 }));
         agents[1].sendBid(new ArrayBid(marketBasis, counter++, new double[] { 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0 }));
         agents[2].sendBid(new ArrayBid(marketBasis, counter++, new double[] { 0, 0, 0, 0, 0, -5, -5, -5, -5, -5, -5 }));
         timer.doTaskOnce();
         assertArrayEquals(new double[] { 9, 9, 9, 9, 9, 0, 0, 0, 0, 0, 0 },
-                ((ArrayBid) this.matcher.getLastReceivedBid()).getDemand(), 0);
+                          ((ArrayBid) matcher.getLastReceivedBid()).getDemand(), 0);
         removeAgents(3);
     }
 
@@ -158,35 +155,49 @@ public class ConcentratorTest {
         int counter = 0;
 
         addAgents(20);
-        agents[0].sendBid(new ArrayBid(marketBasis, counter++, new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 }));
-        agents[1].sendBid(new ArrayBid(marketBasis, counter++, new double[] { -4, -4, -4, -4, -4, -4, -4, -4, -4, -4,
-                -4 }));
-        agents[2].sendBid(new ArrayBid(marketBasis, counter++, new double[] { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 }));
-        agents[3].sendBid(new ArrayBid(marketBasis, counter++, new double[] { -2, -2, -2, -2, -2, -2, -2, -2, -2, -2,
-                -2 }));
-        agents[4].sendBid(new ArrayBid(marketBasis, counter++, new double[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }));
-        agents[5].sendBid(new ArrayBid(marketBasis, counter++, new double[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }));
-        agents[6].sendBid(new ArrayBid(marketBasis, counter++, new double[] { 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0 }));
-        agents[7].sendBid(new ArrayBid(marketBasis, counter++, new double[] { 0, 0, 0, 0, 0, 0, -4, -4, -4, -4, -4 }));
-        agents[8].sendBid(new ArrayBid(marketBasis, counter++, new double[] { 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0 }));
-        agents[9]
-                .sendBid(new ArrayBid(marketBasis, counter++, new double[] { 0, 0, 0, -2, -2, -2, -2, -2, -2, -2, -2 }));
-        agents[10].sendBid(new ArrayBid(marketBasis, counter++, new double[] { 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0 }));
-        agents[11].sendBid(new ArrayBid(marketBasis, counter++, new double[] { 7, 7, 7, 7, 7, 7, 7, 0, 0, 0, 0 }));
+        agents[0].sendBid(new ArrayBid(marketBasis, counter++,
+                                       new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 }));
+        agents[1].sendBid(new ArrayBid(marketBasis, counter++,
+                                       new double[] { -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4 }));
+        agents[2].sendBid(new ArrayBid(marketBasis, counter++,
+                                       new double[] { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 }));
+        agents[3].sendBid(new ArrayBid(marketBasis, counter++,
+                                       new double[] { -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2 }));
+        agents[4].sendBid(new ArrayBid(marketBasis, counter++,
+                                       new double[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }));
+        agents[5].sendBid(new ArrayBid(marketBasis, counter++,
+                                       new double[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }));
+        agents[6].sendBid(new ArrayBid(marketBasis, counter++,
+                                       new double[] { 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0 }));
+        agents[7].sendBid(new ArrayBid(marketBasis, counter++,
+                                       new double[] { 0, 0, 0, 0, 0, 0, -4, -4, -4, -4, -4 }));
+        agents[8].sendBid(new ArrayBid(marketBasis, counter++,
+                                       new double[] { 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0 }));
+        agents[9].sendBid(new ArrayBid(marketBasis, counter++,
+                                       new double[] { 0, 0, 0, -2, -2, -2, -2, -2, -2, -2, -2 }));
+        agents[10].sendBid(new ArrayBid(marketBasis, counter++,
+                                        new double[] { 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0 }));
+        agents[11].sendBid(new ArrayBid(marketBasis, counter++,
+                                        new double[] { 7, 7, 7, 7, 7, 7, 7, 0, 0, 0, 0 }));
         agents[12].sendBid(new ArrayBid(marketBasis, counter++,
-                new double[] { 0, 0, 0, -6, -6, -6, -6, -6, -6, -6, -6 }));
-        agents[13].sendBid(new ArrayBid(marketBasis, counter++, new double[] { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 }));
-        agents[14].sendBid(new ArrayBid(marketBasis, counter++, new double[] { -9, -9, -9, -9, -9, -9, -9, -9, -9, -9,
-                -9 }));
-        agents[15].sendBid(new ArrayBid(marketBasis, counter++, new double[] { 0, 0, 0, 0, 0, 0, 0, 0, -8, -8, -8 }));
-        agents[16].sendBid(new ArrayBid(marketBasis, counter++, new double[] { 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3 }));
-        agents[17].sendBid(new ArrayBid(marketBasis, counter++, new double[] { 2, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0 }));
-        agents[18].sendBid(new ArrayBid(marketBasis, counter++, new double[] { -1, -1, -1, -1, -2, -2, -2, -2, -3, -3,
-                -3 }));
-        agents[19].sendBid(new ArrayBid(marketBasis, counter++, new double[] { 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0 }));
+                                        new double[] { 0, 0, 0, -6, -6, -6, -6, -6, -6, -6, -6 }));
+        agents[13].sendBid(new ArrayBid(marketBasis, counter++,
+                                        new double[] { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 }));
+        agents[14].sendBid(new ArrayBid(marketBasis, counter++,
+                                        new double[] { -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9 }));
+        agents[15].sendBid(new ArrayBid(marketBasis, counter++,
+                                        new double[] { 0, 0, 0, 0, 0, 0, 0, 0, -8, -8, -8 }));
+        agents[16].sendBid(new ArrayBid(marketBasis, counter++,
+                                        new double[] { 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3 }));
+        agents[17].sendBid(new ArrayBid(marketBasis, counter++,
+                                        new double[] { 2, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0 }));
+        agents[18].sendBid(new ArrayBid(marketBasis, counter++,
+                                        new double[] { -1, -1, -1, -1, -2, -2, -2, -2, -3, -3, -3 }));
+        agents[19].sendBid(new ArrayBid(marketBasis, counter++,
+                                        new double[] { 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0 }));
         timer.doTaskOnce();
         assertArrayEquals(new double[] { 29, 29, 29, 21, 16, 11, 0, -8, -18, -18, -18 },
-                ((ArrayBid) this.matcher.getLastReceivedBid()).getDemand(), 0);
+                          ((ArrayBid) matcher.getLastReceivedBid()).getDemand(), 0);
         removeAgents(20);
     }
 }

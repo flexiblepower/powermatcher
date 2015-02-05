@@ -204,7 +204,7 @@ public class Concentrator
     public void agentEndpointDisconnected(Session session) {
         // Find session
         Session foundSession = sessionToAgents.get(session.getAgentId());
-        if (!foundSession.equals(session)) {
+        if (foundSession == null || !foundSession.equals(session)) {
             return;
         } else {
             sessionToAgents.remove(session.getAgentId());
