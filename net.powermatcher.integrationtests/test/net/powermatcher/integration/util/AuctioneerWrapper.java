@@ -10,21 +10,22 @@ import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.core.auctioneer.Auctioneer;
 
 /**
- * 
+ *
  * @author FAN
  * @version 2.0
  */
-public class AuctioneerWrapper extends Auctioneer {
+public class AuctioneerWrapper
+    extends Auctioneer {
 
     private Bid lastReceivedBid;
-    private Set<Session> shadowedSessions = new HashSet<>();
+    private final Set<Session> shadowedSessions = new HashSet<>();
 
     /**
      * {@inheritDoc}
      */
     @Override
     public synchronized boolean connectToAgent(Session session) {
-        this.shadowedSessions.add(session);
+        shadowedSessions.add(session);
         return super.connectToAgent(session);
     }
 
@@ -51,17 +52,17 @@ public class AuctioneerWrapper extends Auctioneer {
      * {@inheritDoc}
      */
     @Override
-    public synchronized void updateBid(Session session, Bid newBid) {
-        this.lastReceivedBid = newBid;
+    public void handleBidUpdate(Session session, Bid newBid) {
+        lastReceivedBid = newBid;
         super.handleBidUpdate(session, newBid);
     }
 
     public Bid getAggregatedBid(MarketBasis marketBasis) {
-        return super.getAggregatedBids().getAggregatedBid(marketBasis, false);
+        return aggregatedBids.aggregate().getAggregatedBid();
     }
 
     public Bid getLastReceivedBid() {
-        return this.lastReceivedBid;
+        return lastReceivedBid;
     }
 
 }

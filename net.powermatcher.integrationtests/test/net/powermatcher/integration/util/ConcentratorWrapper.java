@@ -9,11 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ *
  * @author FAN
  * @version 2.0
  */
-public class ConcentratorWrapper extends Concentrator {
+public class ConcentratorWrapper
+    extends Concentrator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConcentratorWrapper.class);
 
@@ -26,13 +27,13 @@ public class ConcentratorWrapper extends Concentrator {
      * {@inheritDoc}
      */
     @Override
-    public void updatePrice(PriceUpdate priceUpdate) {
-        this.lastReceivedPriceUpdate = priceUpdate;
+    public void handlePriceUpdate(PriceUpdate priceUpdate) {
+        lastReceivedPriceUpdate = priceUpdate;
         super.handlePriceUpdate(priceUpdate);
 
         // This should reflect the check in Concentrator.updatePrice
         if (priceUpdate != null) {
-            this.lastPublishedPriceUpdate = priceUpdate;
+            lastPublishedPriceUpdate = priceUpdate;
         }
     }
 
@@ -40,40 +41,36 @@ public class ConcentratorWrapper extends Concentrator {
      * {@inheritDoc}
      */
     @Override
-    public void updateBid(Session session, Bid newBid) {
+    public void handleBidUpdate(Session session, Bid newBid) {
         try {
             // Exceptions can be thrown in updateBid, if so, lastPublishedBid is
             // not set.
-            this.lastReceivedBid = newBid;
+            lastReceivedBid = newBid;
             super.handleBidUpdate(session, newBid);
-            this.lastPublishedBid = newBid;
+            lastPublishedBid = newBid;
         } catch (IllegalArgumentException | IllegalStateException e) {
             LOGGER.error("Illegal argument or state in updateBid.", e);
             throw e;
         }
     }
 
-    public synchronized void doBidUpdate() {
-        super.doBidUpdate();
-    }
-
     public PriceUpdate getLastPublishedPriceUpdate() {
-        return this.lastPublishedPriceUpdate;
+        return lastPublishedPriceUpdate;
     }
 
     public PriceUpdate getLastReceivedPriceUpdate() {
-        return this.lastReceivedPriceUpdate;
+        return lastReceivedPriceUpdate;
     }
 
     public PriceUpdate getLastPrice() {
-        return this.lastPublishedPriceUpdate;
+        return lastPublishedPriceUpdate;
     }
 
     public Bid getLastReceivedBid() {
-        return this.lastReceivedBid;
+        return lastReceivedBid;
     }
 
     public Bid getLastPublishedBid() {
-        return this.lastPublishedBid;
+        return lastPublishedBid;
     }
 }
