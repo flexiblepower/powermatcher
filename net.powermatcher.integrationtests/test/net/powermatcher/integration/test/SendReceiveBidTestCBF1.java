@@ -16,17 +16,18 @@ import net.powermatcher.integration.base.BidResilienceTest;
 import org.junit.Test;
 
 /**
- * 
+ *
  * @author FAN
  * @version 2.0
  */
-public class SendReceiveBidTestCBF1 extends BidResilienceTest {
+public class SendReceiveBidTestCBF1
+    extends BidResilienceTest {
 
     /**
      * A set of agents send a bid to the auctioneer via the concentrator. The the auctioneer will send a price update
      * downstream to the agents via the concentrator. The price sent by the auctioneer should be equal to the price
      * received by the agents.
-     * 
+     *
      * @throws IOException
      * @throws DataFormatException
      */
@@ -43,13 +44,13 @@ public class SendReceiveBidTestCBF1 extends BidResilienceTest {
         do {
             bid = nextBidToMatcher(id);
             if (bid != null) {
-                concentrator.doBidUpdate();
+                concentratorTimer.doTaskOnce();
                 // Check if the concentrator received the bid
-                assertEquals(bid, this.concentrator.getLastReceivedBid());
+                assertEquals(bid, concentrator.getLastReceivedBid());
 
                 // Check if the published bid by concentrator is received at the
                 // auctioneer
-                ArrayBid lastReceivedBid = this.auctioneer.getLastReceivedBid().toArrayBid();
+                ArrayBid lastReceivedBid = auctioneer.getLastReceivedBid().toArrayBid();
                 ArrayBid aggregatedBid = auctioneer.getAggregatedBid(marketBasis).toArrayBid();
                 assertThat(lastReceivedBid.getDemand(), is(equalTo(aggregatedBid.getDemand())));
                 assertThat(lastReceivedBid.getMarketBasis(), is(equalTo(aggregatedBid.getMarketBasis())));
@@ -60,8 +61,8 @@ public class SendReceiveBidTestCBF1 extends BidResilienceTest {
                 // concentrator.getLastReceived instead of
                 // auctioneer.getLastPublished, because
                 // lastPublished is not reliable anymore.
-                PriceUpdate lastPriceUpdate = this.agentList.get(id).getLastPriceUpdate();
-                PriceUpdate lastReceivedPriceUpdate = this.concentrator.getLastReceivedPriceUpdate();
+                PriceUpdate lastPriceUpdate = agentList.get(id).getLastPriceUpdate();
+                PriceUpdate lastReceivedPriceUpdate = concentrator.getLastReceivedPriceUpdate();
                 assertThat(lastPriceUpdate.getPrice(), is(equalTo(lastReceivedPriceUpdate.getPrice())));
             } else {
                 stop = true;
