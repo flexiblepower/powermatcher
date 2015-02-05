@@ -4,8 +4,9 @@ Service-Component:  *
 	${default-buildpath},\
 	${test},\
 	net.powermatcher.api;version=latest,\
-	net.powermatcher.mock;version=latest
+	net.powermatcher.mock;version=latest,\
+	flexiblepower.api
 Private-Package:  \
 	net.powermatcher.runtime.sessions,\
-	net.powermatcher.runtime.time,\
-	net.powermatcher.runtime.agents
+	net.powermatcher.runtime.agents,\
+	net.powermatcher.runtime.context

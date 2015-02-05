@@ -3,7 +3,6 @@ package net.powermatcher.api.monitoring.events;
 import java.util.Date;
 
 import net.powermatcher.api.AgentEndpoint;
-import net.powermatcher.api.TimeService;
 import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.ObservableAgent;
 

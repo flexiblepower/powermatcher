@@ -5,17 +5,17 @@ import java.util.Map;
 import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.ScheduledExecutorService;
 
 import net.powermatcher.api.Agent;
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
-import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.events.AgentEvent;
+
+import org.flexiblepower.context.FlexiblePowerContext;
 
 /**
  *
@@ -140,14 +140,9 @@ public class MockAgent
     }
 
     @Override
-    public void setTimeService(TimeService timeService) {
+    public void setContext(FlexiblePowerContext context) {
         // TODO Auto-generated method stub
 
     }
 
-    @Override
-    public void setExecutorService(ScheduledExecutorService executorService) {
-        // TODO Auto-generated method stub
-
-    }
 }

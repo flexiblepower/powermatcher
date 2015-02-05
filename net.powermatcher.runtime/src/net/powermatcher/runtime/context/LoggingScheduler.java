@@ -1,4 +1,4 @@
-package net.powermatcher.runtime.time;
+package net.powermatcher.runtime.context;
 
 import java.util.ArrayList;
 import java.util.Collection;

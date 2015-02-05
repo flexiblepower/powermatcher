@@ -20,8 +20,7 @@ import net.powermatcher.api.monitoring.events.IncomingBidEvent;
 import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.mock.MockAgent;
-import net.powermatcher.mock.MockScheduler;
-import net.powermatcher.mock.MockTimeService;
+import net.powermatcher.mock.MockContext;
 import net.powermatcher.mock.SimpleSession;
 
 import org.junit.Before;
@@ -43,7 +42,7 @@ public class AuctioneerTest {
     private static final String AUCTIONEER_NAME = "auctioneer";
     private Auctioneer auctioneer;
     private Map<String, Object> auctioneerProperties;
-    private MockScheduler mockScheduler;
+    private MockContext mockContext;
 
     private MarketBasis marketBasis;
 
@@ -82,9 +81,8 @@ public class AuctioneerTest {
         auctioneerProperties.put("bidTimeout", bidTimeout);
         auctioneerProperties.put("priceUpdateRate", priceUpdateRate);
 
-        mockScheduler = new MockScheduler();
-        auctioneer.setExecutorService(mockScheduler);
-        auctioneer.setTimeService(new MockTimeService(0));
+        mockContext = new MockContext(0);
+        auctioneer.setContext(mockContext);
         auctioneer.activate(auctioneerProperties);
 
     }
@@ -118,14 +116,13 @@ public class AuctioneerTest {
 
     @Test
     public void testActivate() {
-
-        assertThat(mockScheduler.getMockFuture().isCancelled(), is(false));
+        assertThat(mockContext.getMockScheduler().getMockFuture().isCancelled(), is(false));
     }
 
     @Test
     public void testDeactivate() {
         auctioneer.deactivate();
-        assertThat(mockScheduler.getMockFuture().isCancelled(), is(true));
+        assertThat(mockContext.getMockScheduler().getMockFuture().isCancelled(), is(true));
     }
 
     @Test
@@ -223,7 +220,7 @@ public class AuctioneerTest {
         Bid bid = new ArrayBid(marketBasis, 0, demandArray);
         mockAgent.sendBid(bid);
         assertThat(mockAgent.getLastPriceUpdate(), is(nullValue()));
-        mockScheduler.doTaskOnce();
+        mockContext.getMockScheduler().doTaskOnce();
         assertThat(mockAgent.getLastPriceUpdate(), is(notNullValue()));
         assertThat(observer.outgoingPriceEvent.getPriceUpdate(),
                    is(equalTo(mockAgent.getLastPriceUpdate())));

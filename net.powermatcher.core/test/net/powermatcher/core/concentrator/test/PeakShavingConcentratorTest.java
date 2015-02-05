@@ -14,9 +14,9 @@ import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.core.concentrator.PeakShavingConcentrator;
 import net.powermatcher.mock.MockAgent;
+import net.powermatcher.mock.MockContext;
 import net.powermatcher.mock.MockMatcherAgent;
 import net.powermatcher.mock.MockScheduler;
-import net.powermatcher.mock.MockTimeService;
 import net.powermatcher.mock.SimpleSession;
 
 import org.junit.Rule;
@@ -42,7 +42,7 @@ public class PeakShavingConcentratorTest {
     private final MarketBasis marketBasis = new MarketBasis("electricity", "EUR", 11, 0, 10);
 
     private final MockScheduler scheduler = new MockScheduler();
-    private final MockTimeService timeService = new MockTimeService(0);
+    private final MockContext context = new MockContext(0);
 
     private MockMatcherAgent matcher;
     private PeakShavingConcentrator peakShavingConcentrator;
@@ -62,21 +62,18 @@ public class PeakShavingConcentratorTest {
         concentratorProperties.put("ceiling", ceiling);
 
         peakShavingConcentrator.activate(concentratorProperties);
-        peakShavingConcentrator.setExecutorService(scheduler);
-        peakShavingConcentrator.setTimeService(timeService);
+        peakShavingConcentrator.setContext(context);
 
         // Matcher
         matcher = new MockMatcherAgent(AUCTIONEER_ID, CLUSTER_ID);
         matcher.setMarketBasis(marketBasis);
-        matcher.setExecutorService(scheduler);
-        matcher.setTimeService(timeService);
+        matcher.setContext(context);
 
         new SimpleSession(peakShavingConcentrator, matcher).connect();
 
         // Init MockAgent
         deviceAgent = new MockAgent(DEVICE_AGENT_ID);
-        deviceAgent.setExecutorService(scheduler);
-        deviceAgent.setTimeService(timeService);
+        deviceAgent.setContext(context);
         new SimpleSession(deviceAgent, peakShavingConcentrator).connect();
     }
 

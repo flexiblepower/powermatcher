@@ -4,25 +4,25 @@ import java.util.Date;
 
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;
-import net.powermatcher.api.TimeService;
 
 /**
  * A {@link WhitelistEvent} is sent when an {@link MatcherEndpoint} rejects a connection, because the
  * {@link AgentEndpoint} was not on its whitelist.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
-public class WhitelistEvent extends AgentEvent {
+public class WhitelistEvent
+    extends AgentEvent {
 
     /**
      * The id of the blocked {@link AgentEndpoint}
      */
-    private String blockedAgent;
+    private final String blockedAgent;
 
     /**
      * A constructor to create an instance of a WhitelistEvent
-     * 
+     *
      * @param blockedAgent
      *            The id of the blocked {@link AgentEndpoint}
      * @param agentId

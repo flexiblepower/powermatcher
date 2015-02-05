@@ -73,15 +73,6 @@ public abstract class BaseMatcherEndpointProxy
     }
 
     /**
-     * @param the
-     *            new value of scheduler
-     */
-    @Override
-    public void setExecutorService(ScheduledExecutorService scheduler) {
-        this.scheduler = scheduler;
-    }
-
-    /**
      * Creates a {@link Session} and a connection to the remote {@link AgentEndpointProxy}.
      *
      * @return <code>true</code> if the connection was created successfully.

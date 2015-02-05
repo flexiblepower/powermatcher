@@ -1,5 +1,6 @@
 Bundle-Version: 1.0.0.${tstamp}
 Export-Package:  net.powermatcher.api*
--buildpath: \
+-buildpath:  \
 	${default-buildpath},\
-	${test}
+	${test},\
+	flexiblepower.api

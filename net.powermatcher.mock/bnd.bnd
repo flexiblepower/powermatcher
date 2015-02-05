@@ -1,7 +1,8 @@
 -buildpath:  \
 	${default-buildpath},\
 	${test},\
-	net.powermatcher.api;version=latest
+	net.powermatcher.api;version=latest,\
+	flexiblepower.api
 Bundle-Version: 0.0.0.${tstamp}
 Private-Package:  \
 	net.powermatcher.mock

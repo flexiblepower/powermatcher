@@ -6,9 +6,7 @@ import java.util.Set;
 import net.powermatcher.api.Agent;
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;
-import net.powermatcher.api.TimeService;
-import net.powermatcher.runtime.time.LoggingScheduler;
-import net.powermatcher.runtime.time.SystemTimeService;
+import net.powermatcher.runtime.context.RuntimeContext;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
@@ -17,8 +15,7 @@ import aQute.bnd.annotation.component.Reference;
 public class AgentInitializer {
 
     private final Set<Agent> agents = new HashSet<Agent>();
-    private final LoggingScheduler scheduler = new LoggingScheduler();
-    private final TimeService timeService = new SystemTimeService();
+    private final RuntimeContext runtimeContext = new RuntimeContext();
 
     @Activate
     public void activate() {
@@ -44,8 +41,7 @@ public class AgentInitializer {
 
     private synchronized void addAgent(Agent agent) {
         if (!agents.contains(agent)) {
-            agent.setExecutorService(scheduler);
-            agent.setTimeService(timeService);
+            agent.setContext(runtimeContext);
             agents.add(agent);
         }
     }
