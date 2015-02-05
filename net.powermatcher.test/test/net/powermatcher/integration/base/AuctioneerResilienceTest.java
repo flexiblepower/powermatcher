@@ -43,7 +43,7 @@ public class AuctioneerResilienceTest
 
         marketBasis = resultsReader.getMarketBasis();
         auctioneer = new AuctioneerWrapper();
-        Map<String, Object> auctioneerProperties = new HashMap<>();
+        Map<String, Object> auctioneerProperties = new HashMap<String, Object>();
         auctioneerProperties.put("id", MATCHERNAME);
         auctioneerProperties.put("matcherId", MATCHERNAME);
         auctioneerProperties.put("agentId", MATCHERNAME);

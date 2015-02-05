@@ -18,7 +18,7 @@ public class AuctioneerWrapper
     extends Auctioneer {
 
     private Bid lastReceivedBid;
-    private final Set<Session> shadowedSessions = new HashSet<>();
+    private final Set<Session> shadowedSessions = new HashSet<Session>();
 
     /**
      * {@inheritDoc}

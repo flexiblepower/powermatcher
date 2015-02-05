@@ -43,12 +43,14 @@ public class ConcentratorWrapper
     @Override
     public void handleBidUpdate(Session session, Bid newBid) {
         try {
-            // Exceptions can be thrown in updateBid, if so, lastPublishedBid is
-            // not set.
+            // Exceptions can be thrown in updateBid, if so, lastPublishedBid is not set.
             lastReceivedBid = newBid;
             super.handleBidUpdate(session, newBid);
             lastPublishedBid = newBid;
-        } catch (IllegalArgumentException | IllegalStateException e) {
+        } catch (IllegalArgumentException e) {
+            LOGGER.error("Illegal argument or state in updateBid.", e);
+            throw e;
+        } catch (IllegalStateException e) {
             LOGGER.error("Illegal argument or state in updateBid.", e);
             throw e;
         }
