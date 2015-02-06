@@ -1,20 +1,12 @@
 package net.powermatcher.integration.auctioneer;
 
 import static org.junit.Assert.assertEquals;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import net.powermatcher.api.data.ArrayBid;
-import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.core.auctioneer.Auctioneer;
-import net.powermatcher.mock.MockAgent;
-import net.powermatcher.mock.MockScheduler;
-import net.powermatcher.mock.MockTimeService;
-import net.powermatcher.mock.SimpleSession;
+import net.powermatcher.test.helpers.PropertieBuilder;
+import net.powermatcher.test.helpers.TestClusterHelper;
 
+import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -27,179 +19,149 @@ import org.junit.Test;
  * @version 2.0
  */
 public class AuctioneerTest {
-
-    private final static int NR_AGENTS = 21;
-
-    // This needs to be the same as the MarketBasis created in the Auctioneer
-    private final MarketBasis marketBasis = new MarketBasis("electricity", "EUR", 11, 0, 10);
-    private Map<String, Object> auctioneerProperties;
-    private MockScheduler timer;
-
-    private Auctioneer auctioneer;
-    private MockAgent[] agents;
-    private SimpleSession[] sessions;
-
     private static final String AUCTIONEER_NAME = "auctioneer";
 
+    private TestClusterHelper cluster;
+    private Auctioneer auctioneer;
+
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
+        cluster = new TestClusterHelper();
+
         // Init Auctioneer
         auctioneer = new Auctioneer();
-
-        auctioneerProperties = new HashMap<String, Object>();
-        auctioneerProperties.put("agentId", AUCTIONEER_NAME);
-        auctioneerProperties.put("clusterId", "DefaultCluster");
-        auctioneerProperties.put("commodity", "electricity");
-        auctioneerProperties.put("currency", "EUR");
-        auctioneerProperties.put("priceSteps", "11");
-        auctioneerProperties.put("minimumPrice", "0");
-        auctioneerProperties.put("maximumPrice", "10");
-        auctioneerProperties.put("bidTimeout", "600");
-        auctioneerProperties.put("priceUpdateRate", "1");
-
-        timer = new MockScheduler();
-
-        auctioneer.activate(auctioneerProperties);
-        auctioneer.setExecutorService(timer);
-        auctioneer.setTimeService(new MockTimeService(0));
-
-        // Init MockAgents
-        agents = new MockAgent[NR_AGENTS];
-        sessions = new SimpleSession[NR_AGENTS];
-        for (int i = 0; i < NR_AGENTS; i++) {
-            String agentId = "agent" + (i + 1);
-            MockAgent newAgent = new MockAgent(agentId);
-            newAgent.setDesiredParentId(AUCTIONEER_NAME);
-            agents[i] = newAgent;
-            sessions[i] = new SimpleSession(newAgent, auctioneer);
-        }
+        auctioneer.activate(new PropertieBuilder().agentId(AUCTIONEER_NAME)
+                                                  .clusterId("testCluster")
+                                                  .priceUpdateRate(1)
+                                                  .marketBasis(TestClusterHelper.MB)
+                                                  .build());
+        auctioneer.setExecutorService(cluster.getScheduler());
+        auctioneer.setTimeService(cluster.getTimer());
     }
 
-    private void addAgents(int number) {
-        for (int i = 0; i < number; i++) {
-            sessions[i].connect();
-        }
-    }
-
-    private void removeAgents(int number) {
-        for (int i = 0; i < number; i++) {
-            sessions[i].disconnect();
-        }
+    @After
+    public void tearDown() {
+        cluster.close();
     }
 
     @Test
     public void noEquilibriumOnDemandSide() {
-        addAgents(3);
+        cluster.addAgents(auctioneer, 3);
+
         // run 1
-        agents[0].sendBid(new ArrayBid(marketBasis, 0, new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 }));
-        agents[1].sendBid(new ArrayBid(marketBasis, 0, new double[] { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 }));
-        agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 }));
-        timer.doTaskOnce();
-        assertEquals(10, agents[0].getLastPriceUpdate().getPrice().getPriceValue(), 0);
+        cluster.sendBids(0,
+                         new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 },
+                         new double[] { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 },
+                         new double[] { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 });
+        assertAllPricesAre(10);
 
         // run 2
-        agents[0].sendBid(new ArrayBid(marketBasis, 0, new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 }));
-        agents[1].sendBid(new ArrayBid(marketBasis, 0, new double[] { 4, 4, 4, 4, 4, 2, 2, 2, 2, 2, 2 }));
-        agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1 }));
-        timer.doTaskOnce();
-        assertEquals(10, agents[0].getLastPriceUpdate().getPrice().getPriceValue(), 0);
-        removeAgents(3);
+        cluster.sendBids(10,
+                         new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 },
+                         new double[] { 4, 4, 4, 4, 4, 2, 2, 2, 2, 2, 2 },
+                         new double[] { 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1 });
+        assertAllPricesAre(10);
+    }
+
+    private void assertAllPricesAre(double price) {
+        double[] priceValues = cluster.getPriceValues();
+        for (int ix = 0; ix < priceValues.length; ix++) {
+            assertEquals("Price for agent " + ix + " not correct" + priceValues[ix],
+                         price, priceValues[ix], 0);
+        }
     }
 
     @Test
     public void noEquilibriumOnSupplySide() {
-        addAgents(3);
+        cluster.addAgents(auctioneer, 3);
         // run 1
-        agents[0].sendBid(new ArrayBid(marketBasis, 0, new double[] { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5 }));
-        agents[1].sendBid(new ArrayBid(marketBasis, 0, new double[] { -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4 }));
-        agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3 }));
-        timer.doTaskOnce();
-        assertEquals(0, agents[0].getLastPriceUpdate().getPrice().getPriceValue(), 0);
+        cluster.sendBids(0,
+                         new double[] { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5 },
+                         new double[] { -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4 },
+                         new double[] { -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3 });
+        assertAllPricesAre(0);
 
         // run 2
-        agents[0].sendBid(new ArrayBid(marketBasis, 0, new double[] { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5 }));
-        agents[1].sendBid(new ArrayBid(marketBasis, 0, new double[] { -2, -2, -2, -2, -2, -4, -4, -4, -4, -4, -4 }));
-        agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { -1, -1, -1, -1, -1, -1, -1, -3, -3, -3, -3 }));
-        timer.doTaskOnce();
-        assertEquals(0, agents[0].getLastPriceUpdate().getPrice().getPriceValue(), 0);
-        removeAgents(3);
+        cluster.sendBids(10,
+                         new double[] { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5 },
+                         new double[] { -2, -2, -2, -2, -2, -4, -4, -4, -4, -4, -4 },
+                         new double[] { -1, -1, -1, -1, -1, -1, -1, -3, -3, -3, -3 });
+        assertAllPricesAre(0);
     }
 
     @Test
     public void equilibriumSmallNumberOfArrayBids() {
-        addAgents(3);
+        cluster.addAgents(auctioneer, 3);
+
         // run 1
-        agents[0].sendBid(new ArrayBid(marketBasis, 0, new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 }));
-        agents[1].sendBid(new ArrayBid(marketBasis, 0, new double[] { 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0 }));
-        agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, 0, 0, -5, -5, -5, -5, -5, -5 }));
-        timer.doTaskOnce();
-        assertEquals(5, agents[0].getLastPriceUpdate().getPrice().getPriceValue(), 0);
+        cluster.sendBids(0,
+                         new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 },
+                         new double[] { 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0 },
+                         new double[] { 0, 0, 0, 0, 0, -5, -5, -5, -5, -5, -5 });
+        assertAllPricesAre(5);
 
         // run 2
-        agents[0].sendBid(new ArrayBid(marketBasis, 0, new double[] { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5 }));
-        agents[1].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, 0, 0, 0, 0, -4, -4, -4, -4 }));
-        agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9 }));
-        timer.doTaskOnce();
-        assertEquals(7, agents[0].getLastPriceUpdate().getPrice().getPriceValue(), 0);
-        removeAgents(3);
+        cluster.sendBids(10,
+                         new double[] { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5 },
+                         new double[] { 0, 0, 0, 0, 0, 0, 0, -4, -4, -4, -4 },
+                         new double[] { 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9 });
+        assertAllPricesAre(7);
     }
 
     @Test
-    @Ignore("Check whether there is no issue here. Changed to 7 in order to fix the tests. Original test value was 6.")
-    public void equilibriumLargeSet() {
-        addAgents(20);
-        agents[0].sendBid(new ArrayBid(marketBasis, 0, new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 }));
-        agents[1].sendBid(new ArrayBid(marketBasis, 0, new double[] { -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4 }));
-        agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 }));
-        agents[3].sendBid(new ArrayBid(marketBasis, 0, new double[] { -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2 }));
-        agents[4].sendBid(new ArrayBid(marketBasis, 0, new double[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }));
-        agents[5].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }));
-        agents[6].sendBid(new ArrayBid(marketBasis, 0, new double[] { 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0 }));
-        agents[7].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, 0, 0, 0, -4, -4, -4, -4, -4 }));
-        agents[8].sendBid(new ArrayBid(marketBasis, 0, new double[] { 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0 }));
-        agents[9].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, -2, -2, -2, -2, -2, -2, -2, -2 }));
-        agents[10].sendBid(new ArrayBid(marketBasis, 0, new double[] { 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0 }));
-        agents[11].sendBid(new ArrayBid(marketBasis, 0, new double[] { 7, 7, 7, 7, 7, 7, 7, 0, 0, 0, 0 }));
-        agents[12].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, -6, -6, -6, -6, -6, -6, -6, -6 }));
-        agents[13].sendBid(new ArrayBid(marketBasis, 0, new double[] { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 }));
-        agents[14].sendBid(new ArrayBid(marketBasis, 0, new double[] { -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9 }));
-        agents[15].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, 0, 0, 0, 0, 0, -8, -8, -8 }));
-        agents[16].sendBid(new ArrayBid(marketBasis, 0, new double[] { 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3 }));
-        agents[17].sendBid(new ArrayBid(marketBasis, 0, new double[] { 2, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0 }));
-        agents[18].sendBid(new ArrayBid(marketBasis, 0, new double[] { -1, -1, -1, -1, -2, -2, -2, -2, -3, -3, -3 }));
-        agents[19].sendBid(new ArrayBid(marketBasis, 0, new double[] { 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0 }));
-        timer.doTaskOnce();
-
-        assertEquals(6, agents[0].getLastPriceUpdate().getPrice().getPriceValue(), 0);
-        removeAgents(20);
+    // @Ignore("Check whether there is no issue here. Changed to 7 in order to fix the tests. Original test value was 6.")
+            public void
+            equilibriumLargeSet() {
+        cluster.addAgents(auctioneer, 20);
+        cluster.sendBids(0,
+                         new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 },
+                         new double[] { -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4 },
+                         new double[] { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 },
+                         new double[] { -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2 },
+                         new double[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+                         new double[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                         new double[] { 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0 },
+                         new double[] { 0, 0, 0, 0, 0, 0, -4, -4, -4, -4, -4 },
+                         new double[] { 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0 },
+                         new double[] { 0, 0, 0, -2, -2, -2, -2, -2, -2, -2, -2 },
+                         new double[] { 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0 },
+                         new double[] { 7, 7, 7, 7, 7, 7, 7, 0, 0, 0, 0 },
+                         new double[] { 0, 0, 0, -6, -6, -6, -6, -6, -6, -6, -6 },
+                         new double[] { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
+                         new double[] { -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9 },
+                         new double[] { 0, 0, 0, 0, 0, 0, 0, 0, -8, -8, -8 },
+                         new double[] { 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3 },
+                         new double[] { 2, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0 },
+                         new double[] { -1, -1, -1, -1, -2, -2, -2, -2, -3, -3, -3 },
+                         new double[] { 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0 });
+        assertAllPricesAre(6);
     }
 
     @Test
     public void equilibriumLargerSet() {
-        addAgents(21);
-        agents[0].sendBid(new ArrayBid(marketBasis, 0, new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 }));
-        agents[1].sendBid(new ArrayBid(marketBasis, 0, new double[] { -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4 }));
-        agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 }));
-        agents[3].sendBid(new ArrayBid(marketBasis, 0, new double[] { -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2 }));
-        agents[4].sendBid(new ArrayBid(marketBasis, 0, new double[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }));
-        agents[5].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }));
-        agents[6].sendBid(new ArrayBid(marketBasis, 0, new double[] { 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0 }));
-        agents[7].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, 0, 0, 0, -4, -4, -4, -4, -4 }));
-        agents[8].sendBid(new ArrayBid(marketBasis, 0, new double[] { 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0 }));
-        agents[9].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, -2, -2, -2, -2, -2, -2, -2, -2 }));
-        agents[10].sendBid(new ArrayBid(marketBasis, 0, new double[] { 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0 }));
-        agents[11].sendBid(new ArrayBid(marketBasis, 0, new double[] { 7, 7, 7, 7, 7, 7, 7, 0, 0, 0, 0 }));
-        agents[12].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, -6, -6, -6, -6, -6, -6, -6, -6 }));
-        agents[13].sendBid(new ArrayBid(marketBasis, 0, new double[] { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 }));
-        agents[14].sendBid(new ArrayBid(marketBasis, 0, new double[] { -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9 }));
-        agents[15].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0, 0, 0, 0, 0, 0, -8, -8, -8 }));
-        agents[16].sendBid(new ArrayBid(marketBasis, 0, new double[] { 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3 }));
-        agents[17].sendBid(new ArrayBid(marketBasis, 0, new double[] { 2, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0 }));
-        agents[18].sendBid(new ArrayBid(marketBasis, 0, new double[] { -1, -1, -1, -1, -2, -2, -2, -2, -3, -3, -3 }));
-        agents[19].sendBid(new ArrayBid(marketBasis, 0, new double[] { 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0 }));
-        agents[20].sendBid(new ArrayBid(marketBasis, 0, new double[] { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 }));
-        timer.doTaskOnce();
-        assertEquals(7, agents[0].getLastPriceUpdate().getPrice().getPriceValue(), 0);
-        removeAgents(21);
+        cluster.addAgents(auctioneer, 21);
+        cluster.sendBids(0,
+                         new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 },
+                         new double[] { -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4 },
+                         new double[] { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 },
+                         new double[] { -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2 },
+                         new double[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+                         new double[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+                         new double[] { 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0 },
+                         new double[] { 0, 0, 0, 0, 0, 0, -4, -4, -4, -4, -4 },
+                         new double[] { 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0 },
+                         new double[] { 0, 0, 0, -2, -2, -2, -2, -2, -2, -2, -2 },
+                         new double[] { 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0 },
+                         new double[] { 7, 7, 7, 7, 7, 7, 7, 0, 0, 0, 0 },
+                         new double[] { 0, 0, 0, -6, -6, -6, -6, -6, -6, -6, -6 },
+                         new double[] { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 },
+                         new double[] { -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9 },
+                         new double[] { 0, 0, 0, 0, 0, 0, 0, 0, -8, -8, -8 },
+                         new double[] { 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3 },
+                         new double[] { 2, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0 },
+                         new double[] { -1, -1, -1, -1, -2, -2, -2, -2, -3, -3, -3 },
+                         new double[] { 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0 },
+                         new double[] { 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 });
+        assertAllPricesAre(7);
     }
 }

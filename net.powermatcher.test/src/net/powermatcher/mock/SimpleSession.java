@@ -11,21 +11,39 @@ import net.powermatcher.api.data.PriceUpdate;
 
 public class SimpleSession
     implements Session {
-
     private final AgentEndpoint agent;
     private final MatcherEndpoint matcher;
     private final String sessionId;
     private MarketBasis marketBasis;
 
+    private volatile boolean isConnected;
+
     public SimpleSession(AgentEndpoint agent, MatcherEndpoint matcher) {
         this.agent = agent;
         this.matcher = matcher;
         sessionId = UUID.randomUUID().toString();
+        isConnected = false;
     }
 
-    public void connect() {
-        matcher.connectToAgent(this);
-        agent.connectToMatcher(this);
+    public synchronized void connect() {
+        if (!isConnected) {
+            matcher.connectToAgent(this);
+            agent.connectToMatcher(this);
+            isConnected = true;
+        }
+    }
+
+    @Override
+    public synchronized void disconnect() {
+        if (isConnected) {
+            matcher.agentEndpointDisconnected(this);
+            agent.matcherEndpointDisconnected(this);
+            isConnected = false;
+        }
+    }
+
+    public boolean isConnected() {
+        return isConnected;
     }
 
     @Override
@@ -66,12 +84,6 @@ public class SimpleSession
     @Override
     public void updateBid(Bid newBid) {
         matcher.handleBidUpdate(this, newBid);
-    }
-
-    @Override
-    public void disconnect() {
-        matcher.agentEndpointDisconnected(this);
-        agent.matcherEndpointDisconnected(this);
     }
 
 }

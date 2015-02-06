@@ -306,7 +306,7 @@ public class ArrayBid
      * @return the point where the demand drops below the given target demand.
      */
     private int determineDropoff(final double targetDemand, int rightBound) {
-        while (rightBound < demandArray.length && demandArray[rightBound] >= targetDemand) {
+        while (rightBound < demandArray.length - 1 && demandArray[rightBound + 1] >= targetDemand) {
             rightBound += 1;
         }
         return rightBound;

@@ -1,10 +1,12 @@
-Bundle-Version: 1.0.0.${tstamp}
-Service-Component:  *
 -buildpath:  \
 	${default-buildpath},\
+	net.powermatcher.api;version=latest
+-testpath: \
 	${test},\
-	net.powermatcher.api;version=latest,\
-	net.powermatcher.mock;version=latest
+	net.powermatcher.test.helpers;version=latest
+
+Bundle-Version: 1.0.0.${tstamp}
+Service-Component:  *
 Private-Package:  \
 	net.powermatcher.runtime.sessions,\
 	net.powermatcher.runtime.time,\
