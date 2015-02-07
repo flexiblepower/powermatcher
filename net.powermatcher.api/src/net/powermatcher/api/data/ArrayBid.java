@@ -271,99 +271,66 @@ public class ArrayBid
      * {@inheritDoc}
      */
     @Override
-    public Price calculateIntersection(final double targetDemand) {
-        int leftBound = 0;
-        int rightBound = demandArray.length - 1;
-        int middle = rightBound / 2;
-        while (leftBound < middle) {
-            if (demandArray[middle] > targetDemand) {
-                leftBound = middle;
-            } else {
-                rightBound = middle;
-            }
-            middle = (leftBound + rightBound) / 2;
-        }
+    public Price calculateIntersection(double targetDemand) {
+        int leftIx = 0, rightIx = demandArray.length - 1;
 
-        rightBound = determineDropoff(targetDemand, rightBound);
+        // First test for a few special cases
+        if (targetDemand > demandArray[leftIx]) {
+            // If the target is higher than the maximum of the bid, return the minimum price
+            return new Price(marketBasis, marketBasis.getMinimumPrice());
+        } else if (targetDemand < demandArray[rightIx]) {
+            // If the target is lower than the minimum of the bid, return the maximum price
+            return new Price(marketBasis, marketBasis.getMaximumPrice());
+        } else if (demandIsEquals(targetDemand, demandArray[leftIx])) {
+            rightIx = leftIx;
+        } else if (demandIsEquals(targetDemand, demandArray[rightIx])) {
+            leftIx = rightIx;
+        } else { // demand is between the limits of this bid, which can not be flat at this point
+            // Go on while there is at least 1 point between the left and right index
+            while (rightIx - leftIx > 1) {
+                // Determine the middle between the 2 boundaries
+                int middleIx = (leftIx + rightIx) / 2;
+                double middleDemand = demandArray[middleIx];
 
-        int priceStep;
-        if (leftBound > 0 && rightBound < demandArray.length) {
-            priceStep = interpolate(targetDemand, leftBound, rightBound);
-        } else {
-            priceStep = determineCurve(targetDemand, leftBound, rightBound);
-        }
-
-        return new PriceStep(marketBasis, priceStep).toPrice();
-    }
-
-    /**
-     * Find the point where the demand falls below the target demand.
-     *
-     * @param targetDemand
-     *            The demand you want to know the dropoff value of.
-     * @param rightBound
-     *            the method will check for a dropoff up untill this index.
-     * @return the point where the demand drops below the given target demand.
-     */
-    private int determineDropoff(final double targetDemand, int rightBound) {
-        while (rightBound < demandArray.length - 1 && demandArray[rightBound + 1] >= targetDemand) {
-            rightBound += 1;
-        }
-        return rightBound;
-    }
-
-    /**
-     * The index of the point which is just above the intersection is now stored in the variable 'middle'. This means
-     * that middle + 1 is the index of the point that lies just under the intersection. That means that the exact
-     * intersection is between middle and middle+1, hence a weighted interpolation is needed.
-     *
-     * @param targetDemand
-     * @param leftBound
-     * @param rightBound
-     * @return The interpolated priceStep
-     */
-    private int interpolate(final double targetDemand, int leftBound, int rightBound) {
-        int priceStep;
-        double interpolation = ((demandArray[leftBound] - targetDemand) / (demandArray[leftBound] - demandArray[rightBound]))
-                               * (rightBound - leftBound);
-        priceStep = leftBound + (int) Math.ceil(interpolation);
-        return priceStep;
-    }
-
-    /**
-     * Pricing for boundary cases: 1) If the curve is a flat line, if the demand is positive the price will become the
-     * maximum price, or if the demand is zero or negative, the price will become 0. 2) If the curve is a single step,
-     * the price of the stepping point (the left or the right boundary).
-     *
-     * @param targetDemand
-     * @param leftBound
-     * @param rightBound
-     * @return
-     */
-    private int determineCurve(final double targetDemand, int leftBound, int rightBound) {
-        int priceStep;
-        if (leftBound == 0 && rightBound == demandArray.length) {
-            /* Curve is flat line or single step at leftBound */
-            if (demandArray[leftBound] != 0) {
-                /*
-                 * Curve is flat line for non-zero demand or single step at leftBound
-                 */
-                if (demandArray[leftBound + 1] == 0) {
-                    /* Curve is a single step at leftBound */
-                    priceStep = leftBound + 1;
-                } else {
-                    /* Curve is flat line for non-zero demand */
-                    priceStep = rightBound - 1;
+                if (demandIsEquals(targetDemand, middleDemand)) {
+                    // A point with the target demand is found, select this point
+                    leftIx = rightIx = middleIx;
+                } else if (middleDemand > targetDemand) {
+                    // If the middle demand is bigger than the target demand, we set the left to the middle
+                    leftIx = middleIx;
+                } else { // middleDemand < targetDemand
+                    // If the middle demand is smaller than the target demand, we set the right to the middle
+                    rightIx = middleIx;
                 }
-            } else {
-                /* Curve is flat line for zero demand 0 */
-                priceStep = new Price(marketBasis, 0).toPriceStep().getPriceStep();
             }
-        } else {
-            /* Curve is a single step at leftBound */
-            priceStep = demandArray[leftBound] <= targetDemand ? leftBound : leftBound + 1;
         }
-        return priceStep;
+
+        // If the left or right point matches the targetDemand, expand the range
+        while (leftIx > 0 && demandIsEquals(targetDemand, demandArray[leftIx - 1])) {
+            leftIx--;
+        }
+        while (rightIx < demandArray.length - 1 && demandIsEquals(targetDemand, demandArray[rightIx + 1])) {
+            rightIx++;
+        }
+
+        return interpolate(leftIx, rightIx, targetDemand);
+    }
+
+    private Price interpolate(int leftIx, int rightIx, double targetDemand) {
+        double leftPrice = rightIx == 0 ? marketBasis.getMinimumPrice()
+                                       : new PriceStep(marketBasis, leftIx).toPrice().getPriceValue();
+        double rightPrice = leftIx == demandArray.length - 1 ? marketBasis.getMaximumPrice()
+                                                            : new PriceStep(marketBasis, rightIx).toPrice()
+                                                                                                 .getPriceValue();
+
+        double leftDemand = demandArray[leftIx];
+        double rightDemand = demandArray[rightIx];
+
+        double demandFactor = demandIsEquals(leftDemand, rightDemand) ? 0.5
+                                                                     : (leftDemand - targetDemand) / (leftDemand - rightDemand);
+        double price = leftPrice + (rightPrice - leftPrice) * demandFactor;
+
+        return new Price(marketBasis, price);
     }
 
     /**

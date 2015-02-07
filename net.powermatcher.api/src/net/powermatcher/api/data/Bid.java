@@ -3,11 +3,20 @@ package net.powermatcher.api.data;
 /**
  * This immutable abstract data object defines the basis for a Bid in the Powermatcher cluster. The bid curve can be
  * represented in several ways, so subclasses will have their own implementation.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
 public abstract class Bid {
+    /**
+     * The smallest difference between demands, for them to be called different.
+     */
+    protected static final double SMALLEST_DEMAND = 1e-6;
+
+    protected static boolean demandIsEquals(double demand1, double demand2) {
+        return Math.abs(demand1 - demand2) < SMALLEST_DEMAND;
+    }
+
     public static Bid flatDemand(MarketBasis marketBasis, int bidNumber, double demand) {
         return new PointBid.Builder(marketBasis).setBidNumber(bidNumber).add(0, demand).build();
     }
@@ -24,7 +33,7 @@ public abstract class Bid {
 
     /**
      * A constructor used to create an instance of this class.
-     * 
+     *
      * @param marketBasis
      *            the {@link MarketBasis} of the cluster.
      * @param bidNumber
@@ -54,7 +63,7 @@ public abstract class Bid {
 
     /**
      * Aggregates this {@link Bid} instance with another Bid. Bid are aggregated by adding their bid curves.
-     * 
+     *
      * @param other
      *            The {@link Bid} whose bid curve has to be added to the bid curve of this instance.
      * @return A new aggregated Bid.
@@ -63,7 +72,7 @@ public abstract class Bid {
 
     /**
      * Calculates the {@link Price} at the intersection with the bid curve at the given demand.
-     * 
+     *
      * @param targetDemand
      *            the part of the bid curve you want to get the {@link Price} of.
      * @return the calculated{@link Price}
@@ -92,7 +101,7 @@ public abstract class Bid {
 
     /**
      * Calculates the demand at the intersection with the bid curve at the given {@link PriceStep}.
-     * 
+     *
      * @param priceStep
      *            the {@link PriceStep} you want to know the demand of.
      * @return the calculated demand
@@ -110,7 +119,7 @@ public abstract class Bid {
 
     /**
      * Calculates the demand at the intersection in the bid curve with the priceStep in a demand array.
-     * 
+     *
      * @param price
      *            the {@link Price} you want to know the demand of.
      * @return the calculated demand

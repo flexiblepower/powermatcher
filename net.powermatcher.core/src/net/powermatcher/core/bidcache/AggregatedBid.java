@@ -92,7 +92,7 @@ public final class AggregatedBid {
          *         called, the {@link Builder} should not be used any further.
          */
         public AggregatedBid build() {
-            ArrayBid bid = new ArrayBid(marketBasis, bidNumber, aggregatedBid);
+            Bid bid = new ArrayBid(marketBasis, bidNumber, aggregatedBid);
             return new AggregatedBid(agentBidReferences, bid);
         }
     }

@@ -112,7 +112,7 @@ public class PeakShavingConcentratorTest {
         setUp(-1, 1);
 
         double[] demandArray = new double[] { 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8 };
-        ArrayBid arrayBid = new ArrayBid(marketBasis, 1, demandArray);
+        Bid arrayBid = new ArrayBid(marketBasis, 1, demandArray);
         deviceAgent.sendBid(arrayBid);
         scheduler.doTaskOnce();
         double[] transformedDemandArray = new double[] { 1, 1, 0, -1, -1, -1, -1, -1, -1, -1, -1 };

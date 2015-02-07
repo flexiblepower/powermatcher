@@ -10,8 +10,5 @@ Export-Package:  \
 	net.powermatcher.core.sessions,\
 	net.powermatcher.core.time,\
 	net.powermatcher.core.objectiveagent	
--buildpath:  \
-	${default-buildpath},\
-	${test},\
-	net.powermatcher.api;version=latest,\
-	net.powermatcher.mock;version=latest
+-buildpath: ${default-buildpath}, net.powermatcher.api;version=latest
+-testpath: ${test},	net.powermatcher.test;version=latest

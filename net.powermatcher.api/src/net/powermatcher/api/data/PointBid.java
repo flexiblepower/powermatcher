@@ -117,9 +117,31 @@ public class PointBid
      * @param pricePoints
      *            the {@link PointBid} Array that belongs to this bid.
      */
-    public PointBid(MarketBasis marketBasis, int bidNumber, PricePoint[] pricePoints) {
+    public PointBid(MarketBasis marketBasis, int bidNumber, PricePoint... pricePoints) {
         super(marketBasis, bidNumber);
-        this.pricePoints = pricePoints;
+        if (pricePoints.length == 0) {
+            throw new IllegalArgumentException("At least 1 pricepoint is needed");
+        }
+
+        boolean allEqualDemand = true;
+        double firstDemand = pricePoints[0].getDemand(), lastDemand = pricePoints[0].getDemand();
+        for (PricePoint pricePoint : pricePoints) {
+            if (!pricePoint.getPrice().getMarketBasis().equals(marketBasis)) {
+                throw new IllegalArgumentException("Not all pricepoints match the given marketbasis");
+            } else if (pricePoint.getDemand() > lastDemand) {
+                throw new IllegalAccessError("The bid should be going down");
+            } else if (pricePoint.getDemand() != firstDemand) {
+                allEqualDemand = false;
+            }
+
+            lastDemand = pricePoint.getDemand();
+        }
+
+        if (allEqualDemand) {
+            this.pricePoints = new PricePoint[] { pricePoints[0] };
+        } else {
+            this.pricePoints = pricePoints;
+        }
     }
 
     /**
@@ -147,7 +169,67 @@ public class PointBid
      */
     @Override
     public Price calculateIntersection(double targetDemand) {
-        return toArrayBid().calculateIntersection(targetDemand);
+        int leftIx = 0, rightIx = pricePoints.length - 1;
+
+        // First test for a few special cases
+        if (targetDemand > pricePoints[leftIx].getDemand()) {
+            // If the target is higher than the maximum of the bid, return the minimum price
+            return new Price(marketBasis, marketBasis.getMinimumPrice());
+        } else if (targetDemand < pricePoints[rightIx].getDemand()) {
+            // If the target is lower than the minimum of the bid, return the maximum price
+            return new Price(marketBasis, marketBasis.getMaximumPrice());
+        } else if (demandIsEquals(targetDemand, pricePoints[leftIx].getDemand())) {
+            rightIx = leftIx;
+        } else if (demandIsEquals(targetDemand, pricePoints[rightIx].getDemand())) {
+            leftIx = rightIx;
+        } else { // demand is between the limits of this bid, which can not be flat at this point
+            // Go on while there is at least 1 point between the left and right index
+            while (rightIx - leftIx > 1) {
+                // Determine the middle between the 2 boundaries
+                int middleIx = (leftIx + rightIx) / 2;
+                double middleDemand = pricePoints[middleIx].getDemand();
+
+                if (demandIsEquals(targetDemand, middleDemand)) {
+                    // A point with the target demand is found, select this point
+                    leftIx = rightIx = middleIx;
+                } else if (middleDemand > targetDemand) {
+                    // If the middle demand is bigger than the target demand, we set the left to the middle
+                    leftIx = middleIx;
+                } else { // middleDemand < targetDemand
+                    // If the middle demand is smaller than the target demand, we set the right to the middle
+                    rightIx = middleIx;
+                }
+            }
+        }
+
+        // If the left or right point matches the targetDemand, expand the range
+        while (leftIx > 0 && demandIsEquals(targetDemand, pricePoints[leftIx - 1].getDemand())) {
+            leftIx--;
+        }
+        while (rightIx < pricePoints.length - 1 && demandIsEquals(targetDemand, pricePoints[rightIx + 1].getDemand())) {
+            rightIx++;
+        }
+
+        return intersect(leftIx, rightIx, targetDemand);
+    }
+
+    private Price intersect(int leftIx, int rightIx, double targetDemand) {
+        PricePoint leftPoint = pricePoints[leftIx];
+        PricePoint rightPoint = pricePoints[rightIx];
+
+        double leftPrice = rightIx == 0 ? marketBasis.getMinimumPrice()
+                                       : leftPoint.getPrice().getPriceValue();
+        double rightPrice = leftIx == pricePoints.length - 1 ? marketBasis.getMaximumPrice()
+                                                            : rightPoint.getPrice().getPriceValue();
+
+        double leftDemand = leftPoint.getDemand();
+        double rightDemand = rightPoint.getDemand();
+
+        double demandFactor = demandIsEquals(leftDemand, rightDemand) ? 0.5
+                                                                     : (leftDemand - targetDemand) / (leftDemand - rightDemand);
+        double price = leftPrice + (rightPrice - leftPrice) * demandFactor;
+
+        return new Price(marketBasis, price);
     }
 
     /**
