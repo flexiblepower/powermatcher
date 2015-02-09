@@ -6,7 +6,7 @@ qualifier: SNAPSHOT-${tstamp}
 
 -baseline: *
 
-pm-buildpath: ${default-buildpath}, net.powermatcher.api
+pm-buildpath: ${default-buildpath}, net.powermatcher.api, flexiblepower.api
 
 test: \
 	junit;version=latest,\

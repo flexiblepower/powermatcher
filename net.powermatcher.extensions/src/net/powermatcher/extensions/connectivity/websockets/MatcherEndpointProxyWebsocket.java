@@ -8,7 +8,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import net.powermatcher.api.MatcherEndpoint;
-import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
@@ -267,9 +266,4 @@ public class MatcherEndpointProxyWebsocket
         return true;
     }
 
-    @Override
-    public void setTimeService(TimeService timeService) {
-        // TODO Auto-generated method stub
-
-    }
 }

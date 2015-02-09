@@ -2,7 +2,6 @@ package net.powermatcher.examples;
 
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -17,6 +16,7 @@ import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.core.BaseDeviceAgent;
 
+import org.flexiblepower.context.FlexiblePowerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -144,9 +144,9 @@ public class Freezer
     }
 
     @Override
-    public void setExecutorService(ScheduledExecutorService executorService) {
-        this.executorService = executorService;
-        scheduledFuture = executorService.scheduleAtFixedRate(new Runnable() {
+    public void setContext(FlexiblePowerContext context) {
+        super.setContext(context);
+        scheduledFuture = context.getScheduler().scheduleAtFixedRate(new Runnable() {
             /**
              * {@inheritDoc}
              */

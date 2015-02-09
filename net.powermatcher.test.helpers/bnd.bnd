@@ -1,4 +1,4 @@
--buildpath: net.powermatcher.api, junit, slf4j.api
+-buildpath: net.powermatcher.api, flexiblepower.api, junit, slf4j.api
 
 Bundle-Version: 1.0.0.${qualifier}
 Bundle-Description: A library for testing purposes, that should be statically linked. \

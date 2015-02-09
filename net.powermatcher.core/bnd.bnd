@@ -1,7 +1,7 @@
 -buildpath: ${pm-buildpath}
 -testpath: ${test}
 
-Bundle-Version: 1.0.0.${tstamp}
+Bundle-Version: 2.0.0.${tstamp}
 Service-Component:  *
 Export-Package:  \
 	net.powermatcher.core,\

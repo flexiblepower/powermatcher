@@ -8,7 +8,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import net.powermatcher.api.TimeService;
 import net.powermatcher.api.monitoring.events.AgentEvent;
 import net.powermatcher.api.monitoring.events.BidEvent;
 import net.powermatcher.api.monitoring.events.PeakShavingEvent;
@@ -54,11 +53,6 @@ public abstract class AgentEventLogger
      * Scheduler that can schedule commands to run after a given delay, or to execute periodically.
      */
     private ScheduledExecutorService scheduler;
-
-    /**
-     * A {@link TimeService} instance used for the logTime field of a {@link LogRecord}.
-     */
-    protected TimeService timeService;
 
     /**
      * The interval our {@link ScheduledFuture} uses.
@@ -111,17 +105,17 @@ public abstract class AgentEventLogger
             LogRecord logRecord = null;
 
             if (event instanceof BidEvent) {
-                logRecord = new BidLogRecord((BidEvent) event, timeService.currentDate(), getDateFormat());
+                logRecord = new BidLogRecord((BidEvent) event, event.getTimestamp(), getDateFormat());
             } else if (event instanceof PriceUpdateEvent) {
-                logRecord = new PriceUpdateLogRecord((PriceUpdateEvent) event, timeService.currentDate(),
+                logRecord = new PriceUpdateLogRecord((PriceUpdateEvent) event, event.getTimestamp(),
                                                      getDateFormat());
             } else if (event instanceof WhitelistEvent) {
-                logRecord = new WhitelistLogRecord((WhitelistEvent) event, timeService.currentDate(), getDateFormat(),
+                logRecord = new WhitelistLogRecord((WhitelistEvent) event, event.getTimestamp(), getDateFormat(),
                                                    ((WhitelistEvent) event).getBlockedAgent());
             } else if (event instanceof PeakShavingEvent) {
                 PeakShavingEvent peakShavingEvent = (PeakShavingEvent) event;
                 logRecord = new PeakShavingLogRecord(peakShavingEvent,
-                                                     timeService.currentDate(),
+                                                     peakShavingEvent.getTimestamp(),
                                                      getDateFormat(),
                                                      peakShavingEvent.getFloor(),
                                                      peakShavingEvent.getCeiling(),
@@ -188,14 +182,6 @@ public abstract class AgentEventLogger
      */
     protected void setDateFormat(DateFormat dateFormat) {
         this.dateFormat = dateFormat;
-    }
-
-    /**
-     * @param the
-     *            {@link ScheduledExecutorService} to be set
-     */
-    protected void setScheduler(ScheduledExecutorService scheduler) {
-        this.scheduler = scheduler;
     }
 
     /**

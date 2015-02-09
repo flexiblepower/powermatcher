@@ -32,8 +32,6 @@ public class ConcentratorTest {
 
     @Before
     public void setUp() throws Exception {
-        cluster = new TestClusterHelper();
-
         // Concentrator to be tested
         concentrator = new Concentrator();
         concentrator.activate(new PropertieBuilder().agentId(CONCENTRATOR_NAME)
@@ -41,8 +39,7 @@ public class ConcentratorTest {
                                                     .bidUpdateRate(30)
                                                     .build());
 
-        concentrator.setExecutorService(cluster.getScheduler());
-        concentrator.setTimeService(cluster.getTimer());
+        cluster = new TestClusterHelper(concentrator);
 
         // Matcher
         matcher = new MockMatcherAgent(AUCTIONEER_NAME, "testCluster");
@@ -59,8 +56,6 @@ public class ConcentratorTest {
 
     @Test
     public void sendAggregatedBidExtreme() {
-        cluster.addAgents(concentrator, 3);
-
         // Run 1
         cluster.sendBids(0,
                          new double[] { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5 },
@@ -88,8 +83,6 @@ public class ConcentratorTest {
 
     @Test
     public void sendAggregatedBidRejectAscending() {
-        cluster.addAgents(concentrator, 4);
-
         cluster.sendBids(0,
                          new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 },
                          new double[] { 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0 },
@@ -105,7 +98,6 @@ public class ConcentratorTest {
 
     @Test
     public void sendAggregatedBidLarge() {
-        cluster.addAgents(concentrator, 20);
         cluster.sendBids(0,
                          new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 },
                          new double[] { -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4 },

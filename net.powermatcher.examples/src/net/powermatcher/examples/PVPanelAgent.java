@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
-import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.PointBid;
 import net.powermatcher.api.data.Price;
@@ -19,6 +18,7 @@ import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.core.BaseDeviceAgent;
 
+import org.flexiblepower.context.FlexiblePowerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,11 +68,6 @@ public class PVPanelAgent
      * A delayed result-bearing action that can be cancelled.
      */
     private ScheduledFuture<?> scheduledFuture;
-
-    /**
-     * TimeService that is used for obtaining real or simulated time.
-     */
-    private TimeService timeService;
 
     /**
      * The mimimum value of the random demand.
@@ -156,9 +151,9 @@ public class PVPanelAgent
      *            new {@link ScheduledExecutorService} value.
      */
     @Override
-    public void setExecutorService(ScheduledExecutorService scheduler) {
-        executorService = scheduler;
-        scheduledFuture = executorService.scheduleAtFixedRate(new Runnable() {
+    public void setContext(FlexiblePowerContext context) {
+        super.setContext(context);
+        scheduledFuture = context.getScheduler().scheduleAtFixedRate(new Runnable() {
             /**
              * {@inheritDoc}
              */
@@ -170,19 +165,10 @@ public class PVPanelAgent
     }
 
     /**
-     * @param the
-     *            new {@link TimeService} value.
-     */
-    @Override
-    public void setTimeService(TimeService timeService) {
-        this.timeService = timeService;
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
     protected Date now() {
-        return timeService.currentDate();
+        return context.currentTime();
     }
 }

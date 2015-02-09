@@ -6,14 +6,11 @@ import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
-
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-
 import net.powermatcher.api.Session;
 import net.powermatcher.mock.MockAgent;
 import net.powermatcher.mock.MockMatcherAgent;
+import net.powermatcher.runtime.context.RuntimeContext;
 import net.powermatcher.runtime.sessions.SessionManager;
-import net.powermatcher.runtime.time.SystemTimeService;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -43,8 +40,7 @@ public class SessionManagerTest {
     public void setUp() {
         auctioneer = new MockMatcherAgent(AUCTIONEER_NAME, CLUSTER_ID);
 
-        auctioneer.setExecutorService(new ScheduledThreadPoolExecutor(10));
-        auctioneer.setTimeService(new SystemTimeService());
+        auctioneer.setContext(new RuntimeContext());
         // auctioneer.activate(auctioneerProperties);
         sessionManager = new SessionManager();
 

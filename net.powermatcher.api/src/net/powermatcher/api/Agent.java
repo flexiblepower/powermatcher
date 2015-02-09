@@ -1,6 +1,6 @@
 package net.powermatcher.api;
 
-import java.util.concurrent.ScheduledExecutorService;
+import org.flexiblepower.context.FlexiblePowerContext;
 
 /**
  * {@link Agent} defines the interface with the basic functionality needed to act as an agent in a Powermatcher cluster.
@@ -27,20 +27,11 @@ public interface Agent {
     String getDesiredParentId();
 
     /**
-     * Give the agent a reference to a {@link TimeService}. This should be done by the runtime bundle after the
+     * Give the agent a reference to a {@link FlexiblePowerContext}. This should be done by the runtime bundle after the
      * component is activated.
      *
-     * @param timeService
-     *            reference to the {@link TimeService}
+     * @param context
+     *            reference to the {@link FlexiblePowerContext}
      */
-    void setTimeService(TimeService timeService);
-
-    /**
-     * Give the agent a reference to a {@link ScheduledExecutorService}. This should be done by the runtime bundle after
-     * the component is activated.
-     *
-     * @param executorService
-     *            reference to the {@link ScheduledExecutorService}
-     */
-    void setExecutorService(ScheduledExecutorService executorService);
+    void setContext(FlexiblePowerContext context);
 }

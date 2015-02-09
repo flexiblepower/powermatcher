@@ -51,8 +51,6 @@ public class ConcentratorResilienceTest
         new SimpleSession(concentrator, auctioneer).connect();
 
         cluster = new TestClusterHelper(marketBasis, concentrator);
-        auctioneer.setTimeService(cluster.getTimer());
-        auctioneer.setExecutorService(cluster.getScheduler());
 
         // Create the bid reader
         bidReader = new CsvBidReader(getBidInputFile(testID, suffix), marketBasis);

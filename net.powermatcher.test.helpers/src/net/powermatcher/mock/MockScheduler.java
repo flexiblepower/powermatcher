@@ -10,17 +10,19 @@ import java.util.concurrent.TimeoutException;
 import net.powermatcher.api.data.PricePoint;
 
 /**
- * 
+ *
  * @author FAN
  * @version 2.0
  */
-public class MockScheduler extends ScheduledThreadPoolExecutor {
+public class MockScheduler
+    extends ScheduledThreadPoolExecutor {
 
     private Runnable task;
     private long updateRate;
     private MockFuture mockFuture;
 
-    public class MockFuture implements ScheduledFuture<String> {
+    public class MockFuture
+        implements ScheduledFuture<String> {
 
         private boolean cancelled = false;
 
@@ -35,12 +37,12 @@ public class MockScheduler extends ScheduledThreadPoolExecutor {
         /**
          * Compares this object with the specified object for order. Returns a negative integer, zero, or a positive
          * integer as this object is less than, equal to, or greater than the specified object.
-         * 
+         *
          * This mock method will always return 0. This method had to be overridden, but it is never used.
-         * 
+         *
          * @param that
          *            The {@link PricePoint} instance you want to compare with this one.
-         * 
+         *
          * @return a negative integer, zero, or a positive integer as this object is less than, equal to, or greater
          *         than the specified object.
          */
@@ -138,7 +140,9 @@ public class MockScheduler extends ScheduledThreadPoolExecutor {
     }
 
     public void doTaskOnce() {
-        task.run();
+        if (task != null) {
+            task.run();
+        }
     }
 
 }

@@ -13,9 +13,8 @@ import net.powermatcher.api.data.Price;
 import net.powermatcher.core.auctioneer.ObjectiveAuctioneer;
 import net.powermatcher.core.bidcache.BidCache;
 import net.powermatcher.mock.MockAgent;
+import net.powermatcher.mock.MockContext;
 import net.powermatcher.mock.MockObjectiveAgent;
-import net.powermatcher.mock.MockScheduler;
-import net.powermatcher.mock.MockTimeService;
 import net.powermatcher.mock.SimpleSession;
 
 import org.junit.After;
@@ -35,7 +34,7 @@ public class ObjectiveAuctioneerTest {
     private final MarketBasis marketBasis = new MarketBasis("electricity",
                                                             "EUR", 11, 0, 10);
     private Map<String, Object> auctioneerProperties;
-    private MockScheduler timer;
+    private MockContext context;
 
     private ObjectiveAuctioneer objectiveauctioneer;
     private MockAgent[] agents;
@@ -68,10 +67,9 @@ public class ObjectiveAuctioneerTest {
         auctioneerProperties.put("bidTimeout", "600");
         auctioneerProperties.put("priceUpdateRate", "30");
 
-        timer = new MockScheduler();
+        context = new MockContext(0);
 
-        objectiveauctioneer.setExecutorService(timer);
-        objectiveauctioneer.setTimeService(new MockTimeService(0));
+        objectiveauctioneer.setContext(context);
         objectiveauctioneer.activate(auctioneerProperties);
 
         // Init MockAgents
@@ -107,7 +105,7 @@ public class ObjectiveAuctioneerTest {
                                                                      4, 4, 4, 4, 4, 4, 4, 4 }));
         agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { 3, 3, 3,
                                                                      3, 3, 3, 3, 3, 3, 3, 3 }));
-        timer.doTaskOnce();
+        context.getMockScheduler().doTaskOnce();
         assertEquals(10, agents[0].getLastPriceUpdate().getPrice()
                                   .getPriceValue(), 0);
 
@@ -118,7 +116,7 @@ public class ObjectiveAuctioneerTest {
                                                                      4, 4, 2, 2, 2, 2, 2, 2 }));
         agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { 3, 3, 3,
                                                                      3, 3, 1, 1, 1, 1, 1, 1 }));
-        timer.doTaskOnce();
+        context.getMockScheduler().doTaskOnce();
         assertEquals(10, agents[0].getLastPriceUpdate().getPrice()
                                   .getPriceValue(), 0);
         removeAgents(3);
@@ -133,7 +131,7 @@ public class ObjectiveAuctioneerTest {
                                                                      4, 4, 4, 4, 4, 4, 4, 4 }));
         agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { 3, 3, 3,
                                                                      3, 3, 3, 3, 3, 3, 3, 3 }));
-        timer.doTaskOnce();
+        context.getMockScheduler().doTaskOnce();
 
         objectiveauctioneer.addObjectiveEndpoint(mockObjectiveAgent);
 
@@ -173,7 +171,7 @@ public class ObjectiveAuctioneerTest {
                                                                      -4, -4, -4, -4, -4, -4, -4, -4, -4 }));
         agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { -3, -3,
                                                                      -3, -3, -3, -3, -3, -3, -3, -3, -3 }));
-        timer.doTaskOnce();
+        context.getMockScheduler().doTaskOnce();
         assertEquals(3.0, agents[0].getLastPriceUpdate().getPrice()
                                    .getPriceValue(), 0);
 
@@ -184,7 +182,7 @@ public class ObjectiveAuctioneerTest {
                                                                      -2, -2, -2, -4, -4, -4, -4, -4, -4 }));
         agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { -1, -1,
                                                                      -1, -1, -1, -1, -1, -3, -3, -3, -3 }));
-        timer.doTaskOnce();
+        context.getMockScheduler().doTaskOnce();
         assertEquals(3.0, agents[0].getLastPriceUpdate().getPrice()
                                    .getPriceValue(), 0);
         removeAgents(3);
@@ -200,7 +198,7 @@ public class ObjectiveAuctioneerTest {
                                                                      4, 4, 0, 0, 0, 0, 0, 0 }));
         agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { 0, 0, 0,
                                                                      0, 0, -5, -5, -5, -5, -5, -5 }));
-        timer.doTaskOnce();
+        context.getMockScheduler().doTaskOnce();
         assertEquals(5, agents[0].getLastPriceUpdate().getPrice()
                                  .getPriceValue(), 0);
 
@@ -211,7 +209,7 @@ public class ObjectiveAuctioneerTest {
                                                                      0, 0, 0, 0, -4, -4, -4, -4 }));
         agents[2].sendBid(new ArrayBid(marketBasis, 0, new double[] { 9, 9, 9,
                                                                      9, 9, 9, 9, 9, 9, 9, 9 }));
-        timer.doTaskOnce();
+        context.getMockScheduler().doTaskOnce();
         assertEquals(7, agents[0].getLastPriceUpdate().getPrice()
                                  .getPriceValue(), 0);
         removeAgents(3);
@@ -262,7 +260,7 @@ public class ObjectiveAuctioneerTest {
                                                                       6, 6, 6, 0, 0, 0, 0, 0 }));
         agents[20].sendBid(new ArrayBid(marketBasis, 0, new double[] { 8, 8, 8,
                                                                       8, 8, 8, 8, 8, 8, 8, 8 }));
-        timer.doTaskOnce();
+        context.getMockScheduler().doTaskOnce();
         assertEquals(7, agents[0].getLastPriceUpdate().getPrice()
                                  .getPriceValue(), 0);
         removeAgents(21);

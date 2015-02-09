@@ -12,8 +12,7 @@ import net.powermatcher.integration.util.ConcentratorWrapper;
 import net.powermatcher.integration.util.CsvBidReader;
 import net.powermatcher.integration.util.CsvExpectedResultsReader;
 import net.powermatcher.mock.MockAgent;
-import net.powermatcher.mock.MockScheduler;
-import net.powermatcher.mock.SimpleSession;
+import net.powermatcher.mock.MockContext;
 import net.powermatcher.test.helpers.PropertieBuilder;
 import net.powermatcher.test.helpers.TestClusterHelper;
 
@@ -35,8 +34,7 @@ public class BidResilienceTest
 
     // The wrapped auctioneer
     protected AuctioneerWrapper auctioneer;
-
-    protected MockScheduler auctioneerScheduler;
+    protected MockContext auctioneerContext;
 
     protected void prepareTest(String testID, String suffix) throws IOException, DataFormatException {
         // Get the expected results
@@ -60,11 +58,10 @@ public class BidResilienceTest
 
         cluster = new TestClusterHelper(marketBasis, concentrator);
 
-        auctioneerScheduler = new MockScheduler();
-        auctioneer.setExecutorService(auctioneerScheduler);
-        auctioneer.setTimeService(cluster.getTimer());
+        auctioneerContext = new MockContext(0);
+        auctioneer.setContext(auctioneerContext);
 
-        new SimpleSession(concentrator, auctioneer).connect();
+        cluster.connect(concentrator, auctioneer);
 
         // Create the bid reader
         bidReader = new CsvBidReader(getBidInputFile(testID, suffix), marketBasis);

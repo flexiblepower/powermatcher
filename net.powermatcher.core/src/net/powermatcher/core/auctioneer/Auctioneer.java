@@ -22,6 +22,7 @@ import net.powermatcher.core.bidcache.AggregatedBid;
 import net.powermatcher.core.bidcache.BidCache;
 import net.powermatcher.core.concentrator.Concentrator;
 
+import org.flexiblepower.context.FlexiblePowerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -188,7 +189,7 @@ public class Auctioneer
         publishEvent(new IncomingBidEvent(session.getClusterId(),
                                           getAgentId(),
                                           session.getSessionId(),
-                                          timeService.currentDate(),
+                                          context.currentTime(),
                                           session.getAgentId(),
                                           newBid));
     }
@@ -211,7 +212,7 @@ public class Auctioneer
                 publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(),
                                                           getAgentId(),
                                                           session.getSessionId(),
-                                                          timeService.currentDate(),
+                                                          context.currentTime(),
                                                           sessionPriceUpdate));
                 LOGGER.debug("New price: {}, session {}", sessionPriceUpdate, session.getSessionId());
                 session.updatePrice(sessionPriceUpdate);
@@ -235,8 +236,8 @@ public class Auctioneer
      *            new {@link ScheduledExecutorService} implementation.
      */
     @Override
-    public void setExecutorService(ScheduledExecutorService scheduler) {
-        executorService = scheduler;
+    public void setContext(FlexiblePowerContext context) {
+        this.context = context;
         Runnable command = new Runnable() {
             /**
              * {@inheritDoc}
@@ -246,6 +247,9 @@ public class Auctioneer
                 publishNewPrice();
             }
         };
-        scheduledFuture = executorService.scheduleAtFixedRate(command, 0, config.priceUpdateRate(), TimeUnit.SECONDS);
+        scheduledFuture = context.getScheduler().scheduleAtFixedRate(command,
+                                                                     0,
+                                                                     config.priceUpdateRate(),
+                                                                     TimeUnit.SECONDS);
     }
 }

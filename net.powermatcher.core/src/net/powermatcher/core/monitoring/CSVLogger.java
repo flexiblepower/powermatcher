@@ -7,13 +7,12 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
@@ -246,7 +245,7 @@ public class CSVLogger
         if (fileName.matches("\\S*::\\w*::*.csv")) {
 
             String logDateFormat = fileName.substring(fileName.indexOf("::") + 2, fileName.lastIndexOf("::"));
-            String date = new SimpleDateFormat(logDateFormat).format(timeService.currentDate());
+            String date = new SimpleDateFormat(logDateFormat).format(new Date());
 
             Pattern pattern = Pattern.compile("::\\w*::");
             Matcher matcher = pattern.matcher(fileName);
@@ -283,29 +282,6 @@ public class CSVLogger
                 }
             }
         }
-    }
-
-    /**
-     * OSGI calls this method to set the scheduler
-     *
-     * @param scheduler
-     *            The {@link ScheduledExecutorService} implementation to be injected
-     */
-    @Override
-    @Reference
-    public void setScheduler(ScheduledExecutorService scheduler) {
-        super.setScheduler(scheduler);
-    }
-
-    /**
-     * OSGI calls this method to set the timeService
-     *
-     * @param timeService
-     *            The {@link TimeService} implementation to be injected
-     */
-    @Reference
-    public void setTimeService(TimeService timeService) {
-        this.timeService = timeService;
     }
 
     /**

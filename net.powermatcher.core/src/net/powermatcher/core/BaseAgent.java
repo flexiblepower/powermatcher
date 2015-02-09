@@ -4,14 +4,14 @@ import java.util.Date;
 import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.ScheduledExecutorService;
 
 import net.powermatcher.api.Agent;
 import net.powermatcher.api.MatcherEndpoint;
-import net.powermatcher.api.TimeService;
 import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.events.AgentEvent;
+
+import org.flexiblepower.context.FlexiblePowerContext;
 
 /**
  * Base implementation of an {@link Agent}. It provides basic functionality required in each {@link Agent}. Implements
@@ -44,9 +44,7 @@ public abstract class BaseAgent
      */
     private final Set<AgentObserver> observers = new CopyOnWriteArraySet<AgentObserver>();
 
-    protected TimeService timeService;
-
-    protected ScheduledExecutorService executorService;
+    protected FlexiblePowerContext context;
 
     /**
      * {@inheritDoc}
@@ -130,25 +128,20 @@ public abstract class BaseAgent
      * @return A {@link Date} object, representing the current date and time
      */
     protected Date now() {
-        if (timeService == null) {
+        if (context == null) {
             return null;
         } else {
-            return timeService.currentDate();
+            return context.currentTime();
         }
     }
 
     @Override
-    public void setTimeService(TimeService timeService) {
-        this.timeService = timeService;
-    }
-
-    @Override
-    public void setExecutorService(ScheduledExecutorService executorService) {
-        this.executorService = executorService;
+    public void setContext(FlexiblePowerContext context) {
+        this.context = context;
     }
 
     protected boolean isInitialized() {
-        return !(executorService == null || timeService == null);
+        return context != null;
     }
 
 }

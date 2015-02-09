@@ -23,6 +23,7 @@ import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.bidcache.AggregatedBid;
 import net.powermatcher.core.bidcache.BidCache;
 
+import org.flexiblepower.context.FlexiblePowerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,8 +125,8 @@ public class Concentrator
      *            new {@link ScheduledExecutorService} implementation.
      */
     @Override
-    public void setExecutorService(ScheduledExecutorService scheduler) {
-        super.setExecutorService(scheduler);
+    public void setContext(FlexiblePowerContext context) {
+        super.setContext(context);
 
         Runnable command = new Runnable() {
             /**
@@ -143,7 +144,10 @@ public class Concentrator
             }
         };
 
-        bidUpdateSchedule = scheduler.scheduleAtFixedRate(command, 0, config.bidUpdateRate(), TimeUnit.SECONDS);
+        bidUpdateSchedule = context.getScheduler().scheduleAtFixedRate(command,
+                                                                       0,
+                                                                       config.bidUpdateRate(),
+                                                                       TimeUnit.SECONDS);
     }
 
     /**
@@ -231,7 +235,7 @@ public class Concentrator
         publishEvent(new IncomingBidEvent(session.getClusterId(),
                                           config.agentId(),
                                           session.getSessionId(),
-                                          timeService.currentDate(),
+                                          context.currentTime(),
                                           "agentId",
                                           newBid));
 
@@ -256,7 +260,7 @@ public class Concentrator
         publishEvent(new IncomingPriceUpdateEvent(sessionToMatcher.getClusterId(),
                                                   config.agentId(),
                                                   sessionToMatcher.getSessionId(),
-                                                  timeService.currentDate(),
+                                                  context.currentTime(),
                                                   priceUpdate));
 
         try {
@@ -273,7 +277,7 @@ public class Concentrator
                     publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(),
                                                               config.agentId(),
                                                               session.getSessionId(),
-                                                              timeService.currentDate(),
+                                                              context.currentTime(),
                                                               priceUpdate));
                 }
             }

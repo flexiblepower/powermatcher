@@ -1,5 +1,5 @@
 -buildpath:  \
-	${default-buildpath},\
+	${pm-buildpath},\
 	net.powermatcher.core;version=latest
 -testpath: \
 	${test}

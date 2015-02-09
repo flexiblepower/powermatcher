@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Date;
 
 import net.powermatcher.api.AgentEndpoint;
-import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
@@ -12,45 +11,46 @@ import net.powermatcher.api.data.Price;
 /**
  * An {@link PeakShavingEvent} is sent when an PeakShavingConcentrator transforms an aggregated {@link Bid} by
  * peakshaving the demandArray.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
-public class PeakShavingEvent extends AgentEvent {
+public class PeakShavingEvent
+    extends AgentEvent {
 
     /**
      * The minimum power level applied in peak shaving.
      */
-    private double floor;
+    private final double floor;
 
     /**
      * The maximum power level applied in peak shaving.
      */
-    private double ceiling;
+    private final double ceiling;
 
     /**
      * The demand array before the peakshaving.
      */
-    private double[] oldDemand;
+    private final double[] oldDemand;
 
     /**
      * The demand array after the peakshaving.
      */
-    private double[] newDemand;
+    private final double[] newDemand;
 
     /**
      * The {@link Price} before the peakshaving.
      */
-    private Price oldPrice;
+    private final Price oldPrice;
 
     /**
      * The {@link Price} after the peakshaving.
      */
-    private Price newPrice;
+    private final Price newPrice;
 
     /**
      * A constructor to create an instance of a PeakShavingEvent
-     * 
+     *
      * @param agentId
      *            The id of the {@link AgentEndpoint} subclass sending the UpdateEvent.
      * @param clusterId
@@ -71,7 +71,7 @@ public class PeakShavingEvent extends AgentEvent {
      *            The {@link Price} after the peakshaving.
      */
     public PeakShavingEvent(String agentId, String clusterId, Date timestamp, double floor, double ceiling,
-            double[] oldDemand, double[] newDemand, Price newPrice, Price oldPrice) {
+                            double[] oldDemand, double[] newDemand, Price newPrice, Price oldPrice) {
         super(clusterId, agentId, timestamp);
         this.floor = floor;
         this.ceiling = ceiling;

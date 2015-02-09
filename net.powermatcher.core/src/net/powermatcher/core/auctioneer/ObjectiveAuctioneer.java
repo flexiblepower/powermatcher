@@ -1,11 +1,9 @@
 package net.powermatcher.core.auctioneer;
 
 import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
 
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.ObjectiveEndpoint;
-import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
@@ -54,26 +52,6 @@ public class ObjectiveAuctioneer
      * Holds the objective agent
      */
     private ObjectiveEndpoint objectiveEndpoint;
-
-    /**
-     * @param scheduler
-     *            the new {@link ScheduledExecutorService} implementation.
-     */
-    @Override
-    @Reference
-    public void setExecutorService(ScheduledExecutorService scheduler) {
-        super.setExecutorService(scheduler);
-    }
-
-    /**
-     * @param timeService
-     *            the new {@link TimeService} implementation.
-     */
-    @Override
-    @Reference
-    public void setTimeService(TimeService timeService) {
-        super.setTimeService(timeService);
-    }
 
     /**
      * Used to inject an {@link ObjectiveEndpoint} instance into this class.

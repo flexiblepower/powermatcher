@@ -6,19 +6,14 @@ import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
-import net.powermatcher.api.data.ArrayBid;
-import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.concentrator.Concentrator;
-import net.powermatcher.mock.MockAgent;
-import net.powermatcher.mock.MockScheduler;
-import net.powermatcher.mock.MockTimeService;
-import net.powermatcher.mock.SimpleSession;
+import net.powermatcher.mock.MockContext;
+import net.powermatcher.test.helpers.PropertieBuilder;
+import net.powermatcher.test.helpers.TestClusterHelper;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -32,72 +27,38 @@ import org.junit.Test;
  * @version 2.0
  */
 public class OscillationPreventionTest {
-
     private static final String AUCTIONEER_ID = "auctioneer";
     private static final String CONCENTRATOR_ID = "concentrator";
-    private static final String AGENT_ID = "agent";
 
     // This needs to be the same as the MarketBasis created in the Auctioneer
-    private final MarketBasis marketBasis = new MarketBasis("electricity", "EUR", 10, 0, 10);
-    private Map<String, Object> auctioneerProperties;
-    private Map<String, Object> concentratorProperties;
-    private MockScheduler auctioneerScheduler;
-    private MockScheduler concentratorScheduler;
-
+    private TestClusterHelper cluster;
     private Auctioneer auctioneer;
+    private MockContext autioneerContext;
     private Concentrator concentrator;
-    private MockAgent agent1;
-    private MockAgent agent2;
-    private MockAgent agent3;
 
     @Before
     public void setUpCluster() {
         // Create auctioneer
         auctioneer = new Auctioneer();
-        auctioneerProperties = new HashMap<String, Object>();
-        auctioneerProperties.put("agentId", AUCTIONEER_ID);
-        auctioneerProperties.put("clusterId", "DefaultCluster");
-        auctioneerProperties.put("commodity", "electricity");
-        auctioneerProperties.put("currency", "EUR");
-        auctioneerProperties.put("priceSteps", "10");
-        auctioneerProperties.put("minimumPrice", "0");
-        auctioneerProperties.put("maximumPrice", "10");
-        auctioneerProperties.put("bidTimeout", "600");
-        auctioneerProperties.put("priceUpdateRate", "1");
-
-        auctioneerScheduler = new MockScheduler();
-
-        auctioneer.activate(auctioneerProperties);
-        auctioneer.setExecutorService(auctioneerScheduler);
-        auctioneer.setTimeService(new MockTimeService(0));
+        auctioneer.activate(new PropertieBuilder().agentId(AUCTIONEER_ID)
+                                                  .clusterId("testCluster")
+                                                  .marketBasis(TestClusterHelper.DEFAULT_MB)
+                                                  .bidUpdateRate(600)
+                                                  .priceUpdateRate(600)
+                                                  .build());
+        auctioneer.setContext(autioneerContext = new MockContext(0));
 
         // create concentrator
         concentrator = new Concentrator();
-        concentratorProperties = new HashMap<String, Object>();
-        concentratorProperties.put("matcherId", CONCENTRATOR_ID);
-        concentratorProperties.put("desiredParentId", AUCTIONEER_ID);
-        concentratorProperties.put("bidTimeout", "600");
-        concentratorProperties.put("bidUpdateRate", "30");
-        concentratorProperties.put("agentId", CONCENTRATOR_ID);
-        concentratorProperties.put("whiteListAgents", new ArrayList<String>());
+        concentrator.activate(new PropertieBuilder().agentId(CONCENTRATOR_ID)
+                                                    .desiredParentId(AUCTIONEER_ID)
+                                                    .bidUpdateRate(600)
+                                                    .build());
 
-        concentratorScheduler = new MockScheduler();
-        concentrator.activate(concentratorProperties);
-        concentrator.setExecutorService(concentratorScheduler);
-        concentrator.setTimeService(new MockTimeService(0));
+        cluster = new TestClusterHelper(concentrator);
 
-        // create agents
-        agent1 = new MockAgent(AGENT_ID + "1");
-        agent1.setDesiredParentId(CONCENTRATOR_ID);
-        agent2 = new MockAgent(AGENT_ID + "2");
-        agent2.setDesiredParentId(CONCENTRATOR_ID);
-        agent3 = new MockAgent(AGENT_ID + "3");
-        agent3.setDesiredParentId(CONCENTRATOR_ID);
-
-        new SimpleSession(concentrator, auctioneer).connect();
-        new SimpleSession(agent1, concentrator).connect();
-        new SimpleSession(agent2, concentrator).connect();
-        new SimpleSession(agent3, concentrator).connect();
+        cluster.connect(concentrator, auctioneer);
+        cluster.addAgents(3);
     }
 
     /**
@@ -108,17 +69,11 @@ public class OscillationPreventionTest {
     public void synchrousUpdateTestSimple() {
         // create and send bid by agent
         int bidNumber = 1;
-        double[] demandArray = new double[] { 5, 4, 3, 2, 1, 0, -1, -2, -3, -4 };
-        ArrayBid bid = new ArrayBid(marketBasis, bidNumber, demandArray);
-        agent1.sendBid(bid);
+        cluster.sendBid(0, bidNumber, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5);
 
-        // concentrator aggregate and send bid
-        concentratorDoBidUpdate();
+        act();
 
-        // auctioneer generate and send price
-        auctioneerPublishNewPrice();
-
-        assertThat(agent1.getLastPriceUpdate().getBidNumber(), is(equalTo(bidNumber)));
+        assertThat(cluster.getAgent(0).getLastPriceUpdate().getBidNumber(), is(equalTo(bidNumber)));
     }
 
     /**
@@ -131,25 +86,16 @@ public class OscillationPreventionTest {
         int bidNumber1 = 1;
         int bidNumber2 = 2;
         int bidNumber3 = 3;
-        double[] demandArray = new double[] { 5, 4, 3, 2, 1, 0, -1, -2, -3, -4 };
-        ArrayBid bid = new ArrayBid(marketBasis, bidNumber1, demandArray);
-        agent1.sendBid(bid);
-        demandArray = new double[] { 7, 5, 3, 1, -1, -3, -5, -7, -9, -11 };
-        bid = new ArrayBid(marketBasis, bidNumber2, demandArray);
-        agent2.sendBid(bid);
-        demandArray = new double[] { 5, 4, 3, 3, 3, 3, 3, 3, 3, 3 };
-        bid = new ArrayBid(marketBasis, bidNumber3, demandArray);
-        agent3.sendBid(bid);
+        cluster.sendBid(0, bidNumber1, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5);
+        cluster.sendBid(1, bidNumber2, 7, 5, 3, 1, -1, -3, -5, -7, -9, -11, -13);
+        cluster.sendBid(2, bidNumber3, 5, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3);
 
-        // concentrator aggregate and send bid
-        concentratorDoBidUpdate();
+        act();
 
-        // auctioneer generate and send price
-        auctioneerPublishNewPrice();
-
-        assertThat(agent1.getLastPriceUpdate().getBidNumber(), is(equalTo(bidNumber1)));
-        assertThat(agent2.getLastPriceUpdate().getBidNumber(), is(equalTo(bidNumber2)));
-        assertThat(agent3.getLastPriceUpdate().getBidNumber(), is(equalTo(bidNumber3)));
+        List<PriceUpdate> priceUpdates = cluster.getPriceUpdates();
+        assertThat(priceUpdates.get(0).getBidNumber(), is(equalTo(bidNumber1)));
+        assertThat(priceUpdates.get(1).getBidNumber(), is(equalTo(bidNumber2)));
+        assertThat(priceUpdates.get(2).getBidNumber(), is(equalTo(bidNumber3)));
     }
 
     /**
@@ -162,85 +108,68 @@ public class OscillationPreventionTest {
         int bidNumber1 = 1;
         int bidNumber2 = 2;
         int bidNumber3 = 3;
-        double[] demand1 = new double[] { 5, 4, 3, 2, 1, 0, -1, -2, -3, -4 };
-        ArrayBid bid1 = new ArrayBid(marketBasis, bidNumber1, demand1);
-        double[] demand2 = new double[] { 7, 5, 3, 1, -1, -3, -5, -7, -9, -11 };
-        ArrayBid bid2 = new ArrayBid(marketBasis, bidNumber2, demand2);
-        double[] demand3 = new double[] { 5, 4, 3, 3, 3, 3, 3, 3, 3, 3 };
-        ArrayBid bid3 = new ArrayBid(marketBasis, bidNumber3, demand3);
 
-        // sends bids and prices asynchrously
-        agent1.sendBid(bid1);
-        agent2.sendBid(bid2);
+        cluster.sendBid(0, bidNumber1, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5);
+        cluster.sendBid(1, bidNumber2, 7, 5, 3, 1, -1, -3, -5, -7, -9, -11, -12);
+        concentratorRun();
 
-        // agent3 sends bid after concentrator aggregates
-        concentratorDoBidUpdate();
-        agent3.sendBid(bid3);
-        auctioneerPublishNewPrice();
+        cluster.sendBid(2, bidNumber3, 5, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3);
+        auctioneerRun();
 
-        PriceUpdate lastPriceUpdate1 = agent1.getLastPriceUpdate();
-        PriceUpdate lastPriceUpdate2 = agent2.getLastPriceUpdate();
+        List<PriceUpdate> priceUpdates = cluster.getPriceUpdates();
 
         // agents receive price
-        assertThat(lastPriceUpdate1.getPrice(), is(equalTo(lastPriceUpdate2.getPrice())));
-        assertThat(lastPriceUpdate1.getBidNumber(), is(equalTo(bidNumber1)));
-        assertThat(lastPriceUpdate2.getBidNumber(), is(equalTo(bidNumber2)));
-        assertNull(agent3.getLastPriceUpdate());
+        PriceUpdate savedPriceUpdate0 = priceUpdates.get(0);
+        assertThat(savedPriceUpdate0.getPrice(), is(equalTo(priceUpdates.get(1).getPrice())));
+        assertThat(savedPriceUpdate0.getBidNumber(), is(equalTo(bidNumber1)));
+        assertThat(priceUpdates.get(1).getBidNumber(), is(equalTo(bidNumber2)));
+        assertNull(priceUpdates.get(2));
 
-        concentratorDoBidUpdate();
-        auctioneerPublishNewPrice();
-        PriceUpdate lastPriceUpdate3 = agent3.getLastPriceUpdate();
+        act();
 
+        priceUpdates = cluster.getPriceUpdates();
         // agent3 bid has effect on price
-        assertThat(agent1.getLastPriceUpdate().getPrice().getPriceValue(),
-                   is(not(equalTo(lastPriceUpdate1.getPrice()
-                                                  .getPriceValue()))));
-        // assertThat(agent1.getLastPriceUpdate().getPrice().getPriceValue(),
-        // is(equalTo(2.0)));
-        assertThat(agent1.getLastPriceUpdate().getBidNumber(), is(equalTo(bidNumber1)));
-        assertThat(agent2.getLastPriceUpdate().getBidNumber(), is(equalTo(bidNumber2)));
-        assertThat(lastPriceUpdate3.getBidNumber(), is(equalTo(bidNumber3)));
+        assertThat(priceUpdates.get(0).getPrice().getPriceValue(),
+                   is(not(equalTo(savedPriceUpdate0.getPrice().getPriceValue()))));
+        assertThat(priceUpdates.get(0).getBidNumber(), is(equalTo(bidNumber1)));
+        assertThat(priceUpdates.get(1).getBidNumber(), is(equalTo(bidNumber2)));
+        PriceUpdate savedPriceUpdate2 = priceUpdates.get(2);
+        assertThat(savedPriceUpdate2.getBidNumber(), is(equalTo(bidNumber3)));
 
-        demand1 = new double[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
-        bid1 = new ArrayBid(marketBasis, ++bidNumber1, demand1);
-        agent1.sendBid(bid1);
-        demand2 = new double[] { 3, 3, 3, 3, 3, 0, 0, 0, 0, 0 };
-        bid2 = new ArrayBid(marketBasis, ++bidNumber2, demand1);
-        agent2.sendBid(bid2);
+        cluster.sendBid(0, ++bidNumber1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+        cluster.sendBid(1, ++bidNumber2, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0);
 
-        // agent 1 and 2 send bids,
-        lastPriceUpdate1 = agent1.getLastPriceUpdate();
-        PriceUpdate oldPrice3 = new PriceUpdate(lastPriceUpdate3.getPrice(), lastPriceUpdate3.getBidNumber());
-        concentratorDoBidUpdate();
-        auctioneerPublishNewPrice();
+        savedPriceUpdate0 = cluster.getAgent(0).getLastPriceUpdate();
+        act();
 
+        priceUpdates = cluster.getPriceUpdates();
         // agents have received new price
-        PriceUpdate newAgent1Price = agent1.getLastPriceUpdate();
-        assertThat(newAgent1Price.getBidNumber(), is(equalTo(bidNumber1)));
-        assertThat(newAgent1Price.getPrice().getPriceValue(), is(not(equalTo(lastPriceUpdate1.getPrice()
-                                                                                             .getPriceValue()))));
-        assertThat(agent2.getLastPriceUpdate().getBidNumber(), is(equalTo(bidNumber2)));
+        assertThat(priceUpdates.get(0).getBidNumber(), is(equalTo(bidNumber1)));
+        assertThat(priceUpdates.get(0).getPrice().getPriceValue(),
+                   is(not(equalTo(savedPriceUpdate0.getPrice().getPriceValue()))));
+        assertThat(priceUpdates.get(1).getBidNumber(), is(equalTo(bidNumber2)));
 
         // check agent3 included in new Price
-        lastPriceUpdate3 = agent3.getLastPriceUpdate();
-        assertThat(lastPriceUpdate3.getBidNumber(), is(equalTo(bidNumber3)));
-        assertThat(lastPriceUpdate3.getPrice().getPriceValue(), is(not(equalTo(oldPrice3.getPrice().getPriceValue()))));
-        assertThat(lastPriceUpdate3.getPrice().getPriceValue(), is(equalTo(newAgent1Price.getPrice().getPriceValue())));
+        assertThat(priceUpdates.get(2).getBidNumber(), is(equalTo(bidNumber3)));
+        assertThat(priceUpdates.get(2).getPrice().getPriceValue(),
+                   is(not(equalTo(savedPriceUpdate2.getPrice().getPriceValue()))));
+        assertThat(priceUpdates.get(2).getPrice().getPriceValue(),
+                   is(equalTo(priceUpdates.get(0).getPrice().getPriceValue())));
     }
 
     /*
-     * wrapper method to make it more clear what happens during the test. By calling the doTaskOnce() of the
-     * concentratorScheduler, the concentrators doBidUpdate is called
+     * Wrapper that performs all the cluster and auctioneer tasks
      */
-    private void concentratorDoBidUpdate() {
-        concentratorScheduler.doTaskOnce();
+    private void act() {
+        concentratorRun();
+        auctioneerRun();
     }
 
-    /*
-     * wrapper method to make it more clear what happens during the test. By calling the doTaskOnce() of the
-     * auctioneerScheduler, the auctioneers publishNewPrice is called
-     */
-    private void auctioneerPublishNewPrice() {
-        auctioneerScheduler.doTaskOnce();
+    private void auctioneerRun() {
+        autioneerContext.getMockScheduler().doTaskOnce();
+    }
+
+    private void concentratorRun() {
+        cluster.performTasks();
     }
 }

@@ -26,8 +26,6 @@ public class AuctioneerTest {
 
     @Before
     public void setUp() {
-        cluster = new TestClusterHelper();
-
         // Init Auctioneer
         auctioneer = new Auctioneer();
         auctioneer.activate(new PropertieBuilder().agentId(AUCTIONEER_NAME)
@@ -35,8 +33,7 @@ public class AuctioneerTest {
                                                   .priceUpdateRate(1)
                                                   .marketBasis(TestClusterHelper.DEFAULT_MB)
                                                   .build());
-        auctioneer.setExecutorService(cluster.getScheduler());
-        auctioneer.setTimeService(cluster.getTimer());
+        cluster = new TestClusterHelper(auctioneer);
     }
 
     @After
@@ -46,8 +43,6 @@ public class AuctioneerTest {
 
     @Test
     public void noEquilibriumOnDemandSide() {
-        cluster.addAgents(auctioneer, 3);
-
         // run 1
         cluster.sendBids(0,
                          new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 },
@@ -73,7 +68,6 @@ public class AuctioneerTest {
 
     @Test
     public void noEquilibriumOnSupplySide() {
-        cluster.addAgents(auctioneer, 3);
         // run 1
         cluster.sendBids(0,
                          new double[] { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5 },
@@ -91,8 +85,6 @@ public class AuctioneerTest {
 
     @Test
     public void equilibriumSmallNumberOfArrayBids() {
-        cluster.addAgents(auctioneer, 3);
-
         // run 1
         cluster.sendBids(0,
                          new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 },
@@ -109,10 +101,7 @@ public class AuctioneerTest {
     }
 
     @Test
-    // @Ignore("Check whether there is no issue here. Changed to 7 in order to fix the tests. Original test value was 6.")
-            public void
-            equilibriumLargeSet() {
-        cluster.addAgents(auctioneer, 20);
+    public void equilibriumLargeSet() {
         cluster.sendBids(0,
                          new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 },
                          new double[] { -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4 },
@@ -139,7 +128,7 @@ public class AuctioneerTest {
 
     @Test
     public void equilibriumLargerSet() {
-        cluster.addAgents(auctioneer, 21);
+        cluster.addAgents(21);
         cluster.sendBids(0,
                          new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 },
                          new double[] { -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4 },

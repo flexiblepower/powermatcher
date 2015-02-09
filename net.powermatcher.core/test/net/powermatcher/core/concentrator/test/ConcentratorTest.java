@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.powermatcher.api.Session;
-import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
@@ -18,9 +17,9 @@ import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.core.concentrator.Concentrator;
 import net.powermatcher.mock.MockAgent;
+import net.powermatcher.mock.MockContext;
 import net.powermatcher.mock.MockMatcherAgent;
 import net.powermatcher.mock.MockScheduler;
-import net.powermatcher.mock.MockTimeService;
 import net.powermatcher.mock.SimpleSession;
 
 import org.junit.Before;
@@ -47,7 +46,7 @@ public class ConcentratorTest {
     private String auctioneerId;
     private String clusterId;
     private long bidUpdateRate;
-    private TimeService systemTimeService;
+    private MockContext context;
 
     @Before
     public void setUp() {
@@ -65,10 +64,9 @@ public class ConcentratorTest {
         props.put("desiredParentId", auctioneerId);
         props.put("bidUpdateRate", bidUpdateRate);
 
-        systemTimeService = new MockTimeService(0);
+        context = new MockContext(0);
         concentrator.activate(props);
-        concentrator.setTimeService(systemTimeService);
-        concentrator.setExecutorService(mockScheduler);
+        concentrator.setContext(context);
     }
 
     @Test

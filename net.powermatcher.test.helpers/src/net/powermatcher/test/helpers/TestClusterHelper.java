@@ -8,20 +8,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;
-import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.mock.MockAgent;
+import net.powermatcher.mock.MockContext;
 import net.powermatcher.mock.MockMatcherAgent;
-import net.powermatcher.mock.MockScheduler;
-import net.powermatcher.mock.MockTimeService;
 import net.powermatcher.mock.SimpleSession;
 
 public class TestClusterHelper
@@ -30,8 +27,7 @@ public class TestClusterHelper
 
     private final AtomicInteger idGenerator;
 
-    private final MockScheduler scheduler;
-    private final MockTimeService timer;
+    private final MockContext context;
 
     private final List<MockAgent> agents;
     private final List<SimpleSession> sessions;
@@ -39,23 +35,17 @@ public class TestClusterHelper
     private final MarketBasis marketBasis;
     private final MatcherEndpoint matcher;
 
-    public TestClusterHelper() {
-        this(DEFAULT_MB);
-    }
-
-    public TestClusterHelper(MarketBasis marketBasis) {
-        this(marketBasis, null);
-    }
-
     public TestClusterHelper(MatcherEndpoint matcher) {
         this(DEFAULT_MB, matcher);
     }
 
     public TestClusterHelper(MarketBasis marketBasis, MatcherEndpoint matcher) {
+        if (matcher == null) {
+            throw new NullPointerException("matcher");
+        }
         idGenerator = new AtomicInteger(0);
 
-        scheduler = new MockScheduler();
-        timer = new MockTimeService(0);
+        context = new MockContext(0);
 
         agents = new ArrayList<MockAgent>();
         sessions = new ArrayList<SimpleSession>();
@@ -64,31 +54,15 @@ public class TestClusterHelper
         this.matcher = matcher;
 
         if (matcher != null) {
-            matcher.setExecutorService(scheduler);
-            matcher.setTimeService(timer);
+            matcher.setContext(context);
         }
-    }
-
-    public MatcherEndpoint getMatcher() {
-        if (matcher == null) {
-            throw new IllegalStateException("Matcher has not been set");
-        }
-        return matcher;
     }
 
     public MockAgent addAgent() {
-        return addAgent(getMatcher());
-    }
-
-    public MockAgent addAgent(MatcherEndpoint matcher) {
-        return addAgents(matcher, 1).get(0);
+        return addAgents(1).get(0);
     }
 
     public List<MockAgent> addAgents(int nrOfAgents) {
-        return addAgents(getMatcher(), nrOfAgents);
-    }
-
-    public List<MockAgent> addAgents(MatcherEndpoint matcher, int nrOfAgents) {
         List<MockAgent> newAgents = new ArrayList<MockAgent>(nrOfAgents);
         for (int ix = 0; ix < nrOfAgents; ix++) {
             String agentId = "agent" + idGenerator.incrementAndGet();
@@ -109,21 +83,21 @@ public class TestClusterHelper
     }
 
     public void sendBid(int agentIx, int bidNr, double... demandArray) {
-        agents.get(agentIx).sendBid(new ArrayBid(marketBasis, bidNr, demandArray));
+        getAgent(agentIx).sendBid(new ArrayBid(marketBasis, bidNr, demandArray));
     }
 
     public void sendBids(int baseId, double[]... demandArrays) {
         for (int ix = 0; ix < demandArrays.length; ix++) {
             sendBid(ix, baseId + ix, demandArrays[ix]);
         }
-        scheduler.doTaskOnce();
+        performTasks();
     }
 
     public void testPriceSignal(MockMatcherAgent matcher, int... expectedIds) {
         Price price = new Price(marketBasis, Math.random() * marketBasis.getMaximumPrice());
         matcher.publishPrice(new PriceUpdate(price, matcher.getLastReceivedBid().getBidNumber()));
         for (int i = 0; i < expectedIds.length; i++) {
-            MockAgent agent = agents.get(i);
+            MockAgent agent = getAgent(i);
             if (expectedIds[i] < 0) {
                 assertNull(agent.getLastPriceUpdate());
             } else {
@@ -149,20 +123,20 @@ public class TestClusterHelper
         return agents.get(ix);
     }
 
-    public ScheduledExecutorService getScheduler() {
-        return scheduler;
-    }
-
     public MarketBasis getMarketBasis() {
         return marketBasis;
     }
 
     public void performTasks() {
-        scheduler.doTaskOnce();
+        context.getMockScheduler().doTaskOnce();
     }
 
-    public TimeService getTimer() {
-        return timer;
+    public List<PriceUpdate> getPriceUpdates() {
+        List<PriceUpdate> updates = new ArrayList<PriceUpdate>(agents.size());
+        for (MockAgent agent : agents) {
+            updates.add(agent.getLastPriceUpdate());
+        }
+        return updates;
     }
 
     public double[] getPriceValues() {
@@ -182,4 +156,5 @@ public class TestClusterHelper
     public Iterator<MockAgent> iterator() {
         return Collections.unmodifiableList(agents).iterator();
     }
+
 }
