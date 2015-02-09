@@ -3,6 +3,7 @@ package net.powermatcher.api.data.test;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
@@ -152,9 +153,17 @@ public class PointBidTest {
         assertThat(arrayBid.getDemand(), is(equalTo(expected)));
 
         arrayBid = bid2.toArrayBid();
-        expected = new double[] { 25.0, 25.0, 25.0, 25 - 5.0 / 7.0, 25 - 10.0 / 7.0, 25 - 15.0 / 7.0,
-                                 25 - 20.0 / 7.0, 25 - 25 / 7.0, 25 - 30 / 7.0, 20.0 };
-        assertThat(arrayBid.getDemand(), is(equalTo(expected)));
+        expected = new double[] { 25.0,
+                                 25.0,
+                                 25.0,
+                                 25 - 15.0 / 27.0,
+                                 25 - 35.0 / 27.0,
+                                 25 - 55.0 / 27.0,
+                                 25 - 75.0 / 27.0,
+                                 25 - 95.0 / 27.0,
+                                 25 - 115.0 / 27.0,
+                                 20.0 };
+        assertArrayEquals(expected, arrayBid.getDemand(), 1e-9);
     }
 
     @Test

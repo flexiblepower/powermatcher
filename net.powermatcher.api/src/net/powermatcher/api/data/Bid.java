@@ -102,30 +102,28 @@ public abstract class Bid {
     /**
      * Calculates the demand at the intersection with the bid curve at the given {@link PriceStep}.
      *
+     * Implementation note: you should always override either this method or the {@link #getDemandAt(Price)} method. The
+     * default implementation is to call the other.
+     *
      * @param priceStep
      *            the {@link PriceStep} you want to know the demand of.
      * @return the calculated demand
      */
     public double getDemandAt(PriceStep priceStep) {
-        // FIXME The overridden methods are fine, but calling this method or
-        // getDemandAt(Price) would cause a stack overflow if called. .
-        // They are placed here so that you can call Bid.getDemandAt. You won't
-        // have to cast, but this isn't correct either.
-        // Possible solutions: return null (could cause NullpointerExceptions),
-        // throw UnsupportedOperationException or
-        // cast the Bids.
         return getDemandAt(priceStep.toPrice());
     }
 
     /**
      * Calculates the demand at the intersection in the bid curve with the priceStep in a demand array.
      *
+     * Implementation note: you should always override either this method or the {@link #getDemandAt(PriceStep)} method.
+     * The default implementation is to call the other.
+     *
      * @param price
      *            the {@link Price} you want to know the demand of.
      * @return the calculated demand
      */
     public double getDemandAt(Price price) {
-        // FIXME see getDemandAt(PriceStep priceStep)
         return getDemandAt(price.toPriceStep());
     }
 }

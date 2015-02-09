@@ -272,36 +272,61 @@ public class PointBid
      */
     @Override
     public double getDemandAt(Price price) {
-        if (pricePoints.length == 0) {
-            // If there are no pricepoints, all demands are 0
-            return 0;
-        } else if (price.compareTo(getFirst().getPrice()) <= 0) {
+        if (pricePoints.length == 1) {
+            // Flat bid, send any demand (they are all the same)
+            return getMaximumDemand();
+        } else if (price.compareTo(getFirst().getPrice()) < 0) {
             // If the price is lower than the lowest price, return the maximum
             // demand
             return getMaximumDemand();
+        } else if (price.equals(getFirst().getPrice())) {
+            // If the first matcher, it could be that the second is at the same price. If that is the case, use the
+            // second, otherwise the first.
+            PricePoint secondPricePoint = pricePoints[1];
+            if (price.equals(secondPricePoint.getPrice())) {
+                return secondPricePoint.getDemand();
+            } else {
+                return getMaximumDemand();
+            }
         } else if (price.compareTo(getLast().getPrice()) >= 0) {
             // If the price is higher than the highest price, return the minimum
             // demand
             return getMinimumDemand();
+        } else {
+            // We have a normal case that is somewhere in between the lower and higher demands
+
+            // First determine which 2 pricepoints it is in between
+            int lowIx = 0, highIx = pricePoints.length;
+            while (highIx - lowIx > 1) {
+                int middleIx = (lowIx + highIx) / 2;
+                PricePoint middle = pricePoints[middleIx];
+
+                int cmp = middle.getPrice().compareTo(price);
+                if (cmp < 0) {
+                    lowIx = middleIx;
+                } else if (cmp > 0) {
+                    highIx = middleIx;
+                } else {
+                    // Found at least 1 point that is equal in price.
+                    // This is the special case with an open and closed node. Always the lower demand should be chosen.
+                    PricePoint nextPoint = pricePoints[middleIx + 1];
+                    if (price.equals(nextPoint.getPrice())) {
+                        return nextPoint.getDemand();
+                    } else {
+                        middle.getDemand();
+                    }
+                }
+            }
+            PricePoint lower = pricePoints[lowIx];
+            PricePoint higher = pricePoints[highIx];
+
+            // Now calculate the demand between the 2 points
+            // First the factor (between 0 and 1) of where the price is on the line
+            double factor = (price.getPriceValue() - lower.getPrice().getPriceValue())
+                            / (higher.getPrice().getPriceValue() - lower.getPrice().getPriceValue());
+            // Now calculate the demand
+            return (1 - factor) * lower.getDemand() + factor * higher.getDemand();
         }
-
-        // Now it must be somewhere in between 2 pricepoints
-        // First determine which 2 pricepoints
-
-        int ix = 0;
-        PricePoint lower = pricePoints[ix++];
-        PricePoint higher = pricePoints[ix++];
-        while (higher.getPrice().compareTo(price) < 0) {
-            lower = higher;
-            higher = pricePoints[ix++];
-        }
-
-        // Now calculate the demand between the 2 points
-        // First the factor (between 0 and 1) of where the price is on the line
-        double factor = (price.getPriceValue() - lower.getPrice().getPriceValue())
-                        / (higher.getPrice().getPriceValue() - lower.getPrice().getPriceValue());
-        // Now calculate the demand
-        return (1 - factor) * lower.getDemand() + factor * higher.getDemand();
     }
 
     /**
@@ -350,37 +375,6 @@ public class PointBid
                 throw new UnsupportedOperationException();
             }
         };
-    }
-
-    /**
-     * @return A <code>array[]</code> representation of the {@link PricePoint} array.
-     */
-    double[] calculateDemandArray() {
-        int priceSteps = marketBasis.getPriceSteps();
-        double[] newDemand = new double[priceSteps];
-        int numPoints = pricePoints.length;
-        int i = 0;
-        double lastValue = numPoints == 0 ? 0 : getFirst().getDemand();
-        for (int p = 0; p < numPoints; p++) {
-            PricePoint pricePoint = pricePoints[p];
-            int priceStep = pricePoint.getPrice().toPriceStep().getPriceStep();
-            int steps = priceStep - i + 1;
-            double value = pricePoint.getDemand();
-            if (steps > 0) {
-                double delta = (value - lastValue) / steps;
-                while (i <= priceStep) {
-                    newDemand[i] = value - (priceStep - i) * delta;
-                    i += 1;
-                }
-            } else {
-                newDemand[priceStep] = value;
-            }
-            lastValue = value;
-        }
-        while (i < priceSteps) {
-            newDemand[i++] = lastValue;
-        }
-        return newDemand;
     }
 
     /**

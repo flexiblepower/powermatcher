@@ -245,7 +245,14 @@ public class ArrayBid
      */
     ArrayBid(PointBid base) {
         super(base.getMarketBasis(), base.getBidNumber());
-        demandArray = base.calculateDemandArray();
+
+        int priceSteps = marketBasis.getPriceSteps();
+        demandArray = new double[priceSteps];
+
+        for (int ix = 0; ix < priceSteps; ix++) {
+            demandArray[ix] = base.getDemandAt(new PriceStep(marketBasis, ix));
+        }
+
         pointBid = base;
     }
 
@@ -452,7 +459,7 @@ public class ArrayBid
                      * If i is not in a constantly inclining or declining segment, and the previous segment was flat,
                      * then move the end point of the flat segment one price step forward to convert it to a straight
                      * step.
-                     *
+                     * 
                      * This is to preserve the semantics of the straight step when converting between point and vector
                      * representation and back.
                      */
