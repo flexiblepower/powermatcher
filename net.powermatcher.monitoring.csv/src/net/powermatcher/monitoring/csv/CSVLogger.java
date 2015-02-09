@@ -71,12 +71,6 @@ public class CSVLogger
                                                                    "priceValue",
                                                                    "lastUpdateTime" };
 
-    private static final String[] WHITELIST_HEADER_ROW = new String[] { "logTime",
-                                                                       "clusterId",
-                                                                       "agentId",
-                                                                       "blockedAgentId",
-                                                                       "lastUpdateTime" };
-
     private static final String[] PEAKSHAVING_HEADER_ROW = new String[] { "logTime",
                                                                          "clusterId",
                                                                          "agentId",
@@ -208,9 +202,6 @@ public class CSVLogger
             case BID_EVENT:
                 header = BID_HEADER_ROW;
                 break;
-            case WHITELIST_EVENT:
-                header = WHITELIST_HEADER_ROW;
-                break;
             case PEAK_SHAVING_EVENT:
                 header = PEAKSHAVING_HEADER_ROW;
                 break;
@@ -297,8 +288,6 @@ public class CSVLogger
                 output = createLineForBidLogRecord((BidLogRecord) logRecord);
             } else if (logRecord instanceof PriceUpdateLogRecord) {
                 output = createLineForPriceUpdateLog((PriceUpdateLogRecord) logRecord);
-            } else if (logRecord instanceof WhitelistLogRecord) {
-                output = createLineForWhitelistLogRecord((WhitelistLogRecord) logRecord);
             } else if (logRecord instanceof PeakShavingLogRecord) {
                 output = createLineForPeakShavingLogRecor((PeakShavingLogRecord) logRecord);
             }
@@ -351,20 +340,6 @@ public class CSVLogger
                              newDemandBuilder.toString(),
                              oldPrice,
                              newPrice };
-    }
-
-    /**
-     * Creates a <code>String[]</code> out of a {@link WhitelistLogRecord} to be used in
-     * {@link CSVLogger#writeLineToCSV(String[], File)}
-     *
-     * @param logRecord
-     *            the {@link WhitelistLogRecord} that has to be transformed
-     * @return the <code>String[]</code> representation of logRecord
-     */
-    private String[] createLineForWhitelistLogRecord(WhitelistLogRecord logRecord) {
-        return new String[] { getDateFormat().format(logRecord.getLogTime()), logRecord.getClusterId(),
-                             logRecord.getAgentId(), logRecord.getBlockedAgent(),
-                             getDateFormat().format(logRecord.getEventTimestamp()) };
     }
 
     /**

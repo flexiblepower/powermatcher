@@ -12,7 +12,6 @@ import net.powermatcher.api.monitoring.events.AgentEvent;
 import net.powermatcher.api.monitoring.events.BidEvent;
 import net.powermatcher.api.monitoring.events.PeakShavingEvent;
 import net.powermatcher.api.monitoring.events.PriceUpdateEvent;
-import net.powermatcher.api.monitoring.events.WhitelistEvent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,9 +108,6 @@ public abstract class AgentEventLogger
             } else if (event instanceof PriceUpdateEvent) {
                 logRecord = new PriceUpdateLogRecord((PriceUpdateEvent) event, event.getTimestamp(),
                                                      getDateFormat());
-            } else if (event instanceof WhitelistEvent) {
-                logRecord = new WhitelistLogRecord((WhitelistEvent) event, event.getTimestamp(), getDateFormat(),
-                                                   ((WhitelistEvent) event).getBlockedAgent());
             } else if (event instanceof PeakShavingEvent) {
                 PeakShavingEvent peakShavingEvent = (PeakShavingEvent) event;
                 logRecord = new PeakShavingLogRecord(peakShavingEvent,
