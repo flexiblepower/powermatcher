@@ -47,14 +47,12 @@ import com.google.gson.JsonSyntaxException;
 @WebSocket()
 @Component(designateFactory = MatcherEndpointProxyWebsocket.Config.class,
            immediate = true,
-           provide = {
-                      ObservableAgent.class, MatcherEndpoint.class,
+           provide = { ObservableAgent.class, MatcherEndpoint.class,
                       BaseMatcherEndpointProxy.class })
 public class MatcherEndpointProxyWebsocket
     extends BaseMatcherEndpointProxy {
 
-    private static final Logger LOGGER = LoggerFactory
-                                                      .getLogger(MatcherEndpointProxyWebsocket.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MatcherEndpointProxyWebsocket.class);
 
     @Meta.OCD
     public static interface Config {
@@ -92,18 +90,16 @@ public class MatcherEndpointProxyWebsocket
     @Activate
     public synchronized void activate(Map<String, Object> properties) {
         // Read configuration properties
-        Config config = Configurable.createConfigurable(Config.class,
-                                                        properties);
+        Config config = Configurable.createConfigurable(Config.class, properties);
         setAgentId(config.agentId());
 
         try {
             powermatcherUrl = new URI(config.powermatcherUrl()
-                                      + "?agentId=" + getAgentId() + "&desiredConnectionId="
+                                      + "?agentId=" + getAgentId()
+                                      + "&desiredConnectionId="
                                       + config.desiredConnectionId());
         } catch (URISyntaxException e) {
-            LOGGER.error(
-                         "Malformed URL for powermatcher websocket endpoint. Reason {}",
-                         e);
+            LOGGER.error("Malformed URL for powermatcher websocket endpoint. Reason {}", e);
             return;
         }
 
@@ -217,23 +213,18 @@ public class MatcherEndpointProxyWebsocket
             // Handle specific message
             if (pmMessage.getPayloadType() == PayloadType.PRICE_UPDATE) {
                 // Relay price update to local agent
-                PriceUpdate newPriceUpdate = ModelMapper
-                                                        .mapPriceUpdate((PriceUpdateModel) pmMessage
-                                                                                                    .getPayload());
+                PriceUpdate newPriceUpdate = ModelMapper.mapPriceUpdate((PriceUpdateModel) pmMessage.getPayload());
                 updateLocalPrice(newPriceUpdate);
             }
 
             if (pmMessage.getPayloadType() == PayloadType.CLUSTERINFO) {
                 // Sync marketbasis and clusterid with local session, for new
                 // connections
-                ClusterInfoModel clusterInfo = (ClusterInfoModel) pmMessage
-                                                                           .getPayload();
-                updateRemoteMarketBasis(ModelMapper
-                                                   .convertMarketBasis(clusterInfo.getMarketBasis()));
+                ClusterInfoModel clusterInfo = (ClusterInfoModel) pmMessage.getPayload();
+                updateRemoteMarketBasis(ModelMapper.convertMarketBasis(clusterInfo.getMarketBasis()));
             }
         } catch (JsonSyntaxException e) {
-            LOGGER.warn("Unable to understand message from remote agent: {}",
-                        message);
+            LOGGER.warn("Unable to understand message from remote agent: {}", message);
         }
     }
 
@@ -244,15 +235,13 @@ public class MatcherEndpointProxyWebsocket
 
         try {
             client.start();
-            Future<org.eclipse.jetty.websocket.api.Session> connectFuture = client
-                                                                                  .connect(this,
+            Future<org.eclipse.jetty.websocket.api.Session> connectFuture = client.connect(this,
                                                                                            powermatcherUrl,
                                                                                            request);
             LOGGER.info("Connecting to : {}", request);
 
             // Wait configurable time for remote to respond
-            org.eclipse.jetty.websocket.api.Session newRemoteSession = connectFuture
-                                                                                    .get(connectTimeout,
+            org.eclipse.jetty.websocket.api.Session newRemoteSession = connectFuture.get(connectTimeout,
                                                                                          TimeUnit.SECONDS);
 
             remoteSession = newRemoteSession;

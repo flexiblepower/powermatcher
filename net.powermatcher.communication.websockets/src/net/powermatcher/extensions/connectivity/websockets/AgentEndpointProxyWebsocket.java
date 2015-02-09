@@ -30,13 +30,13 @@ import aQute.bnd.annotation.metatype.Meta;
  */
 @Component(designateFactory = AgentEndpointProxyWebsocket.Config.class,
            immediate = true,
-           provide = {
-                      ObservableAgent.class, AgentEndpoint.class,
-                      BaseAgentEndpointProxy.class, AgentEndpointProxyWebsocket.class })
+           provide = { ObservableAgent.class,
+                      AgentEndpoint.class,
+                      BaseAgentEndpointProxy.class,
+                      AgentEndpointProxyWebsocket.class })
 public class AgentEndpointProxyWebsocket
     extends BaseAgentEndpointProxy {
-    private static final Logger LOGGER = LoggerFactory
-                                                      .getLogger(AgentEndpointProxyWebsocket.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AgentEndpointProxyWebsocket.class);
 
     @Meta.OCD
     public static interface Config {
@@ -60,9 +60,7 @@ public class AgentEndpointProxyWebsocket
      */
     @Activate
     public void activate(Map<String, Object> properties) {
-        Config config = Configurable.createConfigurable(Config.class,
-                                                        properties);
-
+        Config config = Configurable.createConfigurable(Config.class, properties);
         setDesiredParentId(config.desiredParentId());
         setAgentId(config.agentId());
         setMatcherEndpointProxyId(config.remoteAgentEndpointId());
@@ -79,12 +77,10 @@ public class AgentEndpointProxyWebsocket
     }
 
     public void
-            remoteAgentConnected(
-                                 org.eclipse.jetty.websocket.api.Session session)
+            remoteAgentConnected(org.eclipse.jetty.websocket.api.Session session)
                                                                                  throws OperationNotSupportedException {
         if (isRemoteConnected()) {
-            throw new OperationNotSupportedException(
-                                                     "Remote Agent already connected.");
+            throw new OperationNotSupportedException("Remote Agent already connected.");
         }
 
         remoteSession = session;
@@ -132,8 +128,7 @@ public class AgentEndpointProxyWebsocket
     public void connectToMatcher(Session session) {
         super.connectToMatcher(session);
 
-        // Local matcher is connected, provide cluster information to remote
-        // agent.
+        // Local matcher is connected, provide cluster information to remote // agent.
         sendCusterInformation();
     }
 
@@ -145,12 +140,10 @@ public class AgentEndpointProxyWebsocket
 
         try {
             PmJsonSerializer serializer = new PmJsonSerializer();
-            String message = serializer.serializeClusterInfo(
-                                                             getClusterId(), getLocalMarketBasis());
+            String message = serializer.serializeClusterInfo(getClusterId(), getLocalMarketBasis());
             remoteSession.getRemote().sendString(message);
         } catch (IOException e) {
-            LOGGER.warn(
-                        "Unable to send price update to remote agent, reason {}", e);
+            LOGGER.warn("Unable to send price update to remote agent, reason {}", e);
         }
     }
 

@@ -30,7 +30,7 @@ import aQute.bnd.annotation.component.Reference;
 
 /**
  * Receiving end of the WebSocket implementation for PowerMatcher.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
@@ -39,11 +39,9 @@ import aQute.bnd.annotation.component.Reference;
 public class PowermatcherWebSocket {
     private static final Logger LOGGER = LoggerFactory.getLogger(PowermatcherWebSocket.class);
 
-    private static final Map<String, AgentEndpointProxyWebsocket> AGENT_ENDPOINT_PROXIES = Collections
-            .synchronizedMap(new HashMap<String, AgentEndpointProxyWebsocket>());
+    private static final Map<String, AgentEndpointProxyWebsocket> AGENT_ENDPOINT_PROXIES = Collections.synchronizedMap(new HashMap<String, AgentEndpointProxyWebsocket>());
 
-    private static final Map<org.eclipse.jetty.websocket.api.Session, AgentEndpointProxyWebsocket> REMOTE_LOCAL_LINK = Collections
-            .synchronizedMap(new HashMap<org.eclipse.jetty.websocket.api.Session, AgentEndpointProxyWebsocket>());
+    private static final Map<org.eclipse.jetty.websocket.api.Session, AgentEndpointProxyWebsocket> REMOTE_LOCAL_LINK = Collections.synchronizedMap(new HashMap<org.eclipse.jetty.websocket.api.Session, AgentEndpointProxyWebsocket>());
 
     private String desiredConnectionId;
     private String remoteMatcherEndpointId;
@@ -54,15 +52,14 @@ public class PowermatcherWebSocket {
     @Deactivate
     public synchronized void deactivate() {
         // Disconnect every connected agent
-        for (Entry<org.eclipse.jetty.websocket.api.Session, AgentEndpointProxyWebsocket> link : REMOTE_LOCAL_LINK
-                .entrySet()) {
+        for (Entry<org.eclipse.jetty.websocket.api.Session, AgentEndpointProxyWebsocket> link : REMOTE_LOCAL_LINK.entrySet()) {
             link.getKey().close();
         }
     }
 
     /**
      * Register {@link AgentEndpointProxyWebsocket} within the OSGI runtime.
-     * 
+     *
      * @param proxy
      */
     @Reference(dynamic = true, multiple = true, optional = true)
@@ -73,7 +70,7 @@ public class PowermatcherWebSocket {
 
     /**
      * Deregister {@link AgentEndpointProxyWebsocket} within the OSGI runtime.
-     * 
+     *
      * @param proxy
      */
     public synchronized void removeProxy(AgentEndpointProxyWebsocket proxy) {
@@ -86,7 +83,7 @@ public class PowermatcherWebSocket {
 
     /**
      * Handle a new incoming WebSocket connection.
-     * 
+     *
      * @param remoteSession
      *            the remote WebSocket session which wants to connect.
      */
@@ -98,25 +95,25 @@ public class PowermatcherWebSocket {
         } catch (UnsupportedEncodingException e1) {
             remoteSession.close();
             LOGGER.warn("Rejecting connection from remote agent [{}], URL is not complete (missing querystring)",
-                    this.remoteMatcherEndpointId);
+                        remoteMatcherEndpointId);
             return;
         }
 
         // Read desired connection from the querystring
-        this.desiredConnectionId = queryString.get("desiredConnectionId");
-        if (this.desiredConnectionId == null || this.desiredConnectionId.length() == 0) {
+        desiredConnectionId = queryString.get("desiredConnectionId");
+        if (desiredConnectionId == null || desiredConnectionId.length() == 0) {
             remoteSession.close();
             LOGGER.warn("Rejecting connection from remote agent [{}], desiredConnectionId is missing from querystring",
-                    this.remoteMatcherEndpointId);
+                        remoteMatcherEndpointId);
             return;
         }
 
         // Read desired agentId from the querystring
-        this.remoteMatcherEndpointId = queryString.get("agentId");
-        if (this.remoteMatcherEndpointId == null || this.remoteMatcherEndpointId.length() == 0) {
+        remoteMatcherEndpointId = queryString.get("agentId");
+        if (remoteMatcherEndpointId == null || remoteMatcherEndpointId.length() == 0) {
             remoteSession.close();
             LOGGER.warn("Rejecting connection from remote agent [{}], agentId is missing from querystring",
-                    this.remoteMatcherEndpointId);
+                        remoteMatcherEndpointId);
             return;
         }
 
@@ -125,7 +122,7 @@ public class PowermatcherWebSocket {
         // implemented
         if (!AGENT_ENDPOINT_PROXIES.containsKey(desiredConnectionId)) {
             LOGGER.warn("Rejecting connection from remote agent [{}] for non-existing local agent: [{}]",
-                    this.remoteMatcherEndpointId, this.desiredConnectionId);
+                        remoteMatcherEndpointId, desiredConnectionId);
 
             remoteSession.close();
             return;
@@ -136,20 +133,20 @@ public class PowermatcherWebSocket {
         try {
             proxy.remoteAgentConnected(remoteSession);
         } catch (OperationNotSupportedException e) {
-            LOGGER.warn("Rejecting connection from remote agent [{}], reason: [{}]", this.remoteMatcherEndpointId, e);
+            LOGGER.warn("Rejecting connection from remote agent [{}], reason: [{}]", remoteMatcherEndpointId, e);
             remoteSession.close();
         }
 
         // Store remote session with local proxy
         REMOTE_LOCAL_LINK.put(remoteSession, proxy);
 
-        LOGGER.info("Remote agent [{}] connected to local agent [{}]", this.remoteMatcherEndpointId,
-                this.desiredConnectionId);
+        LOGGER.info("Remote agent [{}] connected to local agent [{}]", remoteMatcherEndpointId,
+                    desiredConnectionId);
     }
 
     /**
      * Handle WebSocket connection which disconnected.
-     * 
+     *
      * @param remoteSession
      *            the remote WebSocket session which disconnected.
      * @param statusCode
@@ -159,7 +156,7 @@ public class PowermatcherWebSocket {
      */
     @OnWebSocketClose
     public synchronized void onClose(final org.eclipse.jetty.websocket.api.Session remoteSession, int statusCode,
-            String reason) {
+                                     String reason) {
         // Find existing session
         if (!REMOTE_LOCAL_LINK.containsKey(remoteSession)) {
             LOGGER.warn("Received disconnect for non existing session.");
@@ -169,13 +166,13 @@ public class PowermatcherWebSocket {
         // Remove remote session from agent proxy and local session collection
         AgentEndpointProxyWebsocket proxy = REMOTE_LOCAL_LINK.remove(remoteSession);
         LOGGER.info("Agent disconnect detected remote agent: [{}], local agent", proxy.getMatcherEndpointProxyId(),
-                proxy.getAgentId());
+                    proxy.getAgentId());
         proxy.remoteAgentDisconnected();
     }
 
     /**
      * Handle an incoming message from a remote WebSocket (agent).
-     * 
+     *
      * @param remoteSession
      *            the session which sent the message.
      * @param message
@@ -192,7 +189,7 @@ public class PowermatcherWebSocket {
         // Find associated local agentproxy
         AgentEndpointProxyWebsocket proxy = REMOTE_LOCAL_LINK.get(remoteSession);
         LOGGER.info("Received bid update from remote agent [{}] for local agent [{}]",
-                proxy.getMatcherEndpointProxyId(), proxy.getAgentId());
+                    proxy.getMatcherEndpointProxyId(), proxy.getAgentId());
 
         // Decode the JSON data
         PmJsonSerializer serializer = new PmJsonSerializer();
@@ -205,7 +202,7 @@ public class PowermatcherWebSocket {
 
     /**
      * Get the queryparams from the URL used to connect.
-     * 
+     *
      * @param url
      *            the URL
      * @return the key value pairs of the queryparams.
@@ -219,7 +216,7 @@ public class PowermatcherWebSocket {
         for (String pair : pairs) {
             int idx = pair.indexOf("=");
             query_pairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"),
-                    URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+                            URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
         }
         return query_pairs;
     }

@@ -20,7 +20,7 @@ public class PowermatcherWebSocketServlet extends WebSocketServlet {
      * {@inheritDoc}
      */
     @Override
-    public void configure(WebSocketServletFactory arg0) {
-        arg0.register(PowermatcherWebSocket.class);
+    public void configure(WebSocketServletFactory wssf) {
+        wssf.register(PowermatcherWebSocket.class);
     }
 }
