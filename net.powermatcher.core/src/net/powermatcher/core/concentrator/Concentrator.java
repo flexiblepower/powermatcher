@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
-import net.powermatcher.api.WhitelistableMatcherEndpoint;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PriceUpdate;
@@ -50,8 +49,7 @@ import aQute.bnd.annotation.metatype.Meta;
            immediate = true,
            provide = { ObservableAgent.class,
                       MatcherEndpoint.class,
-                      AgentEndpoint.class,
-                      WhitelistableMatcherEndpoint.class })
+                      AgentEndpoint.class })
 public class Concentrator
     extends BaseAgent
     implements MatcherEndpoint, AgentEndpoint {

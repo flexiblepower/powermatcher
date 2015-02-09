@@ -59,7 +59,7 @@ public class PointBid
          * @param bidNumber
          * @return this instance of the Builder with the set bidNumber
          */
-        public Builder setBidNumber(int bidNumber) {
+        public Builder bidNumber(int bidNumber) {
             this.bidNumber = bidNumber;
             return this;
         }

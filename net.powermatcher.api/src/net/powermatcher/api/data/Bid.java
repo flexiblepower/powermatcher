@@ -18,7 +18,7 @@ public abstract class Bid {
     }
 
     public static Bid flatDemand(MarketBasis marketBasis, int bidNumber, double demand) {
-        return new PointBid.Builder(marketBasis).setBidNumber(bidNumber).add(0, demand).build();
+        return new PointBid.Builder(marketBasis).bidNumber(bidNumber).add(0, demand).build();
     }
 
     /**

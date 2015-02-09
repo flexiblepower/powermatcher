@@ -106,7 +106,7 @@ public class PointBidTest {
     public void testBuilderSetBidNumber() {
         PointBid.Builder builder = new Builder(marketBasisFiveSteps);
         builder.add(0, 0);
-        builder.setBidNumber(bidNumber);
+        builder.bidNumber(bidNumber);
         PointBid buildBid = builder.build();
         assertThat(buildBid.getBidNumber(), is(equalTo(bidNumber)));
     }
