@@ -3,10 +3,6 @@ package net.powermatcher.core.concentrator.test;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
@@ -16,12 +12,10 @@ import net.powermatcher.core.concentrator.PeakShavingConcentrator;
 import net.powermatcher.mock.MockAgent;
 import net.powermatcher.mock.MockContext;
 import net.powermatcher.mock.MockMatcherAgent;
-import net.powermatcher.mock.MockScheduler;
 import net.powermatcher.mock.SimpleSession;
+import net.powermatcher.test.helpers.PropertieBuilder;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 /**
  * JUnit test for the {@link PeakShavingConcentrator} class.
@@ -30,50 +24,32 @@ import org.junit.rules.ExpectedException;
  * @version 2.0
  */
 public class PeakShavingConcentratorTest {
-
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
-
+    private static final MarketBasis marketBasis = new MarketBasis("electricity", "EUR", 11, 0, 10);
     private static final String CLUSTER_ID = "testCluster";
     private static final String AUCTIONEER_ID = "auctioneer";
     private static final String CONCENTRATOR_NAME = "peakshavingconcentrator";
     private static final String DEVICE_AGENT_ID = "deviceAgent";
 
-    private final MarketBasis marketBasis = new MarketBasis("electricity", "EUR", 11, 0, 10);
-
-    private final MockScheduler scheduler = new MockScheduler();
     private final MockContext context = new MockContext(0);
 
-    private MockMatcherAgent matcher;
-    private PeakShavingConcentrator peakShavingConcentrator;
-    private MockAgent deviceAgent;
+    private final MockMatcherAgent matcher = new MockMatcherAgent(AUCTIONEER_ID, CLUSTER_ID);
+    private final PeakShavingConcentrator peakShavingConcentrator = new PeakShavingConcentrator();
+    private final MockAgent deviceAgent = new MockAgent(DEVICE_AGENT_ID);
 
     public void setUp(double floor, double ceiling) throws Exception {
-        // Concentrator to be tested
-        peakShavingConcentrator = new PeakShavingConcentrator();
-        Map<String, Object> concentratorProperties = new HashMap<String, Object>();
-        concentratorProperties.put("matcherId", CONCENTRATOR_NAME);
-        concentratorProperties.put("desiredParentId", AUCTIONEER_ID);
-        concentratorProperties.put("bidTimeout", "600");
-        concentratorProperties.put("bidUpdateRate", "30");
-        concentratorProperties.put("agentId", CONCENTRATOR_NAME);
-
-        concentratorProperties.put("floor", floor);
-        concentratorProperties.put("ceiling", ceiling);
-
-        peakShavingConcentrator.activate(concentratorProperties);
+        peakShavingConcentrator.activate(new PropertieBuilder().agentId(CONCENTRATOR_NAME)
+                                                               .desiredParentId(AUCTIONEER_ID)
+                                                               .bidUpdateRate(600)
+                                                               .add("floor", floor)
+                                                               .add("ceiling", ceiling)
+                                                               .build());
         peakShavingConcentrator.setContext(context);
 
-        // Matcher
-        matcher = new MockMatcherAgent(AUCTIONEER_ID, CLUSTER_ID);
+        // Set the market basis for the matcher
         matcher.setMarketBasis(marketBasis);
-        matcher.setContext(context);
 
+        // Connect the 3 parts to each other
         new SimpleSession(peakShavingConcentrator, matcher).connect();
-
-        // Init MockAgent
-        deviceAgent = new MockAgent(DEVICE_AGENT_ID);
-        deviceAgent.setContext(context);
         new SimpleSession(deviceAgent, peakShavingConcentrator).connect();
     }
 
@@ -83,7 +59,7 @@ public class PeakShavingConcentratorTest {
 
         Bid bid = new ArrayBid(marketBasis, 0, new double[] { 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8 });
         deviceAgent.sendBid(bid);
-        scheduler.doTaskOnce();
+        context.getMockScheduler().doTaskOnce();
         int bidNumber = matcher.getLastReceivedBid().getBidNumber();
         PriceUpdate expected = new PriceUpdate(new Price(marketBasis, 0.0), bidNumber);
         matcher.publishPrice(expected);
@@ -96,7 +72,7 @@ public class PeakShavingConcentratorTest {
 
         Bid bid = new ArrayBid(marketBasis, 0, new double[] { 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8 });
         deviceAgent.sendBid(bid);
-        scheduler.doTaskOnce();
+        context.getMockScheduler().doTaskOnce();
         int bidNumber = matcher.getLastReceivedBid().getBidNumber();
         PriceUpdate sentPrice = new PriceUpdate(new Price(marketBasis, 10.0), bidNumber);
         PriceUpdate expectedPrice = new PriceUpdate(new Price(marketBasis, 3.0), bidNumber);
@@ -111,7 +87,7 @@ public class PeakShavingConcentratorTest {
         double[] demandArray = new double[] { 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8 };
         Bid arrayBid = new ArrayBid(marketBasis, 1, demandArray);
         deviceAgent.sendBid(arrayBid);
-        scheduler.doTaskOnce();
+        context.getMockScheduler().doTaskOnce();
         double[] transformedDemandArray = new double[] { 1, 1, 0, -1, -1, -1, -1, -1, -1, -1, -1 };
         Bid expectedBid = new ArrayBid(marketBasis, 0, transformedDemandArray);
         assertThat(matcher.getLastReceivedBid(), is(equalTo(expectedBid)));
@@ -124,7 +100,7 @@ public class PeakShavingConcentratorTest {
         double[] demandArray = new double[] { 1, 1, 0, -1, -1, -1, -1, -1, -1, -1, -1 };
         ArrayBid arrayBid = new ArrayBid(marketBasis, 1, demandArray);
         deviceAgent.sendBid(arrayBid);
-        scheduler.doTaskOnce();
+        context.getMockScheduler().doTaskOnce();
         Bid expectedBid = new ArrayBid(arrayBid, 0);
         assertThat(matcher.getLastReceivedBid(), is(equalTo(expectedBid)));
     }

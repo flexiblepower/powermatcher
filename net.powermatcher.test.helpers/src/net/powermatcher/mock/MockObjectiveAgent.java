@@ -6,7 +6,6 @@ import java.util.Map;
 import net.powermatcher.api.ObjectiveEndpoint;
 import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
-import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 
 import org.slf4j.Logger;
@@ -23,10 +22,9 @@ public class MockObjectiveAgent
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockObjectiveAgent.class);
 
-    private static final String CURRENCY_EUR = "EUR";
-    private static final String COMMODITY_ELECTRICITY = "electricity";
-
     private final Map<String, Object> objectiveAgentProperties;
+
+    private Bid objectiveBid = null;
 
     public MockObjectiveAgent(String agentId) {
         super(agentId);
@@ -42,19 +40,24 @@ public class MockObjectiveAgent
         LOGGER.info("ObjectiveAgent: received price update [{}] ", newPrice);
     }
 
+    public void setObjectiveBid(Bid objectiveBid) {
+        this.objectiveBid = objectiveBid;
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public Bid handleAggregateBid(Bid aggregatedBid) {
-        MarketBasis marketBasis = new MarketBasis(COMMODITY_ELECTRICITY, CURRENCY_EUR, 11, 0, 10);
-        double[] demand = new double[] { 100.0d, 50.0d, 50.0d, 0.0d, 0.0d, 0.0d, 0.0d, 0.0d, 0.0d, 0.0d, 0.0d };
+        // double[] demand = new double[] { 100.0d, 50.0d, 50.0d, 0.0d, 0.0d, 0.0d, 0.0d, 0.0d, 0.0d, 0.0d, 0.0d };
+        // Bid objectiveBid = new ArrayBid(marketBasis, 0, demand);
 
-        Bid objectiveBid = new ArrayBid(marketBasis, 0, demand);
-
-        Bid aggregatedObjectiveBid = objectiveBid.aggregate(aggregatedBid);
-
-        LOGGER.info("ObjectiveAgent: new aggregated bid: [{}] ", ((ArrayBid) aggregatedObjectiveBid).getDemand());
-        return aggregatedObjectiveBid;
+        if (objectiveBid != null) {
+            Bid aggregatedObjectiveBid = objectiveBid.aggregate(aggregatedBid);
+            LOGGER.info("ObjectiveAgent: new aggregated bid: [{}] ", ((ArrayBid) aggregatedObjectiveBid).getDemand());
+            return aggregatedObjectiveBid;
+        } else {
+            return aggregatedBid;
+        }
     }
 }

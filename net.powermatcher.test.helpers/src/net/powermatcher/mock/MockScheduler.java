@@ -128,8 +128,8 @@ public class MockScheduler
     /**
      * @return the current value of updateRate.
      */
-    public long getUpdateRate() {
-        return updateRate;
+    public int getUpdateRate() {
+        return (int) updateRate;
     }
 
     /**

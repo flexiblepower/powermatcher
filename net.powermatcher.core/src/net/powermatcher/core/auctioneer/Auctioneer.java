@@ -173,11 +173,11 @@ public class Auctioneer
      */
     @Override
     public void handleBidUpdate(Session session, Bid newBid) {
-        if (!sessions.containsKey(session.getAgentId())) {
+        if (session == null || !sessions.containsKey(session.getAgentId())) {
             throw new IllegalStateException("No session found");
         }
 
-        if (!newBid.getMarketBasis().equals(marketBasis)) {
+        if (newBid == null || !newBid.getMarketBasis().equals(marketBasis)) {
             throw new InvalidParameterException("Marketbasis new bid differs from marketbasis auctioneer");
         }
 

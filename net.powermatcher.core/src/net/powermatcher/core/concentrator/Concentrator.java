@@ -224,11 +224,11 @@ public class Concentrator
      */
     @Override
     public void handleBidUpdate(Session session, Bid newBid) {
-        if (!sessionToAgents.containsKey(session.getAgentId())) {
+        if (session == null || !sessionToAgents.containsKey(session.getAgentId())) {
             throw new IllegalStateException("No session found");
         }
 
-        if (!newBid.getMarketBasis().equals(sessionToMatcher.getMarketBasis())) {
+        if (newBid == null || !newBid.getMarketBasis().equals(sessionToMatcher.getMarketBasis())) {
             throw new IllegalArgumentException("Marketbasis new bid differs from marketbasis auctioneer");
         }
 
