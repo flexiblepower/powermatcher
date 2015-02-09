@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.zip.DataFormatException;
 
 import net.powermatcher.api.data.ArrayBid;
-import net.powermatcher.integration.base.ConcentratorResilienceTest;
 
 import org.junit.Test;
 

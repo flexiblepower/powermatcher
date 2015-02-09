@@ -5,6 +5,8 @@ import static org.junit.Assert.assertNull;
 
 import java.io.Closeable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,8 +25,8 @@ import net.powermatcher.mock.MockTimeService;
 import net.powermatcher.mock.SimpleSession;
 
 public class TestClusterHelper
-    implements Closeable {
-    public static final MarketBasis MB = new MarketBasis("electricity", "EUR", 11, 0, 10);
+    implements Closeable, Iterable<MockAgent> {
+    public static final MarketBasis DEFAULT_MB = new MarketBasis("electricity", "EUR", 11, 0, 10);
 
     private final AtomicInteger idGenerator;
 
@@ -34,7 +36,22 @@ public class TestClusterHelper
     private final List<MockAgent> agents;
     private final List<SimpleSession> sessions;
 
+    private final MarketBasis marketBasis;
+    private final MatcherEndpoint matcher;
+
     public TestClusterHelper() {
+        this(DEFAULT_MB);
+    }
+
+    public TestClusterHelper(MarketBasis marketBasis) {
+        this(marketBasis, null);
+    }
+
+    public TestClusterHelper(MatcherEndpoint matcher) {
+        this(DEFAULT_MB, matcher);
+    }
+
+    public TestClusterHelper(MarketBasis marketBasis, MatcherEndpoint matcher) {
         idGenerator = new AtomicInteger(0);
 
         scheduler = new MockScheduler();
@@ -42,21 +59,47 @@ public class TestClusterHelper
 
         agents = new ArrayList<MockAgent>();
         sessions = new ArrayList<SimpleSession>();
+
+        this.marketBasis = marketBasis;
+        this.matcher = matcher;
+
+        if (matcher != null) {
+            matcher.setExecutorService(scheduler);
+            matcher.setTimeService(timer);
+        }
     }
 
-    public void addAgent(MatcherEndpoint matcher) {
-        addAgents(matcher, 1);
+    public MatcherEndpoint getMatcher() {
+        if (matcher == null) {
+            throw new IllegalStateException("Matcher has not been set");
+        }
+        return matcher;
     }
 
-    public void addAgents(MatcherEndpoint matcher, int nrOfAgents) {
+    public MockAgent addAgent() {
+        return addAgent(getMatcher());
+    }
+
+    public MockAgent addAgent(MatcherEndpoint matcher) {
+        return addAgents(matcher, 1).get(0);
+    }
+
+    public List<MockAgent> addAgents(int nrOfAgents) {
+        return addAgents(getMatcher(), nrOfAgents);
+    }
+
+    public List<MockAgent> addAgents(MatcherEndpoint matcher, int nrOfAgents) {
+        List<MockAgent> newAgents = new ArrayList<MockAgent>(nrOfAgents);
         for (int ix = 0; ix < nrOfAgents; ix++) {
             String agentId = "agent" + idGenerator.incrementAndGet();
             MockAgent newAgent = new MockAgent(agentId);
             newAgent.setDesiredParentId(matcher.getAgentId());
             agents.add(newAgent);
+            newAgents.add(newAgent);
 
             connect(newAgent, matcher);
         }
+        return newAgents;
     }
 
     public void connect(AgentEndpoint agent, MatcherEndpoint matcher) {
@@ -66,7 +109,7 @@ public class TestClusterHelper
     }
 
     public void sendBid(int agentIx, int bidNr, double... demandArray) {
-        agents.get(agentIx).sendBid(new ArrayBid(MB, bidNr, demandArray));
+        agents.get(agentIx).sendBid(new ArrayBid(marketBasis, bidNr, demandArray));
     }
 
     public void sendBids(int baseId, double[]... demandArrays) {
@@ -77,7 +120,7 @@ public class TestClusterHelper
     }
 
     public void testPriceSignal(MockMatcherAgent matcher, int... expectedIds) {
-        Price price = new Price(MB, Math.random() * MB.getMaximumPrice());
+        Price price = new Price(marketBasis, Math.random() * marketBasis.getMaximumPrice());
         matcher.publishPrice(new PriceUpdate(price, matcher.getLastReceivedBid().getBidNumber()));
         for (int i = 0; i < expectedIds.length; i++) {
             MockAgent agent = agents.get(i);
@@ -99,8 +142,23 @@ public class TestClusterHelper
         agents.clear();
     }
 
+    public MockAgent getAgent(int ix) {
+        if (agents.size() <= ix) {
+            addAgents(agents.size() - ix + 1);
+        }
+        return agents.get(ix);
+    }
+
     public ScheduledExecutorService getScheduler() {
         return scheduler;
+    }
+
+    public MarketBasis getMarketBasis() {
+        return marketBasis;
+    }
+
+    public void performTasks() {
+        scheduler.doTaskOnce();
     }
 
     public TimeService getTimer() {
@@ -118,5 +176,10 @@ public class TestClusterHelper
             }
         }
         return prices;
+    }
+
+    @Override
+    public Iterator<MockAgent> iterator() {
+        return Collections.unmodifiableList(agents).iterator();
     }
 }

@@ -33,7 +33,7 @@ public class AuctioneerTest {
         auctioneer.activate(new PropertieBuilder().agentId(AUCTIONEER_NAME)
                                                   .clusterId("testCluster")
                                                   .priceUpdateRate(1)
-                                                  .marketBasis(TestClusterHelper.MB)
+                                                  .marketBasis(TestClusterHelper.DEFAULT_MB)
                                                   .build());
         auctioneer.setExecutorService(cluster.getScheduler());
         auctioneer.setTimeService(cluster.getTimer());
@@ -98,14 +98,14 @@ public class AuctioneerTest {
                          new double[] { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 },
                          new double[] { 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0 },
                          new double[] { 0, 0, 0, 0, 0, -5, -5, -5, -5, -5, -5 });
-        assertAllPricesAre(5);
+        assertAllPricesAre(7.5);
 
         // run 2
         cluster.sendBids(10,
                          new double[] { -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, -5 },
                          new double[] { 0, 0, 0, 0, 0, 0, 0, -4, -4, -4, -4 },
                          new double[] { 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9 });
-        assertAllPricesAre(7);
+        assertAllPricesAre(8.5);
     }
 
     @Test

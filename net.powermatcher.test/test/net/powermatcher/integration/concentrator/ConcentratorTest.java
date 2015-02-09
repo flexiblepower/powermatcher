@@ -46,7 +46,7 @@ public class ConcentratorTest {
 
         // Matcher
         matcher = new MockMatcherAgent(AUCTIONEER_NAME, "testCluster");
-        matcher.setMarketBasis(TestClusterHelper.MB);
+        matcher.setMarketBasis(TestClusterHelper.DEFAULT_MB);
 
         cluster.connect(concentrator, matcher);
     }

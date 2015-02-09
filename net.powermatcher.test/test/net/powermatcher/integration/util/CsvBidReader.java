@@ -8,7 +8,7 @@ import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.MarketBasis;
 
 /**
- * 
+ *
  * @author FAN
  * @version 2.0
  */
@@ -29,30 +29,32 @@ public class CsvBidReader {
 
     public CsvBidReader(String filename, MarketBasis marketBasis) throws IOException {
         super();
-        this.inputFile = filename;
+        inputFile = filename;
         this.marketBasis = marketBasis;
 
-        this.init();
+        init();
     }
 
     private void init() throws IOException {
-        this.closeFile();
+        closeFile();
         csvReader = new CsvReader(inputFile);
     }
 
     public ArrayBid nextBid() throws IOException, DataFormatException {
-        ArrayBid bid = null;
-
-        List<String> demandList = csvReader.nextLine();
-        if (demandList != null) {
-            bid = new ArrayBid(marketBasis, 0, demandFromList(demandList));
+        List<String> demandList = null;
+        while ((demandList = csvReader.nextLine()) != null) {
+            try {
+                return new ArrayBid(marketBasis, 0, demandFromList(demandList));
+            } catch (IllegalArgumentException ex) {
+                // Illegal bid, ignore line
+            }
         }
-        return bid;
+        return null;
     }
 
     public void closeFile() throws IOException {
-        if (this.csvReader != null) {
-            this.csvReader.closeReader();
+        if (csvReader != null) {
+            csvReader.closeReader();
         }
     }
 
@@ -62,7 +64,7 @@ public class CsvBidReader {
 
     public void setInputFile(String inputFile) throws IOException {
         this.inputFile = inputFile;
-        this.init();
+        init();
     }
 
     public MarketBasis getMarketBasis() {

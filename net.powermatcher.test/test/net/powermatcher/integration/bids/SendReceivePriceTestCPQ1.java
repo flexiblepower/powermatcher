@@ -1,4 +1,4 @@
-package net.powermatcher.integration.test;
+package net.powermatcher.integration.bids;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -11,7 +11,6 @@ import java.util.zip.DataFormatException;
 
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PriceUpdate;
-import net.powermatcher.integration.base.BidResilienceTest;
 import net.powermatcher.mock.MockAgent;
 
 import org.junit.Rule;
@@ -51,7 +50,7 @@ public class SendReceivePriceTestCPQ1
 
         // Send bids to the matcherAgent (concentrator)
         sendBidsToMatcher();
-        auctioneerTimer.doTaskOnce();
+        auctioneerScheduler.doTaskOnce();
 
         // Validate if concentrator receives correct price
         assertEquals(resultsReader.getEquilibriumPrice(), concentrator.getLastPrice().getPrice()
@@ -95,7 +94,7 @@ public class SendReceivePriceTestCPQ1
 
         // Send bids to the matcherAgent (concentrator)
         sendBidsToMatcher();
-        auctioneerTimer.doTaskOnce();
+        auctioneerScheduler.doTaskOnce();
         // Check if concentrator received correct price
         assertEquals(resultsReader.getEquilibriumPrice(), concentrator.getLastReceivedPriceUpdate()
                                                                       .getPrice().getPriceValue(), 0);
@@ -135,13 +134,13 @@ public class SendReceivePriceTestCPQ1
 
         // Send bids to the matcherAgent (concentrator)
         sendBidsToMatcher();
-        auctioneerTimer.doTaskOnce();
+        auctioneerScheduler.doTaskOnce();
         // Validate if concentrator receives correct price
         assertEquals(resultsReader.getEquilibriumPrice(), concentrator.getLastPrice().getPrice()
                                                                       .getPriceValue(), 0);
 
         // Send price outside range price
-        Price price = new Price(marketBasis, 52.0d);
+        Price price = new Price(cluster.getMarketBasis(), 52.0d);
         PriceUpdate priceUpdate = new PriceUpdate(price, 0);
         auctioneer.publishPrice(priceUpdate);
 
@@ -174,13 +173,13 @@ public class SendReceivePriceTestCPQ1
 
         // Send bids to the matcherAgent (concentrator)
         sendBidsToMatcher();
-        auctioneerTimer.doTaskOnce();
+        auctioneerScheduler.doTaskOnce();
         // Validate if concentrator receives correct price
         assertEquals(resultsReader.getEquilibriumPrice(), concentrator.getLastPrice().getPrice()
                                                                       .getPriceValue(), 0);
 
         // Send price outside range price
-        Price price = new Price(marketBasis, 52.0d);
+        Price price = new Price(cluster.getMarketBasis(), 52.0d);
         PriceUpdate priceUpdate = new PriceUpdate(price, 0);
         auctioneer.publishPrice(priceUpdate);
 
@@ -210,13 +209,13 @@ public class SendReceivePriceTestCPQ1
 
         // Send bids to the matcherAgent (concentrator)
         sendBidsToMatcher();
-        auctioneerTimer.doTaskOnce();
+        auctioneerScheduler.doTaskOnce();
         // Validate if concentrator receives correct price
         assertEquals(resultsReader.getEquilibriumPrice(), concentrator.getLastPrice().getPrice()
                                                                       .getPriceValue(), 0);
 
         // Send price outside range
-        Price price = new Price(marketBasis, 52.0d);
+        Price price = new Price(cluster.getMarketBasis(), 52.0d);
         PriceUpdate priceUpdate = new PriceUpdate(price, 0);
         auctioneer.publishPrice(priceUpdate);
 
@@ -243,7 +242,7 @@ public class SendReceivePriceTestCPQ1
 
         // Send bids to the matcherAgent (concentrator)
         sendBidsToMatcher();
-        auctioneerTimer.doTaskOnce();
+        auctioneerScheduler.doTaskOnce();
         // Send incorrect price directly to the concentrator
         LOGGER.info("4. Sending incorrect price (null) by auctioneer");
         PriceUpdate falsePriceUpdate = null;
@@ -282,12 +281,12 @@ public class SendReceivePriceTestCPQ1
         sendBidsToMatcher();
 
         // Send price outside range
-        Price price = new Price(marketBasis, 52.0d);
+        Price price = new Price(cluster.getMarketBasis(), 52.0d);
         PriceUpdate priceUpdate = new PriceUpdate(price, 1);
         auctioneer.publishPrice(priceUpdate);
 
         // Verify the price received by the agents
-        for (MockAgent agent : agentList) {
+        for (MockAgent agent : cluster) {
             assertEquals(price.getPriceValue(), agent.getLastPriceUpdate().getPrice().getPriceValue(), 0);
         }
     }

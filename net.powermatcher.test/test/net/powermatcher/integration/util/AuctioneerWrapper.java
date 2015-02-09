@@ -5,7 +5,6 @@ import java.util.Set;
 
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
-import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.core.auctioneer.Auctioneer;
 
@@ -57,7 +56,7 @@ public class AuctioneerWrapper
         super.handleBidUpdate(session, newBid);
     }
 
-    public Bid getAggregatedBid(MarketBasis marketBasis) {
+    public Bid getAggregatedBid() {
         return aggregatedBids.aggregate().getAggregatedBid();
     }
 

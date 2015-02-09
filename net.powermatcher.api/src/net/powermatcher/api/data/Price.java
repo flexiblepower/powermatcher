@@ -6,11 +6,12 @@ import java.util.Locale;
 
 /**
  * This immutable data object represents a price in the powermatcher cluster.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
-public class Price implements Comparable<Price> {
+public class Price
+    implements Comparable<Price> {
     /**
      * The {@link MarketBasis} of this cluster.
      */
@@ -23,7 +24,7 @@ public class Price implements Comparable<Price> {
 
     /**
      * A constructor to create an instance of Price.
-     * 
+     *
      * @param marketBasis
      *            the {@link MarketBasis} of this Price.
      * @param price
@@ -36,10 +37,10 @@ public class Price implements Comparable<Price> {
             throw new IllegalArgumentException("Price NaN is not valid");
         } else if (price < marketBasis.getMinimumPrice() || price > marketBasis.getMaximumPrice()) {
             throw new IllegalArgumentException("Price " + price + " is out of bounds [" + marketBasis.getMinimumPrice()
-                    + ", " + marketBasis.getMaximumPrice() + "]");
+                                               + ", " + marketBasis.getMaximumPrice() + "]");
         }
         this.marketBasis = marketBasis;
-        this.priceValue = price;
+        priceValue = price;
     }
 
     /**
@@ -61,7 +62,7 @@ public class Price implements Comparable<Price> {
      */
     public PriceStep toPriceStep() {
         double priceStep = (priceValue - marketBasis.getMinimumPrice()) / marketBasis.getPriceIncrement();
-        return new PriceStep(marketBasis, Math.round((float) priceStep));
+        return new PriceStep(marketBasis, (int) Math.ceil(priceStep));
     }
 
     /**
@@ -91,7 +92,7 @@ public class Price implements Comparable<Price> {
      * The {@link DecimalFormat} used to format the <code>String</code> representation of this instance's priceValue.
      */
     public static final DecimalFormat PRICE_FORMAT = new DecimalFormat("0.##",
-            DecimalFormatSymbols.getInstance(Locale.ROOT));
+                                                                       DecimalFormatSymbols.getInstance(Locale.ROOT));
 
     /**
      * {@inheritDoc}
@@ -104,12 +105,12 @@ public class Price implements Comparable<Price> {
     /**
      * Compares this object with the specified object for order. Returns a negative integer, zero, or a positive integer
      * as this object is less than, equal to, or greater than the specified object.
-     * 
+     *
      * This method compares the priceValues of both instances. The one with the highest value is the greatest.
-     * 
+     *
      * @param that
      *            The {@link Price} instance you want to compare with this one.
-     * 
+     *
      * @return a negative integer, zero, or a positive integer as this object is less than, equal to, or greater than
      *         the specified object.
      * @throws IllegalArgumentException

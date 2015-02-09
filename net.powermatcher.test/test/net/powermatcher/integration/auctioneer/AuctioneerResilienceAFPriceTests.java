@@ -3,8 +3,6 @@ package net.powermatcher.integration.auctioneer;
 import java.io.IOException;
 import java.util.zip.DataFormatException;
 
-import net.powermatcher.integration.base.AuctioneerResilienceTest;
-
 import org.junit.Test;
 
 /**

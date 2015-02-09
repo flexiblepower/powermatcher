@@ -4,27 +4,27 @@ import java.io.IOException;
 import java.util.zip.DataFormatException;
 
 import net.powermatcher.api.data.ArrayBid;
-import net.powermatcher.integration.base.AuctioneerResilienceTest;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 /**
- * 
+ *
  * @author FAN
  * @version 2.0
  */
-public class AuctioneerResilienceTestAF extends AuctioneerResilienceTest {
+public class AuctioneerResilienceTestAF
+    extends AuctioneerResilienceTest {
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
     /**
      * No equilibrium (demand side). Agents send series of bids with no-equilibrium price.
-     * 
+     *
      * Check the equilibrium.
-     * 
+     *
      * @throws IOException
      * @throws DataFormatException
      */
@@ -35,9 +35,9 @@ public class AuctioneerResilienceTestAF extends AuctioneerResilienceTest {
 
     /**
      * No equilibrium (demand side). Agents send series of bids with no-equilibrium price.
-     * 
+     *
      * Check the aggregated bid.
-     * 
+     *
      * @throws IOException
      * @throws DataFormatException
      */
@@ -48,9 +48,9 @@ public class AuctioneerResilienceTestAF extends AuctioneerResilienceTest {
 
     /**
      * No equilibrium (supply side) Agents send series of bids with no-equilibrium price.
-     * 
+     *
      * Check the equilibrium.
-     * 
+     *
      * @throws IOException
      * @throws DataFormatException
      */
@@ -61,9 +61,9 @@ public class AuctioneerResilienceTestAF extends AuctioneerResilienceTest {
 
     /**
      * No equilibrium (supply side) Agents send series of bids with no-equilibrium price.
-     * 
+     *
      * Check the aggregated bid.
-     * 
+     *
      * @throws IOException
      * @throws DataFormatException
      */
@@ -74,9 +74,9 @@ public class AuctioneerResilienceTestAF extends AuctioneerResilienceTest {
 
     /**
      * Agents send series of bids with a guaranteed equilibrium price. Scenario 1.
-     * 
+     *
      * Check the equilibrium.
-     * 
+     *
      * @throws IOException
      * @throws DataFormatException
      */
@@ -87,9 +87,9 @@ public class AuctioneerResilienceTestAF extends AuctioneerResilienceTest {
 
     /**
      * Agents send series of bids with a guaranteed equilibrium price. Scenario 1.
-     * 
+     *
      * Check the aggregated bid.
-     * 
+     *
      * @throws IOException
      * @throws DataFormatException
      */
@@ -100,9 +100,9 @@ public class AuctioneerResilienceTestAF extends AuctioneerResilienceTest {
 
     /**
      * Agents send series of bids with a guaranteed equilibrium price. Scenario 2.
-     * 
+     *
      * Check the equilibrium.
-     * 
+     *
      * @throws IOException
      * @throws DataFormatException
      */
@@ -113,9 +113,9 @@ public class AuctioneerResilienceTestAF extends AuctioneerResilienceTest {
 
     /**
      * Agents send series of bids with a guaranteed equilibrium price. Scenario 2.
-     * 
+     *
      * Check the aggregated bid.
-     * 
+     *
      * @throws IOException
      * @throws DataFormatException
      */
@@ -126,13 +126,13 @@ public class AuctioneerResilienceTestAF extends AuctioneerResilienceTest {
 
     /**
      * Multiple consecutive equilibriums.
-     * 
+     *
      * Series of bids with a guaranteed equilibrium price, followed by another single bid or series of bids with another
      * guaranteed equilibrium price. The first expected equilibrium price, followed by the second expected equilibrium
      * price.
-     * 
+     *
      * Check the equilibrium.
-     * 
+     *
      * @throws IOException
      * @throws DataFormatException
      */
@@ -144,13 +144,13 @@ public class AuctioneerResilienceTestAF extends AuctioneerResilienceTest {
 
     /**
      * Multiple consecutive equilibriums.
-     * 
+     *
      * Series of bids with a guaranteed equilibrium price, followed by another single bid or series of bids with another
      * guaranteed equilibrium price. The first expected equilibrium price, followed by the second expected equilibrium
      * price.
-     * 
+     *
      * Check the aggregated bid.
-     * 
+     *
      * @throws IOException
      * @throws DataFormatException
      */
@@ -162,12 +162,12 @@ public class AuctioneerResilienceTestAF extends AuctioneerResilienceTest {
 
     /**
      * Equilibrium including bid rejection.
-     * 
+     *
      * Series of bids with a guaranteed equilibrium price,including an ascending bid. Expected outcome is the defined
      * expected equilibrium price, with the ascending bid being rejected.
-     * 
+     *
      * Check the equilibrium.
-     * 
+     *
      * @throws IOException
      * @throws DataFormatException
      */
@@ -178,13 +178,13 @@ public class AuctioneerResilienceTestAF extends AuctioneerResilienceTest {
 
     /**
      * Equilibrium including bid rejection.
-     * 
+     *
      * Series of bids with a guaranteed equilibrium price,including an ascending bid. Expected outcome is the defined
      * expected equilibrium price, with the ascending bid being rejected.
-     * 
-     * 
+     *
+     *
      * Check the aggregated bid.
-     * 
+     *
      * @throws IOException
      * @throws DataFormatException
      */
@@ -206,6 +206,6 @@ public class AuctioneerResilienceTestAF extends AuctioneerResilienceTest {
 
         sendBidsToMatcher();
 
-        checkAggregatedBid((ArrayBid) this.auctioneer.getAggregatedBid(this.marketBasis));
+        checkAggregatedBid((ArrayBid) auctioneer.getAggregatedBid());
     }
 }

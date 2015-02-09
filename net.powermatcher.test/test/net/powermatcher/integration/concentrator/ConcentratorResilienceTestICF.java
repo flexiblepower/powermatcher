@@ -6,32 +6,32 @@ import java.util.zip.DataFormatException;
 import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PriceUpdate;
-import net.powermatcher.integration.base.ConcentratorResilienceTest;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 /**
  * Functional tests for the Concentrator.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
-public class ConcentratorResilienceTestICF extends ConcentratorResilienceTest {
+public class ConcentratorResilienceTestICF
+    extends ConcentratorResilienceTest {
 
     private void performAggregatedBidTest(String testID, String suffix) throws IOException, DataFormatException {
         prepareTest(testID, suffix);
 
         sendBidsToMatcher();
 
-        checkAggregatedBid((ArrayBid) this.auctioneer.getLastReceivedBid());
+        checkAggregatedBid((ArrayBid) auctioneer.getLastReceivedBid());
     }
 
     /**
      * A set of agents send a bid to the matcher via the concentrator.
-     * 
+     *
      * Check if the concentrator publishes the correct aggregated bid.
-     * 
+     *
      * @throws IOException
      * @throws DataFormatException
      */
@@ -42,9 +42,9 @@ public class ConcentratorResilienceTestICF extends ConcentratorResilienceTest {
 
     /**
      * A set of agents send a bid to the matcher via the concentrator.
-     * 
+     *
      * Check if the concentrator publishes the correct aggregated bid.
-     * 
+     *
      * @throws IOException
      * @throws DataFormatException
      */
@@ -56,9 +56,9 @@ public class ConcentratorResilienceTestICF extends ConcentratorResilienceTest {
     /**
      * A set of agents send a bid to the matcher via the concentrator. Some of the bids will be incorrect (ascending
      * bid). The concentrator should reject the incorrect bid.
-     * 
+     *
      * Check if the concentrator rejected the incorrect bids by validating the aggregated bid.
-     * 
+     *
      * @throws IOException
      * @throws DataFormatException
      */
@@ -70,7 +70,7 @@ public class ConcentratorResilienceTestICF extends ConcentratorResilienceTest {
     /**
      * A set of agents send a bid to the matcher via the concentrator. The the matcher will send a price to the
      * concentrator. Check if the concentrator receives and forwards the correct price.
-     * 
+     *
      * @throws IOException
      * @throws DataFormatException
      */
@@ -79,20 +79,19 @@ public class ConcentratorResilienceTestICF extends ConcentratorResilienceTest {
         prepareTest("ICF/ICF3", null);
 
         sendBidsToMatcher();
-        this.concentrator.doBidUpdate();
+        cluster.performTasks();
         // Send price
-        PriceUpdate equilibrium = new PriceUpdate(
-                new Price(this.marketBasis, this.resultsReader.getEquilibriumPrice()), 2);
+        PriceUpdate equilibrium = new PriceUpdate(new Price(cluster.getMarketBasis(),
+                                                            resultsReader.getEquilibriumPrice()), 0);
 
-        this.auctioneer.publishPrice(equilibrium);
+        auctioneer.publishPrice(equilibrium);
         // Check the received price
-        Assert.assertEquals(equilibrium, this.concentrator.getLastPrice());
+        Assert.assertEquals(equilibrium, concentrator.getLastPrice());
 
         // Check the forwarded price
-        Assert.assertEquals(this.concentrator.getLastPrice(), this.concentrator.getLastPublishedPriceUpdate());
+        Assert.assertEquals(concentrator.getLastPrice(), concentrator.getLastPublishedPriceUpdate());
 
         // Check the prices received by the agents
         checkEquilibriumPrice();
     }
-
 }
