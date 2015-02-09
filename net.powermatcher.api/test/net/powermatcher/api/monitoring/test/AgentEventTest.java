@@ -45,7 +45,7 @@ public class AgentEventTest {
         timestamp = new Date();
         fromAgent = "message from agent";
         marketBasis = new MarketBasis("water", "EURO", 10, 0, 10);
-        bid = new ArrayBid.Builder(marketBasis).setDemand(0).build();
+        bid = new ArrayBid.Builder(marketBasis).demand(0).build();
         priceUpdate = new PriceUpdate(new Price(marketBasis, 10.0), 0);
     }
 

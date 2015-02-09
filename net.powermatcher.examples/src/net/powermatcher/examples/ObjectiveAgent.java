@@ -9,7 +9,7 @@ import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
-import net.powermatcher.core.objectiveagent.BaseObjectiveAgent;
+import net.powermatcher.core.BaseAgent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,8 @@ import aQute.bnd.annotation.metatype.Meta;
                                                                                         ObservableAgent.class,
                                                                                         ObjectiveEndpoint.class })
 public class ObjectiveAgent
-    extends BaseObjectiveAgent {
+    extends BaseAgent
+    implements ObjectiveEndpoint {
 
     private static final Logger LOGGER = LoggerFactory
                                                       .getLogger(ObjectiveAgent.class);

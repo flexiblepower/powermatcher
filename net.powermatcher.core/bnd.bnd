@@ -8,8 +8,4 @@ Export-Package:  \
 	net.powermatcher.core.auctioneer,\
 	net.powermatcher.core.bidcache,\
 	net.powermatcher.core.concentrator,\
-	net.powermatcher.core.connectivity,\
-	net.powermatcher.core.monitoring,\
-	net.powermatcher.core.sessions,\
-	net.powermatcher.core.time,\
-	net.powermatcher.core.objectiveagent	
+	net.powermatcher.core.communication

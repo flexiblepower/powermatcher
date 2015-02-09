@@ -43,10 +43,10 @@ public class ObjectiveAuctioneerTest {
                                                            .priceUpdateRate(30)
                                                            .build());
         objectiveauctioneer.addObjectiveEndpoint(mockObjectiveAgent);
-        mockObjectiveAgent.setObjectiveBid(new ArrayBid.Builder(marketBasis).setDemand(100)
-                                                                            .setDemand(50)
-                                                                            .setDemand(50)
-                                                                            .setDemand(0)
+        mockObjectiveAgent.setObjectiveBid(new ArrayBid.Builder(marketBasis).demand(100)
+                                                                            .demand(50)
+                                                                            .demand(50)
+                                                                            .demand(0)
                                                                             .build());
         cluster = new TestClusterHelper(marketBasis, objectiveauctioneer);
     }

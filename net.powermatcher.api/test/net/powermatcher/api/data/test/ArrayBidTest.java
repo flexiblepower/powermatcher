@@ -128,23 +128,23 @@ public class ArrayBidTest {
     @Test
     public void testBuilderSetDemandAscendingDemand() {
         ArrayBid.Builder builder = new ArrayBid.Builder(marketBasisFiveSteps);
-        builder.setDemand(1.0);
+        builder.demand(1.0);
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("The demand can not be ascending");
-        builder.setDemand(2.0);
+        builder.demand(2.0);
     }
 
     @Test
     public void testBuilderSetDemandOutOfBounds() {
         ArrayBid.Builder builder = new ArrayBid.Builder(marketBasisFiveSteps);
-        builder.setDemand(3.0);
-        builder.setDemand(2.0);
-        builder.setDemand(1.0);
-        builder.setDemand(0.0);
-        builder.setDemand(-1.0);
+        builder.demand(3.0);
+        builder.demand(2.0);
+        builder.demand(1.0);
+        builder.demand(0.0);
+        builder.demand(-1.0);
         expectedException.expect(ArrayIndexOutOfBoundsException.class);
         expectedException.expectMessage("Demand array has already been filled to maximum");
-        builder.setDemand(-2.0);
+        builder.demand(-2.0);
     }
 
     @Test
@@ -152,7 +152,7 @@ public class ArrayBidTest {
         ArrayBid.Builder builder = new ArrayBid.Builder(marketBasisFiveSteps);
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("The demand can not be ascending");
-        builder.setDemandArray(ascendingDemand);
+        builder.demandArray(ascendingDemand);
     }
 
     @Test
@@ -160,15 +160,14 @@ public class ArrayBidTest {
         ArrayBid.Builder builder = new ArrayBid.Builder(marketBasisFiveSteps);
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("supplied array is not same size as number of priceSteps in MarketBasis");
-        builder.setDemandArray(demandTen);
+        builder.demandArray(demandTen);
     }
 
     @Test
     public void testBuilderBuildSetDemandArray() {
-        ArrayBid.Builder builder = new ArrayBid.Builder(marketBasisFiveSteps);
-        builder.setBidNumber(bidNumber);
-        builder.setDemandArray(demandFive);
-        ArrayBid buildBid = builder.build();
+        ArrayBid buildBid = new ArrayBid.Builder(marketBasisFiveSteps).bidNumber(bidNumber)
+                                                                      .demandArray(demandFive)
+                                                                      .build();
         assertThat(buildBid.getBidNumber(), is(equalTo(bidNumber)));
         assertThat(buildBid.getMarketBasis(), is(equalTo(marketBasisFiveSteps)));
         assertThat(buildBid.getDemand(), is(equalTo(demandFive)));
@@ -176,43 +175,39 @@ public class ArrayBidTest {
 
     @Test
     public void testBuilderBuildSetDemand() {
-        ArrayBid.Builder builder = new ArrayBid.Builder(marketBasisFiveSteps);
-        builder.setBidNumber(bidNumber);
-        builder.setDemand(demandFive[0]);
-        builder.setDemand(demandFive[1]);
-        builder.setDemand(demandFive[2]);
-        builder.setDemand(demandFive[3]);
-        builder.setDemand(demandFive[4]);
-        ArrayBid buildBid = builder.build();
+        ArrayBid buildBid = new ArrayBid.Builder(marketBasisFiveSteps).bidNumber(bidNumber)
+                                                                      .demand(demandFive[0])
+                                                                      .demand(demandFive[1])
+                                                                      .demand(demandFive[2])
+                                                                      .demand(demandFive[3])
+                                                                      .demand(demandFive[4])
+                                                                      .build();
         assertThat(buildBid.getBidNumber(), is(equalTo(bidNumber)));
         assertThat(buildBid.getMarketBasis(), is(equalTo(marketBasisFiveSteps)));
         assertThat(buildBid.getDemand(), is(equalTo(demandFive)));
     }
 
-    @Test
+    @Test(expected = IllegalStateException.class)
     public void testBuilderFillArrayToPriceStepNoExtenableDemand() {
-        ArrayBid.Builder builder = new ArrayBid.Builder(marketBasisFiveSteps);
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Demand array contains no demand that can be extended");
-        builder.fillArrayToPriceStep(marketBasisFiveSteps.getPriceSteps());
+        new ArrayBid.Builder(marketBasisFiveSteps).fillTo(marketBasisFiveSteps.getPriceSteps());
     }
 
     @Test
     public void testBuilderFillArrayToOutOfBoundsPriceStep() {
         ArrayBid.Builder builder = new ArrayBid.Builder(marketBasisFiveSteps);
         double demand = 10.0;
-        builder.setDemand(demand);
+        builder.demand(demand);
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("The supplied priceStep is out of bounds");
-        builder.fillArrayToPriceStep(marketBasisFiveSteps.getPriceSteps() + 1);
+        builder.fillTo(marketBasisFiveSteps.getPriceSteps() + 1);
     }
 
     @Test
     public void testBuilderFillArrayToPriceStep() {
         ArrayBid.Builder builder = new ArrayBid.Builder(marketBasisFiveSteps);
         double demand = 10.0;
-        builder.setDemand(demand);
-        builder.fillArrayToPriceStep(marketBasisFiveSteps.getPriceSteps());
+        builder.demand(demand);
+        builder.fillTo(marketBasisFiveSteps.getPriceSteps());
         ArrayBid buildBid = builder.build();
         double[] expectedDemand = new double[] { 10.0, 10.0, 10.0, 10.0, 10.0 };
         assertThat(buildBid.getDemand(), is(equalTo(expectedDemand)));

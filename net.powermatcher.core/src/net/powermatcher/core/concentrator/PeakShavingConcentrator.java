@@ -237,8 +237,8 @@ public class PeakShavingConcentrator
             }
         }
 
-        return new ArrayBid.Builder(bid.getMarketBasis()).setBidNumber(bid.getBidNumber())
-                                                         .setDemandArray(demand)
+        return new ArrayBid.Builder(bid.getMarketBasis()).bidNumber(bid.getBidNumber())
+                                                         .demandArray(demand)
                                                          .build();
     }
 

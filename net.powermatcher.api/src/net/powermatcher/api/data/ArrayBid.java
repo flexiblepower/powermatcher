@@ -77,7 +77,7 @@ public class ArrayBid
          * @param bidNumber
          * @return this instance of the Builder with the set bidNumber
          */
-        public Builder setBidNumber(int bidNumber) {
+        public Builder bidNumber(int bidNumber) {
             this.bidNumber = bidNumber;
             return this;
         }
@@ -93,7 +93,7 @@ public class ArrayBid
          * @throws ArrayIndexOutOfBoundsException
          *             when the demand array is already full
          */
-        public Builder setDemand(double demand) {
+        public Builder demand(double demand) {
             checkIndex(nextIndex);
             if (nextIndex > 0 && demand > builderDemand[nextIndex - 1]) {
                 throw new IllegalArgumentException("The demand can not be ascending");
@@ -127,10 +127,9 @@ public class ArrayBid
          *             if the size of the array differs from the number of priceSteps in the MarketBasis or if the
          *             demand array is ascending
          */
-        public Builder setDemandArray(double[] demand) {
+        public Builder demandArray(double... demand) {
             if (demand.length != marketBasis.getPriceSteps()) {
-                throw new IllegalArgumentException(
-                                                   "supplied array is not same size as number of priceSteps in MarketBasis");
+                throw new IllegalArgumentException("supplied array is not same size as number of priceSteps in MarketBasis");
             }
             checkDescending(demand);
             builderDemand = Arrays.copyOf(demand, demand.length);
@@ -146,7 +145,7 @@ public class ArrayBid
          *             When the length of the demandArray is not equal to the number of price steps
          */
         public ArrayBid build() {
-            fillArrayToPriceStep(builderDemand.length);
+            fillTo(builderDemand.length);
             return new ArrayBid(marketBasis, bidNumber, builderDemand);
         }
 
@@ -162,7 +161,7 @@ public class ArrayBid
          * @throws IllegalArgumentException
          *             when the supplied priceStep is higher than the number of price steps in the marketBasis
          */
-        public Builder fillArrayToPriceStep(int priceStep) {
+        public Builder fillTo(int priceStep) {
             if (nextIndex == 0) {
                 throw new IllegalStateException("Demand array contains no demand that can be extended");
             }

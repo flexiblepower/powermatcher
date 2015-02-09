@@ -11,7 +11,7 @@ import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
-import net.powermatcher.core.connectivity.BaseMatcherEndpointProxy;
+import net.powermatcher.core.communication.BaseMatcherEndpointProxy;
 import net.powermatcher.extensions.connectivity.websockets.data.ClusterInfoModel;
 import net.powermatcher.extensions.connectivity.websockets.data.PmMessage;
 import net.powermatcher.extensions.connectivity.websockets.data.PmMessage.PayloadType;

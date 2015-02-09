@@ -133,7 +133,7 @@ public class ConcentratorTest {
         new SimpleSession(mockAgent, concentrator).connect();
 
         concentrator.handleBidUpdate(mockAgent.getSession(),
-                                     new ArrayBid.Builder(new MarketBasis("a", "b", 2, 0, 2)).setDemand(0).build());
+                                     new ArrayBid.Builder(new MarketBasis("a", "b", 2, 0, 2)).demand(0).build());
     }
 
     @Test
