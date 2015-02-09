@@ -1,14 +1,17 @@
-Bundle-Version: 1.0.0.${tstamp}
 -buildpath:  \
 	${default-buildpath},\
-	${test},\
 	com.google.gson,\
 	org.apache.felix.metatype,\
 	net.powermatcher.scenarios;version=latest,\
 	org.apache.commons.io
-Test-Cases: ${classes;ANNOTATION;org.junit.Test}
+-testpath: \
+	${test}
+
+Bundle-Version: 1.0.0.${tstamp}
 Private-Package:  \
 	net.powermatcher.scenarios.data.test
+Test-Cases: ${classes;ANNOTATION;org.junit.Test}
+
 -runee: JavaSE-1.6
 -runfw: org.apache.felix.framework;version='[4.4.0,4.4.0]'
 -runvm: -ea

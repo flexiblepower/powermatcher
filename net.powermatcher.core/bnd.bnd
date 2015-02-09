@@ -1,3 +1,6 @@
+-buildpath: ${pm-buildpath}
+-testpath: ${test}
+
 Bundle-Version: 1.0.0.${tstamp}
 Service-Component:  *
 Export-Package:  \
@@ -10,5 +13,3 @@ Export-Package:  \
 	net.powermatcher.core.sessions,\
 	net.powermatcher.core.time,\
 	net.powermatcher.core.objectiveagent	
--buildpath: ${default-buildpath}, net.powermatcher.api;version=latest
--testpath: ${test},	net.powermatcher.test;version=latest

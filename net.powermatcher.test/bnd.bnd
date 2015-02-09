@@ -1,13 +1,7 @@
 -buildpath:  \
 	${default-buildpath},\
-	${test},\
-	net.powermatcher.api;version=latest,\
 	net.powermatcher.core;version=latest
-Export-Package: net.powermatcher.mock
-Bundle-Version: 1.0.0.${tstamp}
+-testpath: \
+	${test}
 
--runpath: org.mockito.mockito-all
--runee: JavaSE-1.6
--runfw: org.apache.felix.framework
--runsystempackages:  sun.reflect
--runvm: -ea
+Bundle-Version: 2.0.0.${tstamp}

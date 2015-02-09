@@ -1,8 +1,5 @@
-Bundle-Version: 1.0.0.${tstamp}
 -buildpath:  \
-	net.powermatcher.api;version=latest,\
-	slf4j.api,\
-	biz.aQute.bnd.annotation,\
+	${pm-buildpath},\
 	net.powermatcher.core;version=latest,\
 	org.eclipse.jetty.websocket.api,\
 	org.eclipse.jetty.websocket.client,\
@@ -24,11 +21,11 @@ Bundle-Version: 1.0.0.${tstamp}
     org.eclipse.jetty.webapp,\
     org.eclipse.jetty.xml,\
     javax.servlet-api
-Service-Component:  \
-	*
-	
--includeresource: WEB-INF/web.xml=${project}/web.xml
-Export-Package:  \
+-includeresource: {OSGI-INF/permissions.perm=permissions.perm}, WEB-INF/web.xml=${project}/web.xml
+    
+Bundle-Version: 2.0.0.${tstamp}
+Service-Component:  *
+Private-Package:  \
 	net.powermatcher.extensions.connectivity.websockets.data,\
 	net.powermatcher.extensions.connectivity.websockets,\
 	net.powermatcher.extensions.connectivity.websockets.json

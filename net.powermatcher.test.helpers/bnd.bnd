@@ -1,0 +1,6 @@
+-buildpath: net.powermatcher.api, junit, slf4j.api
+
+Bundle-Version: 1.0.0.${qualifier}
+Bundle-Description: A library for testing purposes, that should be statically linked. \
+	Contains many small utilities. This bundle should not be installed in a runtime framework, it is for testing only.
+Export-Package: net.powermatcher.mock, net.powermatcher.test.helpers

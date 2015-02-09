@@ -1,2 +1,4 @@
-(org.osgi.framework.ServicePermission "*" "get,register")
+(org.osgi.framework.ServicePermission "*" "get")
+(org.osgi.framework.ServicePermission "net.powermatcher.api.monitoring.ObservableAgent" "register")
+(org.osgi.framework.ServicePermission "net.powermatcher.api.AgentEndpoint" "register")
 (org.osgi.framework.PackagePermission "*" "import,exportonly")

@@ -21,12 +21,13 @@ import aQute.bnd.annotation.metatype.Meta;
 /**
  * {@link SimpleObserver} is an example implementation of the {@link BaseObserver} interface. You can add
  * {@link ObservableAgent}s and it can receive {@link AgentEvent}s from them.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
 @Component(immediate = true, designateFactory = SimpleObserver.Config.class)
-public class SimpleObserver extends BaseObserver {
+public class SimpleObserver
+    extends BaseObserver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleObserver.class);
 
@@ -42,7 +43,7 @@ public class SimpleObserver extends BaseObserver {
 
     /**
      * Activate the component.
-     * 
+     *
      * @param properties
      *            updated configuration properties
      */
@@ -53,7 +54,7 @@ public class SimpleObserver extends BaseObserver {
 
     /**
      * OSGi calls this method to modify a managed service.
-     * 
+     *
      * @param properties
      *            the configuration properties
      */
@@ -76,7 +77,7 @@ public class SimpleObserver extends BaseObserver {
      */
     @Override
     protected List<String> getFilter() {
-        return this.filter;
+        return filter;
     }
 
     /**
@@ -89,18 +90,18 @@ public class SimpleObserver extends BaseObserver {
 
     /**
      * This method processes the data in the Config interfaces of this class.
-     * 
+     *
      * @param properties
      *            the configuration properties
      */
     private void processConfig(Map<String, Object> properties) {
         Config config = Configurable.createConfigurable(Config.class, properties);
-        this.filter = config.filter();
+        filter = config.filter();
 
         // ConfigAdmin will sometimes generate a filter with 1 empty element.
         // Ignore it.
         if (filter != null && !filter.isEmpty() && filter.get(0).isEmpty()) {
-            this.filter = new ArrayList<String>();
+            filter = new ArrayList<String>();
         }
 
         updateObservables();

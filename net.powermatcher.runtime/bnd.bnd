@@ -1,5 +1,5 @@
--buildpath: ${default-buildpath}, net.powermatcher.api;version=latest
--testpath: ${test},	net.powermatcher.test;version=latest
+-buildpath: ${pm-buildpath}
+-testpath: ${test}
 
 Bundle-Version: 1.0.0.${tstamp}
 Service-Component:  *

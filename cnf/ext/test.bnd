@@ -1,5 +1,0 @@
-test: \
-	junit;version=latest,\
-	org.hamcrest.core;version=latest,\
-	org.mockito.mockito-all;version=latest,\
-	biz.aQute.junit;version=latest

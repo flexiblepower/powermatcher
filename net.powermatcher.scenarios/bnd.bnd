@@ -1,16 +1,13 @@
-Bundle-Version: 1.0.0.${tstamp}
-Service-Component:  *
 -buildpath:  \
 	${default-buildpath},\
-	${test},\
 	com.google.gson,\
 	org.apache.felix.metatype,\
-	net.powermatcher.api;version=latest,\
 	org.apache.commons.io
+-testpath: \
+	${test}
+
+Bundle-Version: 2.0.0.${tstamp}
+Service-Component:  *
 Export-Package:  \
 	net.powermatcher.scenarios,\
 	net.powermatcher.scenarios.data
-Import-Package:  \
-	,\
-	,\
-	*

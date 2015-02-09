@@ -1,11 +1,10 @@
 -buildpath:  \
-	${default-buildpath},\
-	${test},\
+	${pm-buildpath},\
+	net.powermatcher.core;version=latest,\
 	com.google.gson,\
 	org.apache.felix.http.servlet-api,\
-	net.powermatcher.api;version=latest,\
-	net.powermatcher.core;version=latest,\
 	org.apache.felix.metatype
-Bundle-Version: 1.0.0.${tstamp}
+
+Bundle-Version: 2.0.0.${tstamp}
 Private-Package:  net.powermatcher.remote*
 Service-Component:  *
