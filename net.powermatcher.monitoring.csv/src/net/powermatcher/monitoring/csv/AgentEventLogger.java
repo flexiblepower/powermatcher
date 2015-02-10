@@ -97,7 +97,7 @@ public abstract class AgentEventLogger
      * {@inheritDoc}
      */
     @Override
-    public void update(AgentEvent event) {
+    public void handleAgentEvent(AgentEvent event) {
 
         if (eventType.getClassType().isAssignableFrom(event.getClass())) {
 

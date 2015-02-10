@@ -68,7 +68,7 @@ public class ConsoleObserver
      *            The {@link AgentEvent} that is to be printed.
      */
     @Override
-    public void update(AgentEvent event) {
+    public void handleAgentEvent(AgentEvent event) {
         LOGGER.info("Received event: {}", event);
     }
 }

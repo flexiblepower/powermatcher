@@ -16,7 +16,7 @@ public class MockObserver implements AgentObserver {
      * {@inheritDoc}
      */
     @Override
-    public void update(AgentEvent event) {
+    public void handleAgentEvent(AgentEvent event) {
         this.hasReceivedEvent = true;
     }
 

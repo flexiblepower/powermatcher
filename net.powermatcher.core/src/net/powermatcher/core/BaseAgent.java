@@ -118,7 +118,7 @@ public abstract class BaseAgent
      */
     public void publishEvent(AgentEvent event) {
         for (AgentObserver observer : observers) {
-            observer.update(event);
+            observer.handleAgentEvent(event);
         }
     }
 

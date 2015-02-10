@@ -63,7 +63,7 @@ public class AuctioneerTest {
          * {@inheritDoc}
          */
         @Override
-        public void update(AgentEvent event) {
+        public void handleAgentEvent(AgentEvent event) {
             if (event instanceof IncomingBidEvent) {
                 if (incomingBidEvent != null) {
                     fail("IncomingBidEvent fired more than once");
