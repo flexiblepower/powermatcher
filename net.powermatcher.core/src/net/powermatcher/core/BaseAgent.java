@@ -24,43 +24,34 @@ import org.flexiblepower.context.FlexiblePowerContext;
 public abstract class BaseAgent
     implements ObservableAgent {
 
+    protected FlexiblePowerContext context;
+
+    @Override
+    public void setContext(FlexiblePowerContext context) {
+        this.context = context;
+    }
+
+    /**
+     * Returns the current time in a {@link Date} object.
+     *
+     * @return A {@link Date} object, representing the current date and time
+     */
+    protected Date now() {
+        if (context == null) {
+            return null;
+        } else {
+            return context.currentTime();
+        }
+    }
+
+    protected boolean isInitialized() {
+        return context != null;
+    }
+
     /**
      * The id of this Agent.
      */
     private String agentId;
-
-    /**
-     * The id of the cluster this Agent is running in.
-     */
-    private String clusterId;
-
-    /**
-     * The id of the {@link MatcherEndpoint} this Agent wants to connect to.
-     */
-    private String desiredParentId;
-
-    /**
-     * Collection of {@link Observer} services.
-     */
-    private final Set<AgentObserver> observers = new CopyOnWriteArraySet<AgentObserver>();
-
-    protected FlexiblePowerContext context;
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void addObserver(AgentObserver observer) {
-        observers.add(observer);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void removeObserver(AgentObserver observer) {
-        observers.remove(observer);
-    }
 
     /**
      * {@inheritDoc}
@@ -79,6 +70,11 @@ public abstract class BaseAgent
     }
 
     /**
+     * The id of the cluster this Agent is running in.
+     */
+    private String clusterId;
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -93,6 +89,11 @@ public abstract class BaseAgent
     protected void setClusterId(String clusterId) {
         this.clusterId = clusterId;
     }
+
+    /**
+     * The id of the {@link MatcherEndpoint} this Agent wants to connect to.
+     */
+    private String desiredParentId;
 
     /**
      * {@inheritDoc}
@@ -111,6 +112,27 @@ public abstract class BaseAgent
     }
 
     /**
+     * Collection of {@link Observer} services.
+     */
+    private final Set<AgentObserver> observers = new CopyOnWriteArraySet<AgentObserver>();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addObserver(AgentObserver observer) {
+        observers.add(observer);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void removeObserver(AgentObserver observer) {
+        observers.remove(observer);
+    }
+
+    /**
      * Publish an {@link UpdateEvent} to the attached {@link Observer} services.
      *
      * @param event
@@ -120,28 +142,6 @@ public abstract class BaseAgent
         for (AgentObserver observer : observers) {
             observer.handleAgentEvent(event);
         }
-    }
-
-    /**
-     * Returns the current time in a {@link Date} object.
-     *
-     * @return A {@link Date} object, representing the current date and time
-     */
-    protected Date now() {
-        if (context == null) {
-            return null;
-        } else {
-            return context.currentTime();
-        }
-    }
-
-    @Override
-    public void setContext(FlexiblePowerContext context) {
-        this.context = context;
-    }
-
-    protected boolean isInitialized() {
-        return context != null;
     }
 
 }

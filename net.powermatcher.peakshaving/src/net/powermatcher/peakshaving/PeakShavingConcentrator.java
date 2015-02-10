@@ -1,4 +1,4 @@
-package net.powermatcher.core.concentrator;
+package net.powermatcher.peakshaving;
 
 import java.util.Arrays;
 import java.util.Deque;
@@ -13,6 +13,7 @@ import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PriceStep;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.core.auctioneer.Auctioneer;
+import net.powermatcher.core.concentrator.Concentrator;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
@@ -35,7 +36,7 @@ import aQute.bnd.annotation.metatype.Meta;
  */
 @Component(designateFactory = PeakShavingConcentrator.Config.class,
            immediate = true,
-           provide = { ObservableAgent.class, MatcherEndpoint.class, AgentEndpoint.class })
+           provide = { ObservableAgent.class, MatcherEndpoint.class, AgentEndpoint.class, PeakShavingConcentrator.class })
 public class PeakShavingConcentrator
     extends Concentrator {
 

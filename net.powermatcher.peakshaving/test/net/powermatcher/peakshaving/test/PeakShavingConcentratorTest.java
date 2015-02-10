@@ -1,18 +1,18 @@
-package net.powermatcher.core.concentrator.test;
+package net.powermatcher.peakshaving.test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
 import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PriceUpdate;
-import net.powermatcher.core.concentrator.PeakShavingConcentrator;
 import net.powermatcher.mock.MockAgent;
 import net.powermatcher.mock.MockContext;
 import net.powermatcher.mock.MockMatcherAgent;
 import net.powermatcher.mock.SimpleSession;
+import net.powermatcher.peakshaving.PeakShavingConcentrator;
 import net.powermatcher.test.helpers.PropertieBuilder;
 
 import org.junit.Test;

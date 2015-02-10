@@ -1,4 +1,4 @@
-package net.powermatcher.remote.peakshaving;
+package net.powermatcher.peakshaving;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -14,13 +14,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.powermatcher.core.concentrator.PeakShavingConcentrator;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
+import aQute.bnd.annotation.metatype.Meta;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -42,15 +41,20 @@ import com.google.gson.reflect.TypeToken;
  * @author FAN
  * @version 1.0
  */
-@Component(provide = Servlet.class, properties = "alias=/peakshaver")
-public class PeakShaverServlet
+@Component(provide = Servlet.class, designate = PeakShavingConcentrator.Config.class)
+public class PeakShavingConcentratorServlet
     extends HttpServlet {
+
+    public interface Config {
+        @Meta.AD(deflt = "/peakshaving", description = "The alias under which this servlet can be reached")
+        public String alias();
+    }
 
     private static final String KEY_AGENT_ID = "agentId";
 
     private static final long serialVersionUID = 2215458949793062542L;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PeakShaverServlet.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PeakShavingConcentratorServlet.class);
 
     private final Map<String, PeakShavingConcentrator> concentrators = new ConcurrentHashMap<String, PeakShavingConcentrator>();
 
@@ -96,6 +100,41 @@ public class PeakShaverServlet
                 w.println("No agent with id [" + measurement.getAgentId() + "] is available");
                 LOGGER.info("No agent with id [{}] is available", measurement.getAgentId());
             }
+        }
+    }
+
+    public static class Measurement {
+        private String agentId;
+
+        private double measurement;
+
+        public Measurement() {
+        }
+
+        public Measurement(String agentId, double measurement) {
+            this.agentId = agentId;
+            this.measurement = measurement;
+        }
+
+        public void setAgentId(String agentId) {
+            this.agentId = agentId;
+        }
+
+        public void setMeasurement(double measurement) {
+            this.measurement = measurement;
+        }
+
+        public String getAgentId() {
+            return agentId;
+        }
+
+        public double getMeasurement() {
+            return measurement;
+        }
+
+        @Override
+        public String toString() {
+            return "Measurement [agentId=" + agentId + ", measurement=" + measurement + "]";
         }
     }
 }
