@@ -8,36 +8,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Represents a matching pair of {@link MatcherEndpoint} and {@link AgentEndpoint}. A PotentialSession does not have to
- * be complete right away.
+ * Represents a matching pair of {@link MatcherEndpoint} and {@link AgentEndpoint}. A PotentialSession always has an
+ * {@link AgentEndpoint} (and thus its desired parent), but does not have to have a valid {@link MatcherEndpoint} right
+ * now.
  */
 public class PotentialSession {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(PotentialSession.class);
 
-    private AgentEndpoint agentEndpoint;
+    private final AgentEndpoint agentEndpoint;
     private MatcherEndpoint matcherEndpoint;
     private SessionImpl session;
+
+    public PotentialSession(AgentEndpoint agentEndpoint) {
+        if (agentEndpoint == null) {
+            throw new NullPointerException("Agent can not be null");
+        }
+        this.agentEndpoint = agentEndpoint;
+    }
 
     public AgentEndpoint getAgentEndpoint() {
         return agentEndpoint;
     }
 
     public String getAgentId() {
-        if (agentEndpoint == null) {
-            return null;
-        } else {
-            return agentEndpoint.getAgentId();
-        }
-    }
-
-    public void setAgentEndpoint(AgentEndpoint agentEndpoint) {
-        if (agentEndpoint != null && matcherEndpoint != null) {
-            if (!matcherEndpoint.getAgentId().equals(agentEndpoint.getDesiredParentId())) {
-                throw new IllegalArgumentException("Desired parent of AgentEndpoint does not match the current MatcherEndpoint");
-            }
-        }
-        this.agentEndpoint = agentEndpoint;
+        return agentEndpoint.getAgentId();
     }
 
     public MatcherEndpoint getMatcherEndpoint() {
@@ -45,22 +39,16 @@ public class PotentialSession {
     }
 
     public String getMatcherId() {
-        if (matcherEndpoint == null) {
-            if (agentEndpoint == null) {
-                return null;
-            } else {
-                return agentEndpoint.getDesiredParentId();
-            }
-        } else {
-            return matcherEndpoint.getAgentId();
-        }
+        return agentEndpoint.getDesiredParentId();
     }
 
     public void setMatcherEndpoint(MatcherEndpoint matcherEndpoint) {
-        if (agentEndpoint != null && matcherEndpoint != null) {
-            if (!matcherEndpoint.getAgentId().equals(agentEndpoint.getDesiredParentId())) {
-                throw new IllegalArgumentException("Desired parent of AgentEndpoint does not match the new MatcherEndpoint");
-            }
+        if (session != null) {
+            disconnect();
+        }
+
+        if (matcherEndpoint != null && !matcherEndpoint.getAgentId().equals(agentEndpoint.getDesiredParentId())) {
+            throw new IllegalArgumentException("Desired parent of AgentEndpoint does not match the new MatcherEndpoint");
         }
         this.matcherEndpoint = matcherEndpoint;
     }
@@ -71,7 +59,7 @@ public class PotentialSession {
      * @return true if something changed
      */
     public boolean tryConnect() {
-        if (session == null && matcherEndpoint != null && agentEndpoint != null) {
+        if (session == null && matcherEndpoint != null) {
             SessionImpl newSession = new SessionImpl(agentEndpoint, matcherEndpoint, this);
             if (matcherEndpoint.connectToAgent(newSession)) {
                 // Success!

@@ -31,8 +31,8 @@ public class SessionManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionManager.class);
 
     /**
-     * Data structure with all the {@link PotentialSession}s. Key of the map is the matcherId, the value is a list with
-     * all the {@link PotentialSession}s with that matcher.
+     * Data structure with all the {@link PotentialSession}s. Key of the map is the agentId, the value is a list with
+     * all the {@link PotentialSession}s with that agent.
      */
     private final Map<String, List<PotentialSession>> potentialSessions = new HashMap<String, List<PotentialSession>>();
 
@@ -115,8 +115,7 @@ public class SessionManager {
                 }
             }
 
-            PotentialSession ps = new PotentialSession();
-            ps.setAgentEndpoint(agentEndpoint);
+            PotentialSession ps = new PotentialSession(agentEndpoint);
             ps.setMatcherEndpoint(matcherEndpoints.get(matcherId));
             potentialSessions.get(matcherId).add(ps);
         }
