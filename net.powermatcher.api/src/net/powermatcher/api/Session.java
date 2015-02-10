@@ -39,6 +39,10 @@ public interface Session {
     MarketBasis getMarketBasis();
 
     /**
+     * Sets the {@link MarketBasis} for this session. This should be set by the {@link MatcherEndpoint} when its
+     * {@link MatcherEndpoint#connectToAgent(Session)} method is called. This makes sure that the {@link AgentEndpoint}
+     * knows which {@link MarketBasis} is used for bidding.
+     *
      * @param marketBasis
      *            the new marketBasis used in this {@link Session}.
      */
