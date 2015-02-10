@@ -178,9 +178,9 @@ public class PointBid
         } else if (targetDemand < pricePoints[rightIx].getDemand()) {
             // If the target is lower than the minimum of the bid, return the maximum price
             return new Price(marketBasis, marketBasis.getMaximumPrice());
-        } else if (demandIsEquals(targetDemand, pricePoints[leftIx].getDemand())) {
+        } else if (demandIsEqual(targetDemand, pricePoints[leftIx].getDemand())) {
             rightIx = leftIx;
-        } else if (demandIsEquals(targetDemand, pricePoints[rightIx].getDemand())) {
+        } else if (demandIsEqual(targetDemand, pricePoints[rightIx].getDemand())) {
             leftIx = rightIx;
         } else { // demand is between the limits of this bid, which can not be flat at this point
             // Go on while there is at least 1 point between the left and right index
@@ -189,7 +189,7 @@ public class PointBid
                 int middleIx = (leftIx + rightIx) / 2;
                 double middleDemand = pricePoints[middleIx].getDemand();
 
-                if (demandIsEquals(targetDemand, middleDemand)) {
+                if (demandIsEqual(targetDemand, middleDemand)) {
                     // A point with the target demand is found, select this point
                     leftIx = rightIx = middleIx;
                 } else if (middleDemand > targetDemand) {
@@ -203,10 +203,10 @@ public class PointBid
         }
 
         // If the left or right point matches the targetDemand, expand the range
-        while (leftIx > 0 && demandIsEquals(targetDemand, pricePoints[leftIx - 1].getDemand())) {
+        while (leftIx > 0 && demandIsEqual(targetDemand, pricePoints[leftIx - 1].getDemand())) {
             leftIx--;
         }
-        while (rightIx < pricePoints.length - 1 && demandIsEquals(targetDemand, pricePoints[rightIx + 1].getDemand())) {
+        while (rightIx < pricePoints.length - 1 && demandIsEqual(targetDemand, pricePoints[rightIx + 1].getDemand())) {
             rightIx++;
         }
 
@@ -225,7 +225,7 @@ public class PointBid
         double leftDemand = leftPoint.getDemand();
         double rightDemand = rightPoint.getDemand();
 
-        double demandFactor = demandIsEquals(leftDemand, rightDemand) ? 0.5
+        double demandFactor = demandIsEqual(leftDemand, rightDemand) ? 0.5
                                                                      : (leftDemand - targetDemand) / (leftDemand - rightDemand);
         double price = leftPrice + (rightPrice - leftPrice) * demandFactor;
 

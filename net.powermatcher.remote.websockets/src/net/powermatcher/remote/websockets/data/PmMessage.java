@@ -1,4 +1,4 @@
-package net.powermatcher.extensions.connectivity.websockets.data;
+package net.powermatcher.remote.websockets.data;
 
 /**
  * PmMessage class to encapsulate {@link BidModel}, {@link PriceUpdateModel} or {@link CusterinfoModel}. WebSocket

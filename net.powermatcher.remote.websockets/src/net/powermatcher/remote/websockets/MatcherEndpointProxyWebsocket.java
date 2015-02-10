@@ -1,4 +1,4 @@
-package net.powermatcher.extensions.connectivity.websockets;
+package net.powermatcher.remote.websockets;
 
 import java.io.IOException;
 import java.net.URI;
@@ -12,12 +12,12 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.core.communication.BaseMatcherEndpointProxy;
-import net.powermatcher.extensions.connectivity.websockets.data.ClusterInfoModel;
-import net.powermatcher.extensions.connectivity.websockets.data.PmMessage;
-import net.powermatcher.extensions.connectivity.websockets.data.PmMessage.PayloadType;
-import net.powermatcher.extensions.connectivity.websockets.data.PriceUpdateModel;
-import net.powermatcher.extensions.connectivity.websockets.json.ModelMapper;
-import net.powermatcher.extensions.connectivity.websockets.json.PmJsonSerializer;
+import net.powermatcher.remote.websockets.data.ClusterInfoModel;
+import net.powermatcher.remote.websockets.data.PmMessage;
+import net.powermatcher.remote.websockets.data.PriceUpdateModel;
+import net.powermatcher.remote.websockets.data.PmMessage.PayloadType;
+import net.powermatcher.remote.websockets.json.ModelMapper;
+import net.powermatcher.remote.websockets.json.PmJsonSerializer;
 
 import org.eclipse.jetty.websocket.api.CloseStatus;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;

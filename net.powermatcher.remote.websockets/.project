@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>net.powermatcher.communication.websockets</name>
+	<name>net.powermatcher.remote.websockets</name>
 	<comment></comment>
 	<projects>
 	</projects>

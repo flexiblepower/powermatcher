@@ -1,4 +1,4 @@
-package net.powermatcher.extensions.connectivity.websockets.data;
+package net.powermatcher.remote.websockets.data;
 
 import net.powermatcher.api.data.MarketBasis;
 

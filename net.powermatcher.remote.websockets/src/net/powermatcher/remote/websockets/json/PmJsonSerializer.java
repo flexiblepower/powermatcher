@@ -1,14 +1,14 @@
-package net.powermatcher.extensions.connectivity.websockets.json;
+package net.powermatcher.remote.websockets.json;
 
 import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.PointBid;
 import net.powermatcher.api.data.PriceUpdate;
-import net.powermatcher.extensions.connectivity.websockets.data.BidModel;
-import net.powermatcher.extensions.connectivity.websockets.data.ClusterInfoModel;
-import net.powermatcher.extensions.connectivity.websockets.data.PmMessage;
-import net.powermatcher.extensions.connectivity.websockets.data.PriceUpdateModel;
+import net.powermatcher.remote.websockets.data.BidModel;
+import net.powermatcher.remote.websockets.data.ClusterInfoModel;
+import net.powermatcher.remote.websockets.data.PmMessage;
+import net.powermatcher.remote.websockets.data.PriceUpdateModel;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

@@ -27,7 +27,7 @@
 Bundle-Version: 2.0.0.${tstamp}
 Service-Component:  *
 Private-Package:  \
-	net.powermatcher.extensions.connectivity.websockets.data,\
-	net.powermatcher.extensions.connectivity.websockets,\
-	net.powermatcher.extensions.connectivity.websockets.json
+	net.powermatcher.remote.websockets.data,\
+	net.powermatcher.remote.websockets,\
+	net.powermatcher.remote.websockets.json
 Web-ContextPath: /powermatcher/websockets

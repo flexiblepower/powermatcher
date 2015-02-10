@@ -1,4 +1,4 @@
-package net.powermatcher.extensions.connectivity.websockets;
+package net.powermatcher.remote.websockets;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -12,10 +12,10 @@ import java.util.Map.Entry;
 import javax.naming.OperationNotSupportedException;
 
 import net.powermatcher.api.data.Bid;
-import net.powermatcher.extensions.connectivity.websockets.data.BidModel;
-import net.powermatcher.extensions.connectivity.websockets.data.PmMessage;
-import net.powermatcher.extensions.connectivity.websockets.json.ModelMapper;
-import net.powermatcher.extensions.connectivity.websockets.json.PmJsonSerializer;
+import net.powermatcher.remote.websockets.data.BidModel;
+import net.powermatcher.remote.websockets.data.PmMessage;
+import net.powermatcher.remote.websockets.json.ModelMapper;
+import net.powermatcher.remote.websockets.json.PmJsonSerializer;
 
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;

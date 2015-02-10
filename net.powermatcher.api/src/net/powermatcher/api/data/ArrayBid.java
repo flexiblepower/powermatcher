@@ -287,9 +287,9 @@ public class ArrayBid
         } else if (targetDemand < demandArray[rightIx]) {
             // If the target is lower than the minimum of the bid, return the maximum price
             return new Price(marketBasis, marketBasis.getMaximumPrice());
-        } else if (demandIsEquals(targetDemand, demandArray[leftIx])) {
+        } else if (demandIsEqual(targetDemand, demandArray[leftIx])) {
             rightIx = leftIx;
-        } else if (demandIsEquals(targetDemand, demandArray[rightIx])) {
+        } else if (demandIsEqual(targetDemand, demandArray[rightIx])) {
             leftIx = rightIx;
         } else { // demand is between the limits of this bid, which can not be flat at this point
             // Go on while there is at least 1 point between the left and right index
@@ -298,7 +298,7 @@ public class ArrayBid
                 int middleIx = (leftIx + rightIx) / 2;
                 double middleDemand = demandArray[middleIx];
 
-                if (demandIsEquals(targetDemand, middleDemand)) {
+                if (demandIsEqual(targetDemand, middleDemand)) {
                     // A point with the target demand is found, select this point
                     leftIx = rightIx = middleIx;
                 } else if (middleDemand > targetDemand) {
@@ -312,10 +312,10 @@ public class ArrayBid
         }
 
         // If the left or right point matches the targetDemand, expand the range
-        while (leftIx > 0 && demandIsEquals(targetDemand, demandArray[leftIx - 1])) {
+        while (leftIx > 0 && demandIsEqual(targetDemand, demandArray[leftIx - 1])) {
             leftIx--;
         }
-        while (rightIx < demandArray.length - 1 && demandIsEquals(targetDemand, demandArray[rightIx + 1])) {
+        while (rightIx < demandArray.length - 1 && demandIsEqual(targetDemand, demandArray[rightIx + 1])) {
             rightIx++;
         }
 
@@ -332,7 +332,7 @@ public class ArrayBid
         double leftDemand = demandArray[leftIx];
         double rightDemand = demandArray[rightIx];
 
-        double demandFactor = demandIsEquals(leftDemand, rightDemand) ? 0.5
+        double demandFactor = demandIsEqual(leftDemand, rightDemand) ? 0.5
                                                                      : (leftDemand - targetDemand) / (leftDemand - rightDemand);
         double price = leftPrice + (rightPrice - leftPrice) * demandFactor;
 

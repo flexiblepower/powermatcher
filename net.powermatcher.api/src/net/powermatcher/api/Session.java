@@ -67,7 +67,11 @@ public interface Session {
     void updateBid(Bid newBid);
 
     /**
-     * Disconnect the {@link AgentEndpoint} from the {@link MatcherEndpoint} and calls the SessionManager to sign off.
+     * Disconnect the {@link AgentEndpoint} from the {@link MatcherEndpoint}. This method should always call both the
+     * {@link AgentEndpoint#matcherEndpointDisconnected(Session)} and the
+     * {@link MatcherEndpoint#agentEndpointDisconnected(Session)} methods.
+     *
+     * This method can be called by any object, event the {@link AgentEndpoint} or {@link MatcherEndpoint} themselves.
      */
     void disconnect();
 }

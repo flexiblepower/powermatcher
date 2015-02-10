@@ -13,7 +13,7 @@ public abstract class Bid {
      */
     protected static final double SMALLEST_DEMAND = 1e-6;
 
-    protected static boolean demandIsEquals(double demand1, double demand2) {
+    protected static boolean demandIsEqual(double demand1, double demand2) {
         return Math.abs(demand1 - demand2) < SMALLEST_DEMAND;
     }
 

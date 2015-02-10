@@ -1,4 +1,4 @@
-package net.powermatcher.extensions.connectivity.websockets;
+package net.powermatcher.remote.websockets;
 
 import java.io.IOException;
 import java.util.Map;
@@ -10,7 +10,7 @@ import net.powermatcher.api.Session;
 import net.powermatcher.api.data.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.core.communication.BaseAgentEndpointProxy;
-import net.powermatcher.extensions.connectivity.websockets.json.PmJsonSerializer;
+import net.powermatcher.remote.websockets.json.PmJsonSerializer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

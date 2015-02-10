@@ -1,11 +1,11 @@
-package net.powermatcher.extensions.connectivity.websockets.json;
+package net.powermatcher.remote.websockets.json;
 
 import java.lang.reflect.Type;
 
-import net.powermatcher.extensions.connectivity.websockets.data.BidModel;
-import net.powermatcher.extensions.connectivity.websockets.data.ClusterInfoModel;
-import net.powermatcher.extensions.connectivity.websockets.data.PmMessage;
-import net.powermatcher.extensions.connectivity.websockets.data.PriceUpdateModel;
+import net.powermatcher.remote.websockets.data.BidModel;
+import net.powermatcher.remote.websockets.data.ClusterInfoModel;
+import net.powermatcher.remote.websockets.data.PmMessage;
+import net.powermatcher.remote.websockets.data.PriceUpdateModel;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
