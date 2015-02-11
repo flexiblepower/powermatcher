@@ -1,4 +1,7 @@
-package net.powermatcher.api.data;
+package net.powermatcher.api.messages;
+
+import net.powermatcher.api.data.Bid;
+import net.powermatcher.api.data.Price;
 
 /**
  * 

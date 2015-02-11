@@ -66,9 +66,9 @@ public class PricePointTest {
     public void testToString() {
         PricePoint pricePoint = new PricePoint(price, demand);
         String ppString = pricePoint.toString();
-        assertThat(ppString.startsWith("PricePoint"), is(true));
-        assertThat(ppString.contains("Price"), is(true));
-        assertThat(ppString.contains(Double.toString(demand)), is(true));
+        assertThat(ppString.startsWith("{"), is(true));
+        assertThat(ppString.endsWith("}"), is(true));
+        assertThat(ppString.contains(MarketBasis.DEMAND_FORMAT.format(demand)), is(true));
     }
 
     @Test

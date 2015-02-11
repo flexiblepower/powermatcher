@@ -2,7 +2,7 @@ package net.powermatcher.api;
 
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
-import net.powermatcher.api.data.PriceUpdate;
+import net.powermatcher.api.messages.PriceUpdate;
 
 /**
  * {@link Session} defines the interface for a link between an {@link AgentEndpoint} with a {@link MatcherEndpoint} in a

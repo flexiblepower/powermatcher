@@ -11,7 +11,7 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.PointBid;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PricePoint;
-import net.powermatcher.api.data.PriceUpdate;
+import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.core.BaseDeviceAgent;

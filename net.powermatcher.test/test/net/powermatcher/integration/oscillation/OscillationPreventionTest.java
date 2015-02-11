@@ -8,7 +8,7 @@ import static org.junit.Assert.assertThat;
 
 import java.util.List;
 
-import net.powermatcher.api.data.PriceUpdate;
+import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.concentrator.Concentrator;
 import net.powermatcher.mock.MockContext;

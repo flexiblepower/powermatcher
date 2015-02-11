@@ -2,7 +2,8 @@ package net.powermatcher.api;
 
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
-import net.powermatcher.api.data.PriceUpdate;
+import net.powermatcher.api.messages.BidUpdate;
+import net.powermatcher.api.messages.PriceUpdate;
 
 /**
  * {@link MatcherEndpoint} defines the interface for classes that can receive a {@link Bid} and send a
@@ -41,8 +42,8 @@ public interface MatcherEndpoint
      *
      * @param session
      *            The session linking this {@link MatcherEndpoint} with a specific {@link AgentEndpoint} instance.
-     * @param newBid
-     *            The new {@link Bid}.
+     * @param bidUpdate
+     *            The new {@link BidUpdate}.
      */
-    void handleBidUpdate(Session session, Bid newBid);
+    void handleBidUpdate(Session session, BidUpdate bidUpdate);
 }

@@ -2,7 +2,7 @@ package net.powermatcher.api;
 
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
-import net.powermatcher.api.data.PriceUpdate;
+import net.powermatcher.api.messages.PriceUpdate;
 
 /**
  * {@link AgentEndpoint} defines the interface for classes that can receive a {@link PriceUpdate} and send a {@link Bid}

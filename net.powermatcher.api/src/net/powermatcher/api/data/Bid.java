@@ -17,19 +17,14 @@ public abstract class Bid {
         return Math.abs(demand1 - demand2) < SMALLEST_DEMAND;
     }
 
-    public static Bid flatDemand(MarketBasis marketBasis, int bidNumber, double demand) {
-        return new PointBid.Builder(marketBasis).bidNumber(bidNumber).add(0, demand).build();
+    public static Bid flatDemand(MarketBasis marketBasis, double demand) {
+        return new PointBid.Builder(marketBasis).add(0, demand).build();
     }
 
     /**
      * The {@link MarketBasis} of the cluster.
      */
     protected final MarketBasis marketBasis;
-
-    /**
-     * The number or id of this Bid instance.
-     */
-    protected final int bidNumber;
 
     /**
      * A constructor used to create an instance of this class.
@@ -39,12 +34,11 @@ public abstract class Bid {
      * @param bidNumber
      *            the number of this Bid instance.
      */
-    protected Bid(MarketBasis marketBasis, int bidNumber) {
+    protected Bid(MarketBasis marketBasis) {
         if (marketBasis == null) {
             throw new IllegalArgumentException("marketBasis is not allowed to be null");
         }
         this.marketBasis = marketBasis;
-        this.bidNumber = bidNumber;
     }
 
     /**
@@ -52,13 +46,6 @@ public abstract class Bid {
      */
     public MarketBasis getMarketBasis() {
         return marketBasis;
-    }
-
-    /**
-     * @return the current value of bidNumber
-     */
-    public int getBidNumber() {
-        return bidNumber;
     }
 
     /**

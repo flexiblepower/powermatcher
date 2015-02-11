@@ -5,7 +5,7 @@ import java.util.Set;
 
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
-import net.powermatcher.api.data.PriceUpdate;
+import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.core.auctioneer.Auctioneer;
 
 /**

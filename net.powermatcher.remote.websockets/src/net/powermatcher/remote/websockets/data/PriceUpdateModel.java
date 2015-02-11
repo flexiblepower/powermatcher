@@ -1,6 +1,6 @@
 package net.powermatcher.remote.websockets.data;
 
-import net.powermatcher.api.data.PriceUpdate;
+import net.powermatcher.api.messages.PriceUpdate;
 
 /**
  * PriceUpdate model class to transfer {@link PriceUpdate} data over the wire.

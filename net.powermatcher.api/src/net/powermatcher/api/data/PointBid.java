@@ -32,11 +32,6 @@ public class PointBid
         private final MarketBasis marketBasis;
 
         /**
-         * The number or id of this Bid instance.
-         */
-        private int bidNumber;
-
-        /**
          * The set of {@link PointBid} values that make up the bid curve.
          */
         private final SortedSet<PricePoint> pricePoints;
@@ -49,19 +44,7 @@ public class PointBid
          */
         public Builder(final MarketBasis marketBasis) {
             this.marketBasis = marketBasis;
-            bidNumber = 0;
             pricePoints = new TreeSet<PricePoint>();
-        }
-
-        /**
-         * Sets the bidNumber with the specified bidNumber
-         *
-         * @param bidNumber
-         * @return this instance of the Builder with the set bidNumber
-         */
-        public Builder bidNumber(int bidNumber) {
-            this.bidNumber = bidNumber;
-            return this;
         }
 
         /**
@@ -93,7 +76,7 @@ public class PointBid
          *             when the marketBasis is null
          */
         public PointBid build() {
-            return new PointBid(marketBasis, bidNumber, pricePoints.toArray(new PricePoint[pricePoints.size()]));
+            return new PointBid(marketBasis, pricePoints.toArray(new PricePoint[pricePoints.size()]));
         }
     }
 
@@ -117,8 +100,8 @@ public class PointBid
      * @param pricePoints
      *            the {@link PointBid} Array that belongs to this bid.
      */
-    public PointBid(MarketBasis marketBasis, int bidNumber, PricePoint... pricePoints) {
-        super(marketBasis, bidNumber);
+    public PointBid(MarketBasis marketBasis, PricePoint... pricePoints) {
+        super(marketBasis);
         if (pricePoints.length == 0) {
             throw new IllegalArgumentException("At least 1 pricepoint is needed");
         }
@@ -151,7 +134,7 @@ public class PointBid
      *            The {@link ArrayBid} this PointBid will be based on.
      */
     PointBid(ArrayBid base) {
-        super(base.marketBasis, base.bidNumber);
+        super(base.marketBasis);
         pricePoints = base.calculatePricePoints();
         arrayBid = base;
     }
@@ -226,7 +209,7 @@ public class PointBid
         double rightDemand = rightPoint.getDemand();
 
         double demandFactor = demandIsEqual(leftDemand, rightDemand) ? 0.5
-                                                                     : (leftDemand - targetDemand) / (leftDemand - rightDemand);
+                                                                    : (leftDemand - targetDemand) / (leftDemand - rightDemand);
         double price = leftPrice + (rightPrice - leftPrice) * demandFactor;
 
         return new Price(marketBasis, price);
@@ -389,7 +372,7 @@ public class PointBid
      */
     @Override
     public int hashCode() {
-        return 2011 * Arrays.deepHashCode(pricePoints) + 3557 * bidNumber + marketBasis.hashCode();
+        return 2011 * Arrays.deepHashCode(pricePoints) + marketBasis.hashCode();
     }
 
     /**
@@ -403,7 +386,7 @@ public class PointBid
             return false;
         } else {
             PointBid other = ((PointBid) obj);
-            return other.bidNumber == bidNumber && marketBasis.equals(other.marketBasis)
+            return marketBasis.equals(other.marketBasis)
                    && Arrays.equals(other.getPricePoints(), getPricePoints());
         }
     }
@@ -414,22 +397,13 @@ public class PointBid
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder();
-        b.append("PointBid{bidNumber=").append(bidNumber);
-        PricePoint[] points = getPricePoints();
-        /*
-         * Print price points if available, and if the most compact representation
-         */
-        if (points != null && points.length < marketBasis.getPriceSteps() / 2) {
-            b.append(", PricePoint[]{");
-            for (int i = 0; i < points.length; i++) {
-                if (i > 0) {
-                    b.append(',');
-                }
-                b.append(points[i].toString());
-            }
+        b.append("PointBid [");
+
+        for (PricePoint point : pricePoints) {
+            b.append(point).append(',');
         }
-        b.append("}, ");
-        b.append(marketBasis);
+
+        b.setLength(b.length() - 1);
         b.append('}');
         return b.toString();
     }

@@ -4,7 +4,7 @@ import java.util.Date;
 
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
-import net.powermatcher.api.data.PriceUpdate;
+import net.powermatcher.api.messages.PriceUpdate;
 
 /**
  * An {@link IncomingPriceUpdateEvent} is sent when an {@link AgentEndpoint} receives a new {@link PriceUpdate}.

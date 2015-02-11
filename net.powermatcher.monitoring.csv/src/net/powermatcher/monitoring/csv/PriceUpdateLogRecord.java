@@ -3,7 +3,7 @@ package net.powermatcher.monitoring.csv;
 import java.text.DateFormat;
 import java.util.Date;
 
-import net.powermatcher.api.data.PriceUpdate;
+import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.api.monitoring.events.PriceUpdateEvent;
 
 /**

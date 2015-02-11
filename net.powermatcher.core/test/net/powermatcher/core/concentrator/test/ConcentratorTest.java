@@ -10,7 +10,7 @@ import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
-import net.powermatcher.api.data.PriceUpdate;
+import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.core.concentrator.Concentrator;
 import net.powermatcher.mock.MockAgent;
 import net.powermatcher.mock.MockContext;

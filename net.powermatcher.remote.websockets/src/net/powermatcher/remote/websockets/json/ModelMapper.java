@@ -6,7 +6,7 @@ import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.PointBid;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PricePoint;
-import net.powermatcher.api.data.PriceUpdate;
+import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.remote.websockets.data.BidModel;
 import net.powermatcher.remote.websockets.data.MarketBasisModel;
 import net.powermatcher.remote.websockets.data.PricePointModel;

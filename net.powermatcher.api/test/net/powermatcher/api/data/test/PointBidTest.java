@@ -44,8 +44,6 @@ public class PointBidTest {
     private PricePoint[] pricePoints1;
     private PricePoint[] pricePoints2;
 
-    private int bidNumber;
-
     private PointBid bid1;
     private PointBid bid2;
 
@@ -53,13 +51,12 @@ public class PointBidTest {
     public void setUp() throws Exception {
         marketBasisFiveSteps = new MarketBasis(COMMODITY_ELECTRICITY, CURRENCY_EUR, 5, -1.0d, 7.0d);
         marketBasisTenSteps = new MarketBasis(COMMODITY_ELECTRICITY, CURRENCY_EUR, 10, -1.0d, 7.0d);
-        bidNumber = 1;
         pricePoints1 = new PricePoint[] { pricePoint(marketBasisFiveSteps, -1, 10.0),
                                          pricePoint(marketBasisFiveSteps, 7, 2.0) };
         pricePoints2 = new PricePoint[] { pricePoint(marketBasisTenSteps, 1, 25.0),
                                          pricePoint(marketBasisTenSteps, 7, 20.0) };
-        bid1 = new PointBid(marketBasisFiveSteps, bidNumber, pricePoints1);
-        bid2 = new PointBid(marketBasisTenSteps, bidNumber, pricePoints2);
+        bid1 = new PointBid(marketBasisFiveSteps, pricePoints1);
+        bid2 = new PointBid(marketBasisTenSteps, pricePoints2);
     }
 
     /**
@@ -73,14 +70,13 @@ public class PointBidTest {
     public void testConstructorNullMarketBasis() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("marketBasis is not allowed to be null");
-        new PointBid(null, 0, pricePoints1);
+        new PointBid(null, pricePoints1);
     }
 
     @Test
     public void testConstructor() {
-        PointBid bid = new PointBid(marketBasisFiveSteps, bidNumber, pricePoints1);
+        PointBid bid = new PointBid(marketBasisFiveSteps, pricePoints1);
         assertThat(bid.getMarketBasis(), is(equalTo(marketBasisFiveSteps)));
-        assertThat(bid.getBidNumber(), is(equalTo(bidNumber)));
         assertThat(bid.getPricePoints(), is(equalTo(pricePoints1)));
     }
 
@@ -100,15 +96,6 @@ public class PointBidTest {
         PointBid buildBid = builder.build();
         assertThat(buildBid.getPricePoints()[0], is(equalTo(pricePoint)));
         assertThat(buildBid.getPricePoints().length, is(equalTo(1)));
-    }
-
-    @Test
-    public void testBuilderSetBidNumber() {
-        PointBid.Builder builder = new Builder(marketBasisFiveSteps);
-        builder.add(0, 0);
-        builder.bidNumber(bidNumber);
-        PointBid buildBid = builder.build();
-        assertThat(buildBid.getBidNumber(), is(equalTo(bidNumber)));
     }
 
     @Test
@@ -199,9 +186,8 @@ public class PointBidTest {
 
     @Test
     public void testAggregateBid() {
-        PointBid other = new PointBid(marketBasisFiveSteps, bidNumber, pricePoints1);
+        PointBid other = new PointBid(marketBasisFiveSteps, pricePoints1);
         ArrayBid aggregatedBid = bid1.aggregate(other);
-        assertThat(aggregatedBid.getBidNumber(), is(equalTo(0)));
         assertThat(aggregatedBid.getMarketBasis(), is(equalTo(marketBasisFiveSteps)));
         double[] expectedDemand = new double[] { 20.0, 16.0, 12.0, 8.0, 4.0 };
         assertThat(aggregatedBid.getDemand(), is(equalTo(expectedDemand)));
@@ -213,7 +199,7 @@ public class PointBidTest {
         PricePoint pp2 = new PricePoint(new Price(marketBasisFiveSteps, 5), 20.0);
         PricePoint pp3 = new PricePoint(new Price(marketBasisFiveSteps, 7), 10.0);
         PricePoint[] pbArray = new PricePoint[] { pp1, pp2, pp3 };
-        PointBid bid = new PointBid(marketBasisFiveSteps, 0, pbArray);
+        PointBid bid = new PointBid(marketBasisFiveSteps, pbArray);
         Iterator<PricePoint> iterator = bid.iterator();
 
         assertThat(iterator.next(), is(equalTo(pp1)));
@@ -232,7 +218,7 @@ public class PointBidTest {
         PricePoint pp2 = new PricePoint(new Price(marketBasisFiveSteps, 5), 20.0);
         PricePoint pp3 = new PricePoint(new Price(marketBasisFiveSteps, 7), 10.0);
         PricePoint[] pbArray = new PricePoint[] { pp1, pp2, pp3 };
-        PointBid bid = new PointBid(marketBasisFiveSteps, 0, pbArray);
+        PointBid bid = new PointBid(marketBasisFiveSteps, pbArray);
         assertThat(bid.getPricePoints(), is(equalTo(pbArray)));
     }
 
@@ -254,7 +240,7 @@ public class PointBidTest {
         assertThat(bid1.equals(bid2), is(false));
         assertThat(bid2.equals(bid1), is(false));
 
-        Bid testBid = new PointBid(marketBasisFiveSteps, bidNumber, pricePoints1);
+        Bid testBid = new PointBid(marketBasisFiveSteps, pricePoints1);
         assertThat(bid1.equals(testBid), is(true));
         assertThat(testBid.equals(bid1), is(true));
 
@@ -262,7 +248,7 @@ public class PointBidTest {
         MarketBasis equalsBasis = new MarketBasis(COMMODITY_ELECTRICITY, CURRENCY_EUR, 5, -1.0d, 7.0d);
         PricePoint[] equalsArray = new PricePoint[] { pricePoint(marketBasisFiveSteps, -1, 10.0),
                                                      pricePoint(marketBasisFiveSteps, 7, 2.0) };
-        Bid otherBid = new PointBid(equalsBasis, bidNumber, equalsArray);
+        Bid otherBid = new PointBid(equalsBasis, equalsArray);
         assertThat(bid1.equals(otherBid), is(true));
         assertThat(testBid.equals(otherBid), is(true));
 
@@ -275,16 +261,16 @@ public class PointBidTest {
 
     @Test
     public void testHashCode() {
-        PointBid one = new PointBid(marketBasisTenSteps, 0, pricePoints2);
-        PointBid other = new PointBid(marketBasisTenSteps, 0, pricePoints2);
+        PointBid one = new PointBid(marketBasisTenSteps, pricePoints2);
+        PointBid other = new PointBid(marketBasisTenSteps, pricePoints2);
         assertThat(one.equals(other), is(true));
         assertThat(other.equals(one), is(true));
         assertThat(one.hashCode(), is(equalTo(other.hashCode())));
 
-        other = new PointBid(marketBasisFiveSteps, 0, pricePoints1);
+        other = new PointBid(marketBasisFiveSteps, pricePoints1);
         assertThat(one.hashCode(), is(not(equalTo(other.hashCode()))));
 
-        other = new PointBid(marketBasisFiveSteps, 1, pricePoints1);
+        other = new PointBid(marketBasisFiveSteps, pricePoints1);
         assertThat(one.hashCode(), is(not(equalTo(other.hashCode()))));
     }
 

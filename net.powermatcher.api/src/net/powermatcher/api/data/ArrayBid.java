@@ -44,11 +44,6 @@ public class ArrayBid
         private final MarketBasis marketBasis;
 
         /**
-         * The number or id of this Bid instance.
-         */
-        private int bidNumber;
-
-        /**
          * The index of the next item the demand array.
          */
         private int nextIndex;
@@ -66,20 +61,8 @@ public class ArrayBid
          */
         public Builder(MarketBasis marketBasis) {
             this.marketBasis = marketBasis;
-            bidNumber = 0;
             nextIndex = 0;
             builderDemand = new double[marketBasis.getPriceSteps()];
-        }
-
-        /**
-         * Sets the bidNumber with the specified bidNumber
-         *
-         * @param bidNumber
-         * @return this instance of the Builder with the set bidNumber
-         */
-        public Builder bidNumber(int bidNumber) {
-            this.bidNumber = bidNumber;
-            return this;
         }
 
         /**
@@ -146,7 +129,7 @@ public class ArrayBid
          */
         public ArrayBid build() {
             fillTo(builderDemand.length);
-            return new ArrayBid(marketBasis, bidNumber, builderDemand);
+            return new ArrayBid(marketBasis, builderDemand);
         }
 
         /**
@@ -199,13 +182,11 @@ public class ArrayBid
      *
      * @param marketBasis
      *            the {@link MarketBasis} of the cluster
-     * @param bidNumber
-     *            the number of this ArrayBid instance
      * @param demandArray
      *            the demandArray that belongs to this bid.
      */
-    public ArrayBid(MarketBasis marketBasis, int bidNumber, double[] demandArray) {
-        super(marketBasis, bidNumber);
+    public ArrayBid(MarketBasis marketBasis, double... demandArray) {
+        super(marketBasis);
         if (demandArray.length != marketBasis.getPriceSteps()) {
             throw new IllegalArgumentException("Length of the demandArray is not equal to the number of price steps");
         }
@@ -218,22 +199,9 @@ public class ArrayBid
      *
      * @param bid
      *            The {@link ArrayBid} you want to copy.
-     * @param the
-     *            bidnumber you want the new ArrayBid to have.
-     */
-    public ArrayBid(ArrayBid bid, int bidNumber) {
-        super(bid.marketBasis, bidNumber);
-        demandArray = Arrays.copyOf(bid.demandArray, bid.demandArray.length);
-    }
-
-    /**
-     * A copy constructor to create a copy of the given {@link ArrayBid}.
-     *
-     * @param bid
-     *            The {@link ArrayBid} you want to copy.
      */
     public ArrayBid(ArrayBid bid) {
-        super(bid.marketBasis, bid.bidNumber);
+        super(bid.marketBasis);
         demandArray = Arrays.copyOf(bid.demandArray, bid.demandArray.length);
     }
 
@@ -244,7 +212,7 @@ public class ArrayBid
      *            The {@link PointBid} this ArrayBid will be based on.
      */
     ArrayBid(PointBid base) {
-        super(base.getMarketBasis(), base.getBidNumber());
+        super(base.getMarketBasis());
 
         int priceSteps = marketBasis.getPriceSteps();
         demandArray = new double[priceSteps];
@@ -270,7 +238,7 @@ public class ArrayBid
         for (int i = 0; i < aggregatedDemand.length; i++) {
             aggregatedDemand[i] += demandArray[i];
         }
-        return new ArrayBid(marketBasis, 0, aggregatedDemand);
+        return new ArrayBid(marketBasis, aggregatedDemand);
     }
 
     /**
@@ -333,7 +301,7 @@ public class ArrayBid
         double rightDemand = demandArray[rightIx];
 
         double demandFactor = demandIsEqual(leftDemand, rightDemand) ? 0.5
-                                                                     : (leftDemand - targetDemand) / (leftDemand - rightDemand);
+                                                                    : (leftDemand - targetDemand) / (leftDemand - rightDemand);
         double price = leftPrice + (rightPrice - leftPrice) * demandFactor;
 
         return new Price(marketBasis, price);
@@ -518,7 +486,7 @@ public class ArrayBid
         for (int i = 0; i < newDemand.length; i++) {
             newDemand[i] -= otherDemand[i];
         }
-        return new ArrayBid(marketBasis, bidNumber, newDemand);
+        return new ArrayBid(marketBasis, newDemand);
     }
 
     /**
@@ -532,7 +500,7 @@ public class ArrayBid
         for (int i = 0; i < newDemand.length; i++) {
             newDemand[i] += offset;
         }
-        return new ArrayBid(marketBasis, bidNumber, newDemand);
+        return new ArrayBid(marketBasis, newDemand);
     }
 
     /**
@@ -540,7 +508,7 @@ public class ArrayBid
      */
     @Override
     public int hashCode() {
-        return 2011 * Arrays.hashCode(demandArray) + 3557 * bidNumber + marketBasis.hashCode();
+        return 2011 * Arrays.hashCode(demandArray) + marketBasis.hashCode();
     }
 
     /**
@@ -554,7 +522,7 @@ public class ArrayBid
             return false;
         } else {
             ArrayBid other = (ArrayBid) obj;
-            return other.bidNumber == bidNumber && marketBasis.equals(other.marketBasis)
+            return marketBasis.equals(other.marketBasis)
                    && Arrays.equals(other.getDemand(), getDemand());
         }
     }
@@ -565,21 +533,13 @@ public class ArrayBid
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder();
-        b.append("ArrayBid{bidNumber=").append(bidNumber);
+        b.append("ArrayBid [");
 
-        double[] demand = getDemand();
-        if (demand != null) {
-            b.append(", demand[]{");
-            for (int i = 0; i < demand.length; i++) {
-                if (i > 0) {
-                    b.append(',');
-                }
-                b.append(MarketBasis.DEMAND_FORMAT.format(demand[i]));
-            }
-            b.append("}, ");
+        for (double demand : demandArray) {
+            b.append(MarketBasis.DEMAND_FORMAT.format(demand)).append(',');
         }
-        b.append(marketBasis);
-        b.append('}');
+        b.setLength(b.length() - 1);
+        b.append(']');
         return b.toString();
     }
 }

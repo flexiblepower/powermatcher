@@ -93,7 +93,10 @@ public class PricePoint
      */
     @Override
     public String toString() {
-        return "PricePoint{" + price + ", demand = " + demand + ")";
+        return "{" + MarketBasis.PRICE_FORMAT.format(price.getPriceValue())
+               + " -> "
+               + MarketBasis.DEMAND_FORMAT.format(demand)
+               + "}";
     }
 
     /**

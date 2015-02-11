@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.zip.DataFormatException;
 
 import net.powermatcher.api.data.Price;
-import net.powermatcher.api.data.PriceUpdate;
+import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.mock.MockAgent;
 
 import org.junit.Ignore;

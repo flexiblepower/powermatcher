@@ -7,7 +7,7 @@ import javax.naming.OperationNotSupportedException;
 
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
-import net.powermatcher.api.data.PriceUpdate;
+import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.core.communication.BaseAgentEndpointProxy;
 import net.powermatcher.remote.websockets.json.PmJsonSerializer;
