@@ -13,3 +13,4 @@ RemoteSystemsTempFiles/.project
 */bin_test/*
 .recommenders/
 testdir/
+.com_puppetlabs_geppetto_pptp_target
