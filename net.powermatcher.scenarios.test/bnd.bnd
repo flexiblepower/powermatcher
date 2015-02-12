@@ -3,13 +3,13 @@
 	com.google.gson,\
 	org.apache.felix.metatype,\
 	net.powermatcher.scenarios;version=latest,\
-	org.apache.commons.io
+	org.apache.commons.io,\
+	junit,\
+	junit.osgi
 -testpath: \
 	${test}
 
 Bundle-Version: 1.0.0.${tstamp}
-Private-Package:  \
-	net.powermatcher.scenarios.data.test
 Test-Cases: ${classes;ANNOTATION;org.junit.Test}
 
 -runee: JavaSE-1.6
@@ -27,3 +27,5 @@ Test-Cases: ${classes;ANNOTATION;org.junit.Test}
 	org.apache.commons.io;version='[2.4.0,2.4.1)',\
 	org.apache.felix.configadmin;version='[1.8.0,1.8.1)',\
 	slf4j.api;version='[1.7.7,1.7.8)'
+Export-Package:  \
+	net.powermatcher.scenarios.data.test
