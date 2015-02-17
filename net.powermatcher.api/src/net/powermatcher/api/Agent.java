@@ -22,11 +22,6 @@ public interface Agent {
     String getClusterId();
 
     /**
-     * @return the id of the desired parent {@link Agent}. <code>null</code> when no parent is required (Auctioneer).
-     */
-    String getDesiredParentId();
-
-    /**
      * Give the agent a reference to a {@link FlexiblePowerContext}. This should be done by the runtime bundle after the
      * component is activated.
      *

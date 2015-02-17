@@ -12,7 +12,13 @@ import net.powermatcher.api.messages.PriceUpdate;
  * @author FAN
  * @version 2.0
  */
-public interface AgentEndpoint extends Agent {
+public interface AgentEndpoint
+    extends Agent {
+
+    /**
+     * @return the id of the desired parent {@link Agent}.
+     */
+    String getDesiredParentId();
 
     /**
      * Connects this {@link AgentEndpoint} instance to a {@link MatcherEndpoint} .

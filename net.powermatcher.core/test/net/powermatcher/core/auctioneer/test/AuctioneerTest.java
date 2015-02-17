@@ -10,6 +10,7 @@ import net.powermatcher.api.Session;
 import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
+import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.events.AgentEvent;
 import net.powermatcher.api.monitoring.events.IncomingBidEvent;
@@ -119,7 +120,8 @@ public class AuctioneerTest {
 
     @Test(expected = IllegalStateException.class)
     public void testUpdateBidNullSession() {
-        auctioneer.handleBidUpdate(null, new ArrayBid(marketBasis, 0, new double[] { 5.0, 4.0, 3.0, 1.0, 0.0 }));
+        auctioneer.handleBidUpdate(null, new BidUpdate(new ArrayBid(marketBasis,
+                                                                    new double[] { 5.0, 4.0, 3.0, 1.0, 0.0 }), 0));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -128,7 +130,8 @@ public class AuctioneerTest {
         mockAgent.setDesiredParentId(AUCTIONEER_ID);
         new SimpleSession(mockAgent, auctioneer).connect();
 
-        auctioneer.handleBidUpdate(mockAgent.getSession(), Bid.flatDemand(new MarketBasis("a", "b", 2, 0, 2), 0, 0));
+        auctioneer.handleBidUpdate(mockAgent.getSession(),
+                                   new BidUpdate(Bid.flatDemand(new MarketBasis("a", "b", 2, 0, 2), 0), 0));
     }
 
     @Test
@@ -142,13 +145,13 @@ public class AuctioneerTest {
         new SimpleSession(mockAgent, auctioneer).connect();
 
         double[] demandArray = new double[] { 2, 1, 0, -1, -2 };
-        Bid bid = new ArrayBid(marketBasis, 0, demandArray);
-        mockAgent.sendBid(bid);
+        Bid bid = new ArrayBid(marketBasis, demandArray);
+        mockAgent.sendBid(bid, 0);
 
         assertThat(observer.incomingBidEvent.getClusterId(), is(equalTo(CLUSTER_ID)));
         assertThat(observer.incomingBidEvent.getAgentId(), is(equalTo(AUCTIONEER_ID)));
         assertThat(observer.incomingBidEvent.getFromAgentId(), is(equalTo(agentName)));
-        assertThat(observer.incomingBidEvent.getBid(), is(equalTo(bid)));
+        assertThat(observer.incomingBidEvent.getBidUpdate().getBid(), is(equalTo(bid)));
     }
 
     @Test
@@ -162,8 +165,8 @@ public class AuctioneerTest {
         new SimpleSession(mockAgent, auctioneer).connect();
 
         double[] demandArray = new double[] { 2, 1, 0, -1, -2 };
-        Bid bid = new ArrayBid(marketBasis, 0, demandArray);
-        mockAgent.sendBid(bid);
+        Bid bid = new ArrayBid(marketBasis, demandArray);
+        mockAgent.sendBid(bid, 0);
         assertThat(mockAgent.getLastPriceUpdate(), is(nullValue()));
         mockContext.getMockScheduler().doTaskOnce();
         assertThat(mockAgent.getLastPriceUpdate(), is(notNullValue()));

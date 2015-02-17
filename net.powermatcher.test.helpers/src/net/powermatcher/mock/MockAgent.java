@@ -10,7 +10,8 @@ import net.powermatcher.api.Agent;
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
-import net.powermatcher.api.data.PriceUpdate;
+import net.powermatcher.api.messages.BidUpdate;
+import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.events.AgentEvent;
@@ -64,8 +65,12 @@ public class MockAgent
         lastPriceUpdate = priceUpdate;
     }
 
-    public void sendBid(Bid newBid) {
-        session.updateBid(newBid);
+    public void sendBid(Bid bid, int bidNumber) {
+        session.updateBid(new BidUpdate(bid, bidNumber));
+    }
+
+    public void sendBid(BidUpdate bidUpdate) {
+        session.updateBid(bidUpdate);
     }
 
     /**

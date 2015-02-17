@@ -57,8 +57,8 @@ public class PeakShavingConcentratorTest {
     public void testUpdatePriceNoTransformation() throws Exception {
         setUp(-10, 10);
 
-        Bid bid = new ArrayBid(marketBasis, 0, new double[] { 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8 });
-        deviceAgent.sendBid(bid);
+        Bid bid = new ArrayBid(marketBasis, 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8);
+        deviceAgent.sendBid(bid, 0);
         context.getMockScheduler().doTaskOnce();
         int bidNumber = matcher.getLastReceivedBid().getBidNumber();
         PriceUpdate expected = new PriceUpdate(new Price(marketBasis, 0.0), bidNumber);
@@ -70,8 +70,8 @@ public class PeakShavingConcentratorTest {
     public void testUpdatePriceWithTransformation() throws Exception {
         setUp(-1, 1);
 
-        Bid bid = new ArrayBid(marketBasis, 0, new double[] { 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8 });
-        deviceAgent.sendBid(bid);
+        Bid bid = new ArrayBid(marketBasis, 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8);
+        deviceAgent.sendBid(bid, 0);
         context.getMockScheduler().doTaskOnce();
         int bidNumber = matcher.getLastReceivedBid().getBidNumber();
         PriceUpdate sentPrice = new PriceUpdate(new Price(marketBasis, 10.0), bidNumber);
@@ -85,12 +85,13 @@ public class PeakShavingConcentratorTest {
         setUp(-1, 1);
 
         double[] demandArray = new double[] { 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8 };
-        Bid arrayBid = new ArrayBid(marketBasis, 1, demandArray);
-        deviceAgent.sendBid(arrayBid);
+        Bid arrayBid = new ArrayBid(marketBasis, demandArray);
+        deviceAgent.sendBid(arrayBid, 8);
         context.getMockScheduler().doTaskOnce();
         double[] transformedDemandArray = new double[] { 1, 1, 0, -1, -1, -1, -1, -1, -1, -1, -1 };
-        Bid expectedBid = new ArrayBid(marketBasis, 0, transformedDemandArray);
-        assertThat(matcher.getLastReceivedBid(), is(equalTo(expectedBid)));
+        Bid expectedBid = new ArrayBid(marketBasis, transformedDemandArray);
+        assertThat(matcher.getLastReceivedBid().getBid(), is(equalTo(expectedBid)));
+        assertThat(matcher.getLastReceivedBid().getBidNumber(), is(equalTo(1)));
     }
 
     @Test
@@ -98,10 +99,11 @@ public class PeakShavingConcentratorTest {
         setUp(-1, 1);
 
         double[] demandArray = new double[] { 1, 1, 0, -1, -1, -1, -1, -1, -1, -1, -1 };
-        ArrayBid arrayBid = new ArrayBid(marketBasis, 1, demandArray);
-        deviceAgent.sendBid(arrayBid);
+        ArrayBid arrayBid = new ArrayBid(marketBasis, demandArray);
+        deviceAgent.sendBid(arrayBid, 9);
         context.getMockScheduler().doTaskOnce();
-        Bid expectedBid = new ArrayBid(arrayBid, 0);
-        assertThat(matcher.getLastReceivedBid(), is(equalTo(expectedBid)));
+        Bid expectedBid = new ArrayBid(arrayBid);
+        assertThat(matcher.getLastReceivedBid().getBid(), is(equalTo(expectedBid)));
+        assertThat(matcher.getLastReceivedBid().getBidNumber(), is(equalTo(1)));
     }
 }

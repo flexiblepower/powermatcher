@@ -8,4 +8,4 @@ Export-Package:  \
 	net.powermatcher.core.auctioneer,\
 	net.powermatcher.core.bidcache,\
 	net.powermatcher.core.concentrator,\
-	net.powermatcher.core.communication
+	net.powermatcher.core.proxy

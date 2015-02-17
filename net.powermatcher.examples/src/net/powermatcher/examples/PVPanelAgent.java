@@ -1,6 +1,5 @@
 package net.powermatcher.examples;
 
-import java.util.Date;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ScheduledExecutorService;
@@ -8,7 +7,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import net.powermatcher.api.AgentEndpoint;
-import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.PointBid;
 import net.powermatcher.api.data.Price;
@@ -16,7 +14,7 @@ import net.powermatcher.api.data.PricePoint;
 import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
-import net.powermatcher.core.BaseDeviceAgent;
+import net.powermatcher.core.BaseAgentEndpoint;
 
 import org.flexiblepower.context.FlexiblePowerContext;
 import org.slf4j.Logger;
@@ -29,7 +27,7 @@ import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
 
 /**
- * {@link PVPanelAgent} is a implementation of a {@link BaseDeviceAgent}. It represents a dummy freezer.
+ * {@link PVPanelAgent} is a implementation of a {@link BaseAgentEndpoint}. It represents a dummy freezer.
  * {@link PVPanelAgent} creates a {@link PointBid} with random {@link PricePoint}s at a set interval. It does nothing
  * with the returned {@link Price}.
  *
@@ -40,7 +38,7 @@ import aQute.bnd.annotation.metatype.Meta;
            immediate = true,
            provide = { ObservableAgent.class, AgentEndpoint.class })
 public class PVPanelAgent
-    extends BaseDeviceAgent
+    extends BaseAgentEndpoint
     implements AgentEndpoint {
     private static final Logger LOGGER = LoggerFactory
                                                       .getLogger(PVPanelAgent.class);
@@ -90,8 +88,7 @@ public class PVPanelAgent
     @Activate
     public void activate(Map<String, Object> properties) {
         config = Configurable.createConfigurable(Config.class, properties);
-        setAgentId(config.agentId());
-        setDesiredParentId(config.desiredParentId());
+        activate(config.agentId(), config.desiredParentId());
 
         minimumDemand = config.minimumDemand();
         maximumDemand = config.maximumDemand();
@@ -102,12 +99,10 @@ public class PVPanelAgent
     /**
      * OSGi calls this method to deactivate a managed service.
      */
+    @Override
     @Deactivate
     public void deactivate() {
-        Session session = getSession();
-        if (session != null) {
-            session.disconnect();
-        }
+        super.deactivate();
         scheduledFuture.cancel(false);
         LOGGER.info("Agent [{}], deactivated", getAgentId());
     }
@@ -115,20 +110,11 @@ public class PVPanelAgent
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected void doBidUpdate() {
-        if (getMarketBasis() != null && isInitialized()) {
+    void doBidUpdate() {
+        if (isInitialized()) {
             double demand = minimumDemand + (maximumDemand - minimumDemand)
                             * generator.nextDouble();
-
-            PricePoint pricePoint1 = new PricePoint(new Price(getMarketBasis(),
-                                                              getMarketBasis().getMinimumPrice()), demand);
-            PricePoint pricePoint2 = new PricePoint(new Price(getMarketBasis(),
-                                                              getMarketBasis().getMaximumPrice()), minimumDemand);
-
-            Bid newBid = createBid(pricePoint1, pricePoint2);
-            LOGGER.debug("updateBid({})", newBid);
-            publishBid(newBid);
+            publishBid(Bid.flatDemand(getMarketBasis(), demand));
         }
     }
 
@@ -138,7 +124,7 @@ public class PVPanelAgent
     @Override
     public synchronized void handlePriceUpdate(PriceUpdate priceUpdate) {
         LOGGER.debug("Received price update [{}], current bidNr = {}",
-                     priceUpdate, getBidNumberGenerator());
+                     priceUpdate, getLastBidUpdate().getBidNumber());
         publishEvent(new IncomingPriceUpdateEvent(getClusterId(),
                                                   getAgentId(),
                                                   getSession().getSessionId(),
@@ -162,13 +148,5 @@ public class PVPanelAgent
                 doBidUpdate();
             }
         }, 0, config.bidUpdateRate(), TimeUnit.SECONDS);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected Date now() {
-        return context.currentTime();
     }
 }

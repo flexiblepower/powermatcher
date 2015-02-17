@@ -5,8 +5,10 @@ import java.util.Set;
 
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
+import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.core.auctioneer.Auctioneer;
+import net.powermatcher.mock.MockContext;
 
 /**
  *
@@ -16,7 +18,7 @@ import net.powermatcher.core.auctioneer.Auctioneer;
 public class AuctioneerWrapper
     extends Auctioneer {
 
-    private Bid lastReceivedBid;
+    private BidUpdate lastReceivedBid;
     private final Set<Session> shadowedSessions = new HashSet<Session>();
 
     /**
@@ -38,7 +40,7 @@ public class AuctioneerWrapper
     }
 
     public void publishPrice() {
-        super.publishNewPrice();
+        ((MockContext) context).getMockScheduler().doTaskOnce();
     }
 
     public void publishPrice(PriceUpdate priceUpdate) {
@@ -51,16 +53,16 @@ public class AuctioneerWrapper
      * {@inheritDoc}
      */
     @Override
-    public void handleBidUpdate(Session session, Bid newBid) {
-        lastReceivedBid = newBid;
-        super.handleBidUpdate(session, newBid);
+    public void handleBidUpdate(Session session, BidUpdate bidUpdate) {
+        lastReceivedBid = bidUpdate;
+        super.handleBidUpdate(session, bidUpdate);
     }
 
     public Bid getAggregatedBid() {
-        return aggregatedBids.aggregate().getAggregatedBid();
+        return aggregate();
     }
 
-    public Bid getLastReceivedBid() {
+    public BidUpdate getLastReceivedBid() {
         return lastReceivedBid;
     }
 

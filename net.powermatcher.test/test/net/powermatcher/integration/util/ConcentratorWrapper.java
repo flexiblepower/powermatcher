@@ -1,7 +1,7 @@
 package net.powermatcher.integration.util;
 
 import net.powermatcher.api.Session;
-import net.powermatcher.api.data.Bid;
+import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.core.concentrator.Concentrator;
 
@@ -20,8 +20,8 @@ public class ConcentratorWrapper
 
     private PriceUpdate lastPublishedPriceUpdate;
     private PriceUpdate lastReceivedPriceUpdate;
-    private Bid lastReceivedBid;
-    private Bid lastPublishedBid;
+    private BidUpdate lastReceivedBid;
+    private BidUpdate lastPublishedBid;
 
     /**
      * {@inheritDoc}
@@ -41,12 +41,12 @@ public class ConcentratorWrapper
      * {@inheritDoc}
      */
     @Override
-    public void handleBidUpdate(Session session, Bid newBid) {
+    public void handleBidUpdate(Session session, BidUpdate bidUpdate) {
         try {
             // Exceptions can be thrown in updateBid, if so, lastPublishedBid is not set.
-            lastReceivedBid = newBid;
-            super.handleBidUpdate(session, newBid);
-            lastPublishedBid = newBid;
+            lastReceivedBid = bidUpdate;
+            super.handleBidUpdate(session, bidUpdate);
+            lastPublishedBid = bidUpdate;
         } catch (IllegalArgumentException e) {
             LOGGER.error("Illegal argument or state in updateBid.", e);
             throw e;
@@ -68,11 +68,11 @@ public class ConcentratorWrapper
         return lastPublishedPriceUpdate;
     }
 
-    public Bid getLastReceivedBid() {
+    public BidUpdate getLastReceivedBid() {
         return lastReceivedBid;
     }
 
-    public Bid getLastPublishedBid() {
+    public BidUpdate getLastPublishedBid() {
         return lastPublishedBid;
     }
 }

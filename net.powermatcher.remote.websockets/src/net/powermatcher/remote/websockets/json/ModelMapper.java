@@ -6,6 +6,7 @@ import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.PointBid;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PricePoint;
+import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.remote.websockets.data.BidModel;
 import net.powermatcher.remote.websockets.data.MarketBasisModel;
@@ -14,7 +15,7 @@ import net.powermatcher.remote.websockets.data.PriceUpdateModel;
 
 /**
  * Helper class to mapp between net.powermatcher.api.data classes and model classed for wire transfer.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
@@ -25,30 +26,31 @@ public class ModelMapper {
 
     /**
      * Map from {@link BidModel} to {@link Bid}
-     * 
+     *
      * @param bidModel
      *            the bidmodel to map
      * @return a mapped {@link Bid}
      */
-    public static Bid mapBid(BidModel bidModel) {
-        Bid bid = null;
+    public static BidUpdate mapBidUpdate(BidModel bidModel) {
+        BidUpdate bidUpdate = null;
 
         MarketBasis marketBasis = convertMarketBasis(bidModel.getMarketBasis());
 
         // Include either pricepoints or demand and not both.
         PricePointModel[] pricePointsModel = bidModel.getPricePoints();
         if (pricePointsModel == null || pricePointsModel.length == 0) {
-            bid = new ArrayBid(marketBasis, bidModel.getBidNumber(), bidModel.getDemand());
+            bidUpdate = new BidUpdate(new ArrayBid(marketBasis, bidModel.getDemand()), bidModel.getBidNumber());
         } else {
-            bid = new PointBid(marketBasis, bidModel.getBidNumber(), convertPricePoints(marketBasis, pricePointsModel));
+            bidUpdate = new BidUpdate(new PointBid(marketBasis, convertPricePoints(marketBasis, pricePointsModel)),
+                                      bidModel.getBidNumber());
         }
 
-        return bid;
+        return bidUpdate;
     }
 
     /**
      * Map from {@link PriceUpdateModel} to {@link PriceUpdate}
-     * 
+     *
      * @param priceUpdateModel
      *            the priceupdate to map
      * @return a mapped {@link PriceUpdate}
@@ -61,7 +63,7 @@ public class ModelMapper {
 
     /**
      * Convert a list of {@link PricePointModel} to a list of {@link PricePoint}
-     * 
+     *
      * @param marketBasis
      *            the marketbasis to use
      * @param pricePointsModel
@@ -73,7 +75,7 @@ public class ModelMapper {
         PricePoint[] pricePoints = new PricePoint[pricePointsModel.length];
         for (int i = 0; i < pricePoints.length; i++) {
             pricePoints[i] = new PricePoint(marketBasis, pricePointsModel[i].getPrice(),
-                    pricePointsModel[i].getDemand());
+                                            pricePointsModel[i].getDemand());
         }
 
         return pricePoints;
@@ -81,7 +83,7 @@ public class ModelMapper {
 
     /**
      * Convert a list of {@link PricePoint} to a list of {@link PricePointModel}
-     * 
+     *
      * @param pricePointsModel
      *            the list of pricepoint
      * @return a list of {@link PricePointModel}
@@ -99,7 +101,7 @@ public class ModelMapper {
 
     /**
      * Convert a {@link MarketBasis} to a {@link MarketBasisModel}
-     * 
+     *
      * @param marketBasis
      *            the market basis
      * @return a {@link MarketBasisModel}
@@ -116,15 +118,15 @@ public class ModelMapper {
 
     /**
      * Convert a {@link MarketBasisModel} to a {@link MarketBasis}
-     * 
+     *
      * @param marketBasisModel
      *            the market basis model
      * @return a {@link MarketBasis}
      */
     public static MarketBasis convertMarketBasis(MarketBasisModel marketBasisModel) {
         MarketBasis marketBasis = new MarketBasis(marketBasisModel.getCommodity(), marketBasisModel.getCurrency(),
-                marketBasisModel.getPriceSteps(), marketBasisModel.getMinimumPrice(),
-                marketBasisModel.getMaximumPrice());
+                                                  marketBasisModel.getPriceSteps(), marketBasisModel.getMinimumPrice(),
+                                                  marketBasisModel.getMaximumPrice());
         return marketBasis;
     }
 }

@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.util.Date;
 
 import net.powermatcher.api.data.Bid;
+import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.monitoring.events.BidEvent;
 
 /**
@@ -18,7 +19,7 @@ public class BidLogRecord
     /**
      * The {@link Bid} the {@link BidEvent} was sent for.
      */
-    private final Bid bid;
+    private final BidUpdate bidUpdate;
 
     /**
      * A constructor that creates an instance of this class.
@@ -33,13 +34,13 @@ public class BidLogRecord
     public BidLogRecord(BidEvent event, Date logTime, DateFormat dateFormat) {
         super(event.getClusterId(), event.getAgentId(), logTime, event.getTimestamp(), dateFormat);
 
-        bid = event.getBid();
+        bidUpdate = event.getBidUpdate();
     }
 
     /**
      * @return the current value of bid.
      */
-    public Bid getBid() {
-        return bid;
+    public BidUpdate getBidUpdate() {
+        return bidUpdate;
     }
 }

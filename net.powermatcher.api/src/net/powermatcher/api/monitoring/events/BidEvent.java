@@ -6,7 +6,7 @@ import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
-import net.powermatcher.api.data.Price;
+import net.powermatcher.api.messages.BidUpdate;
 
 /**
  * An {@link BidEvent} is sent when an {@link Bid} is sent or Received by an {@link AgentEndpoint} or a
@@ -19,9 +19,9 @@ public abstract class BidEvent
     extends AgentEvent {
 
     /**
-     * The new {@link Bid} created by the {@link AgentEndpoint} subclass.
+     * The new {@link BidUpdate} created by the {@link AgentEndpoint} subclass.
      */
-    private final Bid bid;
+    private final BidUpdate bidUpdate;
 
     /**
      * The id of the {@link Session} of the {@link AgentEndpoint} subclass sending the UpdateEvent
@@ -39,20 +39,20 @@ public abstract class BidEvent
      *            The id of the {@link Session} of the {@link AgentEndpoint} subclass sending the UpdateEvent
      * @param timestamp
      *            The {@link Date} received from the {@link TimeService}
-     * @param bid
-     *            The new {@link Price} created by the {@link AgentEndpoint} subclass.
+     * @param bidUpdate
+     *            The new {@link BidUpdate} created by the {@link AgentEndpoint} subclass.
      */
-    public BidEvent(String clusterId, String agentId, String sessionId, Date timestamp, Bid bid) {
+    public BidEvent(String clusterId, String agentId, String sessionId, Date timestamp, BidUpdate bidUpdate) {
         super(clusterId, agentId, timestamp);
-        this.bid = bid;
+        this.bidUpdate = bidUpdate;
         this.sessionId = sessionId;
     }
 
     /**
      * @return the current value of bid.
      */
-    public Bid getBid() {
-        return bid;
+    public BidUpdate getBidUpdate() {
+        return bidUpdate;
     }
 
     /**
@@ -70,7 +70,7 @@ public abstract class BidEvent
         return super.toString()
                + ", sessionId = "
                + sessionId
-               + ", bid = "
-               + bid.toString();
+               + ", bidUpdate = "
+               + bidUpdate.toString();
     }
 }

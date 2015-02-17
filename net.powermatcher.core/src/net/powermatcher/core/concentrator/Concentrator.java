@@ -1,8 +1,9 @@
 package net.powermatcher.core.concentrator;
 
+import java.util.Deque;
+import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -11,20 +12,15 @@ import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
+import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
-import net.powermatcher.api.monitoring.events.IncomingBidEvent;
-import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
-import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
-import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
-import net.powermatcher.core.BaseAgent;
+import net.powermatcher.core.BaseAgentEndpoint;
+import net.powermatcher.core.BaseMatcherEndpoint;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.bidcache.AggregatedBid;
-import net.powermatcher.core.bidcache.BidCache;
 
 import org.flexiblepower.context.FlexiblePowerContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
@@ -45,16 +41,11 @@ import aQute.bnd.annotation.metatype.Meta;
  * @author FAN
  * @version 2.0
  */
-@Component(designateFactory = Concentrator.Config.class,
-           immediate = true,
-           provide = { ObservableAgent.class,
-                      MatcherEndpoint.class,
-                      AgentEndpoint.class })
+@Component(designateFactory = Concentrator.Config.class, immediate = true,
+           provide = { AgentEndpoint.class, ObservableAgent.class, MatcherEndpoint.class })
 public class Concentrator
-    extends BaseAgent
-    implements MatcherEndpoint, AgentEndpoint {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Concentrator.class);
+    extends BaseAgentEndpoint
+    implements MatcherEndpoint {
 
     @Meta.OCD
     public static interface Config {
@@ -68,30 +59,17 @@ public class Concentrator
         long bidUpdateRate();
     }
 
+    private static final int MAX_BIDS = 900;
+
+    private final BaseMatcherEndpoint matcherPart = new BaseMatcherEndpoint() {
+    };
+
     /**
      * The schedule that is running the bid updates. This is created in the {@link #activate(Map)} method and cancelled
      * in the {@link #deactivate()} method.
      */
     private ScheduledFuture<?> bidUpdateSchedule;
 
-    /**
-     * {@link Session} object for connecting to matcher
-     */
-    private volatile Session sessionToMatcher;
-
-    /**
-     * The {@link Bid} cache maintains an aggregated {@link Bid}, where bids can be added and removed explicitly.
-     */
-    private volatile BidCache aggregatedBids;
-
-    /**
-     * Holds the sessions from the agents.
-     */
-    private final Map<String, Session> sessionToAgents = new ConcurrentHashMap<String, Session>();
-
-    /**
-     * OSGI configuration meta type with info about the concentrator.
-     */
     protected Config config;
 
     /**
@@ -101,7 +79,7 @@ public class Concentrator
      *            the configuration properties
      */
     @Activate
-    public void activate(final Map<String, Object> properties) {
+    public void activate(final Map<String, ?> properties) {
         activate(Configurable.createConfigurable(Config.class, properties));
     }
 
@@ -113,33 +91,30 @@ public class Concentrator
      */
     public void activate(Config config) {
         this.config = config;
-        setAgentId(config.agentId());
-        setDesiredParentId(config.desiredParentId());
-        LOGGER.info("Agent [{}], activated", config.agentId());
+        matcherPart.activate(config.agentId());
+        activate(config.agentId(), config.desiredParentId());
+
+        Hashtable<String, Object> properties = new Hashtable<String, Object>();
+        properties.put("agentId", config.agentId());
+
+        LOGGER.info("Concentrator [{}], activated", config.agentId());
     }
 
-    /**
-     * @param the
-     *            new {@link ScheduledExecutorService} implementation.
-     */
     @Override
     public void setContext(FlexiblePowerContext context) {
         super.setContext(context);
+        matcherPart.setContext(context);
 
         Runnable command = new Runnable() {
-            /**
-             * {@inheritDoc}
-             */
             @Override
             public void run() {
                 try {
                     doBidUpdate();
-                } catch (IllegalStateException e) {
-                    LOGGER.error("doBidUpate failed for Concentrator " + config.agentId(), e);
-                } catch (IllegalArgumentException e) {
+                } catch (RuntimeException e) {
                     LOGGER.error("doBidUpate failed for Concentrator " + config.agentId(), e);
                 }
             }
+
         };
 
         bidUpdateSchedule = context.getScheduler().scheduleAtFixedRate(command,
@@ -151,96 +126,32 @@ public class Concentrator
     /**
      * OSGi calls this method to deactivate a managed service.
      */
+    @Override
     @Deactivate
     public void deactivate() {
         bidUpdateSchedule.cancel(false);
-
-        LOGGER.info("Agent [{}], deactivated", config.agentId());
+        LOGGER.info("Concentrator [{}], deactivated", config.agentId());
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    void doBidUpdate() {
+        if (matcherPart.isInitialized()) {
+            AggregatedBid aggregatedBid = matcherPart.aggregate();
+            Bid bid = transformBid(aggregatedBid);
+            BidUpdate bidUpdate = publishBid(bid);
+            saveBid(aggregatedBid, bidUpdate);
+        }
+    }
+
     @Override
     public void connectToMatcher(Session session) {
-        sessionToMatcher = session;
-        aggregatedBids = new BidCache(session.getMarketBasis());
-        setClusterId(session.getClusterId());
+        super.connectToMatcher(session);
+        matcherPart.configure(session.getMarketBasis(), session.getClusterId());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void matcherEndpointDisconnected(Session session) {
-        for (Session agentSession : sessionToAgents.values().toArray(new Session[sessionToAgents.size()])) {
-            agentSession.disconnect();
-        }
-        setClusterId(null);
-        aggregatedBids = null;
-        sessionToMatcher = null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean connectToAgent(Session session) {
-        if (sessionToMatcher == null) {
-            return false;
-        } else if (!sessionToAgents.containsKey(session.getAgentId())) {
-            session.setMarketBasis(sessionToMatcher.getMarketBasis());
-            sessionToAgents.put(session.getAgentId(), session);
-            LOGGER.info("Agent connected with session [{}]", session.getSessionId());
-            return true;
-        } else {
-            LOGGER.warn("An agent with id [{}] was already connected", session.getAgentId());
-            return false;
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void agentEndpointDisconnected(Session session) {
-        // Find session
-        Session foundSession = sessionToAgents.get(session.getAgentId());
-        if (foundSession == null || !foundSession.equals(session)) {
-            return;
-        } else {
-            sessionToAgents.remove(session.getAgentId());
-
-            aggregatedBids.removeBidOfAgent(session.getAgentId());
-
-            LOGGER.info("Agent disconnected with session [{}]", session.getSessionId());
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void handleBidUpdate(Session session, Bid newBid) {
-        if (session == null || !sessionToAgents.containsKey(session.getAgentId())) {
-            throw new IllegalStateException("No session found");
-        }
-
-        if (newBid == null || !newBid.getMarketBasis().equals(sessionToMatcher.getMarketBasis())) {
-            throw new IllegalArgumentException("Marketbasis new bid differs from marketbasis auctioneer");
-        }
-
-        publishEvent(new IncomingBidEvent(session.getClusterId(),
-                                          config.agentId(),
-                                          session.getSessionId(),
-                                          context.currentTime(),
-                                          "agentId",
-                                          newBid));
-
-        // Update agent in aggregatedBids
-        aggregatedBids.updateAgentBid(session.getAgentId(), newBid);
-
-        LOGGER.info("Received from session [{}] bid update [{}] ", session.getSessionId(), newBid);
+    public synchronized void matcherEndpointDisconnected(Session session) {
+        matcherPart.unconfigure();
+        super.matcherEndpointDisconnected(session);
     }
 
     /**
@@ -248,59 +159,14 @@ public class Concentrator
      */
     @Override
     public void handlePriceUpdate(PriceUpdate priceUpdate) {
-        if (priceUpdate == null) {
-            String message = "Price cannot be null";
-            LOGGER.error(message);
-            throw new IllegalArgumentException(message);
-        }
-
-        LOGGER.debug("Received price update [{}]", priceUpdate);
-        publishEvent(new IncomingPriceUpdateEvent(sessionToMatcher.getClusterId(),
-                                                  config.agentId(),
-                                                  sessionToMatcher.getSessionId(),
-                                                  context.currentTime(),
-                                                  priceUpdate));
+        super.handlePriceUpdate(priceUpdate);
 
         try {
-            AggregatedBid aggregatedBid = aggregatedBids.retreiveAggregatedBid(priceUpdate.getBidNumber());
-            Price price = transformPrice(priceUpdate.getPrice(), aggregatedBid.getAggregatedBid());
-
-            // Publish new price to connected agents
-            for (Session session : sessionToAgents.values()) {
-                Integer originalAgentBid = aggregatedBid.getAgentBidReferences().get(session.getAgentId());
-                if (originalAgentBid != null) {
-                    PriceUpdate agentPriceUpdate = new PriceUpdate(price, originalAgentBid);
-                    session.updatePrice(agentPriceUpdate);
-
-                    publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(),
-                                                              config.agentId(),
-                                                              session.getSessionId(),
-                                                              context.currentTime(),
-                                                              priceUpdate));
-                }
-            }
+            SentBidInformation info = retreiveAggregatedBid(priceUpdate.getBidNumber());
+            Price price = transformPrice(priceUpdate.getPrice(), info);
+            matcherPart.publishPrice(price, info.getOriginalBid());
         } catch (IllegalArgumentException ex) {
             LOGGER.warn("Received a price update for a bid that I never sent, id: {}", priceUpdate.getBidNumber());
-        }
-    }
-
-    /**
-     * Aggregates the bids and sends them to the matching agent.
-     */
-    final void doBidUpdate() {
-        if (sessionToMatcher != null && aggregatedBids != null && isInitialized()) {
-            AggregatedBid aggregatedBid = aggregatedBids.aggregate();
-
-            Bid bid = transformBid(aggregatedBid.getAggregatedBid());
-
-            sessionToMatcher.updateBid(bid);
-            publishEvent(new OutgoingBidEvent(sessionToMatcher.getClusterId(),
-                                              config.agentId(),
-                                              sessionToMatcher.getSessionId(),
-                                              now(),
-                                              bid));
-
-            LOGGER.debug("Updating aggregated bid [{}]", bid);
         }
     }
 
@@ -325,7 +191,68 @@ public class Concentrator
      *            The {@link AggregatedBid} that has lead to this price update.
      * @return The {@link Price} as it has to be sent to the connected agents.
      */
-    protected Price transformPrice(Price price, Bid bid) {
+    protected Price transformPrice(Price price, SentBidInformation info) {
         return price;
+    }
+
+    // This part keeps track of send bids to be able to retrieve them later
+
+    private final Deque<SentBidInformation> sentBids = new LinkedList<SentBidInformation>();
+
+    private void saveBid(AggregatedBid aggregatedBid, BidUpdate sentBidUpdate) {
+        SentBidInformation info = new SentBidInformation(aggregatedBid, sentBidUpdate);
+
+        synchronized (sentBids) {
+            sentBids.add(info);
+
+            if (sentBids.size() > MAX_BIDS) {
+                LOGGER.warn("The number of generated bids is becoming very big, possible memory leak?");
+                while (sentBids.size() > MAX_BIDS) {
+                    sentBids.removeFirst();
+                }
+            }
+        }
+    }
+
+    private SentBidInformation retreiveAggregatedBid(int bidNumberReference) {
+        synchronized (sentBids) {
+            boolean found = false;
+            for (SentBidInformation info : sentBids) {
+                if (info.getBidNumber() == bidNumberReference) {
+                    found = true;
+                }
+            }
+
+            if (!found) {
+                throw new IllegalArgumentException("No bid with bidNumber " + bidNumberReference + " is available");
+            }
+
+            while (true) {
+                SentBidInformation info = sentBids.peek();
+                if (info.getBidNumber() == bidNumberReference) {
+                    return info;
+                } else {
+                    sentBids.removeFirst();
+                }
+            }
+        }
+    }
+
+    // These method make sure that we implement the MatcherEndpoint
+    // These just call the BaseMatcherEndpoint
+
+    @Override
+    public void agentEndpointDisconnected(Session session) {
+        matcherPart.agentEndpointDisconnected(session);
+    }
+
+    @Override
+    public boolean connectToAgent(Session session) {
+        return matcherPart.connectToAgent(session);
+    }
+
+    @Override
+    public void handleBidUpdate(Session session, BidUpdate bidUpdate) {
+        matcherPart.handleBidUpdate(session, bidUpdate);
     }
 }

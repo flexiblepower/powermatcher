@@ -5,6 +5,7 @@ import java.util.Date;
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
+import net.powermatcher.api.messages.BidUpdate;
 
 /**
  * An {@link IncomingBidEvent} is sent when an {@link AgentEndpoint} receives a new {@link Bid}.
@@ -33,12 +34,12 @@ public class IncomingBidEvent
      *            The {@link Date} received from the {@link TimeService}
      * @param fromAgentId
      *            The id of the Agent that sent the {@link Bid}.
-     * @param bid
-     *            The received {@link Bid}.
+     * @param bidUpdate
+     *            The received {@link BidUpdate}.
      */
     public IncomingBidEvent(String clusterId, String agentId, String sessionId, Date timestamp, String fromAgentId,
-                            Bid bid) {
-        super(clusterId, agentId, sessionId, timestamp, bid);
+                            BidUpdate bidUpdate) {
+        super(clusterId, agentId, sessionId, timestamp, bidUpdate);
         this.fromAgentId = fromAgentId;
     }
 

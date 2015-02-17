@@ -2,6 +2,7 @@ package net.powermatcher.api;
 
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
+import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.messages.PriceUpdate;
 
 /**
@@ -64,7 +65,7 @@ public interface Session {
      * @param newBid
      *            The {@link Bid} passed by the {@link AgentEndpoint} of this {@link Session}.
      */
-    void updateBid(Bid newBid);
+    void updateBid(BidUpdate newBid);
 
     /**
      * Disconnect the {@link AgentEndpoint} from the {@link MatcherEndpoint}. This method should always call both the

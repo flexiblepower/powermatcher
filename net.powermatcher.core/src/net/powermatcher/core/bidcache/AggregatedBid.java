@@ -7,13 +7,15 @@ import java.util.Map;
 import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
+import net.powermatcher.api.messages.BidUpdate;
 
 /**
  * An {@link AggregatedBid} is the combination of several {@link Bid} of agents (as identified by their agentId's) that
  * are aggregated into a single bid (@see {@link #getAggregatedBid()}). This object is immutable and can only be created
  * using the {@link Builder}.
  */
-public final class AggregatedBid {
+public final class AggregatedBid
+    extends ArrayBid {
     /**
      * A Builder that makes it easier to create an {@link AggregatedBid}. The idea is that you can call the
      * {@link #addAgentBid(String, Bid)} several times and the {@link #bidNumber(int)} once to define the
@@ -23,8 +25,7 @@ public final class AggregatedBid {
      * Example usage:
      *
      * <pre>
-     * AggregateBid bid = new AggregatedBid.Builder(marketBasis).bidNumber(generator.next())
-     *                                                          .addAgentBid(&quot;agent1&quot;, bid1)
+     * AggregateBid bid = new AggregatedBid.Builder(marketBasis).addAgentBid(&quot;agent1&quot;, bid1)
      *                                                          .addAgentBid(&quot;agent2&quot;, bid2)
      *                                                          .build();
      * </pre>
@@ -33,7 +34,6 @@ public final class AggregatedBid {
      */
     public static final class Builder {
         private final MarketBasis marketBasis;
-        private int bidNumber;
         private final Map<String, Integer> agentBidReferences;
         private final double[] aggregatedBid;
 
@@ -45,7 +45,6 @@ public final class AggregatedBid {
          */
         public Builder(MarketBasis marketBasis) {
             this.marketBasis = marketBasis;
-            bidNumber = 0;
             agentBidReferences = new HashMap<String, Integer>();
             aggregatedBid = new double[marketBasis.getPriceSteps()];
         }
@@ -63,27 +62,22 @@ public final class AggregatedBid {
          *            The bid that has to be added to the aggregated bid.
          * @return This {@link Builder}
          */
-        public Builder addAgentBid(String agentId, Bid bid) {
-            if (!agentBidReferences.containsKey(agentId) && bid.getMarketBasis().equals(marketBasis)) {
-                agentBidReferences.put(agentId, bid.getBidNumber());
-                double[] demand = bid.toArrayBid().getDemand();
-                for (int ix = 0; ix < marketBasis.getPriceSteps(); ix++) {
-                    aggregatedBid[ix] += demand[ix];
-                }
+        public Builder addAgentBid(String agentId, BidUpdate bidUpdate) {
+            if (!agentBidReferences.containsKey(agentId) && bidUpdate.getBid().getMarketBasis().equals(marketBasis)) {
+                agentBidReferences.put(agentId, bidUpdate.getBidNumber());
+                addBid(bidUpdate.getBid());
             }
 
             return this;
         }
 
-        /**
-         * Changes the bidnumber of the aggregated bid.
-         *
-         * @param bidNumber
-         *            The new bidnumber
-         * @return This {@link Builder}
-         */
-        public Builder bidNumber(int bidNumber) {
-            this.bidNumber = bidNumber;
+        public Builder addBid(Bid bid) {
+            if (bid.getMarketBasis().equals(marketBasis)) {
+                double[] demand = bid.toArrayBid().getDemand();
+                for (int ix = 0; ix < marketBasis.getPriceSteps(); ix++) {
+                    aggregatedBid[ix] += demand[ix];
+                }
+            }
             return this;
         }
 
@@ -92,18 +86,20 @@ public final class AggregatedBid {
          *         called, the {@link Builder} should not be used any further.
          */
         public AggregatedBid build() {
-            Bid bid = new ArrayBid(marketBasis, bidNumber, aggregatedBid);
-            return new AggregatedBid(agentBidReferences, bid);
+            return new AggregatedBid(marketBasis, aggregatedBid, agentBidReferences);
         }
     }
 
     private final Map<String, Integer> agentBidReferences;
 
-    private final Bid aggregatedBid;
-
-    AggregatedBid(Map<String, Integer> agentBidReferences, Bid aggregatedBid) {
+    AggregatedBid(MarketBasis marketBasis, double[] demand, Map<String, Integer> agentBidReferences) {
+        super(marketBasis, demand);
         this.agentBidReferences = Collections.unmodifiableMap(agentBidReferences);
-        this.aggregatedBid = aggregatedBid;
+    }
+
+    public AggregatedBid(ArrayBid bid, Map<String, Integer> agentBidReferences) {
+        super(bid);
+        this.agentBidReferences = Collections.unmodifiableMap(new HashMap<String, Integer>(agentBidReferences));
     }
 
     /**
@@ -113,34 +109,23 @@ public final class AggregatedBid {
         return agentBidReferences;
     }
 
-    /**
-     * @return The {@link Bid} that describes the sum of all the bids that have been stored in this
-     *         {@link AggregatedBid}.
-     * @see #getAgentBidReferences()
-     */
-    public Bid getAggregatedBid() {
-        return aggregatedBid;
-    }
-
     @Override
     public int hashCode() {
-        return 31 * agentBidReferences.hashCode() + 63 * aggregatedBid.hashCode();
+        return 31 * agentBidReferences.hashCode() + 63 * super.hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        } else if (obj == null || getClass() != obj.getClass()) {
+        if (!super.equals(obj)) {
             return false;
         } else {
             AggregatedBid other = (AggregatedBid) obj;
-            return other.agentBidReferences.equals(agentBidReferences) && other.aggregatedBid.equals(aggregatedBid);
+            return other.agentBidReferences.equals(agentBidReferences);
         }
     }
 
     @Override
     public String toString() {
-        return "AggregatedBid [agentBidReferences=" + agentBidReferences + ", aggregatedBid=" + aggregatedBid + "]";
+        return "AggregatedBid [agentBidReferences=" + agentBidReferences + ", aggregatedBid=" + super.toString() + "]";
     }
 }

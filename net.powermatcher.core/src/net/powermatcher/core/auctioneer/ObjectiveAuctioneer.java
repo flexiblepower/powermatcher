@@ -9,10 +9,6 @@ import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.core.concentrator.Concentrator;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
@@ -40,13 +36,15 @@ import aQute.bnd.annotation.component.Reference;
  * @author FAN
  * @version 2.0
  */
-@Component(designateFactory = Auctioneer.Config.class,
+@Component(designateFactory = ObjectiveAuctioneer.Config.class,
            immediate = true,
            provide = { ObservableAgent.class, MatcherEndpoint.class })
 public class ObjectiveAuctioneer
     extends Auctioneer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ObjectiveAuctioneer.class);
+    public interface Config
+        extends Auctioneer.Config {
+    }
 
     /**
      * Holds the objective agent
@@ -82,7 +80,7 @@ public class ObjectiveAuctioneer
      */
     @Activate
     @Override
-    public void activate(final Map<String, Object> properties) {
+    public void activate(final Map<String, ?> properties) {
         super.activate(properties);
     }
 

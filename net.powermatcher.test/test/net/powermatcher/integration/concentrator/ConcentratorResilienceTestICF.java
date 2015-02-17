@@ -3,7 +3,6 @@ package net.powermatcher.integration.concentrator;
 import java.io.IOException;
 import java.util.zip.DataFormatException;
 
-import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.messages.PriceUpdate;
 
@@ -24,7 +23,7 @@ public class ConcentratorResilienceTestICF
 
         sendBidsToMatcher();
 
-        checkAggregatedBid((ArrayBid) auctioneer.getLastReceivedBid());
+        checkAggregatedBid(auctioneer.getLastReceivedBid().getBid().toArrayBid());
     }
 
     /**
@@ -82,7 +81,7 @@ public class ConcentratorResilienceTestICF
         cluster.performTasks();
         // Send price
         PriceUpdate equilibrium = new PriceUpdate(new Price(cluster.getMarketBasis(),
-                                                            resultsReader.getEquilibriumPrice()), 0);
+                                                            resultsReader.getEquilibriumPrice()), 1);
 
         auctioneer.publishPrice(equilibrium);
         // Check the received price

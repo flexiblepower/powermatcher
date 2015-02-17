@@ -4,6 +4,7 @@ import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.PointBid;
+import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.remote.websockets.data.BidModel;
 import net.powermatcher.remote.websockets.data.ClusterInfoModel;
@@ -16,7 +17,7 @@ import com.google.gson.GsonBuilder;
 /**
  * Implements a serializer for the net.powermatcher.api.data data types to JSON. Items are wrapped in a
  * {@link PmMessage} and correct type is set.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
@@ -24,15 +25,17 @@ public class PmJsonSerializer {
 
     /**
      * Serialize a {@link Bid} to JSON.
-     * 
+     *
      * @param bid
      *            the bid to serializer
      * @return a JSON string with a {@link Bid} wrapped in {@link PmMessage}.
      */
-    public String serializeBid(final Bid bid) {
+    public String serializeBidUpdate(final BidUpdate bidUpdate) {
+        Bid bid = bidUpdate.getBid();
+
         // Convert to JSON and send
         BidModel bidModel = new BidModel();
-        bidModel.setBidNumber(bid.getBidNumber());
+        bidModel.setBidNumber(bidUpdate.getBidNumber());
         bidModel.setMarketBasis(ModelMapper.convertMarketBasis(bid.getMarketBasis()));
 
         // Include either pricepoints or demand, not both.
@@ -54,7 +57,7 @@ public class PmJsonSerializer {
 
     /**
      * Serialize a {@link PriceUpdate} to JSON.
-     * 
+     *
      * @param bid
      *            the bid to serializer
      * @return a JSON string with a {@link PriceUpdate} wrapped in {@link PmMessage}.
@@ -75,7 +78,7 @@ public class PmJsonSerializer {
 
     /**
      * Serialize a clusterId and {@link MarketBasis} to JSON.
-     * 
+     *
      * @param clusterId
      *            the id of the cluster
      * @param marketBasis
@@ -97,7 +100,7 @@ public class PmJsonSerializer {
 
     /**
      * Deserialize a JSON string to {@link PmMessage}.
-     * 
+     *
      * @param message
      *            the JSON string
      * @return a {@link PmMessage} containing payload.

@@ -11,7 +11,7 @@ import java.util.Map.Entry;
 
 import javax.naming.OperationNotSupportedException;
 
-import net.powermatcher.api.data.Bid;
+import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.remote.websockets.data.BidModel;
 import net.powermatcher.remote.websockets.data.PmMessage;
 import net.powermatcher.remote.websockets.json.ModelMapper;
@@ -165,7 +165,7 @@ public class PowermatcherWebSocket {
 
         // Remove remote session from agent proxy and local session collection
         AgentEndpointProxyWebsocket proxy = REMOTE_LOCAL_LINK.remove(remoteSession);
-        LOGGER.info("Agent disconnect detected remote agent: [{}], local agent", proxy.getMatcherEndpointProxyId(),
+        LOGGER.info("Agent disconnect detected remote agent: [{}], local agent", proxy.getRemoteAgentEndpointId(),
                     proxy.getAgentId());
         proxy.remoteAgentDisconnected();
     }
@@ -189,12 +189,12 @@ public class PowermatcherWebSocket {
         // Find associated local agentproxy
         AgentEndpointProxyWebsocket proxy = REMOTE_LOCAL_LINK.get(remoteSession);
         LOGGER.info("Received bid update from remote agent [{}] for local agent [{}]",
-                    proxy.getMatcherEndpointProxyId(), proxy.getAgentId());
+                    proxy.getRemoteAgentEndpointId(), proxy.getAgentId());
 
         // Decode the JSON data
         PmJsonSerializer serializer = new PmJsonSerializer();
         PmMessage pmMessage = serializer.deserialize(message);
-        Bid newBid = ModelMapper.mapBid((BidModel) pmMessage.getPayload());
+        BidUpdate newBid = ModelMapper.mapBidUpdate((BidModel) pmMessage.getPayload());
 
         // Relay bid update to local agent
         proxy.updateLocalBid(newBid);

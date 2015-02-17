@@ -7,14 +7,11 @@ import javax.naming.OperationNotSupportedException;
 
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
+import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
-import net.powermatcher.core.communication.BaseAgentEndpointProxy;
+import net.powermatcher.core.BaseAgentEndpoint;
 import net.powermatcher.remote.websockets.json.PmJsonSerializer;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
@@ -30,13 +27,9 @@ import aQute.bnd.annotation.metatype.Meta;
  */
 @Component(designateFactory = AgentEndpointProxyWebsocket.Config.class,
            immediate = true,
-           provide = { ObservableAgent.class,
-                      AgentEndpoint.class,
-                      BaseAgentEndpointProxy.class,
-                      AgentEndpointProxyWebsocket.class })
+           provide = { ObservableAgent.class, AgentEndpoint.class })
 public class AgentEndpointProxyWebsocket
-    extends BaseAgentEndpointProxy {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AgentEndpointProxyWebsocket.class);
+    extends BaseAgentEndpoint {
 
     @Meta.OCD
     public static interface Config {
@@ -52,6 +45,8 @@ public class AgentEndpointProxyWebsocket
 
     private org.eclipse.jetty.websocket.api.Session remoteSession;
 
+    private String remoteAgentEndpointId;
+
     /**
      * OSGi calls this method to activate a managed service.
      *
@@ -61,9 +56,8 @@ public class AgentEndpointProxyWebsocket
     @Activate
     public void activate(Map<String, Object> properties) {
         Config config = Configurable.createConfigurable(Config.class, properties);
-        setDesiredParentId(config.desiredParentId());
-        setAgentId(config.agentId());
-        setMatcherEndpointProxyId(config.remoteAgentEndpointId());
+        activate(config.agentId(), config.desiredParentId());
+        remoteAgentEndpointId = config.remoteAgentEndpointId();
     }
 
     /**
@@ -74,6 +68,11 @@ public class AgentEndpointProxyWebsocket
         if (isRemoteConnected()) {
             remoteSession.close();
         }
+        super.deactivate();
+    }
+
+    public String getRemoteAgentEndpointId() {
+        return remoteAgentEndpointId;
     }
 
     public void
@@ -98,7 +97,6 @@ public class AgentEndpointProxyWebsocket
      *
      * This specific implementation checks the if the websocket is open.
      */
-    @Override
     public boolean isRemoteConnected() {
         return remoteSession != null && remoteSession.isOpen();
     }
@@ -108,7 +106,6 @@ public class AgentEndpointProxyWebsocket
      *
      * This specific implementation serializes the {@link PriceUpdate} to json and sends it through the websocket.
      */
-    @Override
     public void updateRemotePrice(PriceUpdate newPrice) {
         try {
             // Create price update message
@@ -133,18 +130,21 @@ public class AgentEndpointProxyWebsocket
     }
 
     private void sendCusterInformation() {
-        if (!isRemoteConnected() || getLocalMarketBasis() == null) {
+        if (!isRemoteConnected() || !isInitialized()) {
             // Skip sending information
             return;
         }
 
         try {
             PmJsonSerializer serializer = new PmJsonSerializer();
-            String message = serializer.serializeClusterInfo(getClusterId(), getLocalMarketBasis());
+            String message = serializer.serializeClusterInfo(getClusterId(), getMarketBasis());
             remoteSession.getRemote().sendString(message);
         } catch (IOException e) {
             LOGGER.warn("Unable to send price update to remote agent, reason {}", e);
         }
     }
 
+    public void updateLocalBid(BidUpdate bidUpdate) {
+        getSession().updateBid(bidUpdate);
+    }
 }

@@ -7,6 +7,7 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.core.auctioneer.ObjectiveAuctioneer;
+import net.powermatcher.core.bidcache.AggregatedBid;
 import net.powermatcher.core.bidcache.BidCache;
 import net.powermatcher.mock.MockObjectiveAgent;
 import net.powermatcher.test.helpers.PropertieBuilder;
@@ -83,12 +84,15 @@ public class ObjectiveAuctioneerTest {
 
         aggregatedBids = new BidCache(marketBasis);
 
-        Bid aggregatedBid = aggregatedBids.aggregate().getAggregatedBid();
+        Bid aggregatedBid = aggregatedBids.aggregate();
 
         Bid finalAggregatedBid = null;
         if (mockObjectiveAgent != null) {
             Bid aggregatedObjectiveBid = mockObjectiveAgent.handleAggregateBid(aggregatedBid);
-            finalAggregatedBid = aggregatedBid.aggregate(aggregatedObjectiveBid);
+
+            finalAggregatedBid = new AggregatedBid.Builder(marketBasis).addBid(aggregatedBid)
+                                                                       .addBid(aggregatedObjectiveBid)
+                                                                       .build();
 
             // aggregate again with device agent bid.
             determinePrice(finalAggregatedBid);

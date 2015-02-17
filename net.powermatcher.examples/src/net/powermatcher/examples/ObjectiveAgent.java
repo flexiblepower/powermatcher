@@ -61,7 +61,7 @@ public class ObjectiveAgent
     @Activate
     public void activate(final Map<String, Object> properties) {
         config = Configurable.createConfigurable(Config.class, properties);
-        setAgentId(config.agentId());
+        activate(config.agentId());
 
         LOGGER.info("Objective agent activated");
     }
@@ -72,7 +72,6 @@ public class ObjectiveAgent
     @Deactivate
     public void deactivate() {
         LOGGER.info("Objective agent deactivated");
-        setAgentId(null);
     }
 
     /**
@@ -86,7 +85,7 @@ public class ObjectiveAgent
                                                   CURRENCY_EUR, 5, -1.0d, 7.0d);
         double[] demand = new double[] { 100.0d, 50.0d, 50.0d, 0.0d, 0.0d };
 
-        ArrayBid objectiveBid = new ArrayBid(marketBasis, 1, demand);
+        ArrayBid objectiveBid = new ArrayBid(marketBasis, demand);
 
         ArrayBid aggregatedObjectiveBid = objectiveBid.aggregate(aggregatedBid);
 

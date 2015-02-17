@@ -1,8 +1,6 @@
 package net.powermatcher.peakshaving;
 
 import java.util.Arrays;
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.Map;
 
 import net.powermatcher.api.AgentEndpoint;
@@ -14,6 +12,7 @@ import net.powermatcher.api.data.PriceStep;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.concentrator.Concentrator;
+import net.powermatcher.core.concentrator.SentBidInformation;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
@@ -93,7 +92,7 @@ public class PeakShavingConcentrator
      */
     @Override
     @Activate
-    public void activate(final Map<String, Object> properties) {
+    public void activate(final Map<String, ?> properties) {
         activate(Configurable.createConfigurable(Config.class, properties));
     }
 
@@ -134,8 +133,6 @@ public class PeakShavingConcentrator
         super.deactivate();
     }
 
-    private final Deque<Bid> transformedBids = new LinkedList<Bid>();
-
     @Override
     protected Bid transformBid(Bid aggregatedBid) {
         ArrayBid bid = aggregatedBid.toArrayBid();
@@ -149,45 +146,34 @@ public class PeakShavingConcentrator
             bid = bid.transpose(-uncontrolledFlow);
         }
 
-        synchronized (transformedBids) {
-            transformedBids.add(bid);
-        }
-
         return bid;
     }
 
     @Override
-    protected Price transformPrice(Price price, Bid bid) {
+    protected Price transformPrice(Price price, SentBidInformation info) {
         // Find the transformedBid that has the same bidnumber as the bid
-        Bid transformedBid = null;
-        while (!transformedBids.isEmpty()) {
-            transformedBid = transformedBids.peek();
-            if (transformedBid.getBidNumber() == bid.getBidNumber()) {
-                break;
-            } else {
-                transformedBids.removeFirst();
-            }
-        }
+        Bid originalBid = info.getOriginalBid();
+        Bid transformedBid = info.getSentBid();
 
         PriceStep priceStep = price.toPriceStep();
         double transformedDemand = transformedBid.getDemandAt(priceStep);
-        double realDemand = bid.getDemandAt(priceStep);
+        double realDemand = originalBid.getDemandAt(priceStep);
 
         if (transformedDemand < realDemand) {
             // Increase the price step until this is no longer true
             while (transformedDemand < realDemand && !priceStep.isMaximum()) {
                 priceStep = priceStep.increment();
-                realDemand = bid.getDemandAt(priceStep);
+                realDemand = originalBid.getDemandAt(priceStep);
             }
         } else if (transformedDemand > realDemand) {
             // Decrease the price step until this is no longer true
             while (transformedDemand > realDemand && !priceStep.isMinimum()) {
                 priceStep = priceStep.decrement();
-                realDemand = bid.getDemandAt(priceStep);
+                realDemand = originalBid.getDemandAt(priceStep);
             }
         }
 
-        allocatedFlow = bid.getDemandAt(priceStep);
+        allocatedFlow = originalBid.getDemandAt(priceStep);
 
         return priceStep.toPrice();
     }
@@ -238,9 +224,7 @@ public class PeakShavingConcentrator
             }
         }
 
-        return new ArrayBid.Builder(bid.getMarketBasis()).bidNumber(bid.getBidNumber())
-                                                         .demandArray(demand)
-                                                         .build();
+        return new ArrayBid(bid.getMarketBasis(), demand);
     }
 
     /**

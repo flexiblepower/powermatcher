@@ -185,15 +185,6 @@ public class PointBidTest {
     }
 
     @Test
-    public void testAggregateBid() {
-        PointBid other = new PointBid(marketBasisFiveSteps, pricePoints1);
-        ArrayBid aggregatedBid = bid1.aggregate(other);
-        assertThat(aggregatedBid.getMarketBasis(), is(equalTo(marketBasisFiveSteps)));
-        double[] expectedDemand = new double[] { 20.0, 16.0, 12.0, 8.0, 4.0 };
-        assertThat(aggregatedBid.getDemand(), is(equalTo(expectedDemand)));
-    }
-
-    @Test
     public void testIterator() {
         PricePoint pp1 = new PricePoint(new Price(marketBasisFiveSteps, 3), 30.0);
         PricePoint pp2 = new PricePoint(new Price(marketBasisFiveSteps, 5), 20.0);

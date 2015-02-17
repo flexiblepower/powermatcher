@@ -53,10 +53,10 @@ public class SendReceivePriceTestCPF1
         // Verify the price received by the agents
         // The bidnumber should be zero, since the original bid has a bidnumber
         // of 0
-        int bidNumber = 0;
+        int bidNumber = 1;
         for (MockAgent agent : cluster) {
             assertEquals(priceUpdate.getPrice(), agent.getLastPriceUpdate().getPrice());
-            assertEquals(bidNumber, agent.getLastPriceUpdate().getBidNumber());
+            assertEquals(bidNumber++, agent.getLastPriceUpdate().getBidNumber());
         }
     }
 }

@@ -18,6 +18,7 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.PointBid;
 import net.powermatcher.api.data.PricePoint;
+import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.events.AgentEvent;
 import aQute.bnd.annotation.component.Activate;
@@ -360,7 +361,8 @@ public class CSVLogger
      */
     private String[] createLineForBidLogRecord(BidLogRecord logRecord) {
 
-        Bid bid = logRecord.getBid();
+        BidUpdate bidUpdate = logRecord.getBidUpdate();
+        Bid bid = bidUpdate.getBid();
 
         MarketBasis marketBasis = bid.getMarketBasis();
 
@@ -406,7 +408,7 @@ public class CSVLogger
                              // TODO where/what is the "effective price"?
                              MarketBasis.PRICE_FORMAT.format(0),
                              getDateFormat().format(logRecord.getEventTimestamp()),
-                             String.valueOf(bid.getBidNumber()),
+                             String.valueOf(bidUpdate.getBidNumber()),
                              demandBuilder.toString(),
                              pricePointBuiler.toString() };
     }

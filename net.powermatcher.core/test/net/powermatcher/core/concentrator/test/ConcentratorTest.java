@@ -2,6 +2,7 @@ package net.powermatcher.core.concentrator.test;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -10,6 +11,7 @@ import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
+import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.core.concentrator.Concentrator;
 import net.powermatcher.mock.MockAgent;
@@ -84,7 +86,7 @@ public class ConcentratorTest {
 
         topSession.disconnect();
         assertNull(mockMatcherAgent.getSession());
-        assertNull(concentrator.getClusterId());
+        assertFalse(concentrator.isInitialized());
         assertNull(mockAgent.getSession());
         assertNull(mockAgent.getClusterId());
         assertNull(mockAgent.getSession());
@@ -118,7 +120,7 @@ public class ConcentratorTest {
     @Test(expected = IllegalStateException.class)
     public void testUpdateBidNullSession() {
         Concentrator concentrator = new Concentrator();
-        concentrator.handleBidUpdate(null, Bid.flatDemand(marketBasis, 0, 0));
+        concentrator.handleBidUpdate(null, new BidUpdate(Bid.flatDemand(marketBasis, 0), 0));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -132,8 +134,10 @@ public class ConcentratorTest {
         new SimpleSession(concentrator, mockMatcherAgent).connect();
         new SimpleSession(mockAgent, concentrator).connect();
 
-        concentrator.handleBidUpdate(mockAgent.getSession(),
-                                     new ArrayBid.Builder(new MarketBasis("a", "b", 2, 0, 2)).demand(0).build());
+        concentrator
+                    .handleBidUpdate(mockAgent.getSession(),
+                                     new BidUpdate(new ArrayBid.Builder(new MarketBasis("a", "b", 2, 0, 2)).demand(0)
+                                                                                                           .build(), 0));
     }
 
     @Test
@@ -148,12 +152,12 @@ public class ConcentratorTest {
         new SimpleSession(mockAgent, concentrator).connect();
 
         double[] demandArray = new double[] { 2, 1, 0, -1, -2 };
-        ArrayBid arrayBid = new ArrayBid(marketBasis, 1, demandArray);
-        mockAgent.sendBid(arrayBid);
+        ArrayBid arrayBid = new ArrayBid(marketBasis, demandArray);
+        mockAgent.sendBid(new BidUpdate(arrayBid, 1));
         context.getMockScheduler().doTaskOnce();
-        Bid expectedBid = new ArrayBid(arrayBid, 0);
-        assertThat(mockMatcherAgent.getLastReceivedBid(),
-                   is(equalTo(expectedBid)));
+        ArrayBid expectedBid = new ArrayBid(arrayBid);
+        assertThat(mockMatcherAgent.getLastReceivedBid().getBid().toArrayBid().getDemand(),
+                   is(equalTo(expectedBid.getDemand())));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -173,8 +177,8 @@ public class ConcentratorTest {
         new SimpleSession(mockAgent, concentrator).connect();
 
         int sentBidNumber = 5;
-        Bid bid = new ArrayBid(marketBasis, sentBidNumber, new double[] { 2, 1, 0, -1, -1 });
-        mockAgent.sendBid(bid);
+        Bid bid = new ArrayBid(marketBasis, new double[] { 2, 1, 0, -1, -1 });
+        mockAgent.sendBid(new BidUpdate(bid, sentBidNumber));
         context.getMockScheduler().doTaskOnce();
 
         int validBidNumber = mockMatcherAgent.getLastReceivedBid().getBidNumber();

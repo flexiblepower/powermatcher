@@ -1,6 +1,7 @@
 package net.powermatcher.integration.concentrator;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.util.zip.DataFormatException;
@@ -67,6 +68,7 @@ public class ConcentratorResilienceTest
 
         // Verify the price received by the agents
         for (MockAgent agent : cluster) {
+            assertNotNull("agent " + agent.getAgentId() + " did not receive a price update", agent.getLastPriceUpdate());
             assertEquals(expPrice, agent.getLastPriceUpdate().getPrice().getPriceValue(), 0);
         }
     }

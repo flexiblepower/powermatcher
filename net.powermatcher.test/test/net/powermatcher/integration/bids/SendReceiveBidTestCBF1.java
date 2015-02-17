@@ -41,10 +41,10 @@ public class SendReceiveBidTestCBF1
         while ((bid = nextBidToMatcher()) != null) {
             cluster.performTasks();
             // Check if the concentrator received the bid
-            assertEquals(bid, concentrator.getLastReceivedBid());
+            assertEquals(bid, concentrator.getLastReceivedBid().getBid());
 
             // Check if the published bid by concentrator is received at the auctioneer
-            ArrayBid lastReceivedBid = auctioneer.getLastReceivedBid().toArrayBid();
+            ArrayBid lastReceivedBid = auctioneer.getLastReceivedBid().getBid().toArrayBid();
             ArrayBid aggregatedBid = auctioneer.getAggregatedBid().toArrayBid();
             assertThat(lastReceivedBid.getDemand(), is(equalTo(aggregatedBid.getDemand())));
             assertThat(lastReceivedBid.getMarketBasis(), is(equalTo(aggregatedBid.getMarketBasis())));

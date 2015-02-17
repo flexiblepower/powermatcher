@@ -1,30 +1,20 @@
 package net.powermatcher.core.auctioneer;
 
-import java.security.InvalidParameterException;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import net.powermatcher.api.MatcherEndpoint;
-import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
-import net.powermatcher.api.messages.PriceUpdate;
-import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.ObservableAgent;
-import net.powermatcher.api.monitoring.events.IncomingBidEvent;
-import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
-import net.powermatcher.core.BaseAgent;
+import net.powermatcher.core.BaseMatcherEndpoint;
 import net.powermatcher.core.bidcache.AggregatedBid;
-import net.powermatcher.core.bidcache.BidCache;
 import net.powermatcher.core.concentrator.Concentrator;
 
 import org.flexiblepower.context.FlexiblePowerContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
@@ -49,10 +39,8 @@ import aQute.bnd.annotation.metatype.Meta;
            immediate = true,
            provide = { ObservableAgent.class, MatcherEndpoint.class })
 public class Auctioneer
-    extends BaseAgent
+    extends BaseMatcherEndpoint
     implements MatcherEndpoint {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Auctioneer.class);
 
     @Meta.OCD
     public static interface Config {
@@ -89,21 +77,6 @@ public class Auctioneer
      */
     private ScheduledFuture<?> scheduledFuture;
 
-    /**
-     * The bid cache maintains an aggregated {@link Bid}, where bids can be added and removed explicitly.
-     */
-    protected BidCache aggregatedBids;
-
-    /**
-     * The {@link MarketBasis} for {@link Bid} and {@link Price}.
-     */
-    private MarketBasis marketBasis;
-
-    /**
-     * Holds the sessions from the agents.
-     */
-    private final Map<String, Session> sessions = new ConcurrentHashMap<String, Session>();
-
     private Config config;
 
     /**
@@ -113,17 +86,39 @@ public class Auctioneer
      *            the configuration properties
      */
     @Activate
-    public void activate(final Map<String, Object> properties) {
-        // TODO marketBasis, aggregatedBids and
-        // matcherId are used in synchronized methods. Do we have do synchronize
-        // activate? It's only called once, so maybe not.
+    public void activate(final Map<String, ?> properties) {
         config = Configurable.createConfigurable(Config.class, properties);
-        marketBasis = new MarketBasis(config.commodity(),
-                                      config.currency(), config.priceSteps(), config.minimumPrice(),
-                                      config.maximumPrice());
-        aggregatedBids = new BidCache(marketBasis);
-        setClusterId(config.clusterId());
-        setAgentId(config.agentId());
+        super.activate(config.agentId());
+
+        MarketBasis marketBasis = new MarketBasis(config.commodity(),
+                                                  config.currency(),
+                                                  config.priceSteps(),
+                                                  config.minimumPrice(),
+                                                  config.maximumPrice());
+
+        configure(marketBasis, config.clusterId());
+    }
+
+    /**
+     * @param the
+     *            new {@link ScheduledExecutorService} implementation.
+     */
+    @Override
+    public void setContext(FlexiblePowerContext context) {
+        super.setContext(context);
+
+        Runnable command = new Runnable() {
+            @Override
+            public void run() {
+                AggregatedBid aggregatedBid = aggregate();
+                Price newPrice = determinePrice(aggregatedBid);
+                publishPrice(newPrice, aggregatedBid);
+            }
+        };
+        scheduledFuture = context.getScheduler().scheduleAtFixedRate(command,
+                                                                     0,
+                                                                     config.priceUpdateRate(),
+                                                                     TimeUnit.SECONDS);
     }
 
     /**
@@ -132,92 +127,7 @@ public class Auctioneer
     @Deactivate
     public void deactivate() {
         scheduledFuture.cancel(false);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean connectToAgent(Session session) {
-        if (!sessions.containsKey(session.getAgentId())) {
-            session.setMarketBasis(marketBasis);
-            sessions.put(session.getAgentId(), session);
-            LOGGER.info("Agent connected with session [{}]", session.getSessionId());
-            return true;
-        } else {
-            LOGGER.warn("An agent with id [{}] was already connected", session.getAgentId());
-            return false;
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void agentEndpointDisconnected(Session session) {
-        // Find session
-        Session foundSession = sessions.get(session.getAgentId());
-        if (!foundSession.equals(session)) {
-            return;
-        } else {
-            sessions.remove(session.getAgentId());
-
-            aggregatedBids.removeBidOfAgent(session.getAgentId());
-
-            LOGGER.info("Agent disconnected with session [{}]", session.getSessionId());
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void handleBidUpdate(Session session, Bid newBid) {
-        if (session == null || !sessions.containsKey(session.getAgentId())) {
-            throw new IllegalStateException("No session found");
-        }
-
-        if (newBid == null || !newBid.getMarketBasis().equals(marketBasis)) {
-            throw new InvalidParameterException("Marketbasis new bid differs from marketbasis auctioneer");
-        }
-
-        // Update agent in aggregatedBids
-        aggregatedBids.updateAgentBid(session.getAgentId(), newBid);
-
-        LOGGER.debug("Received from session [{}] bid update [{}] ", session.getSessionId(), newBid);
-
-        publishEvent(new IncomingBidEvent(session.getClusterId(),
-                                          getAgentId(),
-                                          session.getSessionId(),
-                                          context.currentTime(),
-                                          session.getAgentId(),
-                                          newBid));
-    }
-
-    /**
-     * Generates the new {@link Price}, based on the aggregated bids. The {@link Price} is sent to the
-     * {@link MatcherEndpoint} through the {@link Session}. An {@link OutgoingPriceUpdateEvent} is sent to all
-     * {@link AgentObserver} listeners.
-     */
-    protected void publishNewPrice() {
-        AggregatedBid aggregatedBid = aggregatedBids.aggregate();
-        Map<String, Integer> bidReferences = aggregatedBid.getAgentBidReferences();
-
-        Price newPrice = determinePrice(aggregatedBid.getAggregatedBid());
-        for (Session session : sessions.values()) {
-            Integer bidReference = bidReferences.get(session.getAgentId());
-
-            if (bidReference != null) {
-                PriceUpdate sessionPriceUpdate = new PriceUpdate(newPrice, bidReference);
-                publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(),
-                                                          getAgentId(),
-                                                          session.getSessionId(),
-                                                          context.currentTime(),
-                                                          sessionPriceUpdate));
-                LOGGER.debug("New price: {}, session {}", sessionPriceUpdate, session.getSessionId());
-                session.updatePrice(sessionPriceUpdate);
-            }
-        }
+        unconfigure();
     }
 
     /**
@@ -229,27 +139,5 @@ public class Auctioneer
      */
     protected Price determinePrice(Bid aggregatedBid) {
         return aggregatedBid.calculateIntersection(0);
-    }
-
-    /**
-     * @param the
-     *            new {@link ScheduledExecutorService} implementation.
-     */
-    @Override
-    public void setContext(FlexiblePowerContext context) {
-        this.context = context;
-        Runnable command = new Runnable() {
-            /**
-             * {@inheritDoc}
-             */
-            @Override
-            public void run() {
-                publishNewPrice();
-            }
-        };
-        scheduledFuture = context.getScheduler().scheduleAtFixedRate(command,
-                                                                     0,
-                                                                     config.priceUpdateRate(),
-                                                                     TimeUnit.SECONDS);
     }
 }

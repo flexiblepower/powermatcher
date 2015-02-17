@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ *
  * @author FAN
  * @version 2.0
  */
@@ -19,7 +19,7 @@ public class CsvExpectedResultsReader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CsvExpectedResultsReader.class);
 
-    private String inputFile;
+    private final String inputFile;
     private CsvReader csvReader;
     private MarketBasis marketBasis;
 
@@ -28,29 +28,29 @@ public class CsvExpectedResultsReader {
 
     public CsvExpectedResultsReader(String filename) throws IOException, DataFormatException {
         super();
-        this.inputFile = filename;
+        inputFile = filename;
 
-        this.init();
+        init();
     }
 
     private void init() throws IOException, DataFormatException {
         csvReader = new CsvReader(inputFile);
         readResultsData();
-        this.closeFile();
+        closeFile();
     }
 
     private void readResultsData() throws IOException, DataFormatException {
         // Get market basis parameters bid from first line
         List<String> marketBasisParams = csvReader.nextLine();
-        this.marketBasis = createMarketBasis(marketBasisParams);
+        marketBasis = createMarketBasis(marketBasisParams);
 
         // Get aggregated bid from second line
         List<String> demandList = csvReader.nextLine();
-        this.aggregatedBid = new ArrayBid(marketBasis, 0, createAggregatedBid(demandList));
+        aggregatedBid = new ArrayBid(marketBasis, createAggregatedBid(demandList));
 
         // Get equilibrium price from the third line
         List<String> priceList = csvReader.nextLine();
-        this.equilibriumPrice = createEquilibriumPrice(priceList);
+        equilibriumPrice = createEquilibriumPrice(priceList);
     }
 
     private double[] createAggregatedBid(List<String> demandList) throws DataFormatException {
@@ -62,7 +62,7 @@ public class CsvExpectedResultsReader {
                     demand[i] = new Double(item);
                 } catch (NumberFormatException e) {
                     throw new DataFormatException("Exception while parsing demand string : cannot convert" + item
-                            + " to double");
+                                                  + " to double");
                 }
                 i++;
             }
@@ -78,7 +78,7 @@ public class CsvExpectedResultsReader {
                 return new Double(priceList.get(0));
             } catch (NumberFormatException e) {
                 throw new DataFormatException("Parse exception : cannot convert equilibrium" + priceList.get(0)
-                        + " to double");
+                                              + " to double");
             }
         } else {
             throw new DataFormatException("Equilibrium price format incorrect.");
@@ -95,7 +95,7 @@ public class CsvExpectedResultsReader {
                 double maximumPrice = Double.valueOf(marketBasisData.get(2));
 
                 MarketBasis mb = new MarketBasis(commodity, currency, priceSteps, minimumPrice, maximumPrice);
-                this.marketBasis = mb;
+                marketBasis = mb;
             } catch (NumberFormatException e) {
                 String msg = "Number format exception parsing market basis parameters. Could not construct market basis.";
                 LOGGER.error(msg);
@@ -104,12 +104,12 @@ public class CsvExpectedResultsReader {
         } else {
             throw new DataFormatException("Could not construct market basis.");
         }
-        return this.marketBasis;
+        return marketBasis;
     }
 
     private void closeFile() throws IOException {
-        if (this.csvReader != null) {
-            this.csvReader.closeReader();
+        if (csvReader != null) {
+            csvReader.closeReader();
         }
     }
 

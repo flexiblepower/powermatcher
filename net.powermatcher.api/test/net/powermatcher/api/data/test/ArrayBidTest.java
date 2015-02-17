@@ -322,22 +322,6 @@ public class ArrayBidTest {
     }
 
     @Test
-    public void testAggregateBid() {
-        Bid other = new ArrayBid(marketBasisFiveSteps, new double[] { 75.0, 50.0, 50.0, 50.0, 50.0 });
-        ArrayBid aggregatedBid = bid1.aggregate(other);
-        double[] expectedDemand = new double[] { 175.0, 100.0, 100.0, 50.0, 50.0 };
-        assertThat(aggregatedBid.getDemand(), is(equalTo(expectedDemand)));
-    }
-
-    @Test
-    public void testAggregateBidDifferentMarketBasis() {
-        Bid other = new ArrayBid(marketBasisTenSteps, new double[10]);
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("The marketbasis of the supplied bid does not equal this market basis");
-        bid1.aggregate(other);
-    }
-
-    @Test
     public void testCalculatePricePoints() {
 
         PointBid pointBid = bid1.toPointBid();

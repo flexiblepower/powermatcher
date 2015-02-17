@@ -11,6 +11,7 @@ import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
+import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.api.monitoring.events.AgentEvent;
 import net.powermatcher.api.monitoring.events.IncomingBidEvent;
@@ -35,6 +36,7 @@ public class AgentEventTest {
     private String fromAgent;
     private MarketBasis marketBasis;
     private Bid bid;
+    private BidUpdate bidUpdate;
     private PriceUpdate priceUpdate;
 
     @Before
@@ -46,40 +48,41 @@ public class AgentEventTest {
         fromAgent = "message from agent";
         marketBasis = new MarketBasis("water", "EURO", 10, 0, 10);
         bid = new ArrayBid.Builder(marketBasis).demand(0).build();
+        bidUpdate = new BidUpdate(bid, 9);
         priceUpdate = new PriceUpdate(new Price(marketBasis, 10.0), 0);
     }
 
     @Test
     public void testIncomingBidEvent() {
-        IncomingBidEvent ibe = new IncomingBidEvent(clusterId, agentId, sessionId, timestamp, fromAgent, bid);
+        IncomingBidEvent ibe = new IncomingBidEvent(clusterId, agentId, sessionId, timestamp, fromAgent, bidUpdate);
         assertThat(ibe.getClusterId(), is(equalTo(clusterId)));
         assertThat(ibe.getAgentId(), is(equalTo(agentId)));
         assertThat(ibe.getSessionId(), is(equalTo(sessionId)));
         assertThat(ibe.getTimestamp(), is(equalTo(timestamp)));
         assertThat(ibe.getFromAgentId(), is(equalTo(fromAgent)));
-        assertThat(ibe.getBid(), is(equalTo(bid)));
+        assertThat(ibe.getBidUpdate(), is(equalTo(bidUpdate)));
     }
 
     @Test
     public void testIncomingBidEventToString() {
-        IncomingBidEvent ibe = new IncomingBidEvent(clusterId, agentId, sessionId, timestamp, fromAgent, bid);
+        IncomingBidEvent ibe = new IncomingBidEvent(clusterId, agentId, sessionId, timestamp, fromAgent, bidUpdate);
         String ibetoString = ibe.toString();
         assertThat(ibetoString, is(notNullValue()));
     }
 
     @Test
     public void testOutgoingBidEvent() {
-        OutgoingBidEvent obe = new OutgoingBidEvent(clusterId, agentId, sessionId, timestamp, bid);
+        OutgoingBidEvent obe = new OutgoingBidEvent(clusterId, agentId, sessionId, timestamp, bidUpdate);
         assertThat(obe.getClusterId(), is(equalTo(clusterId)));
         assertThat(obe.getAgentId(), is(equalTo(agentId)));
         assertThat(obe.getSessionId(), is(equalTo(sessionId)));
         assertThat(obe.getTimestamp(), is(equalTo(timestamp)));
-        assertThat(obe.getBid(), is(equalTo(bid)));
+        assertThat(obe.getBidUpdate(), is(equalTo(bidUpdate)));
     }
 
     @Test
     public void testOutgoingBidEventToString() {
-        OutgoingBidEvent obe = new OutgoingBidEvent(clusterId, agentId, sessionId, timestamp, bid);
+        OutgoingBidEvent obe = new OutgoingBidEvent(clusterId, agentId, sessionId, timestamp, bidUpdate);
         String obetoString = obe.toString();
         assertThat(obetoString, is(notNullValue()));
     }

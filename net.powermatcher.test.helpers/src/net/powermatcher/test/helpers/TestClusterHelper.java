@@ -15,7 +15,7 @@ import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
-import net.powermatcher.api.data.PriceUpdate;
+import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.mock.MockAgent;
 import net.powermatcher.mock.MockContext;
 import net.powermatcher.mock.MockMatcherAgent;
@@ -83,7 +83,7 @@ public class TestClusterHelper
     }
 
     public void sendBid(int agentIx, int bidNr, double... demandArray) {
-        getAgent(agentIx).sendBid(new ArrayBid(marketBasis, bidNr, demandArray));
+        getAgent(agentIx).sendBid(new ArrayBid(marketBasis, demandArray), bidNr);
     }
 
     public void sendBids(int baseId, double[]... demandArrays) {

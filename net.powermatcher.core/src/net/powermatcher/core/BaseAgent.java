@@ -6,12 +6,14 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import net.powermatcher.api.Agent;
-import net.powermatcher.api.MatcherEndpoint;
+import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.events.AgentEvent;
 
 import org.flexiblepower.context.FlexiblePowerContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base implementation of an {@link Agent}. It provides basic functionality required in each {@link Agent}. Implements
@@ -24,34 +26,30 @@ import org.flexiblepower.context.FlexiblePowerContext;
 public abstract class BaseAgent
     implements ObservableAgent {
 
-    protected FlexiblePowerContext context;
-
-    @Override
-    public void setContext(FlexiblePowerContext context) {
-        this.context = context;
-    }
-
-    /**
-     * Returns the current time in a {@link Date} object.
-     *
-     * @return A {@link Date} object, representing the current date and time
-     */
-    protected Date now() {
-        if (context == null) {
-            return null;
-        } else {
-            return context.currentTime();
-        }
-    }
-
-    protected boolean isInitialized() {
-        return context != null;
-    }
+    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     /**
      * The id of this Agent.
      */
     private String agentId;
+
+    /**
+     * This method should always be called during activation of the agent. It sets the identifier of this agent.
+     *
+     * @param agentId
+     *            The (locally) unique identifie of this agentId that should be returned when the {@link #getAgentId()}
+     *            is called.
+     *
+     * @throws IllegalArgumentException
+     *             when the agentId is null or is an empty string.
+     */
+    public void activate(String agentId) {
+        if (agentId == null || agentId.isEmpty()) {
+            throw new IllegalArgumentException("The agentId may not be null or empty");
+        }
+
+        this.agentId = agentId;
+    }
 
     /**
      * {@inheritDoc}
@@ -61,54 +59,91 @@ public abstract class BaseAgent
         return agentId;
     }
 
+    protected FlexiblePowerContext context;
+
     /**
-     * @param the
-     *            new <code>String</code> value of agentId
+     * @see net.powermatcher.api.Agent#setContext(org.flexiblepower.context.FlexiblePowerContext)
      */
-    protected void setAgentId(String agentId) {
-        this.agentId = agentId;
+    @Override
+    public void setContext(FlexiblePowerContext context) {
+        if (agentId == null) {
+            throw new IllegalStateException("The activate method should be called first before the context is set.");
+        }
+        this.context = context;
     }
 
     /**
-     * The id of the cluster this Agent is running in.
+     * Returns the current time in a {@link Date} object.
+     *
+     * @return A {@link Date} object, representing the current date and time
      */
+    protected Date now() {
+        checkInitialized();
+        return context.currentTime();
+    }
+
     private String clusterId;
+    private MarketBasis marketBasis;
+
+    /**
+     * Configures the agent to use a specific {@link MarketBasis} and a cluster identifier.
+     *
+     * @param marketBasis
+     *            The {@link MarketBasis} that this agent should use.
+     * @param clusterId
+     *            The (locally) unique identifier for the cluster this agent is a part of.
+     */
+    protected void configure(MarketBasis marketBasis, String clusterId) {
+        if (agentId == null) {
+            throw new IllegalStateException("The activate method should be called first before the context is set.");
+        } else if (marketBasis == null) {
+            throw new IllegalArgumentException("The MarketBasis can not be null");
+        } else if (clusterId == null) {
+            throw new IllegalArgumentException("The clusterId can not be null");
+        }
+
+        this.clusterId = clusterId;
+        this.marketBasis = marketBasis;
+    }
+
+    protected void unconfigure() {
+        clusterId = null;
+        marketBasis = null;
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
     public String getClusterId() {
+        checkInitialized();
         return clusterId;
     }
 
     /**
-     * @param the
-     *            new <code>String</code> value of clusterId.
+     * @return The {@link MarketBasis} that this agent is using.
+     * @throws IllegalStateException
+     *             When this is called before the agent is initialized.
      */
-    protected void setClusterId(String clusterId) {
-        this.clusterId = clusterId;
+    public MarketBasis getMarketBasis() {
+        checkInitialized();
+        return marketBasis;
+    }
+
+    private void checkInitialized() {
+        if (!isInitialized()) {
+            throw new IllegalStateException("This agent is not yet fully initialized.");
+        }
     }
 
     /**
-     * The id of the {@link MatcherEndpoint} this Agent wants to connect to.
+     * Indicates if the agent is ready. This is only true after {@link #activate(String)},
+     * {@link #setContext(FlexiblePowerContext)} and {@link #setClusterId(String)} are called.
+     *
+     * @return true when the {@link #activate(String)}
      */
-    private String desiredParentId;
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getDesiredParentId() {
-        return desiredParentId;
-    }
-
-    /**
-     * @param the
-     *            new <code>String</code> value of desiredParentId.
-     */
-    protected void setDesiredParentId(String desiredParentId) {
-        this.desiredParentId = desiredParentId;
+    public boolean isInitialized() {
+        return context != null && clusterId != null;
     }
 
     /**
@@ -138,10 +173,13 @@ public abstract class BaseAgent
      * @param event
      *            The event to publish.
      */
-    public void publishEvent(AgentEvent event) {
+    protected final void publishEvent(AgentEvent event) {
         for (AgentObserver observer : observers) {
-            observer.handleAgentEvent(event);
+            try {
+                observer.handleAgentEvent(event);
+            } catch (RuntimeException ex) {
+                LOGGER.warn("Could not public an event to observer [{}]: {}", observer, ex.getMessage());
+            }
         }
     }
-
 }

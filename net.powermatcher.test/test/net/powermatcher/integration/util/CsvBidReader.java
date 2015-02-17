@@ -44,7 +44,7 @@ public class CsvBidReader {
         List<String> demandList = null;
         while ((demandList = csvReader.nextLine()) != null) {
             try {
-                return new ArrayBid(marketBasis, 0, demandFromList(demandList));
+                return new ArrayBid(marketBasis, demandFromList(demandList));
             } catch (IllegalArgumentException ex) {
                 // Illegal bid, ignore line
             }

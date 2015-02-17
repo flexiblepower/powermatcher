@@ -7,9 +7,9 @@ import java.util.Map;
 
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
-import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
-import net.powermatcher.api.data.PriceUpdate;
+import net.powermatcher.api.messages.BidUpdate;
+import net.powermatcher.api.messages.PriceUpdate;
 
 /**
  *
@@ -21,7 +21,7 @@ public class MockMatcherAgent
     implements MatcherEndpoint {
 
     private final Map<String, Object> matcherProperties;
-    private Bid lastReceivedBid;
+    private BidUpdate lastReceivedBid;
     private MarketBasis marketBasis;
     private final String clusterId;
 
@@ -54,14 +54,14 @@ public class MockMatcherAgent
      * {@inheritDoc}
      */
     @Override
-    public void handleBidUpdate(Session session, Bid newBid) {
-        lastReceivedBid = newBid;
+    public void handleBidUpdate(Session session, BidUpdate bidUpdate) {
+        lastReceivedBid = bidUpdate;
     }
 
     /**
      * @return the current value of lastReceivedBid.
      */
-    public Bid getLastReceivedBid() {
+    public BidUpdate getLastReceivedBid() {
         return lastReceivedBid;
     }
 
@@ -93,6 +93,6 @@ public class MockMatcherAgent
     }
 
     public void assertTotalBid(double... demandArray) {
-        assertArrayEquals(demandArray, lastReceivedBid.toArrayBid().getDemand(), 0);
+        assertArrayEquals(demandArray, lastReceivedBid.getBid().toArrayBid().getDemand(), 0);
     }
 }
