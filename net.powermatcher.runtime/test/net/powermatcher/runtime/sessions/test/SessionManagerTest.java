@@ -8,8 +8,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import net.powermatcher.api.Session;
 import net.powermatcher.mock.MockAgent;
+import net.powermatcher.mock.MockContext;
 import net.powermatcher.mock.MockMatcherAgent;
-import net.powermatcher.runtime.context.RuntimeContext;
 import net.powermatcher.runtime.sessions.SessionManager;
 
 import org.junit.Before;
@@ -40,8 +40,7 @@ public class SessionManagerTest {
     public void setUp() {
         auctioneer = new MockMatcherAgent(AUCTIONEER_NAME, CLUSTER_ID);
 
-        auctioneer.setContext(new RuntimeContext());
-        // auctioneer.activate(auctioneerProperties);
+        auctioneer.setContext(new MockContext(0));
         sessionManager = new SessionManager();
 
         testAgent = new MockAgent(AGENT_ID);

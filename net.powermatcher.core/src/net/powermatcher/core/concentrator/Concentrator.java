@@ -5,7 +5,9 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+
+import javax.measure.Measure;
+import javax.measure.unit.SI;
 
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;
@@ -118,9 +120,9 @@ public class Concentrator
         };
 
         bidUpdateSchedule = context.getScheduler().scheduleAtFixedRate(command,
-                                                                       0,
-                                                                       config.bidUpdateRate(),
-                                                                       TimeUnit.SECONDS);
+                                                                       Measure.valueOf(0, SI.SECOND),
+                                                                       Measure.valueOf(config.bidUpdateRate(),
+                                                                                       SI.SECOND));
     }
 
     /**

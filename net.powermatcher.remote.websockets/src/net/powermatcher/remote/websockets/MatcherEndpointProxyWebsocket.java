@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import javax.measure.Measure;
+import javax.measure.unit.SI;
+
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.messages.PriceUpdate;
@@ -126,7 +129,9 @@ public class MatcherEndpointProxyWebsocket
                 connectRemote();
             }
         };
-        context.getScheduler().scheduleAtFixedRate(reconnectJob, 1, reconnectDelay, TimeUnit.SECONDS);
+        context.getScheduler().scheduleAtFixedRate(reconnectJob,
+                                                   Measure.valueOf(1, SI.SECOND),
+                                                   Measure.valueOf(reconnectDelay, SI.SECOND));
     }
 
     /**

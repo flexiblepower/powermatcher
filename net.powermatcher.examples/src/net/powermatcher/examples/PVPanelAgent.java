@@ -4,7 +4,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+
+import javax.measure.Measure;
+import javax.measure.unit.SI;
 
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.data.Bid;
@@ -140,13 +142,10 @@ public class PVPanelAgent
     public void setContext(FlexiblePowerContext context) {
         super.setContext(context);
         scheduledFuture = context.getScheduler().scheduleAtFixedRate(new Runnable() {
-            /**
-             * {@inheritDoc}
-             */
             @Override
             public void run() {
                 doBidUpdate();
             }
-        }, 0, config.bidUpdateRate(), TimeUnit.SECONDS);
+        }, Measure.valueOf(0, SI.SECOND), Measure.valueOf(config.bidUpdateRate(), SI.SECOND));
     }
 }

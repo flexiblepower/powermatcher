@@ -6,7 +6,9 @@ import java.util.Set;
 import net.powermatcher.api.Agent;
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;
-import net.powermatcher.runtime.context.RuntimeContext;
+
+import org.flexiblepower.context.FlexiblePowerContext;
+
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
@@ -15,7 +17,12 @@ import aQute.bnd.annotation.component.Reference;
 public class AgentInitializer {
 
     private final Set<Agent> agents = new HashSet<Agent>();
-    private final RuntimeContext runtimeContext = new RuntimeContext();
+    private FlexiblePowerContext runtimeContext;
+
+    @Reference
+    public void setRuntimeContext(FlexiblePowerContext runtimeContext) {
+        this.runtimeContext = runtimeContext;
+    }
 
     @Activate
     public void activate() {

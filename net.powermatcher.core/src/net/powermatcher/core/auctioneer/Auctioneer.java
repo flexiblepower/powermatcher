@@ -3,7 +3,9 @@ package net.powermatcher.core.auctioneer;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+
+import javax.measure.Measure;
+import javax.measure.unit.SI;
 
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.data.Bid;
@@ -116,9 +118,9 @@ public class Auctioneer
             }
         };
         scheduledFuture = context.getScheduler().scheduleAtFixedRate(command,
-                                                                     0,
-                                                                     config.priceUpdateRate(),
-                                                                     TimeUnit.SECONDS);
+                                                                     Measure.valueOf(0, SI.SECOND),
+                                                                     Measure.valueOf(config.priceUpdateRate(),
+                                                                                     SI.SECOND));
     }
 
     /**

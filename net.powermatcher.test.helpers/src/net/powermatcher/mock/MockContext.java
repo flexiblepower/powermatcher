@@ -1,9 +1,10 @@
 package net.powermatcher.mock;
 
 import java.util.Date;
-import java.util.concurrent.ScheduledExecutorService;
 
 import org.flexiblepower.context.FlexiblePowerContext;
+import org.flexiblepower.context.Scheduler;
+import org.flexiblepower.context.Simulation;
 
 public class MockContext
     implements FlexiblePowerContext {
@@ -36,12 +37,22 @@ public class MockContext
     }
 
     @Override
-    public ScheduledExecutorService getScheduler() {
+    public Scheduler getScheduler() {
         return scheduler;
     }
 
     public MockScheduler getMockScheduler() {
         return scheduler;
+    }
+
+    @Override
+    public boolean isSimulation() {
+        return false;
+    }
+
+    @Override
+    public Simulation getSimulation() {
+        return null;
     }
 
 }

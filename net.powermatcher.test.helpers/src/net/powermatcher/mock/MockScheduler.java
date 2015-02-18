@@ -1,13 +1,20 @@
 package net.powermatcher.mock;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.measure.Measurable;
+import javax.measure.quantity.Duration;
+import javax.measure.unit.SI;
+
 import net.powermatcher.api.data.PricePoint;
+
+import org.flexiblepower.context.Scheduler;
 
 /**
  *
@@ -15,7 +22,7 @@ import net.powermatcher.api.data.PricePoint;
  * @version 2.0
  */
 public class MockScheduler
-    extends ScheduledThreadPoolExecutor {
+    implements Scheduler {
 
     private Runnable task;
     private long updateRate;
@@ -110,19 +117,46 @@ public class MockScheduler
 
     }
 
-    public MockScheduler() {
-        super(1);
+    @Override
+    public <V> ScheduledFuture<V> schedule(Callable<V> callable, Measurable<Duration> delay) {
+        throw new UnsupportedOperationException();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public ScheduledFuture<String> scheduleAtFixedRate(Runnable task, long delay, long updateRate, TimeUnit timeUnit) {
-        this.task = task;
-        this.updateRate = updateRate;
+    public ScheduledFuture<?> schedule(Runnable command, Measurable<Duration> delay) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ScheduledFuture<?> scheduleAtFixedRate(Runnable command,
+                                                  Measurable<Duration> initialDelay,
+                                                  Measurable<Duration> period) {
+        task = command;
+        updateRate = period.longValue(SI.SECOND);
         mockFuture = new MockFuture();
         return mockFuture;
+    }
+
+    @Override
+    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command,
+                                                     Measurable<Duration> initialDelay,
+                                                     Measurable<Duration> delay) {
+        return scheduleAtFixedRate(command, initialDelay, delay);
+    }
+
+    @Override
+    public <T> Future<T> submit(Callable<T> task) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Future<?> submit(Runnable task) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <T> Future<T> submit(Runnable task, T result) {
+        throw new UnsupportedOperationException();
     }
 
     /**
