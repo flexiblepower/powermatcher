@@ -54,5 +54,4 @@ public class MockContext
     public Simulation getSimulation() {
         return null;
     }
-
 }

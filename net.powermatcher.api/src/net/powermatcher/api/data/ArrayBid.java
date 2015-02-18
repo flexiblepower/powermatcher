@@ -357,8 +357,7 @@ public class ArrayBid
         if (!priceStep.getMarketBasis().equals(marketBasis)) {
             throw new IllegalArgumentException("The marketbasis of the pricestep does not equal this market basis");
         }
-        int boundPriceStep = marketBasis.boundPriceStep(priceStep);
-        return demandArray[boundPriceStep];
+        return demandArray[priceStep.getPriceStep()];
     }
 
     /**
@@ -427,7 +426,7 @@ public class ArrayBid
                      * If i is not in a constantly inclining or declining segment, and the previous segment was flat,
                      * then move the end point of the flat segment one price step forward to convert it to a straight
                      * step.
-                     * 
+                     *
                      * This is to preserve the semantics of the straight step when converting between point and vector
                      * representation and back.
                      */
