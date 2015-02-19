@@ -40,6 +40,8 @@ import aQute.bnd.annotation.metatype.Meta;
 public class CSVLogger
     extends AgentEventLogger {
 
+    private static final String LINE_SEPERATOR = System.getProperty("line.seperator");
+
     /**
      * The header for the bidlog file
      */
@@ -264,7 +266,7 @@ public class CSVLogger
                 w.write(s);
                 w.write(separator);
             }
-            w.write(System.lineSeparator());
+            w.write(LINE_SEPERATOR);
         } catch (IOException e) {
         } finally {
             if (w != null) {
