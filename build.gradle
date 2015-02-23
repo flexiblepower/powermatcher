@@ -1,5 +1,16 @@
 apply from: rootProject.file("${bnd_cnf}/gradle/master.gradle")
 
+// Reconfigure the Javadoc classes
+generateJavadoc.source = fileTree('.') {
+                             include 'net.powermatcher.api/**/*.java'
+                             include 'net.powermatcher.core/**/*.java'
+                             include 'net.powermatcher.peakshaving/**/*.java'
+                             exclude '*.test/*'
+                             exclude '**/*Test.java'
+                         }
+generateJavadoc.enabled = true
+
+
 // Generate sonar-runner.properties containing all projects and jars
 task generatesonar << {
 
