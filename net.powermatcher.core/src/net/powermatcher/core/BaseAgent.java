@@ -137,8 +137,8 @@ public abstract class BaseAgent
     }
 
     /**
-     * Indicates if the agent is ready. This is only true after {@link #activate(String)},
-     * {@link #setContext(FlexiblePowerContext)} and {@link #setClusterId(String)} are called.
+     * Indicates if the agent is ready. This is only true after {@link #activate(String)} and
+     * {@link #configure(MarketBasis, String)} are called.
      *
      * @return true when the {@link #activate(String)}
      */
@@ -168,7 +168,7 @@ public abstract class BaseAgent
     }
 
     /**
-     * Publish an {@link UpdateEvent} to the attached {@link Observer} services.
+     * Publish an {@link AgentEvent} to the attached {@link Observer} services.
      *
      * @param event
      *            The event to publish.

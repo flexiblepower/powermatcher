@@ -18,7 +18,7 @@ public class ArrayBid
     /**
      * In the calculatePricePoints, 2 floating points will be compared. The significance is set here.
      */
-    private static int PRECISION = 5;
+    private static final int PRECISION = 5;
 
     /**
      * The array of <code>double</code> values that make up the bid curve.
@@ -426,7 +426,7 @@ public class ArrayBid
                      * If i is not in a constantly inclining or declining segment, and the previous segment was flat,
                      * then move the end point of the flat segment one price step forward to convert it to a straight
                      * step.
-                     *
+                     * 
                      * This is to preserve the semantics of the straight step when converting between point and vector
                      * representation and back.
                      */

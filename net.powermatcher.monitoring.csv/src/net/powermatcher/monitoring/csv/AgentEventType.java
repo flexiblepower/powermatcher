@@ -2,7 +2,6 @@ package net.powermatcher.monitoring.csv;
 
 import net.powermatcher.api.monitoring.events.AgentEvent;
 import net.powermatcher.api.monitoring.events.BidEvent;
-import net.powermatcher.api.monitoring.events.PeakShavingEvent;
 import net.powermatcher.api.monitoring.events.PriceUpdateEvent;
 
 /**
@@ -15,8 +14,7 @@ import net.powermatcher.api.monitoring.events.PriceUpdateEvent;
 public enum AgentEventType {
 
     BID_EVENT("BidEvent", BidEvent.class),
-    PRICE_EVENT("PriceEvent", PriceUpdateEvent.class),
-    PEAK_SHAVING_EVENT("PeakShavingEvent", PeakShavingEvent.class);
+    PRICE_EVENT("PriceEvent", PriceUpdateEvent.class);
 
     /**
      * The class name of the {@link AgentEvent} implementations.

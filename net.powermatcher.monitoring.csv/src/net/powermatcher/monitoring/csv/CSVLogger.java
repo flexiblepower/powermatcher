@@ -74,16 +74,6 @@ public class CSVLogger
                                                                    "priceValue",
                                                                    "lastUpdateTime" };
 
-    private static final String[] PEAKSHAVING_HEADER_ROW = new String[] { "logTime",
-                                                                         "clusterId",
-                                                                         "agentId",
-                                                                         "floor",
-                                                                         "ceiling",
-                                                                         "oldDemand",
-                                                                         "newDemand",
-                                                                         "oldPrice",
-                                                                         "newPrice" };
-
     /**
      * OSGI configuration of the {@link CSVLogger}
      */
@@ -205,9 +195,6 @@ public class CSVLogger
             case BID_EVENT:
                 header = BID_HEADER_ROW;
                 break;
-            case PEAK_SHAVING_EVENT:
-                header = PEAKSHAVING_HEADER_ROW;
-                break;
             default:
                 break;
             }
@@ -291,8 +278,6 @@ public class CSVLogger
                 output = createLineForBidLogRecord((BidLogRecord) logRecord);
             } else if (logRecord instanceof PriceUpdateLogRecord) {
                 output = createLineForPriceUpdateLog((PriceUpdateLogRecord) logRecord);
-            } else if (logRecord instanceof PeakShavingLogRecord) {
-                output = createLineForPeakShavingLogRecor((PeakShavingLogRecord) logRecord);
             }
 
             if (output != null) {
@@ -301,48 +286,6 @@ public class CSVLogger
             removeLogRecord(logRecord);
         }
         getLogger().info("CSVLogger [{}] wrote to {}", getLoggerId(), logFile);
-    }
-
-    /**
-     * Creates a <code>String[]</code> out of a {@link PeakShavingLogRecord} to be used in
-     * {@link CSVLogger#writeLineToCSV(String[], File)}
-     *
-     * @param logRecord
-     *            the {@link PeakShavingLogRecord} that has to be transformed
-     * @return the <code>String[]</code> representation of logRecord
-     */
-    private String[] createLineForPeakShavingLogRecor(PeakShavingLogRecord logRecord) {
-
-        StringBuilder oldDemandBuilder = new StringBuilder();
-
-        for (Double d : logRecord.getOldDemand()) {
-            if (oldDemandBuilder.length() > 0) {
-                oldDemandBuilder.append("#");
-            }
-            oldDemandBuilder.append(d);
-        }
-
-        StringBuilder newDemandBuilder = new StringBuilder();
-
-        for (Double d : logRecord.getNewDemand()) {
-            if (newDemandBuilder.length() > 0) {
-                newDemandBuilder.append("#");
-            }
-            newDemandBuilder.append(d);
-        }
-
-        String oldPrice = logRecord.getOldPrice() == null ? "" : String.valueOf(logRecord.getOldPrice());
-        String newPrice = logRecord.getNewPrice() == null ? "" : String.valueOf(logRecord.getNewPrice());
-
-        return new String[] { getDateFormat().format(logRecord.getLogTime()),
-                             logRecord.getClusterId(),
-                             logRecord.getAgentId(),
-                             String.valueOf(logRecord.getFloor()),
-                             String.valueOf(logRecord.getCeiling()),
-                             oldDemandBuilder.toString(),
-                             newDemandBuilder.toString(),
-                             oldPrice,
-                             newPrice };
     }
 
     /**

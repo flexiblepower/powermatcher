@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 
 import net.powermatcher.api.monitoring.events.AgentEvent;
 import net.powermatcher.api.monitoring.events.BidEvent;
-import net.powermatcher.api.monitoring.events.PeakShavingEvent;
 import net.powermatcher.api.monitoring.events.PriceUpdateEvent;
 
 import org.slf4j.Logger;
@@ -108,17 +107,6 @@ public abstract class AgentEventLogger
             } else if (event instanceof PriceUpdateEvent) {
                 logRecord = new PriceUpdateLogRecord((PriceUpdateEvent) event, event.getTimestamp(),
                                                      getDateFormat());
-            } else if (event instanceof PeakShavingEvent) {
-                PeakShavingEvent peakShavingEvent = (PeakShavingEvent) event;
-                logRecord = new PeakShavingLogRecord(peakShavingEvent,
-                                                     peakShavingEvent.getTimestamp(),
-                                                     getDateFormat(),
-                                                     peakShavingEvent.getFloor(),
-                                                     peakShavingEvent.getCeiling(),
-                                                     peakShavingEvent.getOldDemand(),
-                                                     peakShavingEvent.getNewDemand(),
-                                                     peakShavingEvent.getNewPrice(),
-                                                     peakShavingEvent.getOldPrice());
             }
 
             addLogRecord(logRecord);
