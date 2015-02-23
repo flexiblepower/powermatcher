@@ -13,10 +13,28 @@ public abstract class Bid {
      */
     protected static final double SMALLEST_DEMAND = 1e-6;
 
+    /**
+     * Tests if the difference between the 2 demand values is less that {@link #SMALLEST_DEMAND}
+     *
+     * @param demand1
+     *            The first demand
+     * @param demand2
+     *            The second demand
+     * @return true when the difference between the 2 demand values is less than {@link #SMALLEST_DEMAND}
+     */
     protected static boolean demandIsEqual(double demand1, double demand2) {
         return Math.abs(demand1 - demand2) < SMALLEST_DEMAND;
     }
 
+    /**
+     * Creates a new flat {@link Bid} with a given demand.
+     *
+     * @param marketBasis
+     *            The {@link MarketBasis} on which the {@link Bid} should be based
+     * @param demand
+     *            The constant demand value
+     * @return A new {@link Bid} that represents a flat bid
+     */
     public static Bid flatDemand(MarketBasis marketBasis, double demand) {
         return new PointBid.Builder(marketBasis).add(0, demand).build();
     }
@@ -31,8 +49,6 @@ public abstract class Bid {
      *
      * @param marketBasis
      *            the {@link MarketBasis} of the cluster.
-     * @param bidNumber
-     *            the number of this Bid instance.
      */
     protected Bid(MarketBasis marketBasis) {
         if (marketBasis == null) {

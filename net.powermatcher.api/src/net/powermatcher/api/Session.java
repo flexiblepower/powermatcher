@@ -59,11 +59,11 @@ public interface Session {
     void updatePrice(PriceUpdate priceUpdate);
 
     /**
-     * Passes the {@link Bid} sent by the {@link AgentEndpoint} to the {@link MatcherEndpoint} of this session. It calls @see
-     * {@link AgentEndpoint#updateBid(Bid)}.
+     * Passes the {@link Bid} sent by the {@link AgentEndpoint} to the {@link MatcherEndpoint} of this session.
      *
      * @param newBid
      *            The {@link Bid} passed by the {@link AgentEndpoint} of this {@link Session}.
+     * @see MatcherEndpoint#handleBidUpdate(Session, BidUpdate)
      */
     void updateBid(BidUpdate newBid);
 

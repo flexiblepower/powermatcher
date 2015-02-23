@@ -1,7 +1,6 @@
 package net.powermatcher.core.auctioneer;
 
 import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
 import javax.measure.Measure;
@@ -102,8 +101,8 @@ public class Auctioneer
     }
 
     /**
-     * @param the
-     *            new {@link ScheduledExecutorService} implementation.
+     * @param context
+     *            the {@link FlexiblePowerContext} implementation.
      */
     @Override
     public void setContext(FlexiblePowerContext context) {

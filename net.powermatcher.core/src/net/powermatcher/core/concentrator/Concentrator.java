@@ -188,8 +188,8 @@ public class Concentrator
      *
      * @param price
      *            The input price update as received from the connected matcher.
-     * @param aggregatedBid
-     *            The {@link AggregatedBid} that has lead to this price update.
+     * @param info
+     *            The information about the bid that has been send
      * @return The {@link Price} as it has to be sent to the connected agents.
      */
     protected Price transformPrice(Price price, SentBidInformation info) {

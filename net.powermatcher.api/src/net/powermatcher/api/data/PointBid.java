@@ -51,6 +51,7 @@ public class PointBid
          * Adds the supplied pricePoint the PricePoint array
          *
          * @param pricePoint
+         *            The point to add
          * @return this instance of the Builder with the array
          */
         public Builder add(PricePoint pricePoint) {
@@ -61,7 +62,10 @@ public class PointBid
         /**
          * Creates a PricePoint with the supplied price and demand. Adds the point to the PricePoint array.
          *
-         * @param pricePoint
+         * @param price
+         *            The price of the point that should be added
+         * @param demand
+         *            The demand value of the point that should be added
          * @return this instance of the Builder with the array
          */
         public Builder add(double price, double demand) {
@@ -95,8 +99,6 @@ public class PointBid
      *
      * @param marketBasis
      *            the {@link MarketBasis} of the cluster
-     * @param bidNumber
-     *            the number of this ArrayBid instance
      * @param pricePoints
      *            the {@link PointBid} Array that belongs to this bid.
      */

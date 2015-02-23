@@ -35,7 +35,7 @@ public abstract class PriceUpdateEvent
      * @param sessionId
      *            The id of the {@link Session} of the {@link AgentEndpoint} subclass sending the UpdateEvent
      * @param timestamp
-     *            The {@link Date} received from the {@link TimeService}
+     *            The time at which this event occurred
      * @param priceUpdate
      *            The received {@link PriceUpdate}.
      */

@@ -493,6 +493,7 @@ public class ArrayBid
      *
      * @param offset
      *            The offset (<code>double</code>) parameter.
+     * @return The {@link ArrayBid} that has been shifted.
      */
     public ArrayBid transpose(final double offset) {
         double[] newDemand = getDemand();

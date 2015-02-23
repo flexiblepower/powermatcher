@@ -11,16 +11,15 @@ import net.powermatcher.api.messages.BidUpdate;
 
 /**
  * An {@link AggregatedBid} is the combination of several {@link Bid} of agents (as identified by their agentId's) that
- * are aggregated into a single bid (@see {@link #getAggregatedBid()}). This object is immutable and can only be created
- * using the {@link Builder}.
+ * are aggregated into a single bid. This object is immutable and can only be created using the {@link Builder}.
  */
 public final class AggregatedBid
     extends ArrayBid {
     /**
      * A Builder that makes it easier to create an {@link AggregatedBid}. The idea is that you can call the
-     * {@link #addAgentBid(String, Bid)} several times and the {@link #bidNumber(int)} once to define the
-     * {@link AggregatedBid}. When calling the {@link #build()} method it returns the created aggregated bid and this
-     * {@link Builder} should not be used after that.
+     * {@link #addAgentBid(String, BidUpdate)} or {@link #addBid(Bid)} several times to define the {@link AggregatedBid}
+     * . When calling the {@link #build()} method it returns the created aggregated bid and this {@link Builder} should
+     * not be used after that.
      *
      * Example usage:
      *
@@ -58,8 +57,8 @@ public final class AggregatedBid
          *
          * @param agentId
          *            The unqiue identifier of the agent that has sent the bid.
-         * @param bid
-         *            The bid that has to be added to the aggregated bid.
+         * @param bidUpdate
+         *            The bidUpdate that has to be added to the aggregated bid.
          * @return This {@link Builder}
          */
         public Builder addAgentBid(String agentId, BidUpdate bidUpdate) {

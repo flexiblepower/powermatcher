@@ -30,7 +30,7 @@ public abstract class AgentEvent {
     private final String agentId;
 
     /**
-     * The {@link Date} received from the {@link TimeService}
+     * The time at which this event occurred
      */
     private final Date timestamp;
 
@@ -42,7 +42,7 @@ public abstract class AgentEvent {
      * @param agentId
      *            The id of the {@link AgentEndpoint} subclass sending the UpdateEvent.
      * @param timestamp
-     *            The {@link Date} received from the {@link TimeService}
+     *            The time at which this event occurred
      */
     public AgentEvent(String clusterId, String agentId, Date timestamp) {
         this.clusterId = clusterId;

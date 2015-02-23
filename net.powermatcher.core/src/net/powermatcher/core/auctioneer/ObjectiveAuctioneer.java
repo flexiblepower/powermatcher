@@ -17,9 +17,9 @@ import aQute.bnd.annotation.component.Reference;
 /**
  * <p>
  * This class represents an {@link ObjectiveAuctioneer} component which will receive all {@link Bid} of other agents as
- * a single {@link Bid} or as an aggregate {@link Bid} via one or more {@link Concentrator}. If {@link ObjectiveAgent}
- * are active, the {@link ObjectiveAuctioneer} will also receive a {@link Bid} from the {@link ObjectiveAgent} as a
- * single {@link Bid} .
+ * a single {@link Bid} or as an aggregate {@link Bid} via one or more {@link Concentrator}. If ObjectiveAgent are
+ * active, the {@link ObjectiveAuctioneer} will also receive a {@link Bid} from the ObjectiveAgent as a single
+ * {@link Bid} .
  * </p>
  *
  * <p>
