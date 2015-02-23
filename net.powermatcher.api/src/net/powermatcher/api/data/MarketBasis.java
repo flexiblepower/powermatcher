@@ -9,7 +9,7 @@ import java.util.Locale;
  * {@link MarketBasis} is an immutable data object specifying the settings for the market. This includes the price
  * range, the commodity being exchanges, the currency being used and the number of price steps used in the demand
  * arrays.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
@@ -54,7 +54,7 @@ public class MarketBasis {
 
     /**
      * A constructor used to create an instance of this class.
-     * 
+     *
      * @param commodity
      *            the commodity that is to be handled by this market.
      * @param currency
@@ -67,7 +67,7 @@ public class MarketBasis {
      *            the maximum price that is valid in this market (inclusive)
      */
     public MarketBasis(final String commodity, final String currency, final int priceSteps, final double minimumPrice,
-            final double maximumPrice) {
+                       final double maximumPrice) {
         if (commodity == null) {
             throw new NullPointerException("commodity");
         } else if (currency == null) {
@@ -93,58 +93,42 @@ public class MarketBasis {
      * @return the current value of commodity.
      */
     public String getCommodity() {
-        return this.commodity;
+        return commodity;
     }
 
     /**
      * @return the current value of currency.
      */
     public String getCurrency() {
-        return this.currency;
+        return currency;
     }
 
     /**
      * @return the current value of maximumPrice.
      */
     public double getMaximumPrice() {
-        return this.maximumPrice;
+        return maximumPrice;
     }
 
     /**
      * @return the current value of minimumPrice.
      */
     public double getMinimumPrice() {
-        return this.minimumPrice;
+        return minimumPrice;
     }
 
     /**
      * @return The difference in market price between a price step.
      */
     public final double getPriceIncrement() {
-        return (this.maximumPrice - this.minimumPrice) / (this.priceSteps - 1);
+        return (maximumPrice - minimumPrice) / (priceSteps - 1);
     }
 
     /**
      * @return the current value of priceSteps.
      */
     public int getPriceSteps() {
-        return this.priceSteps;
-    }
-
-    /**
-     * Bound price step with the specified price step parameter and return the int result.
-     * 
-     * @param priceStep
-     *            The price step (<code>int</code>) parameter.
-     * @return Results of the bound price step (<code>int</code>) value.
-     * @see Price#toPriceStep(double)
-     * @see Price#toPriceStep(int)
-     */
-    public int boundPriceStep(final PriceStep priceStep) {
-        int step = priceStep.getPriceStep();
-        int boundedPriceStep = Math.min(step, this.priceSteps - 1);
-        boundedPriceStep = Math.max(boundedPriceStep, 0);
-        return boundedPriceStep;
+        return priceSteps;
     }
 
     /**
@@ -158,9 +142,9 @@ public class MarketBasis {
             return false;
         } else {
             MarketBasis other = (MarketBasis) obj;
-            return this.commodity.equals(other.commodity) && this.currency.equals(other.currency)
-                    && this.maximumPrice == other.maximumPrice && this.minimumPrice == other.minimumPrice
-                    && this.priceSteps == other.priceSteps;
+            return commodity.equals(other.commodity) && currency.equals(other.currency)
+                   && maximumPrice == other.maximumPrice && minimumPrice == other.minimumPrice
+                   && priceSteps == other.priceSteps;
         }
     }
 
@@ -170,13 +154,13 @@ public class MarketBasis {
     @Override
     public int hashCode() {
         final int prime = 31;
-        int result = prime + ((this.commodity == null) ? 0 : this.commodity.hashCode());
-        result = prime * result + ((this.currency == null) ? 0 : this.currency.hashCode());
-        long temp = Double.doubleToLongBits(this.maximumPrice);
+        int result = prime + ((commodity == null) ? 0 : commodity.hashCode());
+        result = prime * result + ((currency == null) ? 0 : currency.hashCode());
+        long temp = Double.doubleToLongBits(maximumPrice);
         result = prime * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(this.minimumPrice);
+        temp = Double.doubleToLongBits(minimumPrice);
         result = prime * result + (int) (temp ^ (temp >>> 32));
-        result = prime * result + this.priceSteps;
+        result = prime * result + priceSteps;
         return result;
     }
 
@@ -186,11 +170,11 @@ public class MarketBasis {
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder();
-        b.append("MarketBasis{commodity=").append(this.commodity);
-        b.append(", currency=").append(this.currency);
-        b.append(", minimumPrice=").append(PRICE_FORMAT.format(this.minimumPrice));
-        b.append(", maximumPrice=").append(PRICE_FORMAT.format(this.maximumPrice));
-        b.append(", priceSteps=").append(this.priceSteps);
+        b.append("MarketBasis{commodity=").append(commodity);
+        b.append(", currency=").append(currency);
+        b.append(", minimumPrice=").append(PRICE_FORMAT.format(minimumPrice));
+        b.append(", maximumPrice=").append(PRICE_FORMAT.format(maximumPrice));
+        b.append(", priceSteps=").append(priceSteps);
         b.append('}');
         return b.toString();
     }

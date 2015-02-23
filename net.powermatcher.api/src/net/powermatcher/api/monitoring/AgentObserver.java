@@ -17,5 +17,5 @@ public interface AgentObserver {
      * @param event
      *            the {@link AgentEvent} sent by the {@link ObservableAgent}
      */
-    void update(AgentEvent event);
+    void handleAgentEvent(AgentEvent event);
 }

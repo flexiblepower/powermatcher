@@ -1,19 +1,25 @@
-plugindir: ${workspace}/cnf/plugins
-
--pluginpath: ${plugindir}/biz.aQute.repository/biz.aQute.repository.jar
+-pluginpath: ${workspace}/cnf/gradle/bnd/biz.aQute.repository.jar
 
 -plugin: \
-	aQute.bnd.deployer.repository.FixedIndexedRepo;\
-            name=FlexiblePower Bundle Hub;\
-            locations=https://raw.githubusercontent.com/flexiblepower/bundle-hub/master/index.xml.gz;\
+     aQute.bnd.deployer.repository.LocalIndexedRepo;\
+            name=Release;\
+            local=${workspace}/cnf/release;\
+            pretty=true,\
+     aQute.bnd.deployer.repository.FixedIndexedRepo;\
+            name=FlexiblePower Base (snapshot);\
+            locations=http://fpai-ci.sensorlab.tno.nl/builds/flexiblepower-base/development/LATEST/repo/index.xml;\
             cache=${workspace}/cnf/cache,\
-	aQute.lib.deployer.FileRepo;name=Build;\
-			location=${workspace}/cnf/buildrepo,\
-	aQute.lib.deployer.FileRepo;name=Jetty 9.2 Bundles;\
-			location=${workspace}/cnf/jettyrepo92,\
-	aQute.bnd.deployer.repository.LocalIndexedRepo;\
-			name=Release;\
-			local=${workspace}/cnf/releaserepo;\
-			pretty=true
+     aQute.bnd.deployer.repository.FixedIndexedRepo;\
+            name=FlexiblePower Bundle Hub - Build;\
+            locations=https://raw.githubusercontent.com/flexiblepower/bundle-hub/split-repos-pm/build/index.xml;\
+            cache=${workspace}/cnf/cache,\
+     aQute.bnd.deployer.repository.FixedIndexedRepo;\
+            name=FlexiblePower Bundle Hub - Run;\
+            locations=https://raw.githubusercontent.com/flexiblepower/bundle-hub/split-repos-pm/run/index.xml;\
+            cache=${workspace}/cnf/cache,\
+     aQute.bnd.deployer.repository.FixedIndexedRepo;\
+            name=FlexiblePower Bundle Hub - Test;\
+            locations=https://raw.githubusercontent.com/flexiblepower/bundle-hub/split-repos-pm/test/index.xml;\
+            cache=${workspace}/cnf/cache
 
 -releaserepo: Release

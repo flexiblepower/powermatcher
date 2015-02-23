@@ -1,8 +1,10 @@
 package net.powermatcher.api;
 
+import org.flexiblepower.context.FlexiblePowerContext;
+
 /**
  * {@link Agent} defines the interface with the basic functionality needed to act as an agent in a Powermatcher cluster.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
@@ -20,12 +22,11 @@ public interface Agent {
     String getClusterId();
 
     /**
-     * @return the id of the desired parent {@link Agent}. <code>null</code> when no parent is required (Auctioneer).
+     * Give the agent a reference to a {@link FlexiblePowerContext}. This should be done by the runtime bundle after the
+     * component is activated.
+     *
+     * @param context
+     *            reference to the {@link FlexiblePowerContext}
      */
-    String getDesiredParentId();
-
-    /**
-     * @return the service Pid of the managed service of this instance in the OSGi container.
-     */
-    String getServicePid();
+    void setContext(FlexiblePowerContext context);
 }

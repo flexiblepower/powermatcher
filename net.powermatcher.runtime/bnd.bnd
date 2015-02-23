@@ -1,0 +1,8 @@
+-buildpath: ${pm-buildpath}
+-testpath: ${test}
+
+Bundle-Version: 1.0.0.${tstamp}
+Service-Component:  *
+Private-Package:  \
+	net.powermatcher.runtime.sessions,\
+	net.powermatcher.runtime.agents

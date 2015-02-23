@@ -4,26 +4,26 @@ import java.util.Date;
 
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
-import net.powermatcher.api.TimeService;
 import net.powermatcher.api.data.Bid;
-import net.powermatcher.api.monitoring.Qualifier;
+import net.powermatcher.api.messages.BidUpdate;
 
 /**
  * An {@link IncomingBidEvent} is sent when an {@link AgentEndpoint} receives a new {@link Bid}.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
-public class IncomingBidEvent extends BidEvent {
+public class IncomingBidEvent
+    extends BidEvent {
 
     /**
      * The id of the Agent that sent the {@link Bid}
      */
-    private String fromAgentId;
+    private final String fromAgentId;
 
     /**
      * Constructs an instance of this class.
-     * 
+     *
      * @param clusterId
      *            The id of the cluster the {@link AgentEndpoint} subclass sending the UpdateEvent is running in.
      * @param agentId
@@ -31,15 +31,15 @@ public class IncomingBidEvent extends BidEvent {
      * @param sessionId
      *            The id of the {@link Session} of the {@link AgentEndpoint} subclass sending the UpdateEvent
      * @param timestamp
-     *            The {@link Date} received from the {@link TimeService}
+     *            The time at which this event occurred
      * @param fromAgentId
      *            The id of the Agent that sent the {@link Bid}.
-     * @param bid
-     *            The received {@link Bid}.
+     * @param bidUpdate
+     *            The received {@link BidUpdate}.
      */
     public IncomingBidEvent(String clusterId, String agentId, String sessionId, Date timestamp, String fromAgentId,
-            Bid bid, Qualifier qualifier) {
-        super(clusterId, agentId, sessionId, timestamp, bid, qualifier);
+                            BidUpdate bidUpdate) {
+        super(clusterId, agentId, sessionId, timestamp, bidUpdate);
         this.fromAgentId = fromAgentId;
     }
 
@@ -55,7 +55,6 @@ public class IncomingBidEvent extends BidEvent {
      */
     @Override
     public String toString() {
-        return IncomingBidEvent.class.getSimpleName() + " " + super.toString() + ", fromAgentId = " + this.fromAgentId
-                + ", bid = " + getBid().toString();
+        return super.toString() + ", fromAgentId = " + fromAgentId;
     }
 }

@@ -1,0 +1,7 @@
+-buildpath:  \
+	${pm-buildpath},\
+	net.powermatcher.core;version=latest
+-testpath: \
+	${test}
+
+Bundle-Version: 2.0.0.${tstamp}

@@ -1,0 +1,3 @@
+[submodule "cnf/gradle"]
+	path = cnf/gradle
+	url = git://github.com/flexiblepower/flexiblepower-build-tools.git
