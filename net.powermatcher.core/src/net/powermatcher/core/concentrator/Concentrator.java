@@ -119,10 +119,9 @@ public class Concentrator
 
         };
 
-        bidUpdateSchedule = context.getScheduler().scheduleAtFixedRate(command,
-                                                                       Measure.valueOf(0, SI.SECOND),
-                                                                       Measure.valueOf(config.bidUpdateRate(),
-                                                                                       SI.SECOND));
+        bidUpdateSchedule = context.scheduleAtFixedRate(command,
+                                                        Measure.valueOf(0, SI.SECOND),
+                                                        Measure.valueOf(config.bidUpdateRate(), SI.SECOND));
     }
 
     /**

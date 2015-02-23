@@ -128,7 +128,7 @@ public class TestClusterHelper
     }
 
     public void performTasks() {
-        context.getMockScheduler().doTaskOnce();
+        context.doTaskOnce();
     }
 
     public List<PriceUpdate> getPriceUpdates() {

@@ -141,7 +141,7 @@ public class PVPanelAgent
     @Override
     public void setContext(FlexiblePowerContext context) {
         super.setContext(context);
-        scheduledFuture = context.getScheduler().scheduleAtFixedRate(new Runnable() {
+        scheduledFuture = context.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 doBidUpdate();

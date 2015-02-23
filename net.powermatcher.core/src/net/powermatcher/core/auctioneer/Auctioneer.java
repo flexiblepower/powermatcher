@@ -117,10 +117,9 @@ public class Auctioneer
                 publishPrice(newPrice, aggregatedBid);
             }
         };
-        scheduledFuture = context.getScheduler().scheduleAtFixedRate(command,
-                                                                     Measure.valueOf(0, SI.SECOND),
-                                                                     Measure.valueOf(config.priceUpdateRate(),
-                                                                                     SI.SECOND));
+        scheduledFuture = context.scheduleAtFixedRate(command,
+                                                      Measure.valueOf(0, SI.SECOND),
+                                                      Measure.valueOf(config.priceUpdateRate(), SI.SECOND));
     }
 
     /**

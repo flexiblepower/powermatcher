@@ -83,13 +83,13 @@ public class AuctioneerTest {
 
     @Test
     public void testActivate() {
-        assertThat(mockContext.getMockScheduler().getMockFuture().isCancelled(), is(false));
+        assertThat(mockContext.getMockFuture().isCancelled(), is(false));
     }
 
     @Test
     public void testDeactivate() {
         auctioneer.deactivate();
-        assertThat(mockContext.getMockScheduler().getMockFuture().isCancelled(), is(true));
+        assertThat(mockContext.getMockFuture().isCancelled(), is(true));
     }
 
     @Test
@@ -168,7 +168,7 @@ public class AuctioneerTest {
         Bid bid = new ArrayBid(marketBasis, demandArray);
         mockAgent.sendBid(bid, 0);
         assertThat(mockAgent.getLastPriceUpdate(), is(nullValue()));
-        mockContext.getMockScheduler().doTaskOnce();
+        mockContext.doTaskOnce();
         assertThat(mockAgent.getLastPriceUpdate(), is(notNullValue()));
         assertThat(observer.outgoingPriceEvent.getPriceUpdate(), is(equalTo(mockAgent.getLastPriceUpdate())));
     }

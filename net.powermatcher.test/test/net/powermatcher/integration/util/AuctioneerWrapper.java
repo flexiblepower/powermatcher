@@ -40,7 +40,7 @@ public class AuctioneerWrapper
     }
 
     public void publishPrice() {
-        ((MockContext) context).getMockScheduler().doTaskOnce();
+        ((MockContext) context).doTaskOnce();
     }
 
     public void publishPrice(PriceUpdate priceUpdate) {

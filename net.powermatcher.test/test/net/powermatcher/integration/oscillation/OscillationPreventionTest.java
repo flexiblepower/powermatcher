@@ -166,7 +166,7 @@ public class OscillationPreventionTest {
     }
 
     private void auctioneerRun() {
-        autioneerContext.getMockScheduler().doTaskOnce();
+        autioneerContext.doTaskOnce();
     }
 
     private void concentratorRun() {

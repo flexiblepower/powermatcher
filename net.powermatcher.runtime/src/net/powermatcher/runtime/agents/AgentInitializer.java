@@ -17,12 +17,7 @@ import aQute.bnd.annotation.component.Reference;
 public class AgentInitializer {
 
     private final Set<Agent> agents = new HashSet<Agent>();
-    private FlexiblePowerContext runtimeContext;
-
-    @Reference
-    public void setRuntimeContext(FlexiblePowerContext runtimeContext) {
-        this.runtimeContext = runtimeContext;
-    }
+    private final FlexiblePowerContext runtimeContext = new PowerMatcherContext();
 
     @Activate
     public void activate() {

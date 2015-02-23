@@ -52,15 +52,15 @@ public class ConcentratorTest {
     public void testActivate() {
         assertThat(concentrator.getAgentId(), is(equalTo(CONCENTRATOR_ID)));
         assertThat(concentrator.getDesiredParentId(), is(equalTo(AUCTIONEER_ID)));
-        assertThat(context.getMockScheduler().getUpdateRate(), is(equalTo(BID_UPDATE_RATE)));
+        assertThat(context.getUpdateRate(), is(equalTo(BID_UPDATE_RATE)));
     }
 
     @Test
     public void testDeactivate() {
-        context.getMockScheduler().doTaskOnce();
-        assertThat(context.getMockScheduler().getMockFuture().isCancelled(), is(false));
+        context.doTaskOnce();
+        assertThat(context.getMockFuture().isCancelled(), is(false));
         concentrator.deactivate();
-        assertThat(context.getMockScheduler().getMockFuture().isCancelled(), is(true));
+        assertThat(context.getMockFuture().isCancelled(), is(true));
     }
 
     @Test
@@ -154,7 +154,7 @@ public class ConcentratorTest {
         double[] demandArray = new double[] { 2, 1, 0, -1, -2 };
         ArrayBid arrayBid = new ArrayBid(marketBasis, demandArray);
         mockAgent.sendBid(new BidUpdate(arrayBid, 1));
-        context.getMockScheduler().doTaskOnce();
+        context.doTaskOnce();
         ArrayBid expectedBid = new ArrayBid(arrayBid);
         assertThat(mockMatcherAgent.getLastReceivedBid().getBid().toArrayBid().getDemand(),
                    is(equalTo(expectedBid.getDemand())));
@@ -179,7 +179,7 @@ public class ConcentratorTest {
         int sentBidNumber = 5;
         Bid bid = new ArrayBid(marketBasis, new double[] { 2, 1, 0, -1, -1 });
         mockAgent.sendBid(new BidUpdate(bid, sentBidNumber));
-        context.getMockScheduler().doTaskOnce();
+        context.doTaskOnce();
 
         int validBidNumber = mockMatcherAgent.getLastReceivedBid().getBidNumber();
         PriceUpdate expected = new PriceUpdate(new Price(marketBasis, 5.0), validBidNumber);

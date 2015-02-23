@@ -52,7 +52,7 @@ public class SendReceivePriceTestCPQ1
 
         // Send bids to the matcherAgent (concentrator)
         sendBidsToMatcher();
-        auctioneerContext.getMockScheduler().doTaskOnce();
+        auctioneerContext.doTaskOnce();
 
         // Validate if concentrator receives correct price
         assertEquals(resultsReader.getEquilibriumPrice(), concentrator.getLastPrice().getPrice()
@@ -96,7 +96,7 @@ public class SendReceivePriceTestCPQ1
 
         // Send bids to the matcherAgent (concentrator)
         sendBidsToMatcher();
-        auctioneerContext.getMockScheduler().doTaskOnce();
+        auctioneerContext.doTaskOnce();
         // Check if concentrator received correct price
         assertEquals(resultsReader.getEquilibriumPrice(), concentrator.getLastReceivedPriceUpdate()
                                                                       .getPrice().getPriceValue(), 0);
@@ -136,7 +136,7 @@ public class SendReceivePriceTestCPQ1
 
         // Send bids to the matcherAgent (concentrator)
         sendBidsToMatcher();
-        auctioneerContext.getMockScheduler().doTaskOnce();
+        auctioneerContext.doTaskOnce();
         // Validate if concentrator receives correct price
         assertEquals(resultsReader.getEquilibriumPrice(), concentrator.getLastPrice().getPrice()
                                                                       .getPriceValue(), 0);
@@ -175,7 +175,7 @@ public class SendReceivePriceTestCPQ1
 
         // Send bids to the matcherAgent (concentrator)
         sendBidsToMatcher();
-        auctioneerContext.getMockScheduler().doTaskOnce();
+        auctioneerContext.doTaskOnce();
         // Validate if concentrator receives correct price
         assertEquals(resultsReader.getEquilibriumPrice(), concentrator.getLastPrice().getPrice()
                                                                       .getPriceValue(), 0);
@@ -209,7 +209,7 @@ public class SendReceivePriceTestCPQ1
 
         // Send bids to the matcherAgent (concentrator)
         sendBidsToMatcher();
-        auctioneerContext.getMockScheduler().doTaskOnce();
+        auctioneerContext.doTaskOnce();
         // Validate if concentrator receives correct price
         assertEquals(resultsReader.getEquilibriumPrice(),
                      concentrator.getLastPrice().getPrice().getPriceValue(), 0);
@@ -243,7 +243,7 @@ public class SendReceivePriceTestCPQ1
 
         // Send bids to the matcherAgent (concentrator)
         sendBidsToMatcher();
-        auctioneerContext.getMockScheduler().doTaskOnce();
+        auctioneerContext.doTaskOnce();
         // Send incorrect price directly to the concentrator
         LOGGER.info("4. Sending incorrect price (null) by auctioneer");
         PriceUpdate falsePriceUpdate = null;

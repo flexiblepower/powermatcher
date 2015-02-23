@@ -129,9 +129,9 @@ public class MatcherEndpointProxyWebsocket
                 connectRemote();
             }
         };
-        context.getScheduler().scheduleAtFixedRate(reconnectJob,
-                                                   Measure.valueOf(1, SI.SECOND),
-                                                   Measure.valueOf(reconnectDelay, SI.SECOND));
+        context.scheduleAtFixedRate(reconnectJob,
+                                    Measure.valueOf(1, SI.SECOND),
+                                    Measure.valueOf(reconnectDelay, SI.SECOND));
     }
 
     /**

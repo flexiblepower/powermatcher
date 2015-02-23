@@ -59,7 +59,7 @@ public class PeakShavingConcentratorTest {
 
         Bid bid = new ArrayBid(marketBasis, 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8);
         deviceAgent.sendBid(bid, 0);
-        context.getMockScheduler().doTaskOnce();
+        context.doTaskOnce();
         int bidNumber = matcher.getLastReceivedBid().getBidNumber();
         PriceUpdate expected = new PriceUpdate(new Price(marketBasis, 0.0), bidNumber);
         matcher.publishPrice(expected);
@@ -72,7 +72,7 @@ public class PeakShavingConcentratorTest {
 
         Bid bid = new ArrayBid(marketBasis, 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8);
         deviceAgent.sendBid(bid, 0);
-        context.getMockScheduler().doTaskOnce();
+        context.doTaskOnce();
         int bidNumber = matcher.getLastReceivedBid().getBidNumber();
         PriceUpdate sentPrice = new PriceUpdate(new Price(marketBasis, 10.0), bidNumber);
         PriceUpdate expectedPrice = new PriceUpdate(new Price(marketBasis, 3.0), bidNumber);
@@ -87,7 +87,7 @@ public class PeakShavingConcentratorTest {
         double[] demandArray = new double[] { 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8 };
         Bid arrayBid = new ArrayBid(marketBasis, demandArray);
         deviceAgent.sendBid(arrayBid, 8);
-        context.getMockScheduler().doTaskOnce();
+        context.doTaskOnce();
         double[] transformedDemandArray = new double[] { 1, 1, 0, -1, -1, -1, -1, -1, -1, -1, -1 };
         Bid expectedBid = new ArrayBid(marketBasis, transformedDemandArray);
         assertThat(matcher.getLastReceivedBid().getBid(), is(equalTo(expectedBid)));
@@ -101,7 +101,7 @@ public class PeakShavingConcentratorTest {
         double[] demandArray = new double[] { 1, 1, 0, -1, -1, -1, -1, -1, -1, -1, -1 };
         ArrayBid arrayBid = new ArrayBid(marketBasis, demandArray);
         deviceAgent.sendBid(arrayBid, 9);
-        context.getMockScheduler().doTaskOnce();
+        context.doTaskOnce();
         Bid expectedBid = new ArrayBid(arrayBid);
         assertThat(matcher.getLastReceivedBid().getBid(), is(equalTo(expectedBid)));
         assertThat(matcher.getLastReceivedBid().getBidNumber(), is(equalTo(1)));
