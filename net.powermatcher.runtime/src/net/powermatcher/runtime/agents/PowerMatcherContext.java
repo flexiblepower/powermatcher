@@ -2,10 +2,13 @@ package net.powermatcher.runtime.agents;
 
 import java.util.Date;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
+import java.util.concurrent.Delayed;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.RunnableScheduledFuture;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.measure.Measurable;
 import javax.measure.quantity.Duration;
@@ -17,49 +20,88 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PowerMatcherContext
+    extends ScheduledThreadPoolExecutor
     implements FlexiblePowerContext {
-    static final Logger logger = LoggerFactory.getLogger(PowerMatcherContext.class);
+
     static final Unit<Duration> MS = SI.MILLI(SI.SECOND);
 
-    private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(2);
+    private static final Logger logger = LoggerFactory.getLogger(PowerMatcherContext.class);
 
-    static class WrappedCallable<T>
-        implements Callable<T> {
-        private final Callable<T> wrapped;
+    static class WrappedTask<T>
+        implements RunnableScheduledFuture<T> {
+        private final RunnableScheduledFuture<T> task;
 
-        public WrappedCallable(Callable<T> wrapped) {
-            this.wrapped = wrapped;
+        public WrappedTask(RunnableScheduledFuture<T> task) {
+            this.task = task;
         }
 
         @Override
-        public T call() throws Exception {
-            try {
-                return wrapped.call();
-            } catch (Exception ex) {
-                logger.error("An scheduled execution has thrown an exception: " + ex.getMessage(), ex);
-                throw ex;
-            }
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            return task.cancel(mayInterruptIfRunning);
         }
-    }
 
-    static class WrappedRunnable
-        implements Runnable {
-        private final Runnable wrapped;
+        @Override
+        public int compareTo(Delayed o) {
+            return task.compareTo(o);
+        }
 
-        public WrappedRunnable(Runnable wrapped) {
-            this.wrapped = wrapped;
+        @Override
+        public T get() throws InterruptedException, ExecutionException {
+            return task.get();
+        }
+
+        @Override
+        public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+            return task.get(timeout, unit);
+        }
+
+        @Override
+        public long getDelay(TimeUnit unit) {
+            return task.getDelay(unit);
+        }
+
+        @Override
+        public boolean isCancelled() {
+            return task.isCancelled();
+        }
+
+        @Override
+        public boolean isDone() {
+            return task.isDone();
+        }
+
+        @Override
+        public boolean isPeriodic() {
+            return task.isPeriodic();
         }
 
         @Override
         public void run() {
             try {
-                wrapped.run();
-            } catch (RuntimeException ex) {
+                task.run();
+            } catch (Exception ex) {
                 logger.error("An scheduled execution has thrown an exception: " + ex.getMessage(), ex);
-                throw ex;
+                // TODO: should we rethrow this exception or not? Now it will retry to execute the task
             }
         }
     }
+
+    public PowerMatcherContext() {
+        super(2);
+        setKeepAliveTime(5, TimeUnit.MINUTES);
+    }
+
+    @Override
+    protected <V> RunnableScheduledFuture<V> decorateTask(final Callable<V> callable,
+                                                          final RunnableScheduledFuture<V> task) {
+        return new WrappedTask<V>(task);
+    };
+
+    @Override
+    protected <V> RunnableScheduledFuture<V> decorateTask(Runnable runnable,
+                                                          java.util.concurrent.RunnableScheduledFuture<V> task) {
+        return new WrappedTask<V>(task);
+    };
 
     @Override
     public long currentTimeMillis() {
@@ -72,47 +114,32 @@ public class PowerMatcherContext
     }
 
     @Override
-    public <T> Future<T> submit(Callable<T> task) {
-        return executor.submit(new WrappedCallable<T>(task));
-    }
-
-    @Override
-    public <T> Future<T> submit(Runnable task, T result) {
-        return executor.submit(new WrappedRunnable(task), result);
-    }
-
-    @Override
-    public Future<?> submit(Runnable task) {
-        return executor.submit(new WrappedRunnable(task));
-    }
-
-    @Override
     public ScheduledFuture<?> schedule(Runnable command, Measurable<Duration> delay) {
-        return executor.schedule(new WrappedRunnable(command), delay.longValue(MS), TimeUnit.MILLISECONDS);
+        return schedule(command, delay.longValue(MS), TimeUnit.MILLISECONDS);
     }
 
     @Override
     public <V> ScheduledFuture<V> schedule(Callable<V> callable, Measurable<Duration> delay) {
-        return executor.schedule(new WrappedCallable<V>(callable), delay.longValue(MS), TimeUnit.MILLISECONDS);
+        return schedule(callable, delay.longValue(MS), TimeUnit.MILLISECONDS);
     }
 
     @Override
     public ScheduledFuture<?> scheduleAtFixedRate(Runnable command,
                                                   Measurable<Duration> initialDelay,
                                                   Measurable<Duration> period) {
-        return executor.scheduleAtFixedRate(new WrappedRunnable(command),
-                                            initialDelay.longValue(MS),
-                                            period.longValue(MS),
-                                            TimeUnit.MILLISECONDS);
+        return scheduleAtFixedRate(command,
+                                   initialDelay.longValue(MS),
+                                   period.longValue(MS),
+                                   TimeUnit.MILLISECONDS);
     }
 
     @Override
     public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command,
                                                      Measurable<Duration> initialDelay,
                                                      Measurable<Duration> delay) {
-        return executor.scheduleWithFixedDelay(new WrappedRunnable(command),
-                                               initialDelay.longValue(MS),
-                                               delay.longValue(MS),
-                                               TimeUnit.MILLISECONDS);
+        return scheduleWithFixedDelay(command,
+                                      initialDelay.longValue(MS),
+                                      delay.longValue(MS),
+                                      TimeUnit.MILLISECONDS);
     }
 }
