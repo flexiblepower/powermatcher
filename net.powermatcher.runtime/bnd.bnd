@@ -6,3 +6,5 @@ Service-Component:  *
 Private-Package:  \
 	net.powermatcher.runtime.sessions,\
 	net.powermatcher.runtime.agents
+
+Provide-Capability: flexiblepower.context; runtime=powermatcher

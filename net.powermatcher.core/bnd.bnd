@@ -9,3 +9,5 @@ Export-Package:  \
 	net.powermatcher.core.bidcache,\
 	net.powermatcher.core.concentrator,\
 	net.powermatcher.core.proxy
+
+Require-Capability: flexiblepower.context; filter:="(runtime=powermatcher)"

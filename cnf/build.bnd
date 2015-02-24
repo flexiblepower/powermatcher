@@ -4,7 +4,7 @@ Bundle-Category: PowerMatcher
 qualifier: SNAPSHOT-${tstamp}
 -includeresource: {OSGI-INF/permissions.perm=permissions.perm}
 
-pm-buildpath: ${default-buildpath}, net.powermatcher.api, flexiblepower.api
+pm-buildpath: ${default-buildpath}, net.powermatcher.api;version=latest
 
 test: \
 	junit;version=latest,\
