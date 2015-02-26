@@ -163,7 +163,7 @@ public class Concentrator
         super.handlePriceUpdate(priceUpdate);
 
         try {
-            SentBidInformation info = retreiveAggregatedBid(priceUpdate.getBidNumber());
+            SentBidInformation info = retrieveAggregatedBid(priceUpdate.getBidNumber());
             Price price = transformPrice(priceUpdate.getPrice(), info);
             matcherPart.publishPrice(price, info.getOriginalBid());
         } catch (IllegalArgumentException ex) {
@@ -215,8 +215,9 @@ public class Concentrator
         }
     }
 
-    private SentBidInformation retreiveAggregatedBid(int bidNumberReference) {
+    private SentBidInformation retrieveAggregatedBid(int bidNumberReference) {
         synchronized (sentBids) {
+            // First check if we have actually sent a bid with that number
             boolean found = false;
             for (SentBidInformation info : sentBids) {
                 if (info.getBidNumber() == bidNumberReference) {
@@ -224,18 +225,18 @@ public class Concentrator
                 }
             }
 
+            // If we haven't, then throw an exception
             if (!found) {
                 throw new IllegalArgumentException("No bid with bidNumber " + bidNumberReference + " is available");
             }
 
-            while (true) {
-                SentBidInformation info = sentBids.peek();
-                if (info.getBidNumber() == bidNumberReference) {
-                    return info;
-                } else {
-                    sentBids.removeFirst();
-                }
+            // If we have, drop all older bids and return the found info
+            SentBidInformation info = sentBids.peek();
+            while (info.getBidNumber() != bidNumberReference) {
+                sentBids.removeFirst();
+                info = sentBids.peek();
             }
+            return info;
         }
     }
 
