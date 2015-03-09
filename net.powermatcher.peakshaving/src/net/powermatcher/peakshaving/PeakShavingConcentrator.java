@@ -3,6 +3,10 @@ package net.powermatcher.peakshaving;
 import java.util.Arrays;
 import java.util.Map;
 
+import javax.measure.Measurable;
+import javax.measure.quantity.Power;
+import javax.measure.unit.SI;
+
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.data.ArrayBid;
@@ -13,6 +17,7 @@ import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.concentrator.Concentrator;
 import net.powermatcher.core.concentrator.SentBidInformation;
+import net.powermatcher.core.concentrator.TransformingConcentrator;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
@@ -35,9 +40,14 @@ import aQute.bnd.annotation.metatype.Meta;
  */
 @Component(designateFactory = PeakShavingConcentrator.Config.class,
            immediate = true,
-           provide = { ObservableAgent.class, MatcherEndpoint.class, AgentEndpoint.class, PeakShavingConcentrator.class })
+           provide = { ObservableAgent.class,
+                      MatcherEndpoint.class,
+                      AgentEndpoint.class,
+                      TransformingConcentrator.class,
+                      PeakShavingConcentrator.class })
 public class PeakShavingConcentrator
-    extends Concentrator {
+    extends Concentrator
+    implements TransformingConcentrator {
 
     @Meta.OCD
     public static interface Config
@@ -271,7 +281,8 @@ public class PeakShavingConcentrator
         return -1;
     }
 
-    public void setMeasuredFlow(double measuredFlow) {
-        this.measuredFlow = measuredFlow;
+    @Override
+    public void setMeasuredFlow(Measurable<Power> measuredFlow) {
+        this.measuredFlow = measuredFlow.doubleValue(SI.WATT);
     }
 }

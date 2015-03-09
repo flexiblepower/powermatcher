@@ -8,11 +8,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.measure.Measure;
+import javax.measure.unit.SI;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import net.powermatcher.core.concentrator.TransformingConcentrator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,16 +63,16 @@ public class PeakShavingConcentratorServlet
     private final Map<String, PeakShavingConcentrator> concentrators = new ConcurrentHashMap<String, PeakShavingConcentrator>();
 
     @Reference(dynamic = true, multiple = true)
-    public void addConcentrator(PeakShavingConcentrator concentrator, Map<String, Object> properties) {
+    public void addConcentrator(TransformingConcentrator concentrator, Map<String, Object> properties) {
         Object agentId = properties.get(KEY_AGENT_ID);
         if (agentId == null || concentrators.containsKey(agentId.toString())) {
             LOGGER.warn("Illegal configuration for PeakShavingConcentrator: agentId already in use or not available");
-        } else {
-            concentrators.put(agentId.toString(), concentrator);
+        } else if (concentrator instanceof PeakShavingConcentrator) {
+            concentrators.put(agentId.toString(), (PeakShavingConcentrator) concentrator);
         }
     }
 
-    public void removeConcentrator(PeakShavingConcentrator concentrator, Map<String, Object> properties) {
+    public void removeConcentrator(TransformingConcentrator concentrator, Map<String, Object> properties) {
         Object agentId = properties.get(KEY_AGENT_ID);
         if (concentrators.get(agentId) == concentrator) {
             concentrators.remove(agentId);
@@ -92,7 +96,7 @@ public class PeakShavingConcentratorServlet
         for (Measurement measurement : measurements) {
             PeakShavingConcentrator concentrator = concentrators.get(measurement.getAgentId());
             if (concentrator != null) {
-                concentrator.setMeasuredFlow(measurement.getMeasurement());
+                concentrator.setMeasuredFlow(Measure.valueOf(measurement.getMeasurement(), SI.WATT));
                 w.println("Changed measurement of agent [" + measurement.getAgentId()
                           + "] to "
                           + measurement.getMeasurement());
