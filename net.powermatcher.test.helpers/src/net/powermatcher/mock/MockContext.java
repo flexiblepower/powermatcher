@@ -47,6 +47,7 @@ public class MockContext
     private Runnable task;
     private long updateRate;
     private MockFuture mockFuture;
+    private long scheduleTime;
 
     public class MockFuture
         implements ScheduledFuture<String> {
@@ -144,7 +145,10 @@ public class MockContext
 
     @Override
     public ScheduledFuture<?> schedule(Runnable command, Measurable<Duration> delay) {
-        throw new UnsupportedOperationException();
+        task = command;
+        scheduleTime = currentTimeMillis() + delay.longValue(SI.MILLI(SI.SECOND));
+        mockFuture = new MockFuture();
+        return mockFuture;
     }
 
     @Override
@@ -152,6 +156,7 @@ public class MockContext
                                                   Measurable<Duration> initialDelay,
                                                   Measurable<Duration> period) {
         task = command;
+        scheduleTime = currentTimeMillis() + initialDelay.longValue(SI.MILLI(SI.SECOND));
         updateRate = period.longValue(SI.SECOND);
         mockFuture = new MockFuture();
         return mockFuture;
@@ -171,7 +176,8 @@ public class MockContext
 
     @Override
     public Future<?> submit(Runnable task) {
-        throw new UnsupportedOperationException();
+        task.run();
+        return new MockFuture();
     }
 
     @Override
@@ -191,6 +197,10 @@ public class MockContext
      */
     public MockFuture getMockFuture() {
         return mockFuture;
+    }
+
+    public long getScheduleTime() {
+        return scheduleTime;
     }
 
     public void doTaskOnce() {

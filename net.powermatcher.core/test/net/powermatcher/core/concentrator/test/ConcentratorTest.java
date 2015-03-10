@@ -2,6 +2,7 @@ package net.powermatcher.core.concentrator.test;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -30,11 +31,11 @@ import org.junit.Test;
  * @version 2.0
  **/
 public class ConcentratorTest {
+    private static final int MIN_TIME_BETWEEN_BIDS_MS = 1000;
     private static final MarketBasis marketBasis = new MarketBasis("electricity", "EUR", 5, 0, 10);;
     private static final String CONCENTRATOR_ID = "Concentrator";
     private static final String AUCTIONEER_ID = "Auctioneer";
     private static final String CLUSTER_ID = "testCluster";
-    private static final int BID_UPDATE_RATE = 30;
 
     private final Concentrator concentrator = new Concentrator();
     private final MockContext context = new MockContext(0);
@@ -43,7 +44,7 @@ public class ConcentratorTest {
     public void setUp() {
         concentrator.activate(new PropertieBuilder().agentId(CONCENTRATOR_ID)
                                                     .desiredParentId(AUCTIONEER_ID)
-                                                    .bidUpdateRate(BID_UPDATE_RATE)
+                                                    .minTimeBetweenBidsMS(MIN_TIME_BETWEEN_BIDS_MS)
                                                     .build());
         concentrator.setContext(context);
     }
@@ -52,15 +53,6 @@ public class ConcentratorTest {
     public void testActivate() {
         assertThat(concentrator.getAgentId(), is(equalTo(CONCENTRATOR_ID)));
         assertThat(concentrator.getDesiredParentId(), is(equalTo(AUCTIONEER_ID)));
-        assertThat(context.getUpdateRate(), is(equalTo(BID_UPDATE_RATE)));
-    }
-
-    @Test
-    public void testDeactivate() {
-        context.doTaskOnce();
-        assertThat(context.getMockFuture().isCancelled(), is(false));
-        concentrator.deactivate();
-        assertThat(context.getMockFuture().isCancelled(), is(true));
     }
 
     @Test
@@ -188,5 +180,39 @@ public class ConcentratorTest {
         concentrator.handlePriceUpdate(error);
         assertThat(mockAgent.getLastPriceUpdate().getBidNumber(), is(equalTo(sentBidNumber)));
         assertThat(mockAgent.getLastPriceUpdate().getPrice(), is(equalTo(expected.getPrice())));
+    }
+
+    @Test
+    public void testTiming() {
+        MockMatcherAgent mockMatcherAgent = new MockMatcherAgent(AUCTIONEER_ID, CLUSTER_ID);
+        mockMatcherAgent.setMarketBasis(marketBasis);
+        mockMatcherAgent.setDesiredParentId("test");
+        MockAgent mockAgent = new MockAgent("testAgent");
+        mockAgent.setDesiredParentId(CONCENTRATOR_ID);
+
+        new SimpleSession(concentrator, mockMatcherAgent).connect();
+        new SimpleSession(mockAgent, concentrator).connect();
+
+        // cleanup
+        context.jump(1001);
+        mockMatcherAgent.resetLastReceivedBid();
+        double[] demandArray = new double[] { 2, 1, 0, -1, -2 };
+        ArrayBid arrayBid = new ArrayBid(marketBasis, demandArray);
+
+        // Currently no cool down, should sent BidUpdate right away
+        mockAgent.sendBid(new BidUpdate(arrayBid, 1));
+        assertNotNull(mockMatcherAgent.getLastReceivedBid());
+        mockMatcherAgent.resetLastReceivedBid();
+
+        // Move in the future, but not past the cool down, should not send bidUpdate
+        context.jump(500);
+        mockAgent.sendBid(new BidUpdate(arrayBid, 2));
+        assertNull(mockMatcherAgent.getLastReceivedBid());
+        assertEquals(context.currentTimeMillis() + 500, context.getScheduleTime());
+
+        // Move to the end of the cool down, now it should send a price update
+        context.jump(500);
+        context.doTaskOnce();
+        assertNotNull(mockMatcherAgent.getLastReceivedBid());
     }
 }

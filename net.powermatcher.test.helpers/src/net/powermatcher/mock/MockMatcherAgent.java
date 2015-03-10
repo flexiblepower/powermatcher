@@ -65,6 +65,10 @@ public class MockMatcherAgent
         return lastReceivedBid;
     }
 
+    public void resetLastReceivedBid() {
+        lastReceivedBid = null;
+    }
+
     /**
      * @return the current value of matcherProperties.
      */
