@@ -135,9 +135,6 @@ public class Concentrator
     public void setContext(FlexiblePowerContext context) {
         super.setContext(context);
         matcherPart.setContext(context);
-        // bidUpdateSchedule = context.scheduleAtFixedRate(command,
-        // Measure.valueOf(0, SI.SECOND),
-        // Measure.valueOf(config.bidUpdateRate(), SI.SECOND));
     }
 
     /**

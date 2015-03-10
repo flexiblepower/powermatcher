@@ -31,7 +31,7 @@ import org.junit.Test;
  * @version 2.0
  **/
 public class ConcentratorTest {
-    private static final int MIN_TIME_BETWEEN_BIDS_MS = 1000;
+    private static final int MIN_TIME_BETWEEN_BIDS = 1000;
     private static final MarketBasis marketBasis = new MarketBasis("electricity", "EUR", 5, 0, 10);;
     private static final String CONCENTRATOR_ID = "Concentrator";
     private static final String AUCTIONEER_ID = "Auctioneer";
@@ -44,7 +44,7 @@ public class ConcentratorTest {
     public void setUp() {
         concentrator.activate(new PropertieBuilder().agentId(CONCENTRATOR_ID)
                                                     .desiredParentId(AUCTIONEER_ID)
-                                                    .minTimeBetweenBids(MIN_TIME_BETWEEN_BIDS_MS)
+                                                    .minTimeBetweenBids(MIN_TIME_BETWEEN_BIDS)
                                                     .build());
         concentrator.setContext(context);
     }
