@@ -33,8 +33,8 @@ public class PropertieBuilder {
         return add("priceUpdateRate", priceUpdateRate);
     }
 
-    public PropertieBuilder minTimeBetweenBidsMS(int minTimeBetweenBidsMS) {
-        return add("minTimeBetweenBidsMS", minTimeBetweenBidsMS);
+    public PropertieBuilder minTimeBetweenBids(int minTimeBetweenBids) {
+        return add("minTimeBetweenBids", minTimeBetweenBids);
     }
 
     public PropertieBuilder marketBasis(MarketBasis marketBasis) {

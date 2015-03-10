@@ -44,7 +44,7 @@ public class ConcentratorTest {
     public void setUp() {
         concentrator.activate(new PropertieBuilder().agentId(CONCENTRATOR_ID)
                                                     .desiredParentId(AUCTIONEER_ID)
-                                                    .minTimeBetweenBidsMS(MIN_TIME_BETWEEN_BIDS_MS)
+                                                    .minTimeBetweenBids(MIN_TIME_BETWEEN_BIDS_MS)
                                                     .build());
         concentrator.setContext(context);
     }
