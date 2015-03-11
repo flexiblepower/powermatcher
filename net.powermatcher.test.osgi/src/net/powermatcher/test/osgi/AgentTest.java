@@ -11,18 +11,19 @@ public class AgentTest extends TestCase {
 
     private final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 
-    private ConfigurationAdmin configAdmin;
-    private ServiceReference configAdminReference;
+    @SuppressWarnings("unused")
+	private ConfigurationAdmin configAdmin;
+    private ServiceReference<?> configAdminReference;
     
 	public void testExample() throws Exception {
-		configAdmin = (ConfigurationAdmin) context.getService(configAdminReference);
+		super.setUp();
 		
-//		configAdminReference = context.getServiceReference(ConfigurationAdmin.class.getName());
-//    	if (configAdminReference != null) {
-//    		configAdmin = (ConfigurationAdmin) context.getService(configAdminReference);
-//    	}
-    	
-    	
-    	assertNotNull(context);
+		configAdminReference = context.getServiceReference(ConfigurationAdmin.class.getName());
+    	if (configAdminReference != null) {
+    		configAdmin = (ConfigurationAdmin) context.getService(configAdminReference);
+    	}
+    	assert(configAdmin != null);
+    	assertNotNull(configAdmin);
     }
+	
 }
