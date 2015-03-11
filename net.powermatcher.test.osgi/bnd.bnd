@@ -1,0 +1,16 @@
+-buildpath:  \
+	osgi.core;version='[4.2,5)',\
+	osgi.cmpn,\
+	junit.osgi,\
+	org.apache.felix.scr
+-runbundles: 	
+-runee: JavaSE-1.6
+-runfw: org.apache.felix.framework
+-runsystempackages:  \
+	sun.reflect
+-runvm: -ea
+Bundle-Version: 0.0.0.${tstamp}
+Private-Package:  \
+	net.powermatcher.test.osgi
+Test-Cases:  \
+	${classes;CONCRETE;EXTENDS;junit.framework.TestCase}
