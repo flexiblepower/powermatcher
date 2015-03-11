@@ -3,7 +3,6 @@
 	org.apache.felix.http.servlet-api,\
 	org.apache.commons.io,\
 	com.google.gson,\
-	net.powermatcher.core;version=latest
 
 Bundle-Version: 1.0.0.${tstamp}
 Private-Package:  net.powermatcher.visualisation*
