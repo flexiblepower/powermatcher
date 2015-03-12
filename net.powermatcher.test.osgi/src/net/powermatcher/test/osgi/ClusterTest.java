@@ -17,24 +17,25 @@ public class ClusterTest extends TestCase {
 
     private final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 
-    private ConfigurationAdmin configAdmin;
-    private ServiceReference<?> configAdminReference;
-    private ScrService scrService;
-    private ServiceReference<?> scrServiceReference;
+    private ServiceReference<?> scrServiceReference = context.getServiceReference( ScrService.class.getName());
+    private ServiceReference<?> configAdminReference = context.getServiceReference(ConfigurationAdmin.class.getName());
+	private ConfigurationAdmin configAdmin = (ConfigurationAdmin) context.getService(configAdminReference);
+    private ScrService scrService = (ScrService) context.getService(scrServiceReference);
     
-	public void testSetup() throws Exception {
-		super.setUp();
-		
-		configAdminReference = context.getServiceReference(ConfigurationAdmin.class.getName());
-    	if (configAdminReference != null) {
-    		configAdmin = (ConfigurationAdmin) context.getService(configAdminReference);
-    	}
-    	assertNotNull(configAdminReference);
-    	
-    	scrServiceReference = context.getServiceReference( ScrService.class.getName() );
-    	if (scrServiceReference != null) {
-    		scrService = (ScrService) context.getService(scrServiceReference);
-    	}
+    public void testConfiguration()  {
+//	//	super.setUp();
+//		
+//		//configAdminReference = context.getServiceReference(ConfigurationAdmin.class.getName());
+//    	if (configAdminReference != null) {
+//    		configAdmin = (ConfigurationAdmin) context.getService(configAdminReference);
+//    	}
+//    	assertNotNull(configAdminReference);
+//    	
+//    	scrServiceReference = context.getServiceReference( ScrService.class.getName() );
+//    	if (scrServiceReference != null) {
+//    		scrService = (ScrService) context.getService(scrServiceReference);
+//    	}
+    	assertNotNull(scrServiceReference);
     	assertNotNull(scrService);
     }
 	
