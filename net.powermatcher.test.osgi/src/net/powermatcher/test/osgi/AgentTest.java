@@ -4,6 +4,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import junit.framework.TestCase;
+import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.test.helpers.PropertieBuilder;
 import net.powermatcher.test.helpers.TestClusterHelper;
@@ -27,7 +28,7 @@ public class AgentTest extends TestCase {
     
     //private TestClusterHelper cluster;
     
-	public void testExample() throws Exception {
+	public void testAuctioneer() throws Exception {
 		super.setUp();
 		
 		configAdminReference = context.getServiceReference(ConfigurationAdmin.class.getName());
@@ -69,20 +70,21 @@ public class AgentTest extends TestCase {
     	
     	Configuration configWithAuctioneer = configAdmin.getConfiguration("net.powermatcher.core.auctioneer");
     	//Configuration[] configurations = configAdmin.listConfigurations("(service.pid=net.powermatcher.core.auctioneer.Auctioneer)");
-
+    	
     	components = scrService.getComponents("net.powermatcher.core.auctioneer.Auctioneer");
     	// Verify that there is exactly one Auctioneer configuration present
     	assertNotNull(configWithAuctioneer);
     	
+    	MarketBasis marketbasis = new MarketBasis("electricity", "EUR", 11, 0, 10);
     	// bij toevoegen hiervan, een wiring exception
-//    	Auctioneer auctioneer = new Auctioneer();
-//        auctioneer.activate(new PropertieBuilder().agentId("auctioneer")
-//                                                  .clusterId("DefaultCluster")
-//                                                  .priceUpdateRate(30)
-//                                                  .marketBasis(TestClusterHelper.DEFAULT_MB)
-//                                                  .build());
+    	Auctioneer auctioneer = new Auctioneer();
+        auctioneer.activate(new PropertieBuilder().agentId("auctioneer")
+                                                  .clusterId("DefaultCluster")
+                                                  .priceUpdateRate(30)
+                                                  .marketBasis(marketbasis)
+                                                  .build());
+        
 //        
-
     }
 	
 }
