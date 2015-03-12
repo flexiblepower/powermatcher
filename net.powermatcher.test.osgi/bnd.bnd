@@ -4,11 +4,9 @@
 	junit.osgi,\
 	org.apache.felix.scr,\
 	net.powermatcher.api;version=latest,\
-	net.powermatcher.core;version=latest,\
-	net.powermatcher.test.helpers;version=latest
+	net.powermatcher.core;version=latest
 -runbundles:  \
 	biz.aQute.bnd.annotation;version='[2.4.0,2.4.1)',\
-	biz.aQute.junit;version='[1.3.0,1.3.1)',\
 	ch.qos.logback.classic;version='[1.1.2,1.1.3)',\
 	ch.qos.logback.core;version='[1.1.2,1.1.3)',\
 	flexiblepower.api;version='[3.0.0,3.0.1)',\
@@ -16,7 +14,6 @@
 	net.powermatcher.api;version=latest,\
 	net.powermatcher.core;version=latest,\
 	net.powermatcher.runtime;version=latest,\
-	net.powermatcher.test.helpers;version=latest,\
 	org.apache.felix.configadmin;version='[1.8.0,1.8.1)',\
 	org.apache.felix.gogo.command;version='[0.14.0,0.14.1)',\
 	org.apache.felix.gogo.runtime;version='[0.12.1,0.12.2)',\
@@ -45,7 +42,6 @@ Test-Cases:  \
 	osgi.identity;filter:='(osgi.identity=org.apache.felix.scr)',\
 	osgi.identity;filter:='(osgi.identity=ch.qos.logback.core)',\
 	osgi.identity;filter:='(osgi.identity=ch.qos.logback.classic)',\
-	osgi.identity;filter:='(osgi.identity=net.powermatcher.core)',\
-	osgi.identity;filter:='(osgi.identity=net.powermatcher.test.helpers)'
+	osgi.identity;filter:='(osgi.identity=net.powermatcher.core)'
 Export-Package:  \
 	net.powermatcher.test.osgi
