@@ -6,13 +6,16 @@ import java.util.Hashtable;
 import junit.framework.TestCase;
 import net.powermatcher.core.auctioneer.Auctioneer;
 
+import org.apache.felix.scr.ScrService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.util.tracker.ServiceTracker;
+import org.apache.felix.scr.Component;
 
 public class OsgiAgentTest extends TestCase {
 
@@ -71,6 +74,17 @@ public class OsgiAgentTest extends TestCase {
     	// Wait for Auctioneer to become active
     	Auctioneer auctioneer = getServiceByPid(auctioneerConfig.getPid(), Auctioneer.class);
     	
+    	ServiceReference<?> scrServiceReference = context.getServiceReference(ScrService.class.getName());
+    	ScrService scrService = (ScrService) context.getService(scrServiceReference);
+    	Component[] components = scrService.getComponents(auctioneerConfig.getFactoryPid());
+    	
+    	for (Component comp : components) {
+			if (comp.getConfigurationPid().equals("net.powermatcher.core.auctioneer.Auctioneer")) {
+				int state = comp.getState();
+				System.out.println(state);
+				assertEquals(Component.STATE_ACTIVE, comp.getState());
+			}
+		}
     	
     	/* this does not work, since it seems to rely on time...
         // Verify there is exactly one Auctioneer configuration present
