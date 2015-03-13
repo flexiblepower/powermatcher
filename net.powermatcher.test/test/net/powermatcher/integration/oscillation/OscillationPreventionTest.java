@@ -43,8 +43,7 @@ public class OscillationPreventionTest {
         auctioneer.activate(new PropertieBuilder().agentId(AUCTIONEER_ID)
                                                   .clusterId("testCluster")
                                                   .marketBasis(TestClusterHelper.DEFAULT_MB)
-                                                  .bidUpdateRate(600)
-                                                  .priceUpdateRate(600)
+                                                  .minTimeBetweenPriceUpdates(1000)
                                                   .build());
         auctioneer.setContext(autioneerContext = new MockContext(0));
 
@@ -52,7 +51,7 @@ public class OscillationPreventionTest {
         concentrator = new Concentrator();
         concentrator.activate(new PropertieBuilder().agentId(CONCENTRATOR_ID)
                                                     .desiredParentId(AUCTIONEER_ID)
-                                                    .bidUpdateRate(600)
+                                                    .minTimeBetweenBids(1000)
                                                     .build());
 
         cluster = new TestClusterHelper(concentrator);

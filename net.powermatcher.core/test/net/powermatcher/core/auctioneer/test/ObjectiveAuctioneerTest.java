@@ -40,8 +40,7 @@ public class ObjectiveAuctioneerTest {
         objectiveauctioneer.activate(new PropertieBuilder().agentId(OBJECTIVE_AUCTIONEER_NAME)
                                                            .clusterId("testCluster")
                                                            .marketBasis(marketBasis)
-                                                           .bidUpdateRate(600)
-                                                           .priceUpdateRate(30)
+                                                           .minTimeBetweenPriceUpdates(1000)
                                                            .build());
         objectiveauctioneer.addObjectiveEndpoint(mockObjectiveAgent);
         mockObjectiveAgent.setObjectiveBid(new ArrayBid.Builder(marketBasis).demand(100)

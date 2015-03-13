@@ -201,18 +201,20 @@ public class ConcentratorTest {
 
         // Currently no cool down, should sent BidUpdate right away
         mockAgent.sendBid(new BidUpdate(arrayBid, 1));
+        context.doTaskIfTimeIsRight();
         assertNotNull(mockMatcherAgent.getLastReceivedBid());
         mockMatcherAgent.resetLastReceivedBid();
 
         // Move in the future, but not past the cool down, should not send bidUpdate
         context.jump(500);
         mockAgent.sendBid(new BidUpdate(arrayBid, 2));
+        context.doTaskIfTimeIsRight();
         assertNull(mockMatcherAgent.getLastReceivedBid());
         assertEquals(context.currentTimeMillis() + 500, context.getScheduleTime());
 
         // Move to the end of the cool down, now it should send a price update
         context.jump(500);
-        context.doTaskOnce();
+        context.doTaskIfTimeIsRight();
         assertNotNull(mockMatcherAgent.getLastReceivedBid());
     }
 }
