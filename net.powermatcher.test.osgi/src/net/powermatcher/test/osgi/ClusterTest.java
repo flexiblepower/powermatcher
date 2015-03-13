@@ -19,6 +19,7 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 
+import net.powermatcher.examples.Freezer;
 import net.powermatcher.examples.PVPanelAgent;
 import net.powermatcher.examples.StoringObserver;
 
@@ -63,6 +64,17 @@ public class ClusterTest extends TestCase {
     	
     	assertNotNull(pvPanel);
     	Thread.sleep(1000);
+
+    	// Create Freezer
+    	String freezerFactoryPid = "net.powermatcher.examples.Freezer";
+    	Configuration freezerConfig = configAdmin.createFactoryConfiguration(freezerFactoryPid, null);
+    	setFreezerProperties(freezerConfig);
+    	
+    	// Wait for Freezer to become active
+    	Freezer freezer = getServiceByPid(freezerConfig.getPid(), Freezer.class);
+    	
+    	assertNotNull(freezer);
+    	Thread.sleep(1000);
     	
     	// check Auctioneer alive
     	assertEquals(true, auctioneerActive());
@@ -70,11 +82,13 @@ public class ClusterTest extends TestCase {
     	assertEquals(true, concentratorActive());
     	// check PvPanel alive
     	assertEquals(true, pvPanelActive());
+    	// check Freezer alive
+    	assertEquals(true, freezerActive());
     	
     	//Create StoringObserver
     	String storingObserverFactoryPid = "net.powermatcher.examples.StoringObserver";
     	Configuration storingObserverConfig = configAdmin.createFactoryConfiguration(storingObserverFactoryPid, null);
-
+    	
     	setStoringObserverProperties(storingObserverConfig);
     	
     	// Wait for StoringObserver to become active
@@ -84,11 +98,13 @@ public class ClusterTest extends TestCase {
     	Thread.sleep(30000);
     	checkBidsFullCluster(observer);
     	
-    	//CHecking to see is the PVPanel stopped sending bid
-//    	observer.clearEvents();
-//    	Thread.sleep(30000);
-    	//checkBidsClusterNoPVPabel(observer);
+    	// disconnect Freezer
+    	this.disconnectFreezer(configAdmin);
     	
+    	//Checking to see if the Freezer stopped sending bid
+    	observer.clearEvents();
+    	Thread.sleep(30000);
+    	checkBidsClusterNoFreezer(observer);
     	
     	// disconnect Auctioneer 
     	this.disconnectAuctioneer(configAdmin);
@@ -97,13 +113,6 @@ public class ClusterTest extends TestCase {
     	observer.clearEvents();
     	Thread.sleep(30000);
     	checkBidsClusterNoAuctioneer(observer);
-    	
-    	// check Concentrator and PvPanel are unsatisfied, because Auctioneer is NOT active
-    	//boolean[] activeAgents = this.testConcentratorPvPanelNotActive();
-    	//TODO: check Concentrator and PvPanel are unsatisfied, because Auctioneer is NOT active
-//    	boolean[] activeAgents = this.testConcentratorPvPanelNotActive();
-//    	assertFalse(activeAgents[0]);
-//    	assertFalse(activeAgents[1]);
     }
 
 	private void disconnectAuctioneer(ConfigurationAdmin configAdmin) throws Exception, InvalidSyntaxException {
@@ -113,6 +122,19 @@ public class ClusterTest extends TestCase {
 			if (factoryPid.equals(c.getFactoryPid())) {
 	            String agentId = (String) c.getProperties().get("agentId"); 
 				if (agentId.equals("auctioneer")) {
+					c.delete();
+				}
+			}
+		}
+    }
+	
+	private void disconnectFreezer(ConfigurationAdmin configAdmin) throws Exception, InvalidSyntaxException {
+		String factoryPid = "net.powermatcher.examples.Freezer";
+		
+		for (Configuration c : configAdmin.listConfigurations(null)) { 
+			if (factoryPid.equals(c.getFactoryPid())) {
+	            String agentId = (String) c.getProperties().get("agentId"); 
+				if (agentId.equals("freezer")) {
 					c.delete();
 				}
 			}
@@ -161,6 +183,20 @@ public class ClusterTest extends TestCase {
 		return activePvPanel;
 	}
 
+	private boolean freezerActive() throws Exception {
+		Component[] components = scrService.getComponents("net.powermatcher.examples.Freezer");
+		boolean activeFreezer = false;
+	
+		for (Component comp : components) {
+			if (comp.getConfigurationPid().equals("net.powermatcher.examples.Freezer")) {
+				if (comp.getState() == Component.STATE_ACTIVE) {
+					activeFreezer = true;
+				}
+			}
+		}
+		return activeFreezer;
+	}
+	
     private <T> T getService(Class<T> type) throws InterruptedException {
         ServiceTracker<T, T> serviceTracker = 
                 new ServiceTracker<T, T>(context, type, null);
@@ -200,6 +236,17 @@ public class ClusterTest extends TestCase {
     	pvPanelConfig.update(properties);
     }
     
+    private void setFreezerProperties(Configuration freezerConfig) throws Exception {
+    	// create Freezer props
+    	Dictionary<String, Object> properties = new Hashtable<String, Object>();
+    	properties.put("agentId", "freezer");
+    	properties.put("desiredParentId", "concentrator");
+    	properties.put("bidUpdateRate", "30");
+    	properties.put("minimumDemand", "100");
+    	properties.put("maximumDemand", "121");
+    	freezerConfig.update(properties);
+    }
+    
     private void setConcentratorProperties(Configuration concentratorConfig) throws Exception {
     	Dictionary<String, Object> properties = new Hashtable<String, Object>();
     	properties.put("agentId", "concentrator");
@@ -237,13 +284,14 @@ public class ClusterTest extends TestCase {
     	assert(!observer.getEvents().isEmpty());
     	assert(observer.getEvents().containsKey("concentrator"));
     	assert(observer.getEvents().containsKey("pvpanel"));
+    	assert(observer.getEvents().containsKey("freezer"));
     }
     
-    private void checkBidsClusterNoPVPabel(StoringObserver observer)
+    private void checkBidsClusterNoFreezer(StoringObserver observer)
     {
     	assert(!observer.getEvents().isEmpty());
     	assert(observer.getEvents().containsKey("concentrator"));
-    	assertFalse(observer.getEvents().containsKey("pvpanel"));
+    	assertFalse(observer.getEvents().containsKey("freezer"));
     }
     
     private void checkBidsClusterNoAuctioneer(StoringObserver observer)
