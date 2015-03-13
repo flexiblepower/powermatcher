@@ -39,7 +39,7 @@ public class PeakShavingConcentratorTest {
     public void setUp(double floor, double ceiling) throws Exception {
         peakShavingConcentrator.activate(new PropertieBuilder().agentId(CONCENTRATOR_NAME)
                                                                .desiredParentId(AUCTIONEER_ID)
-                                                               .bidUpdateRate(600)
+                                                               .minTimeBetweenBids(1000)
                                                                .add("floor", floor)
                                                                .add("ceiling", ceiling)
                                                                .build());

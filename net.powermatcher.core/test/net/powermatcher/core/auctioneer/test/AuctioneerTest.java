@@ -4,6 +4,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import net.powermatcher.api.Session;
@@ -34,8 +35,6 @@ public class AuctioneerTest {
     private static final MarketBasis marketBasis = new MarketBasis("electricity", "EUR", 5, 0, 10);;
     private static final String AUCTIONEER_ID = "Auctioneer";
     private static final String CLUSTER_ID = "testCluster";
-    private static final int BID_UPDATE_RATE = 30;
-    private static final int PRICE_UPDATE_RATE = 5;
 
     private Auctioneer auctioneer;
     private MockContext mockContext;
@@ -46,8 +45,7 @@ public class AuctioneerTest {
         auctioneer.activate(new PropertieBuilder().agentId(AUCTIONEER_ID)
                                                   .clusterId(CLUSTER_ID)
                                                   .marketBasis(marketBasis)
-                                                  .bidUpdateRate(BID_UPDATE_RATE)
-                                                  .priceUpdateRate(PRICE_UPDATE_RATE)
+                                                  .minTimeBetweenPriceUpdates(1000)
                                                   .build());
 
         mockContext = new MockContext(0);
@@ -83,13 +81,24 @@ public class AuctioneerTest {
 
     @Test
     public void testActivate() {
-        assertThat(mockContext.getMockFuture().isCancelled(), is(false));
+        assertNull(mockContext.getMockFuture());
     }
 
     @Test
     public void testDeactivate() {
         auctioneer.deactivate();
-        assertThat(mockContext.getMockFuture().isCancelled(), is(true));
+        try {
+            auctioneer.getClusterId();
+            fail("Expected an IllegalStateException after being deactivated");
+        } catch (IllegalStateException ex) {
+            // Expected
+        }
+        try {
+            auctioneer.getMarketBasis();
+            fail("Expected an IllegalStateException after being deactivated");
+        } catch (IllegalStateException ex) {
+            // Expected
+        }
     }
 
     @Test

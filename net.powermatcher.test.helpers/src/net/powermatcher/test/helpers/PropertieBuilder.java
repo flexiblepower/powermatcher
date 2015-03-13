@@ -25,16 +25,12 @@ public class PropertieBuilder {
         return add("desiredParentId", desiredParentId);
     }
 
-    public PropertieBuilder bidUpdateRate(int bidUpdateRate) {
-        return add("bidUpdateRate", bidUpdateRate);
-    }
-
-    public PropertieBuilder priceUpdateRate(int priceUpdateRate) {
-        return add("priceUpdateRate", priceUpdateRate);
-    }
-
     public PropertieBuilder minTimeBetweenBids(int minTimeBetweenBids) {
         return add("minTimeBetweenBids", minTimeBetweenBids);
+    }
+
+    public PropertieBuilder minTimeBetweenPriceUpdates(int minTimeBetweenPriceUpdates) {
+        return add("minTimeBetweenPriceUpdates", minTimeBetweenPriceUpdates);
     }
 
     public PropertieBuilder marketBasis(MarketBasis marketBasis) {

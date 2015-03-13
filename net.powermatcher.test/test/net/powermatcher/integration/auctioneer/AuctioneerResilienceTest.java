@@ -36,8 +36,7 @@ public class AuctioneerResilienceTest
         auctioneer = new AuctioneerWrapper();
         Map<String, Object> auctioneerProperties = new PropertieBuilder().agentId("auctioneer")
                                                                          .marketBasis(marketBasis)
-                                                                         .bidUpdateRate(600)
-                                                                         .priceUpdateRate(600)
+                                                                         .minTimeBetweenPriceUpdates(1000)
                                                                          .clusterId("testCluster")
                                                                          .build();
         auctioneer.activate(auctioneerProperties);
