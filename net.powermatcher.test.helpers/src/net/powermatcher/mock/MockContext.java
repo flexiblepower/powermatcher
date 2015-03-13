@@ -46,7 +46,8 @@ public class MockContext
 
     private Runnable task;
     private long updateRate;
-    private MockFuture mockFuture;
+    protected MockFuture mockFuture;
+    private long scheduleTime;
 
     public class MockFuture
         implements ScheduledFuture<String> {
@@ -132,7 +133,7 @@ public class MockContext
          */
         @Override
         public boolean isDone() {
-            return true;
+            return task != null;
         }
 
     }
@@ -144,7 +145,10 @@ public class MockContext
 
     @Override
     public ScheduledFuture<?> schedule(Runnable command, Measurable<Duration> delay) {
-        throw new UnsupportedOperationException();
+        task = command;
+        scheduleTime = currentTimeMillis() + delay.longValue(SI.MILLI(SI.SECOND));
+        mockFuture = new MockFuture();
+        return mockFuture;
     }
 
     @Override
@@ -152,6 +156,7 @@ public class MockContext
                                                   Measurable<Duration> initialDelay,
                                                   Measurable<Duration> period) {
         task = command;
+        scheduleTime = currentTimeMillis() + initialDelay.longValue(SI.MILLI(SI.SECOND));
         updateRate = period.longValue(SI.SECOND);
         mockFuture = new MockFuture();
         return mockFuture;
@@ -171,7 +176,10 @@ public class MockContext
 
     @Override
     public Future<?> submit(Runnable task) {
-        throw new UnsupportedOperationException();
+        this.task = task;
+        scheduleTime = currentTimeMillis();
+        mockFuture = new MockFuture();
+        return mockFuture;
     }
 
     @Override
@@ -193,10 +201,24 @@ public class MockContext
         return mockFuture;
     }
 
+    public long getScheduleTime() {
+        return scheduleTime;
+    }
+
     public void doTaskOnce() {
         if (task != null) {
             task.run();
         }
     }
 
+    public void doTaskIfTimeIsRight() {
+        if (task != null && scheduleTime <= now) {
+            task.run();
+            if (updateRate > 0) {
+                scheduleTime += updateRate;
+            } else {
+                task = null;
+            }
+        }
+    }
 }

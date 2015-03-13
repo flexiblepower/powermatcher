@@ -130,6 +130,10 @@ public abstract class BaseAgentEndpoint
         Session session = getSession();
 
         if (isInitialized()) {
+            if (lastBidUpdate != null && newBid.equals(lastBidUpdate.getBid())) {
+                // This bid is equal to the previous bid, we should not send an update
+                return lastBidUpdate;
+            }
             BidUpdate update = new BidUpdate(newBid, bidNumberGenerator.incrementAndGet());
             lastBidUpdate = update;
             publishEvent(new OutgoingBidEvent(getClusterId(),
