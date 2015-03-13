@@ -70,39 +70,49 @@ public class ClusterTest extends TestCase {
     	// check PvPanel alive
     	assertEquals(true, pvPanelActive());
     	
-    	disconnectPvPanel(configAdmin);
+    	// disconnect Auctioneer 
+    	this.disconnectAuctioneer(configAdmin);
+    	Thread.sleep(10000);
     	
-    	// check PvPanel not active anymore
-    	assertFalse(testPvPanelNotActive());
+    	// check Concentrator and PvPanel are unsatisfied, because Auctioneer is NOT active
+    	boolean[] activeAgents = this.testConcentratorPvPanelNotActive();
+    	assertFalse(activeAgents[0]);
+    	assertFalse(activeAgents[1]);
     }
 
-	private boolean testPvPanelNotActive() throws Exception {
-		Component[] components = scrService.getComponents("net.powermatcher.examples.PVPanelAgent");
-		boolean panelActive = true;
+	private boolean[] testConcentratorPvPanelNotActive() throws Exception {
+		Component[] components = scrService.getComponents();
+		boolean[] activeAgents = {true, true};
 		
 		for (Component comp : components) {
+			if (comp.getConfigurationPid().equals("net.powermatcher.core.concentrator.Concentrator")) {
+				if (comp.getState() == Component.STATE_UNSATISFIED) {
+					activeAgents[0] = false;
+				}
+			}
 			if (comp.getConfigurationPid().equals("net.powermatcher.examples.PVPanelAgent")) {
 				if (comp.getState() == Component.STATE_UNSATISFIED) {
-					panelActive = false;
+					activeAgents[1] = false;
 				}
 			}
 		}
-		return 	panelActive;
+		
+		return 	activeAgents;
 	}
-    
-	private void disconnectPvPanel(ConfigurationAdmin configAdmin) throws Exception, InvalidSyntaxException {
-		String factoryPid = "net.powermatcher.examples.PVPanelAgent";
+	
+	private void disconnectAuctioneer(ConfigurationAdmin configAdmin) throws Exception, InvalidSyntaxException {
+		String factoryPid = "net.powermatcher.core.auctioneer.Auctioneer";
 		
 		for (Configuration c : configAdmin.listConfigurations(null)) { 
 			if (factoryPid.equals(c.getFactoryPid())) {
 	            String agentId = (String) c.getProperties().get("agentId"); 
-				if (agentId.equals("pvpanel")) {
+				if (agentId.equals("auctioneer")) {
 					c.delete();
 				}
 			}
 		}
     }
-    
+	
 	private boolean auctioneerActive() throws Exception {
 		Component[] components = scrService.getComponents("net.powermatcher.core.auctioneer.Auctioneer");
 		boolean activeAuctioneer = false;
