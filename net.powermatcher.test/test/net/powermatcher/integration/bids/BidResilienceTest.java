@@ -46,14 +46,13 @@ public class BidResilienceTest
         auctioneer.activate(new PropertieBuilder().agentId(AUCTIONEER_NAME)
                                                   .clusterId("testCluster")
                                                   .marketBasis(marketBasis)
-                                                  .bidUpdateRate(600)
-                                                  .priceUpdateRate(600)
+                                                  .minTimeBetweenPriceUpdates(1000)
                                                   .build());
 
         concentrator = new ConcentratorWrapper();
         concentrator.activate(new PropertieBuilder().agentId(CONCENTRATOR_NAME)
                                                     .desiredParentId(AUCTIONEER_NAME)
-                                                    .bidUpdateRate(600)
+                                                    .minTimeBetweenBidUpdates(1000)
                                                     .build());
 
         cluster = new TestClusterHelper(marketBasis, concentrator);

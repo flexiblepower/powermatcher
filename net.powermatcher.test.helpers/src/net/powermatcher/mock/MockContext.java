@@ -46,7 +46,7 @@ public class MockContext
 
     private Runnable task;
     private long updateRate;
-    private MockFuture mockFuture;
+    protected MockFuture mockFuture;
     private long scheduleTime;
 
     public class MockFuture
@@ -133,7 +133,7 @@ public class MockContext
          */
         @Override
         public boolean isDone() {
-            return true;
+            return task != null;
         }
 
     }
@@ -176,8 +176,10 @@ public class MockContext
 
     @Override
     public Future<?> submit(Runnable task) {
-        task.run();
-        return new MockFuture();
+        this.task = task;
+        scheduleTime = currentTimeMillis();
+        mockFuture = new MockFuture();
+        return mockFuture;
     }
 
     @Override
@@ -209,4 +211,14 @@ public class MockContext
         }
     }
 
+    public void doTaskIfTimeIsRight() {
+        if (task != null && scheduleTime <= now) {
+            task.run();
+            if (updateRate > 0) {
+                scheduleTime += updateRate;
+            } else {
+                task = null;
+            }
+        }
+    }
 }

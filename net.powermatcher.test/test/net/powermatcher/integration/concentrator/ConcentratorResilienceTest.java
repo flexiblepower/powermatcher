@@ -13,7 +13,6 @@ import net.powermatcher.integration.util.CsvBidReader;
 import net.powermatcher.integration.util.CsvExpectedResultsReader;
 import net.powermatcher.mock.MockAgent;
 import net.powermatcher.mock.MockMatcherAgent;
-import net.powermatcher.mock.SimpleSession;
 import net.powermatcher.test.helpers.PropertieBuilder;
 import net.powermatcher.test.helpers.TestClusterHelper;
 
@@ -44,14 +43,14 @@ public class ConcentratorResilienceTest
         concentrator = new ConcentratorWrapper();
         concentrator.activate(new PropertieBuilder().agentId(CONCENTRATOR_NAME)
                                                     .desiredParentId(MATCHERAGENTNAME)
-                                                    .bidUpdateRate(600)
+                                                    .minTimeBetweenBidUpdates(1000)
                                                     .build());
 
         auctioneer = new MockMatcherAgent(MATCHERAGENTNAME, "testCluster");
         auctioneer.setMarketBasis(marketBasis);
-        new SimpleSession(concentrator, auctioneer).connect();
 
         cluster = new TestClusterHelper(marketBasis, concentrator);
+        cluster.connect(concentrator, auctioneer);
 
         // Create the bid reader
         bidReader = new CsvBidReader(getBidInputFile(testID, suffix), marketBasis);

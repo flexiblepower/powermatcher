@@ -8,6 +8,7 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.monitoring.ObservableAgent;
+import net.powermatcher.core.bidcache.AggregatedBid;
 import net.powermatcher.core.concentrator.Concentrator;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
@@ -94,15 +95,15 @@ public class ObjectiveAuctioneer
     }
 
     @Override
-    protected Price determinePrice(Bid aggregatedBid) {
+    protected void performUpdate(AggregatedBid aggregatedBid) {
         ObjectiveEndpoint ep = objectiveEndpoint;
         if (ep != null) {
-            aggregatedBid = ep.handleAggregateBid(aggregatedBid);
-            Price price = super.determinePrice(aggregatedBid);
+            Bid bid = ep.handleAggregateBid(aggregatedBid);
+            Price price = bid.calculateIntersection(0);
             ep.notifyPrice(price);
-            return price;
+            publishPrice(price, aggregatedBid);
         } else {
-            return super.determinePrice(aggregatedBid);
+            super.performUpdate(aggregatedBid);
         }
     }
 }

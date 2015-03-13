@@ -30,7 +30,7 @@ public class AuctioneerTest {
         auctioneer = new Auctioneer();
         auctioneer.activate(new PropertieBuilder().agentId(AUCTIONEER_NAME)
                                                   .clusterId("testCluster")
-                                                  .priceUpdateRate(1)
+                                                  .minTimeBetweenPriceUpdates(1000)
                                                   .marketBasis(TestClusterHelper.DEFAULT_MB)
                                                   .build());
         cluster = new TestClusterHelper(auctioneer);
