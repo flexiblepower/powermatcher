@@ -25,8 +25,8 @@ public class PropertieBuilder {
         return add("desiredParentId", desiredParentId);
     }
 
-    public PropertieBuilder minTimeBetweenBids(int minTimeBetweenBids) {
-        return add("minTimeBetweenBids", minTimeBetweenBids);
+    public PropertieBuilder minTimeBetweenBidUpdates(int minTimeBetweenBidUpdates) {
+        return add("minTimeBetweenBidUpdates", minTimeBetweenBidUpdates);
     }
 
     public PropertieBuilder minTimeBetweenPriceUpdates(int minTimeBetweenPriceUpdates) {

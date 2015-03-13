@@ -36,7 +36,7 @@ public class ConcentratorTest {
         concentrator = new Concentrator();
         concentrator.activate(new PropertieBuilder().agentId(CONCENTRATOR_NAME)
                                                     .desiredParentId(AUCTIONEER_NAME)
-                                                    .minTimeBetweenBids(1000)
+                                                    .minTimeBetweenBidUpdates(1000)
                                                     .build());
 
         cluster = new TestClusterHelper(concentrator);

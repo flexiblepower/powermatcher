@@ -52,7 +52,7 @@ public class BidResilienceTest
         concentrator = new ConcentratorWrapper();
         concentrator.activate(new PropertieBuilder().agentId(CONCENTRATOR_NAME)
                                                     .desiredParentId(AUCTIONEER_NAME)
-                                                    .minTimeBetweenBids(1000)
+                                                    .minTimeBetweenBidUpdates(1000)
                                                     .build());
 
         cluster = new TestClusterHelper(marketBasis, concentrator);

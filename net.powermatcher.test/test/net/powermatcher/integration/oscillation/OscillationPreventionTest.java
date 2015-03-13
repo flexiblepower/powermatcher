@@ -51,7 +51,7 @@ public class OscillationPreventionTest {
         concentrator = new Concentrator();
         concentrator.activate(new PropertieBuilder().agentId(CONCENTRATOR_ID)
                                                     .desiredParentId(AUCTIONEER_ID)
-                                                    .minTimeBetweenBids(1000)
+                                                    .minTimeBetweenBidUpdates(1000)
                                                     .build());
 
         cluster = new TestClusterHelper(concentrator);

@@ -43,7 +43,7 @@ public class ConcentratorResilienceTest
         concentrator = new ConcentratorWrapper();
         concentrator.activate(new PropertieBuilder().agentId(CONCENTRATOR_NAME)
                                                     .desiredParentId(MATCHERAGENTNAME)
-                                                    .minTimeBetweenBids(1000)
+                                                    .minTimeBetweenBidUpdates(1000)
                                                     .build());
 
         auctioneer = new MockMatcherAgent(MATCHERAGENTNAME, "testCluster");
