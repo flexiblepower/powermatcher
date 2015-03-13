@@ -20,6 +20,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 
 import net.powermatcher.examples.PVPanelAgent;
+import net.powermatcher.examples.StoringObserver;
 
 public class ClusterTest extends TestCase {
 
@@ -70,12 +71,39 @@ public class ClusterTest extends TestCase {
     	// check PvPanel alive
     	assertEquals(true, pvPanelActive());
     	
+    	//Create StoringObserver
+    	String storingObserverFactoryPid = "net.powermatcher.examples.StoringObserver";
+    	Configuration storingObserverConfig = configAdmin.createFactoryConfiguration(storingObserverFactoryPid, null);
+
+    	setStoringObserverProperties(storingObserverConfig);
+    	
+    	// Wait for StoringObserver to become active
+    	StoringObserver observer = getServiceByPid(storingObserverConfig.getPid(), StoringObserver.class);
+    	
+    	//Checking to see if all agents send bids
+    	Thread.sleep(30000);
+    	checkBidsFullCluster(observer);
+    	
+    	//CHecking to see is the PVPanel stopped sending bid
+//    	observer.clearEvents();
+//    	Thread.sleep(30000);
+    	//checkBidsClusterNoPVPabel(observer);
+    	
+    	
     	// disconnect Auctioneer 
     	this.disconnectAuctioneer(configAdmin);
+    	
+    	//Checking to see if any bids were sent when the autioneer was down.
+    	observer.clearEvents();
+    	Thread.sleep(30000);
+    	checkBidsClusterNoAuctioneer(observer);
     	
     	// check Concentrator and PvPanel are unsatisfied, because Auctioneer is NOT active
     	//boolean[] activeAgents = this.testConcentratorPvPanelNotActive();
     	//TODO: check Concentrator and PvPanel are unsatisfied, because Auctioneer is NOT active
+//    	boolean[] activeAgents = this.testConcentratorPvPanelNotActive();
+//    	assertFalse(activeAgents[0]);
+//    	assertFalse(activeAgents[1]);
     }
 
 	private void disconnectAuctioneer(ConfigurationAdmin configAdmin) throws Exception, InvalidSyntaxException {
@@ -196,6 +224,31 @@ public class ClusterTest extends TestCase {
     	properties.put("priceUpdateRate", 30l);
     	properties.put("minTimeBetweenPriceUpdates", 1000);
     	auctioneerConfig.update(properties);
+    }
+    
+    private void setStoringObserverProperties(Configuration storingObserverConfig) throws Exception {
+    	Dictionary<String, Object> properties = new Hashtable<String, Object>();
+    	properties.put("observableAgent_filter", "");
+    	storingObserverConfig.update(properties);
+    }
+    
+    private void checkBidsFullCluster(StoringObserver observer)
+    {
+    	assert(!observer.getEvents().isEmpty());
+    	assert(observer.getEvents().containsKey("concentrator"));
+    	assert(observer.getEvents().containsKey("pvpanel"));
+    }
+    
+    private void checkBidsClusterNoPVPabel(StoringObserver observer)
+    {
+    	assert(!observer.getEvents().isEmpty());
+    	assert(observer.getEvents().containsKey("concentrator"));
+    	assertFalse(observer.getEvents().containsKey("pvpanel"));
+    }
+    
+    private void checkBidsClusterNoAuctioneer(StoringObserver observer)
+    {
+    	assert(observer.getEvents().isEmpty());
     }
     
 }
