@@ -20,7 +20,8 @@
 	org.apache.felix.metatype;version='[1.0.10,1.0.11)',\
 	org.apache.felix.scr;version='[1.8.2,1.8.3)',\
 	org.slf4j.osgi-over-slf4j;version='[1.7.7,1.7.8)',\
-	slf4j.api;version='[1.7.7,1.7.8)'
+	slf4j.api;version='[1.7.7,1.7.8)',\
+	net.powermatcher.examples;version=latest
 -runee: JavaSE-1.6
 -runfw: org.apache.felix.framework
 -runsystempackages:  \
@@ -37,5 +38,4 @@ Test-Cases:  \
 	osgi.identity;filter:='(osgi.identity=org.apache.felix.scr)',\
 	osgi.identity;filter:='(osgi.identity=ch.qos.logback.core)',\
 	osgi.identity;filter:='(osgi.identity=ch.qos.logback.classic)',\
-	osgi.identity;filter:='(osgi.identity=net.powermatcher.core)',\
-	osgi.identity;filter:='(osgi.identity=net.powermatcher.examples)'
+	osgi.identity;filter:='(osgi.identity=net.powermatcher.core)'

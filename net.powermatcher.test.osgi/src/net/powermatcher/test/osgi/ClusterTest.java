@@ -76,31 +76,29 @@ public class ClusterTest extends TestCase {
     	assertNotNull(concentrator);
     	Thread.sleep(1000);
     }
-    
-//    public void testAddPvPanel() throws Exception {
-//	    ConfigurationAdmin configAdmin = getService(ConfigurationAdmin.class);
-//
-//	    // Create PvPanel
-//    	String pvPanelFactoryPid = "net.powermatcher.examples.PVPanelAgent";
-//    	Configuration pvPanelConfig = configAdmin.createFactoryConfiguration(pvPanelFactoryPid, null);
-//
-//    	// create PvPanel props
-//    	Dictionary<String, Object> properties = new Hashtable<String, Object>();
-//    	properties.put("agentId", "pvpanel");
-//    	properties.put("desiredParentId", "concentrator");
-//    	properties.put("bidUpdateRate", "30");
-//    	properties.put("minimumDemand", "-700");
-//    	properties.put("maximumDemand", "-600");
-//    	pvPanelConfig.update(properties);
-//    	
-//    	// Wait for Auctioneer to become active
-//    	PVPanelAgent pvPanel = getServiceByPid(pvPanelConfig.getPid(), PVPanelAgent.class);
-//    	
-//    	assertNotNull(pvPanel);
-//    	Thread.sleep(100);
-//    }
 
- 
+    public void testAddPvPanel() throws Exception {
+	    ConfigurationAdmin configAdmin = getService(ConfigurationAdmin.class);
+
+	    // Create PvPanel
+    	String pvPanelFactoryPid = "net.powermatcher.examples.PVPanelAgent";
+    	Configuration pvPanelConfig = configAdmin.createFactoryConfiguration(pvPanelFactoryPid, null);
+
+    	// create PvPanel props
+    	Dictionary<String, Object> properties = new Hashtable<String, Object>();
+    	properties.put("agentId", "pvpanel");
+    	properties.put("desiredParentId", "concentrator");
+    	properties.put("bidUpdateRate", "30");
+    	properties.put("minimumDemand", "-700");
+    	properties.put("maximumDemand", "-600");
+    	pvPanelConfig.update(properties);
+    	
+    	// Wait for PvPanel to become active
+    	PVPanelAgent pvPanel = getServiceByPid(pvPanelConfig.getPid(), PVPanelAgent.class);
+    	
+    	assertNotNull(pvPanel);
+    	Thread.sleep(100);
+    }
     
 	public void testAuctioneerActive() throws Exception {
 		Component[] components = scrService.getComponents("net.powermatcher.core.auctioneer.Auctioneer");

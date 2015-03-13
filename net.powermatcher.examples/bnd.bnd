@@ -1,7 +1,8 @@
 -buildpath: ${pm-buildpath}, net.powermatcher.core;version=latest
 
 Bundle-Version: 2.0.0.${tstamp}
-Private-Package:  net.powermatcher.examples
+
 Service-Component:  *
 Export-Package:  \
+	net.powermatcher.examples.PVPanelAgent,\
 	net.powermatcher.examples
