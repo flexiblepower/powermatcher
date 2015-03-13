@@ -130,7 +130,7 @@ public abstract class BaseAgentEndpoint
         Session session = getSession();
 
         if (isInitialized()) {
-            if (lastBidUpdate != null && newBid.equals(lastBidUpdate)) {
+            if (lastBidUpdate != null && newBid.equals(lastBidUpdate.getBid())) {
                 // This bid is equal to the previous bid, we should not send an update
                 return lastBidUpdate;
             }
