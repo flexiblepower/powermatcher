@@ -87,16 +87,22 @@ public class ClusterTest extends TestCase {
     	//CHecking to see is the PVPanel stopped sending bid
 //    	observer.clearEvents();
 //    	Thread.sleep(30000);
+    	//checkBidsClusterNoPVPabel(observer);
     	
     	
     	// disconnect Auctioneer 
     	this.disconnectAuctioneer(configAdmin);
     	Thread.sleep(10000);
     	
+    	//Checking to see if any bids were sent when the autioneer was down.
+    	observer.clearEvents();
+    	Thread.sleep(30000);
+    	checkBidsClusterNoAuctioneer(observer);
+    	
     	// check Concentrator and PvPanel are unsatisfied, because Auctioneer is NOT active
-    	boolean[] activeAgents = this.testConcentratorPvPanelNotActive();
-    	assertFalse(activeAgents[0]);
-    	assertFalse(activeAgents[1]);
+//    	boolean[] activeAgents = this.testConcentratorPvPanelNotActive();
+//    	assertFalse(activeAgents[0]);
+//    	assertFalse(activeAgents[1]);
     }
 
 	private boolean[] testConcentratorPvPanelNotActive() throws Exception {
@@ -257,6 +263,11 @@ public class ClusterTest extends TestCase {
     	assert(!observer.getEvents().isEmpty());
     	assert(observer.getEvents().containsKey("concentrator"));
     	assertFalse(observer.getEvents().containsKey("pvpanel"));
+    }
+    
+    private void checkBidsClusterNoAuctioneer(StoringObserver observer)
+    {
+    	assert(observer.getEvents().isEmpty());
     }
     
 }
