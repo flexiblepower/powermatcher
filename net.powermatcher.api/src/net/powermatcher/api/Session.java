@@ -56,6 +56,7 @@ public interface Session {
      * @param priceUpdate
      *            The {@link PriceUpdate} passed by the {@link MatcherEndpoint} of this {@link Session}.
      */
+
     void updatePrice(PriceUpdate priceUpdate);
 
     /**
