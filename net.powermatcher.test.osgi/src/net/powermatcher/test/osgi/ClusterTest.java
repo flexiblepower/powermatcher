@@ -17,6 +17,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.util.tracker.ServiceTracker;
+import net.powermatcher.examples.PVPanelAgent;
 
 public class ClusterTest extends TestCase {
 
@@ -42,13 +43,14 @@ public class ClusterTest extends TestCase {
     	properties.put("maximumPrice", 1.0);
     	properties.put("bidTimeout", 600);
     	properties.put("priceUpdateRate", 30l);
+    	properties.put("minTimeBetweenPriceUpdates", 1000);
     	auctioneerConfig.update(properties);
 
     	// Wait for Auctioneer to become active
     	Auctioneer auctioneer = getServiceByPid(auctioneerConfig.getPid(), Auctioneer.class);
     	
     	assertNotNull(auctioneer);
-    	Thread.sleep(10);
+    	Thread.sleep(1000);
     }
 
     public void testAddConcentrator() throws Exception {
@@ -64,14 +66,41 @@ public class ClusterTest extends TestCase {
     	properties.put("agentId", "concentrator");
     	properties.put("desiredParentId", "auctioneer");
     	properties.put("bidUpdateRate", "60");
+    	properties.put("minTimeBetweenBidUpdates", "1000");
+    	
     	concentratorConfig.update(properties);
     	
     	// Wait for Concentrator to become active
     	Concentrator concentrator = getServiceByPid(concentratorConfig.getPid(), Concentrator.class);
     	
     	assertNotNull(concentrator);
-    	Thread.sleep(10);
+    	Thread.sleep(1000);
     }
+    
+//    public void testAddPvPanel() throws Exception {
+//	    ConfigurationAdmin configAdmin = getService(ConfigurationAdmin.class);
+//
+//	    // Create PvPanel
+//    	String pvPanelFactoryPid = "net.powermatcher.examples.PVPanelAgent";
+//    	Configuration pvPanelConfig = configAdmin.createFactoryConfiguration(pvPanelFactoryPid, null);
+//
+//    	// create PvPanel props
+//    	Dictionary<String, Object> properties = new Hashtable<String, Object>();
+//    	properties.put("agentId", "pvpanel");
+//    	properties.put("desiredParentId", "concentrator");
+//    	properties.put("bidUpdateRate", "30");
+//    	properties.put("minimumDemand", "-700");
+//    	properties.put("maximumDemand", "-600");
+//    	pvPanelConfig.update(properties);
+//    	
+//    	// Wait for Auctioneer to become active
+//    	PVPanelAgent pvPanel = getServiceByPid(pvPanelConfig.getPid(), PVPanelAgent.class);
+//    	
+//    	assertNotNull(pvPanel);
+//    	Thread.sleep(100);
+//    }
+
+ 
     
 	public void testAuctioneerActive() throws Exception {
 		Component[] components = scrService.getComponents("net.powermatcher.core.auctioneer.Auctioneer");
@@ -89,16 +118,16 @@ public class ClusterTest extends TestCase {
     
 	public void testConcentratorActive() throws Exception {
 		Component[] components = scrService.getComponents("net.powermatcher.core.concentrator.Concentrator");
-		boolean activeAuctioneer = false;
+		boolean activeConcentrator = false;
 	
 		for (Component comp : components) {
-			if (comp.getConfigurationPid().equals("net.powermatcher.core.auctioneer.Auctioneer")) {
+			if (comp.getConfigurationPid().equals("net.powermatcher.core.concentrator.Concentrator")) {
 				if (comp.getState() == Component.STATE_ACTIVE) {
-					activeAuctioneer = true;
+					activeConcentrator = true;
 				}
 			}
 		}
-		assertEquals(true, activeAuctioneer);
+		assertEquals(true, activeConcentrator);
 	}
 	
     private <T> T getService(Class<T> type) throws InterruptedException {
