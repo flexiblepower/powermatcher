@@ -37,53 +37,37 @@ public class ClusterTest extends TestCase {
 	private final BundleContext context = FrameworkUtil.getBundle(getClass()).getBundleContext();
     private ServiceReference<?> scrServiceReference = context.getServiceReference( ScrService.class.getName());
     private ScrService scrService = (ScrService) context.getService(scrServiceReference);
+    private ConfigurationAdmin configAdmin;
     
     public void testAddAgentsForCluster() throws Exception {
-	    ConfigurationAdmin configAdmin = getService(ConfigurationAdmin.class);
-
+    	configAdmin = getService(ConfigurationAdmin.class);
+    	
 	    // Create Auctioneer
-    	String auctioneerFactoryPid = FACTORY_PID_AUCTIONEER;
-    	Configuration auctioneerConfig = configAdmin.createFactoryConfiguration(auctioneerFactoryPid, null);
-    	setAuctioneerProperties(auctioneerConfig);
+    	Configuration auctioneerConfig = createConfifuration(FACTORY_PID_AUCTIONEER, getAuctioneerProperties());
 
     	// Wait for Auctioneer to become active
-    	Auctioneer auctioneer = getServiceByPid(auctioneerConfig.getPid(), Auctioneer.class);
-    	
-    	assertNotNull(auctioneer);
-    	Thread.sleep(1000);
+    	checkServiceByPid(auctioneerConfig.getPid(), Auctioneer.class);
     	
     	// Create Concentrator
-    	String concentratorFactoryPid = FACTORY_PID_CONCENTRATOR;
-    	Configuration concentratorConfig = configAdmin.createFactoryConfiguration(concentratorFactoryPid, null);
-    	setConcentratorProperties(concentratorConfig);
+    	Configuration concentratorConfig = createConfifuration(FACTORY_PID_CONCENTRATOR, getConcentratorProperties());
     	
     	// Wait for Concentrator to become active
-    	Concentrator concentrator = getServiceByPid(concentratorConfig.getPid(), Concentrator.class);
-    	
-    	assertNotNull(concentrator);
-    	Thread.sleep(1000);
+    	checkServiceByPid(concentratorConfig.getPid(), Concentrator.class);
     	
     	// Create PvPanel
-    	String pvPanelFactoryPid = FACTORY_PID_PV_PANEL;
-    	Configuration pvPanelConfig = configAdmin.createFactoryConfiguration(pvPanelFactoryPid, null);
-    	setPvPanelProperties(pvPanelConfig);
+    	Configuration pvPanelConfig = createConfifuration(FACTORY_PID_PV_PANEL, getPvPanelProperties());
     	
     	// Wait for PvPanel to become active
-    	PVPanelAgent pvPanel = getServiceByPid(pvPanelConfig.getPid(), PVPanelAgent.class);
-    	
-    	assertNotNull(pvPanel);
-    	Thread.sleep(1000);
+    	checkServiceByPid(pvPanelConfig.getPid(), PVPanelAgent.class);
 
     	// Create Freezer
-    	String freezerFactoryPid = FACTORY_PID_FREEZER;
-    	Configuration freezerConfig = configAdmin.createFactoryConfiguration(freezerFactoryPid, null);
-    	setFreezerProperties(freezerConfig);
+    	Configuration freezerConfig = createConfifuration(FACTORY_PID_FREEZER, getFreezerProperties());
     	
     	// Wait for Freezer to become active
-    	Freezer freezer = getServiceByPid(freezerConfig.getPid(), Freezer.class);
-    	
-    	assertNotNull(freezer);
-    	Thread.sleep(1000);
+    	checkServiceByPid(freezerConfig.getPid(), Freezer.class);
+
+    	// Wait a little time for all components to become satisfied / active
+    	Thread.sleep(2000);
     	
     	// check Auctioneer alive
     	assertEquals(true, checkActive(FACTORY_PID_AUCTIONEER));
@@ -95,10 +79,7 @@ public class ClusterTest extends TestCase {
     	assertEquals(true, checkActive(FACTORY_PID_FREEZER));
     	
     	//Create StoringObserver
-    	String storingObserverFactoryPid = FACTORY_PID_OBSERVER;
-    	Configuration storingObserverConfig = configAdmin.createFactoryConfiguration(storingObserverFactoryPid, null);
-    	
-    	setStoringObserverProperties(storingObserverConfig);
+    	Configuration storingObserverConfig = createConfifuration(FACTORY_PID_OBSERVER, getStoringObserverProperties());
     	
     	// Wait for StoringObserver to become active
     	StoringObserver observer = getServiceByPid(storingObserverConfig.getPid(), StoringObserver.class);
@@ -158,6 +139,12 @@ public class ClusterTest extends TestCase {
         return result;
     }
 
+    private <T> void checkServiceByPid(String pid, Class<T> type) throws InterruptedException {
+    	T service = getServiceByPid(pid, type);
+        assertNotNull(service);
+    }
+
+    
     private <T> T getServiceByPid(String pid, Class<T> type) throws InterruptedException {
     	String filter = "(" + Constants.SERVICE_PID + "=" + pid + ")";
     	
@@ -172,12 +159,10 @@ public class ClusterTest extends TestCase {
 			fail(e.getMessage());
 		}
 
-        assertNotNull(result);
-
 		return result;
     }
 
-    private void setPvPanelProperties(Configuration pvPanelConfig) throws Exception {
+    private Dictionary<String, Object> getPvPanelProperties() throws Exception {
     	// create PvPanel props
     	Dictionary<String, Object> properties = new Hashtable<String, Object>();
     	properties.put("agentId", AGENT_ID_PV_PANEL);
@@ -185,10 +170,11 @@ public class ClusterTest extends TestCase {
     	properties.put("bidUpdateRate", "30");
     	properties.put("minimumDemand", "-700");
     	properties.put("maximumDemand", "-600");
-    	pvPanelConfig.update(properties);
+    	
+    	return properties;
     }
     
-    private void setFreezerProperties(Configuration freezerConfig) throws Exception {
+    private Dictionary<String, Object> getFreezerProperties() throws Exception {
     	// create Freezer props
     	Dictionary<String, Object> properties = new Hashtable<String, Object>();
     	properties.put("agentId", AGENT_ID_FREEZER);
@@ -196,20 +182,29 @@ public class ClusterTest extends TestCase {
     	properties.put("bidUpdateRate", "30");
     	properties.put("minimumDemand", "100");
     	properties.put("maximumDemand", "121");
-    	freezerConfig.update(properties);
+    	
+    	return properties;
     }
     
-    private void setConcentratorProperties(Configuration concentratorConfig) throws Exception {
+    private Dictionary<String, Object> getConcentratorProperties() throws Exception {
     	Dictionary<String, Object> properties = new Hashtable<String, Object>();
     	properties.put("agentId", AGENT_ID_CONCENTRATOR);
     	properties.put("desiredParentId", AGENT_ID_AUCTIONEER);
     	properties.put("minTimeBetweenBidUpdates", "1000");
     	
-    	concentratorConfig.update(properties);
+    	return properties;
     }
     
-    private void setAuctioneerProperties(Configuration auctioneerConfig) throws Exception {
+    private Configuration createConfifuration(String factoryPid, Dictionary<String, Object> properties) throws Exception {
+    	Configuration config = configAdmin.createFactoryConfiguration(factoryPid, null);
+
     	// create Auctioneer props
+    	config.update(properties);
+    	
+    	return config;
+    }
+
+    private Dictionary<String, Object> getAuctioneerProperties() {
     	Dictionary<String, Object> properties = new Hashtable<String, Object>();
     	properties.put("agentId", AGENT_ID_AUCTIONEER);
     	properties.put("clusterId", "DefaultCluster");
@@ -221,13 +216,15 @@ public class ClusterTest extends TestCase {
     	properties.put("bidTimeout", 600);
     	properties.put("priceUpdateRate", 30l);
     	properties.put("minTimeBetweenPriceUpdates", 1000);
-    	auctioneerConfig.update(properties);
+    	
+    	return properties;
     }
     
-    private void setStoringObserverProperties(Configuration storingObserverConfig) throws Exception {
+    private Dictionary<String, Object> getStoringObserverProperties() throws Exception {
     	Dictionary<String, Object> properties = new Hashtable<String, Object>();
     	properties.put("observableAgent_filter", "");
-    	storingObserverConfig.update(properties);
+
+    	return properties;    	
     }
     
     private void checkBidsFullCluster(StoringObserver observer) {
