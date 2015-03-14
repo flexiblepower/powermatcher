@@ -39,29 +39,38 @@ public class ClusterTest extends TestCase {
     private ScrService scrService = (ScrService) context.getService(scrServiceReference);
     private ConfigurationAdmin configAdmin;
     
-    public void testAddAgentsForCluster() throws Exception {
-    	configAdmin = getService(ConfigurationAdmin.class);
+    @Override 
+    protected void setUp() throws Exception {
+    	super.setUp();
     	
+    	configAdmin = getService(ConfigurationAdmin.class);
+    }
+    
+    /**
+     * Tests a simple buildup of a cluster in OSGI and sanity tests.
+     * Custer consists of Auctioneer, Concentrator and 2 agents.
+     */
+    public void testSimpleClusterBuildUp() throws Exception {
 	    // Create Auctioneer
-    	Configuration auctioneerConfig = createConfifuration(FACTORY_PID_AUCTIONEER, getAuctioneerProperties());
+    	Configuration auctioneerConfig = createConfiguration(FACTORY_PID_AUCTIONEER, getAuctioneerProperties());
 
     	// Wait for Auctioneer to become active
     	checkServiceByPid(auctioneerConfig.getPid(), Auctioneer.class);
     	
     	// Create Concentrator
-    	Configuration concentratorConfig = createConfifuration(FACTORY_PID_CONCENTRATOR, getConcentratorProperties());
+    	Configuration concentratorConfig = createConfiguration(FACTORY_PID_CONCENTRATOR, getConcentratorProperties());
     	
     	// Wait for Concentrator to become active
     	checkServiceByPid(concentratorConfig.getPid(), Concentrator.class);
     	
     	// Create PvPanel
-    	Configuration pvPanelConfig = createConfifuration(FACTORY_PID_PV_PANEL, getPvPanelProperties());
+    	Configuration pvPanelConfig = createConfiguration(FACTORY_PID_PV_PANEL, getPvPanelProperties());
     	
     	// Wait for PvPanel to become active
     	checkServiceByPid(pvPanelConfig.getPid(), PVPanelAgent.class);
 
     	// Create Freezer
-    	Configuration freezerConfig = createConfifuration(FACTORY_PID_FREEZER, getFreezerProperties());
+    	Configuration freezerConfig = createConfiguration(FACTORY_PID_FREEZER, getFreezerProperties());
     	
     	// Wait for Freezer to become active
     	checkServiceByPid(freezerConfig.getPid(), Freezer.class);
@@ -79,7 +88,7 @@ public class ClusterTest extends TestCase {
     	assertEquals(true, checkActive(FACTORY_PID_FREEZER));
     	
     	//Create StoringObserver
-    	Configuration storingObserverConfig = createConfifuration(FACTORY_PID_OBSERVER, getStoringObserverProperties());
+    	Configuration storingObserverConfig = createConfiguration(FACTORY_PID_OBSERVER, getStoringObserverProperties());
     	
     	// Wait for StoringObserver to become active
     	StoringObserver observer = getServiceByPid(storingObserverConfig.getPid(), StoringObserver.class);
@@ -87,15 +96,71 @@ public class ClusterTest extends TestCase {
     	//Checking to see if all agents send bids
     	Thread.sleep(30000);
     	checkBidsFullCluster(observer);
+    }
+
+    /**
+     * Tests whether agent removal actually makes the bid obsolete of this agent
+     * The agent should also not receive any price updates.
+     */
+    public void testAgentRemoval() throws Exception {
+	    // Create simple cluster
+    	createConfiguration(FACTORY_PID_AUCTIONEER, getAuctioneerProperties());
+    	createConfiguration(FACTORY_PID_CONCENTRATOR, getConcentratorProperties());
+    	Configuration pvPanelConfig = createConfiguration(FACTORY_PID_PV_PANEL, getPvPanelProperties());
+    	Configuration freezerConfig = createConfiguration(FACTORY_PID_FREEZER, getFreezerProperties());
+    	
+    	// Wait for PvPanel and Freezer to become active
+    	checkServiceByPid(pvPanelConfig.getPid(), PVPanelAgent.class);
+    	checkServiceByPid(freezerConfig.getPid(), Freezer.class);
+
+    	// Wait a little time for all components to become satisfied / active
+    	Thread.sleep(2000);
+    	
+    	// Create StoringObserver
+    	Configuration storingObserverConfig = createConfiguration(FACTORY_PID_OBSERVER, getStoringObserverProperties());
+    	StoringObserver observer = getServiceByPid(storingObserverConfig.getPid(), StoringObserver.class);
+    	
+    	// Checking to see if all agents send bids
+    	Thread.sleep(30000);
+    	checkBidsFullCluster(observer);
     	
     	// disconnect Freezer
     	this.disconnectAgent(configAdmin, freezerConfig.getPid());
     	
-    	//Checking to see if the Freezer stopped sending bid
+    	// Checking to see if the Freezer stopped sending bid
     	observer.clearEvents();
     	Thread.sleep(30000);
     	checkBidsClusterNoFreezer(observer);
 
+    	// Check aggregated bid no longer contains the Freezer bid
+    	// TODO
+    }
+
+    /**
+     * Tests whether auctioneer removal stops complete cluster but continues when Auctioneer is started again.
+     */
+    public void testAuctioneerRemoval() throws Exception {
+	    // Create simple cluster
+    	Configuration auctioneerConfig = createConfiguration(FACTORY_PID_AUCTIONEER, getAuctioneerProperties());
+    	createConfiguration(FACTORY_PID_CONCENTRATOR, getConcentratorProperties());
+    	Configuration pvPanelConfig = createConfiguration(FACTORY_PID_PV_PANEL, getPvPanelProperties());
+    	Configuration freezerConfig = createConfiguration(FACTORY_PID_FREEZER, getFreezerProperties());
+    	
+    	// Wait for PvPanel and Freezer to become active
+    	checkServiceByPid(pvPanelConfig.getPid(), PVPanelAgent.class);
+    	checkServiceByPid(freezerConfig.getPid(), Freezer.class);
+
+    	// Wait a little time for all components to become satisfied / active
+    	Thread.sleep(2000);
+    	
+    	// Create StoringObserver
+    	Configuration storingObserverConfig = createConfiguration(FACTORY_PID_OBSERVER, getStoringObserverProperties());
+    	StoringObserver observer = getServiceByPid(storingObserverConfig.getPid(), StoringObserver.class);
+    	
+    	// Checking to see if all agents send bids
+    	Thread.sleep(30000);
+    	checkBidsFullCluster(observer);
+    	
     	// disconnect Auctioneer 
     	this.disconnectAgent(configAdmin, auctioneerConfig.getPid());
     	
@@ -103,8 +168,15 @@ public class ClusterTest extends TestCase {
     	observer.clearEvents();
     	Thread.sleep(30000);
     	checkBidsClusterNoAuctioneer(observer);
+    	
+    	// connect auctioneer, bid should start again
+    	auctioneerConfig = createConfiguration(FACTORY_PID_AUCTIONEER, getAuctioneerProperties());
+    	checkActive(FACTORY_PID_AUCTIONEER);
+    
+    	Thread.sleep(30000);
+    	checkBidsFullCluster(observer);
     }
-
+    
 	private void disconnectAgent(ConfigurationAdmin configAdmin, String agentPid) throws Exception, InvalidSyntaxException {
 		Configuration config = configAdmin.getConfiguration(agentPid);
 		if (config == null) {
@@ -195,7 +267,7 @@ public class ClusterTest extends TestCase {
     	return properties;
     }
     
-    private Configuration createConfifuration(String factoryPid, Dictionary<String, Object> properties) throws Exception {
+    private Configuration createConfiguration(String factoryPid, Dictionary<String, Object> properties) throws Exception {
     	Configuration config = configAdmin.createFactoryConfiguration(factoryPid, null);
 
     	// create Auctioneer props
