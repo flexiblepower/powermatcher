@@ -1,14 +1,21 @@
 package net.powermatcher.test.osgi;
 
+import java.lang.reflect.Field;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.TestCase;
+import net.powermatcher.api.MatcherEndpoint;
+import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
 import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
+import net.powermatcher.core.BaseMatcherEndpoint;
 import net.powermatcher.core.auctioneer.Auctioneer;
+import net.powermatcher.core.bidcache.AggregatedBid;
+import net.powermatcher.core.bidcache.BidCache;
 import net.powermatcher.core.concentrator.Concentrator;
 import net.powermatcher.examples.Freezer;
 import net.powermatcher.examples.PVPanelAgent;
@@ -16,6 +23,7 @@ import net.powermatcher.examples.StoringObserver;
 
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.ScrService;
+import org.hamcrest.MatcherAssert;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
@@ -117,11 +125,12 @@ public class ClusterTest extends TestCase {
     public void testAgentRemoval() throws Exception {
 	    // Create simple cluster
     	createConfiguration(FACTORY_PID_AUCTIONEER, getAuctioneerProperties());
-    	createConfiguration(FACTORY_PID_CONCENTRATOR, getConcentratorProperties());
+    	Configuration concentratorConfig = createConfiguration(FACTORY_PID_CONCENTRATOR, getConcentratorProperties());
     	Configuration pvPanelConfig = createConfiguration(FACTORY_PID_PV_PANEL, getPvPanelProperties());
     	Configuration freezerConfig = createConfiguration(FACTORY_PID_FREEZER, getFreezerProperties());
     	
     	// Wait for PvPanel and Freezer to become active
+    	Concentrator concentrator = getServiceByPid(concentratorConfig.getPid(), Concentrator.class);
     	checkServiceByPid(pvPanelConfig.getPid(), PVPanelAgent.class);
     	checkServiceByPid(freezerConfig.getPid(), Freezer.class);
 
@@ -142,7 +151,13 @@ public class ClusterTest extends TestCase {
     	// Checking to see if the Freezer is no longer participating
     	observer.clearEvents();
     	Thread.sleep(10000);
-    	checkBidsClusterNoFreezer(observer);
+    	checkBidsClusterNoFreezer(observer, concentrator);
+    	
+    	// Re-add Freezer agent, it should not receive bids from previous freezer
+    	observer.clearEvents();
+    	freezerConfig = createConfiguration(FACTORY_PID_FREEZER, getFreezerProperties());
+    	Thread.sleep(10000);
+    	checkBidsFullCluster(observer);
     }
 
     /**
@@ -215,7 +230,7 @@ public class ClusterTest extends TestCase {
         ServiceTracker<T, T> serviceTracker = 
                 new ServiceTracker<T, T>(context, type, null);
         serviceTracker.open();
-        T result = (T)serviceTracker.waitForService(10000);
+        T result = serviceTracker.waitForService(10000);
 
         assertNotNull(result);
         
@@ -245,6 +260,32 @@ public class ClusterTest extends TestCase {
 		return result;
     }
 
+    private <T> T getPrivateField(Object agent, String field, Class<T> type) {
+    	T result = null;
+    	Field privateField = null;
+    	try {
+        	privateField = agent.getClass().getDeclaredField(field);
+    	} catch (NoSuchFieldException e) {
+    		try {
+    			privateField = agent.getClass().getSuperclass().getDeclaredField(field);
+    		} catch (NoSuchFieldException e2) {
+    			fail("Failed to get " + type.getSimpleName() + ", reason: " + e2);
+    		}
+    	}
+
+    	// Read value from field
+    	if (privateField != null) {
+    		try {
+    			privateField.setAccessible(true);
+    	    	result = type.cast(privateField.get(agent));
+    		} catch (IllegalArgumentException | IllegalAccessException e) {
+    			fail("Failed to get " + type.getSimpleName() + ", reason: " + e);
+    		}
+    	}
+
+    	return result;
+    }
+    
     private Dictionary<String, Object> getPvPanelProperties() throws Exception {
     	// create PvPanel props
     	Dictionary<String, Object> properties = new Hashtable<String, Object>();
@@ -341,7 +382,7 @@ public class ClusterTest extends TestCase {
     	}
     }
     
-    private void checkBidsClusterNoFreezer(StoringObserver observer) {
+    private void checkBidsClusterNoFreezer(StoringObserver observer, Concentrator concentrator) {
     	assertFalse(observer.getOutgoingBidEvents(AGENT_ID_CONCENTRATOR).isEmpty());
     	assertFalse(observer.getOutgoingBidEvents(AGENT_ID_PV_PANEL).isEmpty());
     	assertTrue(observer.getOutgoingBidEvents(AGENT_ID_FREEZER).isEmpty());
@@ -359,11 +400,28 @@ public class ClusterTest extends TestCase {
     	}
     	
     	assertTrue("Concentrator still contains freezer bid", foundBid);
+    	
+    	// Validate last aggregated bid contains only pvPanel
+    	BaseMatcherEndpoint matcherPart = getPrivateField(concentrator, "matcherPart", BaseMatcherEndpoint.class);
+    	BidCache bidCache = getPrivateField(matcherPart, "bidCache", BidCache.class);
+    	AggregatedBid lastBid = getPrivateField(bidCache, "lastBid", AggregatedBid.class);
+    	assertTrue(lastBid.getAgentBidReferences().containsKey(AGENT_ID_PV_PANEL));
+    	assertFalse(lastBid.getAgentBidReferences().containsKey(AGENT_ID_FREEZER));
+    	
+    	// Validate bidcache no longer conatins any reference to Freezer
+    	@SuppressWarnings("unchecked")
+		Map<String, BidUpdate> agentBids = (Map<String, BidUpdate>)getPrivateField(bidCache, "agentBids", Object.class);
+    	assertFalse(agentBids.containsKey(AGENT_ID_FREEZER));
+    	assertFalse(agentBids.containsKey(AGENT_ID_PV_PANEL));
     }
     
     private void checkBidsClusterNoAuctioneer(StoringObserver observer) {
     	assertTrue(observer.getOutgoingBidEvents(AGENT_ID_CONCENTRATOR).isEmpty());
     	assertTrue(observer.getOutgoingBidEvents(AGENT_ID_PV_PANEL).isEmpty());
     	assertTrue(observer.getOutgoingBidEvents(AGENT_ID_FREEZER).isEmpty());
-    }    
+    }
+    
+    private void validateAggregatedBid(Concentrator concentrator) {
+    	
+    }
 }
