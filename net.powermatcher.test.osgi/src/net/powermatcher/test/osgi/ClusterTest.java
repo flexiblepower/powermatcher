@@ -2,8 +2,11 @@ package net.powermatcher.test.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Map;
 
 import junit.framework.TestCase;
+import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
+import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.concentrator.Concentrator;
 import net.powermatcher.examples.Freezer;
@@ -264,7 +267,7 @@ public class ClusterTest extends TestCase {
     	Dictionary<String, Object> properties = new Hashtable<String, Object>();
     	properties.put("agentId", AGENT_ID_CONCENTRATOR);
     	properties.put("desiredParentId", AGENT_ID_AUCTIONEER);
-    	properties.put("minTimeBetweenBidUpdates", "1000");
+    	properties.put("minTimeBetweenBidUpdates", 5000);
     	
     	return properties;
     }
@@ -289,7 +292,7 @@ public class ClusterTest extends TestCase {
     	properties.put("maximumPrice", 1.0);
     	properties.put("bidTimeout", 600);
     	properties.put("priceUpdateRate", 30l);
-    	properties.put("minTimeBetweenPriceUpdates", 1000);
+    	properties.put("minTimeBetweenPriceUpdates", 5000);
     	
     	return properties;
     }
@@ -302,20 +305,31 @@ public class ClusterTest extends TestCase {
     }
     
     private void checkBidsFullCluster(StoringObserver observer) {
-    	assertTrue(!observer.getEvents().isEmpty());
-    	assertTrue(observer.getEvents().containsKey(AGENT_ID_CONCENTRATOR));
-    	assertTrue(observer.getEvents().containsKey(AGENT_ID_PV_PANEL));
-    	assertTrue(observer.getEvents().containsKey(AGENT_ID_FREEZER));
-    }
+    	Map<String, OutgoingBidEvent> outgoingBidEvents = observer.getOutgoingBidEvents();
+    	Map<String, OutgoingPriceUpdateEvent> outgoingPriceEvents = observer.getOutgoingPriceEvents();
+    	
+    	// Are any bids available for each agent (at all)
+    	assertFalse(outgoingBidEvents.isEmpty());
+    	assertTrue(outgoingBidEvents.containsKey(AGENT_ID_CONCENTRATOR));
+    	assertTrue(outgoingBidEvents.containsKey(AGENT_ID_PV_PANEL));
+    	assertTrue(outgoingBidEvents.containsKey(AGENT_ID_FREEZER));
+    	
+    	// Validate bidnumber auctioneer vs concentrator
+    	OutgoingPriceUpdateEvent auctioneerPrice = outgoingPriceEvents.get(AGENT_ID_AUCTIONEER);
+    	OutgoingBidEvent concentratorBid = outgoingBidEvents.get(AGENT_ID_CONCENTRATOR);
+    	assertEquals(concentratorBid.getBidUpdate().getBidNumber(), auctioneerPrice.getPriceUpdate().getBidNumber());
+}
     
     private void checkBidsClusterNoFreezer(StoringObserver observer) {
-    	assertTrue(!observer.getEvents().isEmpty());
-    	assertTrue(observer.getEvents().containsKey(AGENT_ID_CONCENTRATOR));
-    	assertFalse(observer.getEvents().containsKey(AGENT_ID_FREEZER));
+    	Map<String, OutgoingBidEvent> outgoingBidEvents = observer.getOutgoingBidEvents();
+
+    	assertFalse(outgoingBidEvents.isEmpty());
+    	assertTrue(outgoingBidEvents.containsKey(AGENT_ID_CONCENTRATOR));
+    	assertTrue(outgoingBidEvents.containsKey(AGENT_ID_PV_PANEL));
+    	assertFalse(outgoingBidEvents.containsKey(AGENT_ID_FREEZER));
     }
     
     private void checkBidsClusterNoAuctioneer(StoringObserver observer) {
-    	assert(observer.getEvents().isEmpty());
-    }
-    
+    	assert(observer.getOutgoingBidEvents().isEmpty());
+    }    
 }
