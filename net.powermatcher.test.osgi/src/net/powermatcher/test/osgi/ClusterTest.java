@@ -411,7 +411,7 @@ public class ClusterTest extends TestCase {
     	@SuppressWarnings("unchecked")
 		Map<String, BidUpdate> agentBids = (Map<String, BidUpdate>)getPrivateField(bidCache, "agentBids", Object.class);
     	assertFalse(agentBids.containsKey(AGENT_ID_FREEZER));
-    	assertFalse(agentBids.containsKey(AGENT_ID_PV_PANEL));
+    	assertTrue(agentBids.containsKey(AGENT_ID_PV_PANEL));
     }
     
     private void checkBidsClusterNoAuctioneer(StoringObserver observer) {
