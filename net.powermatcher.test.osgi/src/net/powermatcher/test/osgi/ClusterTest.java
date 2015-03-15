@@ -7,11 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
-import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
-import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.BaseMatcherEndpoint;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.bidcache.AggregatedBid;
@@ -23,7 +21,6 @@ import net.powermatcher.examples.StoringObserver;
 
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.ScrService;
-import org.hamcrest.MatcherAssert;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
@@ -278,9 +275,11 @@ public class ClusterTest extends TestCase {
     		try {
     			privateField.setAccessible(true);
     	    	result = type.cast(privateField.get(agent));
-    		} catch (IllegalArgumentException | IllegalAccessException e) {
+    		} catch (IllegalArgumentException e) {
     			fail("Failed to get " + type.getSimpleName() + ", reason: " + e);
-    		}
+    		} catch (IllegalAccessException e) {
+    			fail("Failed to get " + type.getSimpleName() + ", reason: " + e);
+			}
     	}
 
     	return result;
@@ -419,9 +418,5 @@ public class ClusterTest extends TestCase {
     	assertTrue(observer.getOutgoingBidEvents(AGENT_ID_CONCENTRATOR).isEmpty());
     	assertTrue(observer.getOutgoingBidEvents(AGENT_ID_PV_PANEL).isEmpty());
     	assertTrue(observer.getOutgoingBidEvents(AGENT_ID_FREEZER).isEmpty());
-    }
-    
-    private void validateAggregatedBid(Concentrator concentrator) {
-    	
     }
 }
