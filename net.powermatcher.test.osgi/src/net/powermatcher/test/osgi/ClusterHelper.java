@@ -1,12 +1,20 @@
 package net.powermatcher.test.osgi;
 
+import java.lang.reflect.Field;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import junit.framework.TestCase;
+
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.ScrService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.util.tracker.ServiceTracker;
 
 public class ClusterHelper {
 
@@ -88,4 +96,64 @@ public class ClusterHelper {
 		return activeAgent;
 	}
     
+    public <T> void checkServiceByPid(BundleContext context, String pid, Class<T> type) throws InterruptedException {
+    	T service = getServiceByPid(context, pid, type);
+    	TestCase.assertNotNull(service);
+    }
+    
+    public <T> T getService(BundleContext context, Class<T> type) throws InterruptedException {
+        ServiceTracker<T, T> serviceTracker = 
+                new ServiceTracker<T, T>(context, type, null);
+        serviceTracker.open();
+        T result = (T)serviceTracker.waitForService(10000);
+
+        TestCase.assertNotNull(result);
+        
+        return result;
+    }
+    
+    public <T> T getServiceByPid(BundleContext context, String pid, Class<T> type) throws InterruptedException {
+    	String filter = "(" + Constants.SERVICE_PID + "=" + pid + ")";
+    	
+        ServiceTracker<T, T> serviceTracker;
+        T result = null;
+		try {
+			serviceTracker = new ServiceTracker<T, T>(context, FrameworkUtil.createFilter(filter), null);
+		
+	        serviceTracker.open();
+	        result = type.cast(serviceTracker.waitForService(10000));
+		} catch (InvalidSyntaxException e) {
+			TestCase.fail(e.getMessage());
+		}
+
+		return result;
+    }
+    
+    public <T> T getPrivateField(Object agent, String field, Class<T> type) {
+        T result = null;
+        Field privateField = null;
+        try {
+            privateField = agent.getClass().getDeclaredField(field);
+        } catch (NoSuchFieldException e) {
+            try {
+                privateField = agent.getClass().getSuperclass().getDeclaredField(field);
+            } catch (NoSuchFieldException e2) {
+                TestCase.fail("Failed to get " + type.getSimpleName() + ", reason: " + e2);
+            }
+        }
+
+        // Read value from field
+        if (privateField != null) {
+            try {
+                privateField.setAccessible(true);
+                result = type.cast(privateField.get(agent));
+            } catch (IllegalArgumentException e) {
+            	TestCase.fail("Failed to get " + type.getSimpleName() + ", reason: " + e);
+            } catch (IllegalAccessException e) {
+            	TestCase.fail("Failed to get " + type.getSimpleName() + ", reason: " + e);
+            }
+        }
+
+        return result;
+    }
 }
