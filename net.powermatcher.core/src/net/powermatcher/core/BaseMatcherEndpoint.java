@@ -14,7 +14,7 @@ import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.messages.PriceUpdate;
-import net.powermatcher.api.monitoring.events.IncomingBidEvent;
+import net.powermatcher.api.monitoring.events.IncomingBidUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.bidcache.AggregatedBid;
 import net.powermatcher.core.bidcache.BidCache;
@@ -150,7 +150,7 @@ public abstract class BaseMatcherEndpoint
 
         LOGGER.debug("Received from session [{}] bid update [{}] ", session.getSessionId(), bidUpdate);
 
-        publishEvent(new IncomingBidEvent(session.getClusterId(),
+        publishEvent(new IncomingBidUpdateEvent(session.getClusterId(),
                                           getAgentId(),
                                           session.getSessionId(),
                                           context.currentTime(),

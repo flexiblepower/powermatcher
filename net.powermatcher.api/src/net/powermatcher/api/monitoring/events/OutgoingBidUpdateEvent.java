@@ -8,18 +8,13 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.messages.BidUpdate;
 
 /**
- * An {@link IncomingBidEvent} is sent when an {@link AgentEndpoint} receives a new {@link Bid}.
+ * An {@link OutgoingBidUpdateEvent} is sent when an {@link AgentEndpoint} sends a new {@link Bid}.
  *
  * @author FAN
  * @version 2.0
  */
-public class IncomingBidEvent
-    extends BidEvent {
-
-    /**
-     * The id of the Agent that sent the {@link Bid}
-     */
-    private final String fromAgentId;
+public class OutgoingBidUpdateEvent
+    extends BidUpdateEvent {
 
     /**
      * Constructs an instance of this class.
@@ -32,29 +27,10 @@ public class IncomingBidEvent
      *            The id of the {@link Session} of the {@link AgentEndpoint} subclass sending the UpdateEvent
      * @param timestamp
      *            The time at which this event occurred
-     * @param fromAgentId
-     *            The id of the Agent that sent the {@link Bid}.
      * @param bidUpdate
-     *            The received {@link BidUpdate}.
+     *            The new {@link BidUpdate} created by the {@link AgentEndpoint} subclass.
      */
-    public IncomingBidEvent(String clusterId, String agentId, String sessionId, Date timestamp, String fromAgentId,
-                            BidUpdate bidUpdate) {
+    public OutgoingBidUpdateEvent(String clusterId, String agentId, String sessionId, Date timestamp, BidUpdate bidUpdate) {
         super(clusterId, agentId, sessionId, timestamp, bidUpdate);
-        this.fromAgentId = fromAgentId;
-    }
-
-    /**
-     * @return the current value of agentId.
-     */
-    public String getFromAgentId() {
-        return fromAgentId;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        return super.toString() + ", fromAgentId = " + fromAgentId;
     }
 }

@@ -14,7 +14,7 @@ import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.events.AgentEvent;
-import net.powermatcher.api.monitoring.events.IncomingBidEvent;
+import net.powermatcher.api.monitoring.events.IncomingBidUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.mock.MockAgent;
@@ -55,7 +55,7 @@ public class AuctioneerTest {
     private class AuctioneerObserver
         implements AgentObserver {
 
-        private IncomingBidEvent incomingBidEvent;
+        private IncomingBidUpdateEvent incomingBidEvent;
         private OutgoingPriceUpdateEvent outgoingPriceEvent;
 
         /**
@@ -63,11 +63,11 @@ public class AuctioneerTest {
          */
         @Override
         public void handleAgentEvent(AgentEvent event) {
-            if (event instanceof IncomingBidEvent) {
+            if (event instanceof IncomingBidUpdateEvent) {
                 if (incomingBidEvent != null) {
                     fail("IncomingBidEvent fired more than once");
                 }
-                incomingBidEvent = (IncomingBidEvent) event;
+                incomingBidEvent = (IncomingBidUpdateEvent) event;
             } else if (event instanceof OutgoingPriceUpdateEvent) {
                 if (outgoingPriceEvent != null) {
                     fail("OutgoingPriceEvent fired more than once");

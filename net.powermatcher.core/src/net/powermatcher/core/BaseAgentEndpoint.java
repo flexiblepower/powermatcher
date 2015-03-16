@@ -9,7 +9,7 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
-import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
+import net.powermatcher.api.monitoring.events.OutgoingBidUpdateEvent;
 
 /**
  * {@link BaseAgentEndpoint} defines the basic functionality of any Device Agent.
@@ -136,7 +136,7 @@ public abstract class BaseAgentEndpoint
             }
             BidUpdate update = new BidUpdate(newBid, bidNumberGenerator.incrementAndGet());
             lastBidUpdate = update;
-            publishEvent(new OutgoingBidEvent(getClusterId(),
+            publishEvent(new OutgoingBidUpdateEvent(getClusterId(),
                                               getAgentId(),
                                               session.getSessionId(),
                                               now(),
