@@ -36,14 +36,14 @@ public class VariousRateBidUpdateTest extends TestCase {
     private ScrService scrService = (ScrService) context.getService(scrServiceReference);
     private ConfigurationAdmin configAdmin;
     
-    private ClusterHelper cluster;
+    private ClusterHelper clusterHelper;
     
     @Override 
     protected void setUp() throws Exception {
     	super.setUp();
-    	cluster = new ClusterHelper();
+    	clusterHelper = new ClusterHelper();
     	
-    	configAdmin = cluster.getService(context, ConfigurationAdmin.class);
+    	configAdmin = clusterHelper.getService(context, ConfigurationAdmin.class);
 
     	// Cleanup running agents to start with clean test
     	Configuration[] configs = configAdmin.listConfigurations(null);
@@ -60,44 +60,44 @@ public class VariousRateBidUpdateTest extends TestCase {
      */
     public void testSimpleClusterBuildUp() throws Exception {
     	// Create Auctioneer
-    	Configuration auctioneerConfig = cluster.createConfiguration(configAdmin, FACTORY_PID_AUCTIONEER, cluster.getAuctioneerProperties(AGENT_ID_AUCTIONEER, 5000));
+    	Configuration auctioneerConfig = clusterHelper.createConfiguration(configAdmin, FACTORY_PID_AUCTIONEER, clusterHelper.getAuctioneerProperties(AGENT_ID_AUCTIONEER, 5000));
     	
     	// Wait for Auctioneer to become active
-    	cluster.checkServiceByPid(context, auctioneerConfig.getPid(), Auctioneer.class);
+    	clusterHelper.checkServiceByPid(context, auctioneerConfig.getPid(), Auctioneer.class);
     	
     	// Create Concentrator
-    	Configuration concentratorConfig = cluster.createConfiguration(configAdmin, FACTORY_PID_CONCENTRATOR, cluster.getConcentratorProperties(AGENT_ID_CONCENTRATOR, AGENT_ID_AUCTIONEER, 5000));
+    	Configuration concentratorConfig = clusterHelper.createConfiguration(configAdmin, FACTORY_PID_CONCENTRATOR, clusterHelper.getConcentratorProperties(AGENT_ID_CONCENTRATOR, AGENT_ID_AUCTIONEER, 5000));
     	
     	// Wait for Concentrator to become active
-    	cluster.checkServiceByPid(context, concentratorConfig.getPid(), Concentrator.class);
+    	clusterHelper.checkServiceByPid(context, concentratorConfig.getPid(), Concentrator.class);
     	
     	// Create PvPanel
-    	Configuration pvPanelConfig = cluster.createConfiguration(configAdmin, FACTORY_PID_PV_PANEL, cluster.getPvPanelProperties(AGENT_ID_PV_PANEL, AGENT_ID_CONCENTRATOR, 4));
+    	Configuration pvPanelConfig = clusterHelper.createConfiguration(configAdmin, FACTORY_PID_PV_PANEL, clusterHelper.getPvPanelProperties(AGENT_ID_PV_PANEL, AGENT_ID_CONCENTRATOR, 4));
     	
     	// Wait for PvPanel to become active
-    	cluster.checkServiceByPid(context, pvPanelConfig.getPid(), PVPanelAgent.class);
+    	clusterHelper.checkServiceByPid(context, pvPanelConfig.getPid(), PVPanelAgent.class);
 
     	// Create Freezer
-    	Configuration freezerConfig = cluster.createConfiguration(configAdmin, FACTORY_PID_FREEZER, cluster.getFreezerProperties(AGENT_ID_FREEZER, AGENT_ID_CONCENTRATOR, 4));
+    	Configuration freezerConfig = clusterHelper.createConfiguration(configAdmin, FACTORY_PID_FREEZER, clusterHelper.getFreezerProperties(AGENT_ID_FREEZER, AGENT_ID_CONCENTRATOR, 4));
     	
     	// Wait for Freezer to become active
-    	cluster.checkServiceByPid(context, freezerConfig.getPid(), Freezer.class);
+    	clusterHelper.checkServiceByPid(context, freezerConfig.getPid(), Freezer.class);
 
     	// Wait a little time for all components to become satisfied / active
     	Thread.sleep(2000);
     	
     	// check Auctioneer alive
-    	assertEquals(true, cluster.checkActive(scrService, FACTORY_PID_AUCTIONEER));
+    	assertEquals(true, clusterHelper.checkActive(scrService, FACTORY_PID_AUCTIONEER));
     	// check Concentrator alive
-    	assertEquals(true, cluster.checkActive(scrService, FACTORY_PID_CONCENTRATOR));
+    	assertEquals(true, clusterHelper.checkActive(scrService, FACTORY_PID_CONCENTRATOR));
     	// check PvPanel alive
-    	assertEquals(true, cluster.checkActive(scrService, FACTORY_PID_PV_PANEL));
+    	assertEquals(true, clusterHelper.checkActive(scrService, FACTORY_PID_PV_PANEL));
     	
     	//Create StoringObserver
-    	Configuration storingObserverConfig = cluster.createConfiguration(configAdmin, FACTORY_PID_OBSERVER, cluster.getStoringObserverProperties());
+    	Configuration storingObserverConfig = clusterHelper.createConfiguration(configAdmin, FACTORY_PID_OBSERVER, clusterHelper.getStoringObserverProperties());
     	
     	// Wait for StoringObserver to become active
-    	StoringObserver observer = cluster.getServiceByPid(context, storingObserverConfig.getPid(), StoringObserver.class);
+    	StoringObserver observer = clusterHelper.getServiceByPid(context, storingObserverConfig.getPid(), StoringObserver.class);
     	
     	//Checking to see if all agents send bids
     	Thread.sleep(10000);
