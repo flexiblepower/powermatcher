@@ -1,7 +1,5 @@
 package net.powermatcher.test.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -13,16 +11,12 @@ import net.powermatcher.examples.Freezer;
 import net.powermatcher.examples.PVPanelAgent;
 import net.powermatcher.examples.StoringObserver;
 
-import org.apache.felix.scr.Component;
 import org.apache.felix.scr.ScrService;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.util.tracker.ServiceTracker;
 
 public class VariousRateBidUpdateTest extends TestCase {
 
@@ -47,8 +41,9 @@ public class VariousRateBidUpdateTest extends TestCase {
     @Override 
     protected void setUp() throws Exception {
     	super.setUp();
+    	cluster = new ClusterHelper();
     	
-    	configAdmin = getService(ConfigurationAdmin.class);
+    	configAdmin = cluster.getService(context, ConfigurationAdmin.class);
 
     	// Cleanup running agents to start with clean test
     	Configuration[] configs = configAdmin.listConfigurations(null);
@@ -64,46 +59,45 @@ public class VariousRateBidUpdateTest extends TestCase {
      * Custer consists of Auctioneer, Concentrator and 2 agents.
      */
     public void testSimpleClusterBuildUp() throws Exception {
-    	cluster = new ClusterHelper();
     	// Create Auctioneer
     	Configuration auctioneerConfig = cluster.createConfiguration(configAdmin, FACTORY_PID_AUCTIONEER, cluster.getAuctioneerProperties(AGENT_ID_AUCTIONEER, 5000));
     	
     	// Wait for Auctioneer to become active
-    	checkServiceByPid(auctioneerConfig.getPid(), Auctioneer.class);
+    	cluster.checkServiceByPid(context, auctioneerConfig.getPid(), Auctioneer.class);
     	
     	// Create Concentrator
     	Configuration concentratorConfig = cluster.createConfiguration(configAdmin, FACTORY_PID_CONCENTRATOR, cluster.getConcentratorProperties(AGENT_ID_CONCENTRATOR, AGENT_ID_AUCTIONEER, 5000));
     	
     	// Wait for Concentrator to become active
-    	checkServiceByPid(concentratorConfig.getPid(), Concentrator.class);
+    	cluster.checkServiceByPid(context, concentratorConfig.getPid(), Concentrator.class);
     	
     	// Create PvPanel
     	Configuration pvPanelConfig = cluster.createConfiguration(configAdmin, FACTORY_PID_PV_PANEL, cluster.getPvPanelProperties(AGENT_ID_PV_PANEL, AGENT_ID_CONCENTRATOR, 4));
     	
     	// Wait for PvPanel to become active
-    	checkServiceByPid(pvPanelConfig.getPid(), PVPanelAgent.class);
+    	cluster.checkServiceByPid(context, pvPanelConfig.getPid(), PVPanelAgent.class);
 
     	// Create Freezer
     	Configuration freezerConfig = cluster.createConfiguration(configAdmin, FACTORY_PID_FREEZER, cluster.getFreezerProperties(AGENT_ID_FREEZER, AGENT_ID_CONCENTRATOR, 4));
     	
     	// Wait for Freezer to become active
-    	checkServiceByPid(freezerConfig.getPid(), Freezer.class);
+    	cluster.checkServiceByPid(context, freezerConfig.getPid(), Freezer.class);
 
     	// Wait a little time for all components to become satisfied / active
     	Thread.sleep(2000);
     	
     	// check Auctioneer alive
-    	assertEquals(true, checkActive(FACTORY_PID_AUCTIONEER));
+    	assertEquals(true, cluster.checkActive(scrService, FACTORY_PID_AUCTIONEER));
     	// check Concentrator alive
-    	assertEquals(true, checkActive(FACTORY_PID_CONCENTRATOR));
+    	assertEquals(true, cluster.checkActive(scrService, FACTORY_PID_CONCENTRATOR));
     	// check PvPanel alive
-    	assertEquals(true, checkActive(FACTORY_PID_PV_PANEL));
+    	assertEquals(true, cluster.checkActive(scrService, FACTORY_PID_PV_PANEL));
     	
     	//Create StoringObserver
     	Configuration storingObserverConfig = cluster.createConfiguration(configAdmin, FACTORY_PID_OBSERVER, cluster.getStoringObserverProperties());
     	
     	// Wait for StoringObserver to become active
-    	StoringObserver observer = getServiceByPid(storingObserverConfig.getPid(), StoringObserver.class);
+    	StoringObserver observer = cluster.getServiceByPid(context, storingObserverConfig.getPid(), StoringObserver.class);
     	
     	//Checking to see if all agents send bids
     	Thread.sleep(10000);
@@ -140,51 +134,4 @@ public class VariousRateBidUpdateTest extends TestCase {
     		assertTrue("Price bidnumber " + priceBidnumber + " is unknown in bids for agent " + agentId, validBidNumber);
     	}
     }
-    
-    private <T> void checkServiceByPid(String pid, Class<T> type) throws InterruptedException {
-    	T service = getServiceByPid(pid, type);
-        assertNotNull(service);
-    }
-    
-    private <T> T getService(Class<T> type) throws InterruptedException {
-        ServiceTracker<T, T> serviceTracker = 
-                new ServiceTracker<T, T>(context, type, null);
-        serviceTracker.open();
-        T result = (T)serviceTracker.waitForService(10000);
-
-        assertNotNull(result);
-        
-        return result;
-    }
-    
-    private <T> T getServiceByPid(String pid, Class<T> type) throws InterruptedException {
-    	String filter = "(" + Constants.SERVICE_PID + "=" + pid + ")";
-    	
-        ServiceTracker<T, T> serviceTracker;
-        T result = null;
-		try {
-			serviceTracker = new ServiceTracker<T, T>(context, FrameworkUtil.createFilter(filter), null);
-		
-	        serviceTracker.open();
-	        result = type.cast(serviceTracker.waitForService(10000));
-		} catch (InvalidSyntaxException e) {
-			fail(e.getMessage());
-		}
-
-		return result;
-    }
-    
-    private boolean checkActive(final String factoryPid) throws Exception {
-		Component[] components = scrService.getComponents(factoryPid);
-		boolean activeAgent = false;
-	
-		for (Component comp : components) {
-			if (comp.getConfigurationPid().equals(factoryPid)) {
-				if (comp.getState() == Component.STATE_ACTIVE) {
-					activeAgent = true;
-				}
-			}
-		}
-		return activeAgent;
-	}
 }
