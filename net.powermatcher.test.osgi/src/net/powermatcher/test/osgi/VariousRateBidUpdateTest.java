@@ -93,11 +93,11 @@ public class VariousRateBidUpdateTest extends TestCase {
     	Thread.sleep(2000);
     	
     	// check Auctioneer alive
-    	assertEquals(true, checkActive(FACTORY_PID_AUCTIONEER));
+    	assertEquals(true, cluster.checkActive(scrService, FACTORY_PID_AUCTIONEER));
     	// check Concentrator alive
-    	assertEquals(true, checkActive(FACTORY_PID_CONCENTRATOR));
+    	assertEquals(true, cluster.checkActive(scrService, FACTORY_PID_CONCENTRATOR));
     	// check PvPanel alive
-    	assertEquals(true, checkActive(FACTORY_PID_PV_PANEL));
+    	assertEquals(true, cluster.checkActive(scrService, FACTORY_PID_PV_PANEL));
     	
     	//Create StoringObserver
     	Configuration storingObserverConfig = cluster.createConfiguration(configAdmin, FACTORY_PID_OBSERVER, cluster.getStoringObserverProperties());
@@ -173,18 +173,5 @@ public class VariousRateBidUpdateTest extends TestCase {
 
 		return result;
     }
-    
-    private boolean checkActive(final String factoryPid) throws Exception {
-		Component[] components = scrService.getComponents(factoryPid);
-		boolean activeAgent = false;
-	
-		for (Component comp : components) {
-			if (comp.getConfigurationPid().equals(factoryPid)) {
-				if (comp.getState() == Component.STATE_ACTIVE) {
-					activeAgent = true;
-				}
-			}
-		}
-		return activeAgent;
-	}
+
 }
