@@ -44,7 +44,7 @@ import com.google.gson.JsonSyntaxException;
 /**
  * WebSocket implementation of an {@link MatcherEndpointProxy}. Enabled two agents to communicate via WebSockets and
  * JSON over a TCP connection.
- *
+ * 
  * @author FAN
  * @version 2.0
  */
@@ -87,7 +87,7 @@ public class MatcherEndpointProxyWebsocket
 
     /**
      * OSGi calls this method to activate a managed service.
-     *
+     * 
      * @param properties
      *            the configuration properties
      */
@@ -136,7 +136,7 @@ public class MatcherEndpointProxyWebsocket
 
     /**
      * {@inheritDoc}
-     *
+     * 
      * This specific implementation opens a websocket.
      */
     public synchronized void connectRemote() {
@@ -163,7 +163,7 @@ public class MatcherEndpointProxyWebsocket
 
     /**
      * {@inheritDoc}
-     *
+     * 
      * This specific implementation closes the open websocket.
      */
     public synchronized boolean disconnectRemote() {
@@ -189,7 +189,7 @@ public class MatcherEndpointProxyWebsocket
 
     /**
      * {@inheritDoc}
-     *
+     * 
      * This specific implementation checks to see if the websocket is open.
      */
     public boolean isRemoteConnected() {
@@ -239,7 +239,7 @@ public class MatcherEndpointProxyWebsocket
     public boolean connectToAgent(net.powermatcher.api.Session session) {
         if (!isInitialized()) {
             return false;
-        } else if (localSession != null) {
+        } else if (localSession == null) {
             localSession = session;
             session.setMarketBasis(getMarketBasis());
             return true;

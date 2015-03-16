@@ -21,13 +21,13 @@ import aQute.bnd.annotation.metatype.Meta;
 /**
  * WebSocket implementation of an {@link AgentEndpointProxy}. Enabled two agents to communicate via WebSockets and JSON
  * over a TCP connection.
- *
+ * 
  * @author FAN
  * @version 2.0
  */
 @Component(designateFactory = AgentEndpointProxyWebsocket.Config.class,
            immediate = true,
-           provide = { ObservableAgent.class, AgentEndpoint.class })
+           provide = { ObservableAgent.class, AgentEndpoint.class, AgentEndpointProxyWebsocket.class })
 public class AgentEndpointProxyWebsocket
     extends BaseAgentEndpoint {
 
@@ -49,7 +49,7 @@ public class AgentEndpointProxyWebsocket
 
     /**
      * OSGi calls this method to activate a managed service.
-     *
+     * 
      * @param properties
      *            the configuration properties
      */
@@ -94,7 +94,7 @@ public class AgentEndpointProxyWebsocket
 
     /**
      * {@inheritDoc}
-     *
+     * 
      * This specific implementation checks the if the websocket is open.
      */
     public boolean isRemoteConnected() {
@@ -103,7 +103,7 @@ public class AgentEndpointProxyWebsocket
 
     /**
      * {@inheritDoc}
-     *
+     * 
      * This specific implementation serializes the {@link PriceUpdate} to json and sends it through the websocket.
      */
     public void updateRemotePrice(PriceUpdate newPrice) {

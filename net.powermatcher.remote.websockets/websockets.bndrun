@@ -4,60 +4,35 @@
 
 -resolve.effective: active;skip:="osgi.service"
 
+
+
+-runrequires:  \
+	osgi.identity;filter:='(&(osgi.identity=org.apache.felix.webconsole)(version>=4.2.2.all))',\
+	osgi.identity;filter:='(&(osgi.identity=org.apache.felix.http.jetty)(version>=3.0.2))',\
+	osgi.identity;filter:='(osgi.identity=net.powermatcher.remote.websockets)',\
+	osgi.identity;filter:='(osgi.identity=org.apache.felix.webconsole.plugins.ds)',\
+	osgi.identity;filter:='(osgi.identity=org.apache.felix.metatype)',\
+	osgi.identity;filter:='(osgi.identity=net.powermatcher.examples)'
 -runbundles:  \
+	biz.aQute.bnd.annotation;version='[2.4.0,2.4.1)',\
+	ch.qos.logback.classic;version='[1.1.2,1.1.3)',\
+	ch.qos.logback.core;version='[1.1.2,1.1.3)',\
+	com.google.gson;version='[2.2.4,2.2.5)',\
+	flexiblepower.api;version='[3.0.0,3.0.1)',\
+	net.powermatcher.api;version=latest,\
+	net.powermatcher.core;version=latest,\
+	net.powermatcher.examples;version=latest,\
+	net.powermatcher.remote.websockets;version=latest,\
+	net.powermatcher.runtime;version=latest,\
 	org.apache.felix.configadmin;version='[1.8.0,1.8.1)',\
-	org.apache.felix.eventadmin;version='[1.3.2,1.3.3)',\
-	org.apache.felix.http.api;version='[2.3.0,2.3.1)',\
-	org.apache.felix.http.jetty;version='[2.3.0,2.3.1)',\
-	org.apache.felix.http.servlet-api;version='[1.0.0,1.0.1)',\
+	org.apache.felix.http.api;version='[2.3.2,2.3.3)',\
+	org.apache.felix.http.jetty;version='[3.0.2,3.0.3)',\
+	org.apache.felix.http.servlet-api;version='[1.1.0,1.1.1)',\
 	org.apache.felix.metatype;version='[1.0.10,1.0.11)',\
 	org.apache.felix.scr;version='[1.8.2,1.8.3)',\
 	org.apache.felix.webconsole;version='[4.2.2,4.2.3)',\
 	org.apache.felix.webconsole.plugins.ds;version='[1.0.0,1.0.1)',\
-	osgi.cmpn;version=latest,\
-	javax.servlet-api,\
-	org.eclipse.jetty.http,\
-	org.eclipse.jetty.io,\
-	org.eclipse.jetty.util,\
-	org.eclipse.jetty.websocket.api,\
-	org.eclipse.jetty.websocket.client,\
-	org.eclipse.jetty.websocket.common,\
-	org.eclipse.jetty.websocket.server,\
-	org.eclipse.jetty.websocket.servlet,\
-	org.eclipse.jetty.server,\
-	org.eclipse.jetty.servlet,\
-	org.eclipse.jetty.security,\
-	org.eclipse.jetty.osgi.boot,\
-	org.eclipse.jetty.deploy,\
-	org.eclipse.jetty.webapp,\
-	org.eclipse.jetty.xml,\
-	net.powermatcher.api;version=latest,\
-	net.powermatcher.core;version=latest,\
-	net.powermatcher.examples;version=latest,\
-	net.powermatcher.extensions;version=latest,\
-	biz.aQute.bnd.annotation,\
-	slf4j.api,\
-	ch.qos.logback.classic,\
-	ch.qos.logback.core,\
-	org.apache.felix.webconsole.plugins.ds,\
-	com.google.gson
-
--runrequires:  \
-	osgi.identity;filter:='(osgi.identity=org.apache.felix.gogo.shell)',\
-	osgi.identity;filter:='(osgi.identity=org.apache.felix.gogo.command)',\
-	osgi.identity;filter:='(osgi.identity=org.apache.felix.webconsole)',\
-	osgi.identity;filter:='(osgi.identity=org.apache.felix.configadmin)',\
-	osgi.identity;filter:='(osgi.identity=org.apache.felix.metatype)',\
-	osgi.identity;filter:='(osgi.identity=org.apache.felix.log)',\
-	osgi.identity;filter:='(&(osgi.identity=osgi.cmpn)(version>=4.2))',\
-	osgi.identity;filter:='(&(osgi.identity=org.apache.felix.scr)(version>=1.6.0))',\
-	osgi.identity;filter:='(osgi.identity=org.apache.felix.http.jetty)',\
-	osgi.identity;filter:='(osgi.identity=net.powermatcher.api)',\
-	osgi.identity;filter:='(osgi.identity=net.powermatcher.core)',\
-	osgi.identity;filter:='(osgi.identity=net.powermatcher.examples)',\
-	osgi.identity;filter:='(osgi.identity=net.powermatcher.extensions)',\
-	osgi.identity;filter:='(osgi.identity=biz.aQute.bnd.annotation)'
-
-## Uncomment if you need to change the HTTP port
-#-runproperties: org.osgi.service.http.port=8080
--runvm: -Djetty.home.bundle=org.eclipse.jetty.osgi.boot -Dorg.osgi.service.http.port=8181 -Dlogback.configurationFile=${workspace}/cnf/conf-local/logback.xml
+	org.slf4j.osgi-over-slf4j;version='[1.7.7,1.7.8)',\
+	osgi.residential;version='[4.3.0,4.3.1)',\
+	slf4j.api;version='[1.7.7,1.7.8)'
+-runvm: -Dlogback.configurationFile=${workspace}/cnf/conf-local/logback.xml
