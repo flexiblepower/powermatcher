@@ -2,7 +2,6 @@ package net.powermatcher.test.osgi;
 
 import java.util.List;
 
-import junit.framework.TestCase;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
 import net.powermatcher.core.auctioneer.Auctioneer;
@@ -11,39 +10,11 @@ import net.powermatcher.examples.Freezer;
 import net.powermatcher.examples.PVPanelAgent;
 import net.powermatcher.examples.StoringObserver;
 
-import org.apache.felix.scr.ScrService;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
 
-public class VariousRateBidUpdateTest extends TestCase {
+public class VariousRateBidUpdateTests extends OsgiTestCase {
 
-	private final BundleContext context = FrameworkUtil.getBundle(getClass()).getBundleContext();
-    private ServiceReference<?> scrServiceReference = context.getServiceReference( ScrService.class.getName());
-    private ScrService scrService = (ScrService) context.getService(scrServiceReference);
-    private ConfigurationAdmin configAdmin;
-    
-    private ClusterHelper clusterHelper;
-    
-    @Override 
-    protected void setUp() throws Exception {
-    	super.setUp();
-    	clusterHelper = new ClusterHelper();
-    	
-    	configAdmin = clusterHelper.getService(context, ConfigurationAdmin.class);
-
-    	// Cleanup running agents to start with clean test
-    	Configuration[] configs = configAdmin.listConfigurations(null);
-    	if (configs != null) {
-        	for (Configuration config : configs) {
-        		config.delete();
-        	}
-    	}
-    }
-
-    /**
+	/**
      * Tests a simple buildup of a cluster in OSGI and sanity tests.
      * Custer consists of Auctioneer, Concentrator and 2 agents.
      */
@@ -123,5 +94,4 @@ public class VariousRateBidUpdateTest extends TestCase {
     		assertTrue("Price bidnumber " + priceBidnumber + " is unknown in bids for agent " + agentId, validBidNumber);
     	}
     }
-
 }
