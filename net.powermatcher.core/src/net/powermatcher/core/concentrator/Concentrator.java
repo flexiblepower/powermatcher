@@ -12,6 +12,7 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.messages.PriceUpdate;
+import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.core.BaseAgentEndpoint;
 import net.powermatcher.core.BaseMatcherEndpoint;
@@ -227,5 +228,17 @@ public class Concentrator
     @Override
     public void handleBidUpdate(Session session, BidUpdate bidUpdate) {
         matcherPart.handleBidUpdate(session, bidUpdate);
+    }
+
+    @Override
+    public void addObserver(AgentObserver observer) {
+        super.addObserver(observer);
+        matcherPart.addObserver(observer);
+    }
+
+    @Override
+    public void removeObserver(AgentObserver observer) {
+        super.removeObserver(observer);
+        matcherPart.removeObserver(observer);
     }
 }
