@@ -156,4 +156,14 @@ public class ClusterHelper {
 
         return result;
     }
+    
+	public void disconnectAgent(ConfigurationAdmin configAdmin, String agentPid) throws Exception, InvalidSyntaxException {
+	Configuration config = configAdmin.getConfiguration(agentPid);
+	if (config == null) {
+		TestCase.fail("Config for agent " + agentPid + " does not exist, but should be.");
+	}
+	
+	config.delete();
+}
+
 }
