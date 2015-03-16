@@ -74,6 +74,7 @@ public abstract class BaseMatcherEndpoint
         if (session.equals(foundSession)) {
             sessions.remove(session.getAgentId());
             bidCache.removeBidOfAgent(session.getAgentId());
+            doUpdate();
             LOGGER.info("Agent disconnected with session [{}]", session.getSessionId());
         }
     }
@@ -156,6 +157,10 @@ public abstract class BaseMatcherEndpoint
                                           session.getAgentId(),
                                           bidUpdate));
 
+        doUpdate();
+    }
+
+    private void doUpdate() {
         synchronized (bidUpdateCommand) {
             if (!bidUpdateScheduled) {
                 long waitTime = coolDownEnds - context.currentTimeMillis();
