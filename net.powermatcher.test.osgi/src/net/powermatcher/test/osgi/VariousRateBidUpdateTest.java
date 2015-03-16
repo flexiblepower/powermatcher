@@ -42,6 +42,8 @@ public class VariousRateBidUpdateTest extends TestCase {
     private ScrService scrService = (ScrService) context.getService(scrServiceReference);
     private ConfigurationAdmin configAdmin;
     
+    private ClusterHelper cluster;
+    
     @Override 
     protected void setUp() throws Exception {
     	super.setUp();
@@ -62,26 +64,27 @@ public class VariousRateBidUpdateTest extends TestCase {
      * Custer consists of Auctioneer, Concentrator and 2 agents.
      */
     public void testSimpleClusterBuildUp() throws Exception {
-	    // Create Auctioneer
-    	Configuration auctioneerConfig = createConfiguration(FACTORY_PID_AUCTIONEER, getAuctioneerProperties());
-
+    	cluster = new ClusterHelper();
+    	// Create Auctioneer
+    	Configuration auctioneerConfig = cluster.createConfiguration(configAdmin, FACTORY_PID_AUCTIONEER, cluster.getAuctioneerProperties(AGENT_ID_AUCTIONEER, 5000));
+    	
     	// Wait for Auctioneer to become active
     	checkServiceByPid(auctioneerConfig.getPid(), Auctioneer.class);
     	
     	// Create Concentrator
-    	Configuration concentratorConfig = createConfiguration(FACTORY_PID_CONCENTRATOR, getConcentratorProperties());
+    	Configuration concentratorConfig = cluster.createConfiguration(configAdmin, FACTORY_PID_CONCENTRATOR, cluster.getConcentratorProperties(AGENT_ID_CONCENTRATOR, AGENT_ID_AUCTIONEER, 5000));
     	
     	// Wait for Concentrator to become active
     	checkServiceByPid(concentratorConfig.getPid(), Concentrator.class);
     	
     	// Create PvPanel
-    	Configuration pvPanelConfig = createConfiguration(FACTORY_PID_PV_PANEL, getPvPanelProperties());
+    	Configuration pvPanelConfig = cluster.createConfiguration(configAdmin, FACTORY_PID_PV_PANEL, cluster.getPvPanelProperties(AGENT_ID_PV_PANEL, AGENT_ID_CONCENTRATOR, 4));
     	
     	// Wait for PvPanel to become active
     	checkServiceByPid(pvPanelConfig.getPid(), PVPanelAgent.class);
 
     	// Create Freezer
-    	Configuration freezerConfig = createConfiguration(FACTORY_PID_FREEZER, getFreezerProperties());
+    	Configuration freezerConfig = cluster.createConfiguration(configAdmin, FACTORY_PID_FREEZER, cluster.getFreezerProperties(AGENT_ID_FREEZER, AGENT_ID_CONCENTRATOR, 4));
     	
     	// Wait for Freezer to become active
     	checkServiceByPid(freezerConfig.getPid(), Freezer.class);
@@ -97,7 +100,7 @@ public class VariousRateBidUpdateTest extends TestCase {
     	assertEquals(true, checkActive(FACTORY_PID_PV_PANEL));
     	
     	//Create StoringObserver
-    	Configuration storingObserverConfig = createConfiguration(FACTORY_PID_OBSERVER, getStoringObserverProperties());
+    	Configuration storingObserverConfig = cluster.createConfiguration(configAdmin, FACTORY_PID_OBSERVER, cluster.getStoringObserverProperties());
     	
     	// Wait for StoringObserver to become active
     	StoringObserver observer = getServiceByPid(storingObserverConfig.getPid(), StoringObserver.class);
@@ -169,71 +172,6 @@ public class VariousRateBidUpdateTest extends TestCase {
 		}
 
 		return result;
-    }
-    
-    private Configuration createConfiguration(String factoryPid, Dictionary<String, Object> properties) throws Exception {
-    	Configuration config = configAdmin.createFactoryConfiguration(factoryPid, null);
-
-    	// create Auctioneer props
-    	config.update(properties);
-    	
-    	return config;
-    }
-    
-    private Dictionary<String, Object> getAuctioneerProperties() {
-    	Dictionary<String, Object> properties = new Hashtable<String, Object>();
-    	properties.put("agentId", AGENT_ID_AUCTIONEER);
-    	properties.put("clusterId", "DefaultCluster");
-    	properties.put("commodity", "electricity");
-    	properties.put("currency", "EUR");
-    	properties.put("priceSteps", 100);
-    	properties.put("minimumPrice", 0.0);
-    	properties.put("maximumPrice", 1.0);
-    	properties.put("bidTimeout", 600);
-    	properties.put("priceUpdateRate", 30l);
-    	properties.put("minTimeBetweenPriceUpdates", 5000);
-    	
-    	return properties;
-    }
-    
-    private Dictionary<String, Object> getConcentratorProperties() throws Exception {
-    	Dictionary<String, Object> properties = new Hashtable<String, Object>();
-    	properties.put("agentId", AGENT_ID_CONCENTRATOR);
-    	properties.put("desiredParentId", AGENT_ID_AUCTIONEER);
-    	properties.put("minTimeBetweenBidUpdates", 5000);
-    	
-    	return properties;
-    }
-    
-    private Dictionary<String, Object> getPvPanelProperties() throws Exception {
-    	// create PvPanel props
-    	Dictionary<String, Object> properties = new Hashtable<String, Object>();
-    	properties.put("agentId", AGENT_ID_PV_PANEL);
-    	properties.put("desiredParentId", AGENT_ID_CONCENTRATOR);
-    	properties.put("bidUpdateRate", "1");
-    	properties.put("minimumDemand", "-700");
-    	properties.put("maximumDemand", "-600");
-    	
-    	return properties;
-    }
-    
-    private Dictionary<String, Object> getFreezerProperties() throws Exception {
-    	// create Freezer props
-    	Dictionary<String, Object> properties = new Hashtable<String, Object>();
-    	properties.put("agentId", AGENT_ID_FREEZER);
-    	properties.put("desiredParentId", AGENT_ID_CONCENTRATOR);
-    	properties.put("bidUpdateRate", "5");
-    	properties.put("minimumDemand", "100");
-    	properties.put("maximumDemand", "121");
-    	
-    	return properties;
-    }
-    
-    private Dictionary<String, Object> getStoringObserverProperties() throws Exception {
-    	Dictionary<String, Object> properties = new Hashtable<String, Object>();
-    	properties.put("observableAgent_filter", "");
-
-    	return properties;    	
     }
     
     private boolean checkActive(final String factoryPid) throws Exception {
