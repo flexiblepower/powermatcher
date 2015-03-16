@@ -18,6 +18,17 @@ import org.osgi.util.tracker.ServiceTracker;
 
 public class ClusterHelper {
 
+	private final String FACTORY_PID_AUCTIONEER = "net.powermatcher.core.auctioneer.Auctioneer";
+	private final String FACTORY_PID_CONCENTRATOR = "net.powermatcher.core.concentrator.Concentrator";
+	private final String FACTORY_PID_PV_PANEL = "net.powermatcher.examples.PVPanelAgent";
+	private final String FACTORY_PID_FREEZER = "net.powermatcher.examples.Freezer";
+	private final String FACTORY_PID_OBSERVER = "net.powermatcher.examples.StoringObserver";
+	
+	private final String AGENT_ID_AUCTIONEER = "auctioneer";
+	private final String AGENT_ID_CONCENTRATOR = "concentrator";
+	private final String AGENT_ID_PV_PANEL = "pvPanel";
+	private final String AGENT_ID_FREEZER = "freezer";
+
 	public Configuration createConfiguration(ConfigurationAdmin configAdmin, String factoryPid, Dictionary<String, Object> properties) throws Exception {
     	Configuration config = configAdmin.createFactoryConfiguration(factoryPid, null);
 
@@ -158,12 +169,47 @@ public class ClusterHelper {
     }
     
 	public void disconnectAgent(ConfigurationAdmin configAdmin, String agentPid) throws Exception, InvalidSyntaxException {
-	Configuration config = configAdmin.getConfiguration(agentPid);
-	if (config == null) {
-		TestCase.fail("Config for agent " + agentPid + " does not exist, but should be.");
+		Configuration config = configAdmin.getConfiguration(agentPid);
+		if (config == null) {
+			TestCase.fail("Config for agent " + agentPid + " does not exist, but should be.");
+		}
+		
+		config.delete();
+	}
+
+	public String getFactoryPidAuctioneer() {
+		return FACTORY_PID_AUCTIONEER;
 	}
 	
-	config.delete();
-}
-
+	public String getFactoryPidConcentrator() {
+		return FACTORY_PID_CONCENTRATOR;
+	}
+	
+	public String getAgentIdAuctioneer() {
+		return AGENT_ID_AUCTIONEER;
+	}
+	
+	public String getAgentIdConcentrator() {
+		return AGENT_ID_CONCENTRATOR;
+	}
+	
+	public String getFactoryPidPvPanel() {
+		return FACTORY_PID_PV_PANEL;	
+	}
+	
+	public String getAgentIdPvPanel() {
+		return AGENT_ID_PV_PANEL;
+	}
+	
+	public String getAgentIdFreezer() {
+		return AGENT_ID_FREEZER;
+	}
+	
+	public String getFactoryPidObserver() {
+		return FACTORY_PID_OBSERVER;
+	}
+	
+	public String getFactoryPidFreezer() {
+		return FACTORY_PID_FREEZER;
+	}
 }

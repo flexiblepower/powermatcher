@@ -20,17 +20,6 @@ import org.osgi.service.cm.ConfigurationAdmin;
 
 public class VariousRateBidUpdateTest extends TestCase {
 
-	private final String FACTORY_PID_AUCTIONEER = "net.powermatcher.core.auctioneer.Auctioneer";
-	private final String FACTORY_PID_CONCENTRATOR = "net.powermatcher.core.concentrator.Concentrator";
-	private final String FACTORY_PID_PV_PANEL = "net.powermatcher.examples.PVPanelAgent";
-	private final String FACTORY_PID_FREEZER = "net.powermatcher.examples.Freezer";
-	private final String FACTORY_PID_OBSERVER = "net.powermatcher.examples.StoringObserver";
-	
-	private final String AGENT_ID_AUCTIONEER = "auctioneer";
-	private final String AGENT_ID_CONCENTRATOR = "concentrator";
-	private final String AGENT_ID_PV_PANEL = "pvPanel";
-	private final String AGENT_ID_FREEZER = "freezer";
-	
 	private final BundleContext context = FrameworkUtil.getBundle(getClass()).getBundleContext();
     private ServiceReference<?> scrServiceReference = context.getServiceReference( ScrService.class.getName());
     private ScrService scrService = (ScrService) context.getService(scrServiceReference);
@@ -60,25 +49,25 @@ public class VariousRateBidUpdateTest extends TestCase {
      */
     public void testSimpleClusterBuildUp() throws Exception {
     	// Create Auctioneer
-    	Configuration auctioneerConfig = clusterHelper.createConfiguration(configAdmin, FACTORY_PID_AUCTIONEER, clusterHelper.getAuctioneerProperties(AGENT_ID_AUCTIONEER, 5000));
+    	Configuration auctioneerConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidAuctioneer(), clusterHelper.getAuctioneerProperties(clusterHelper.getAgentIdAuctioneer(), 5000));
     	
     	// Wait for Auctioneer to become active
     	clusterHelper.checkServiceByPid(context, auctioneerConfig.getPid(), Auctioneer.class);
     	
     	// Create Concentrator
-    	Configuration concentratorConfig = clusterHelper.createConfiguration(configAdmin, FACTORY_PID_CONCENTRATOR, clusterHelper.getConcentratorProperties(AGENT_ID_CONCENTRATOR, AGENT_ID_AUCTIONEER, 5000));
+    	Configuration concentratorConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidConcentrator(), clusterHelper.getConcentratorProperties(clusterHelper.getAgentIdConcentrator(), clusterHelper.getAgentIdAuctioneer(), 5000));
     	
     	// Wait for Concentrator to become active
     	clusterHelper.checkServiceByPid(context, concentratorConfig.getPid(), Concentrator.class);
     	
     	// Create PvPanel
-    	Configuration pvPanelConfig = clusterHelper.createConfiguration(configAdmin, FACTORY_PID_PV_PANEL, clusterHelper.getPvPanelProperties(AGENT_ID_PV_PANEL, AGENT_ID_CONCENTRATOR, 4));
+    	Configuration pvPanelConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidPvPanel(), clusterHelper.getPvPanelProperties(clusterHelper.getAgentIdPvPanel(), clusterHelper.getAgentIdConcentrator(), 4));
     	
     	// Wait for PvPanel to become active
     	clusterHelper.checkServiceByPid(context, pvPanelConfig.getPid(), PVPanelAgent.class);
 
     	// Create Freezer
-    	Configuration freezerConfig = clusterHelper.createConfiguration(configAdmin, FACTORY_PID_FREEZER, clusterHelper.getFreezerProperties(AGENT_ID_FREEZER, AGENT_ID_CONCENTRATOR, 4));
+    	Configuration freezerConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidFreezer(), clusterHelper.getFreezerProperties(clusterHelper.getAgentIdFreezer(), clusterHelper.getAgentIdConcentrator(), 4));
     	
     	// Wait for Freezer to become active
     	clusterHelper.checkServiceByPid(context, freezerConfig.getPid(), Freezer.class);
@@ -87,14 +76,14 @@ public class VariousRateBidUpdateTest extends TestCase {
     	Thread.sleep(2000);
     	
     	// check Auctioneer alive
-    	assertEquals(true, clusterHelper.checkActive(scrService, FACTORY_PID_AUCTIONEER));
+    	assertEquals(true, clusterHelper.checkActive(scrService, clusterHelper.getFactoryPidAuctioneer()));
     	// check Concentrator alive
-    	assertEquals(true, clusterHelper.checkActive(scrService, FACTORY_PID_CONCENTRATOR));
+    	assertEquals(true, clusterHelper.checkActive(scrService, clusterHelper.getFactoryPidConcentrator()));
     	// check PvPanel alive
-    	assertEquals(true, clusterHelper.checkActive(scrService, FACTORY_PID_PV_PANEL));
+    	assertEquals(true, clusterHelper.checkActive(scrService, clusterHelper.getFactoryPidPvPanel()));
     	
     	//Create StoringObserver
-    	Configuration storingObserverConfig = clusterHelper.createConfiguration(configAdmin, FACTORY_PID_OBSERVER, clusterHelper.getStoringObserverProperties());
+    	Configuration storingObserverConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidObserver(), clusterHelper.getStoringObserverProperties());
     	
     	// Wait for StoringObserver to become active
     	StoringObserver observer = clusterHelper.getServiceByPid(context, storingObserverConfig.getPid(), StoringObserver.class);
@@ -106,14 +95,14 @@ public class VariousRateBidUpdateTest extends TestCase {
 
     private void checkBidsFullCluster(StoringObserver observer) {
     	// Are any bids available for each agent (at all)
-    	assertFalse(observer.getOutgoingBidEvents(AGENT_ID_CONCENTRATOR).isEmpty());
-    	assertFalse(observer.getOutgoingBidEvents(AGENT_ID_PV_PANEL).isEmpty());
-    	assertFalse(observer.getOutgoingBidEvents(AGENT_ID_FREEZER).isEmpty());
+    	assertFalse(observer.getOutgoingBidEvents(clusterHelper.getAgentIdConcentrator()).isEmpty());
+    	assertFalse(observer.getOutgoingBidEvents(clusterHelper.getAgentIdPvPanel()).isEmpty());
+    	assertFalse(observer.getOutgoingBidEvents(clusterHelper.getAgentIdFreezer()).isEmpty());
     	
     	// Validate bidnumbers
-    	checkBidNumbers(observer, AGENT_ID_CONCENTRATOR);
-    	checkBidNumbers(observer, AGENT_ID_FREEZER);
-    	checkBidNumbers(observer, AGENT_ID_PV_PANEL);
+    	checkBidNumbers(observer, clusterHelper.getAgentIdConcentrator());
+    	checkBidNumbers(observer, clusterHelper.getAgentIdFreezer());
+    	checkBidNumbers(observer, clusterHelper.getAgentIdPvPanel());
     }
     
     private void checkBidNumbers(StoringObserver observer, String agentId) {
