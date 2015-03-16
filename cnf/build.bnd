@@ -1,3 +1,6 @@
+javac.source: 1.7
+javac.target: 1.7
+
 -include: cnf/gradle/base.bnd
 
 Bundle-Category: PowerMatcher
