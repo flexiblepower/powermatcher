@@ -12,6 +12,10 @@ import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.core.BaseAgentEndpoint;
 import net.powermatcher.remote.websockets.json.PmJsonSerializer;
+
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
@@ -27,7 +31,7 @@ import aQute.bnd.annotation.metatype.Meta;
  */
 @Component(designateFactory = AgentEndpointProxyWebsocket.Config.class,
            immediate = true,
-           provide = { ObservableAgent.class, AgentEndpoint.class, AgentEndpointProxyWebsocket.class })
+           provide = { ObservableAgent.class, AgentEndpointProxyWebsocket.class })
 public class AgentEndpointProxyWebsocket
     extends BaseAgentEndpoint {
 
@@ -47,6 +51,10 @@ public class AgentEndpointProxyWebsocket
 
     private String remoteAgentEndpointId;
 
+    private BundleContext bundleContext;
+
+    private ServiceRegistration<AgentEndpoint> agentEndpointServiceRegistration;
+
     /**
      * OSGi calls this method to activate a managed service.
      * 
@@ -54,10 +62,13 @@ public class AgentEndpointProxyWebsocket
      *            the configuration properties
      */
     @Activate
-    public void activate(Map<String, Object> properties) {
+    public void activate(BundleContext bundleContext, Map<String, Object> properties) {
         Config config = Configurable.createConfigurable(Config.class, properties);
         activate(config.agentId(), config.desiredParentId());
         remoteAgentEndpointId = config.remoteAgentEndpointId();
+
+        this.bundleContext = bundleContext;
+        agentEndpointServiceRegistration = null;
     }
 
     /**
@@ -68,6 +79,9 @@ public class AgentEndpointProxyWebsocket
         if (isRemoteConnected()) {
             remoteSession.close();
         }
+
+        unregisterAgentEndpoint();
+
         super.deactivate();
     }
 
@@ -75,13 +89,14 @@ public class AgentEndpointProxyWebsocket
         return remoteAgentEndpointId;
     }
 
-    public void
-            remoteAgentConnected(org.eclipse.jetty.websocket.api.Session session)
-                                                                                 throws OperationNotSupportedException {
+    public void remoteAgentConnected(org.eclipse.jetty.websocket.api.Session session)
+            throws OperationNotSupportedException {
         if (isRemoteConnected()) {
             throw new OperationNotSupportedException("Remote Agent already connected.");
         }
 
+        // Register the AgentEndpoint with the OSGI runtime, to make it available for connections
+        registerAgentEndpoint();
         remoteSession = session;
 
         // Notify the remote agent about the cluster
@@ -90,6 +105,9 @@ public class AgentEndpointProxyWebsocket
 
     public void remoteAgentDisconnected() {
         remoteSession = null;
+
+        // Remove the AgentEndpoint with the OSGI runtime, to make it available for connections
+        unregisterAgentEndpoint();
     }
 
     /**
@@ -146,5 +164,18 @@ public class AgentEndpointProxyWebsocket
 
     public void updateLocalBid(BidUpdate bidUpdate) {
         getSession().updateBid(bidUpdate);
+    }
+
+    private void registerAgentEndpoint() {
+        if (agentEndpointServiceRegistration == null) {
+            agentEndpointServiceRegistration = bundleContext.registerService(AgentEndpoint.class, this, null);
+        }
+    }
+
+    private void unregisterAgentEndpoint() {
+        if (agentEndpointServiceRegistration != null) {
+            agentEndpointServiceRegistration.unregister();
+            agentEndpointServiceRegistration = null;
+        }
     }
 }
