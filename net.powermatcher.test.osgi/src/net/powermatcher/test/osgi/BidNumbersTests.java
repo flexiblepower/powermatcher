@@ -67,9 +67,9 @@ public class BidNumbersTests extends OsgiTestCase {
 
     private void checkBidsFullCluster(StoringObserver observer) throws Exception {
     	// Are any bids available for each agent (at all)
-    	assertFalse(observer.getOutgoingBidEvents(clusterHelper.getAgentIdConcentrator()).isEmpty());
-    	assertFalse(observer.getOutgoingBidEvents(clusterHelper.getAgentIdPvPanel()).isEmpty());
-    	assertFalse(observer.getOutgoingBidEvents(clusterHelper.getAgentIdFreezer()).isEmpty());
+    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdConcentrator()).isEmpty());
+    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdPvPanel()).isEmpty());
+    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdFreezer()).isEmpty());
     	
     	// Validate bidNumbers of freezer and pvPanel
     	checkBidNumbersWithDifferentPriceUpdates(observer);

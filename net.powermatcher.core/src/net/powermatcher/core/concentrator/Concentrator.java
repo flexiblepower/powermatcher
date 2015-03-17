@@ -1,7 +1,6 @@
 package net.powermatcher.core.concentrator;
 
 import java.util.Deque;
-import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -12,6 +11,7 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.messages.PriceUpdate;
+import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.core.BaseAgentEndpoint;
 import net.powermatcher.core.BaseMatcherEndpoint;
@@ -45,6 +45,21 @@ public class Concentrator
     extends BaseAgentEndpoint
     implements MatcherEndpoint {
 
+    private final class MatcherPart
+        extends BaseMatcherEndpoint {
+        @Override
+        public void init(String agentId) {
+            super.init(agentId);
+        }
+
+        @Override
+        protected void performUpdate(AggregatedBid aggregatedBid) {
+            Bid bid = transformBid(aggregatedBid);
+            BidUpdate bidUpdate = publishBid(bid);
+            saveBid(aggregatedBid, bidUpdate);
+        }
+    }
+
     @Meta.OCD
     public static interface Config {
         @Meta.AD(deflt = "concentrator")
@@ -60,14 +75,7 @@ public class Concentrator
 
     private static final int MAX_BIDS = 900;
 
-    private final BaseMatcherEndpoint matcherPart = new BaseMatcherEndpoint() {
-        @Override
-        protected void performUpdate(AggregatedBid aggregatedBid) {
-            Bid bid = transformBid(aggregatedBid);
-            BidUpdate bidUpdate = publishBid(bid);
-            saveBid(aggregatedBid, bidUpdate);
-        };
-    };
+    private final MatcherPart matcherPart = new MatcherPart();
 
     protected Config config;
 
@@ -90,12 +98,8 @@ public class Concentrator
      */
     public void activate(Config config) {
         this.config = config;
-        matcherPart.activate(config.agentId());
-        activate(config.agentId(), config.desiredParentId());
-
-        Hashtable<String, Object> properties = new Hashtable<String, Object>();
-        properties.put("agentId", config.agentId());
-
+        matcherPart.init(config.agentId());
+        super.init(config.agentId(), config.desiredParentId());
         LOGGER.info("Concentrator [{}], activated", config.agentId());
     }
 
@@ -220,12 +224,24 @@ public class Concentrator
     }
 
     @Override
-    public boolean connectToAgent(Session session) {
-        return matcherPart.connectToAgent(session);
+    public void connectToAgent(Session session) {
+        matcherPart.connectToAgent(session);
     }
 
     @Override
     public void handleBidUpdate(Session session, BidUpdate bidUpdate) {
         matcherPart.handleBidUpdate(session, bidUpdate);
+    }
+
+    @Override
+    public void addObserver(AgentObserver observer) {
+        super.addObserver(observer);
+        matcherPart.addObserver(observer);
+    }
+
+    @Override
+    public void removeObserver(AgentObserver observer) {
+        super.removeObserver(observer);
+        matcherPart.removeObserver(observer);
     }
 }

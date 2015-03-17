@@ -3,7 +3,7 @@ package net.powermatcher.test.osgi;
 import java.util.List;
 
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
-import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
+import net.powermatcher.api.monitoring.events.OutgoingBidUpdateEvent;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.concentrator.Concentrator;
 import net.powermatcher.examples.Freezer;
@@ -66,9 +66,9 @@ public class VariousRateBidUpdateTests extends OsgiTestCase {
 
     private void checkBidsFullCluster(StoringObserver observer) {
     	// Are any bids available for each agent (at all)
-    	assertFalse(observer.getOutgoingBidEvents(clusterHelper.getAgentIdConcentrator()).isEmpty());
-    	assertFalse(observer.getOutgoingBidEvents(clusterHelper.getAgentIdPvPanel()).isEmpty());
-    	assertFalse(observer.getOutgoingBidEvents(clusterHelper.getAgentIdFreezer()).isEmpty());
+    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdConcentrator()).isEmpty());
+    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdPvPanel()).isEmpty());
+    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdFreezer()).isEmpty());
     	
     	// Validate bidnumbers
     	checkBidNumbers(observer, clusterHelper.getAgentIdConcentrator());
@@ -78,14 +78,14 @@ public class VariousRateBidUpdateTests extends OsgiTestCase {
     
     private void checkBidNumbers(StoringObserver observer, String agentId) {
     	// Validate bidnumber incoming from concentrator for correct agent
-    	List<OutgoingBidEvent> agentBids = observer.getOutgoingBidEvents(agentId);
+    	List<OutgoingBidUpdateEvent> agentBids = observer.getOutgoingBidUpdateEvents(agentId);
     	List<IncomingPriceUpdateEvent> receivedPrices = observer.getIncomingPriceUpdateEvents(agentId);
 
     	for (IncomingPriceUpdateEvent priceEvent : receivedPrices) {
     		int priceBidnumber = priceEvent.getPriceUpdate().getBidNumber();
     		boolean validBidNumber = false;
     		
-    		for (OutgoingBidEvent bidEvent : agentBids) {
+    		for (OutgoingBidUpdateEvent bidEvent : agentBids) {
     			if (bidEvent.getBidUpdate().getBidNumber() == priceBidnumber) {
     				validBidNumber = true;
     			}

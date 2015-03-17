@@ -37,7 +37,7 @@ public class Auctioneer
     implements MatcherEndpoint {
 
     @Meta.OCD
-    public static interface Config {
+    public interface Config {
         @Meta.AD(deflt = "auctioneer")
         String agentId();
 
@@ -75,7 +75,7 @@ public class Auctioneer
     @Activate
     public void activate(final Map<String, ?> properties) {
         config = Configurable.createConfigurable(Config.class, properties);
-        super.activate(config.agentId());
+        super.init(config.agentId());
 
         MarketBasis marketBasis = new MarketBasis(config.commodity(),
                                                   config.currency(),

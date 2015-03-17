@@ -13,11 +13,11 @@ import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.messages.PriceUpdate;
-import net.powermatcher.api.monitoring.events.IncomingBidEvent;
+import net.powermatcher.api.monitoring.events.IncomingBidUpdateEvent;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
-import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
+import net.powermatcher.api.monitoring.events.OutgoingBidUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
-import net.powermatcher.monitoring.csv.BidLogRecord;
+import net.powermatcher.monitoring.csv.BidUpdateLogRecord;
 import net.powermatcher.monitoring.csv.LogRecord;
 import net.powermatcher.monitoring.csv.PriceUpdateLogRecord;
 
@@ -41,8 +41,8 @@ public class LogRecordTest {
     private SimpleDateFormat dateFormat;
     private int bidNumber;
     private double[] demand;
-    private IncomingBidEvent incomingBidEvent;
-    private OutgoingBidEvent outgoingBidEvent;
+    private IncomingBidUpdateEvent incomingBidEvent;
+    private OutgoingBidUpdateEvent outgoingBidEvent;
     private IncomingPriceUpdateEvent incomingPriceUpdateEvent;
     private OutgoingPriceUpdateEvent outgoingPriceUpdateEvent;
     private ArrayBid bid;
@@ -64,8 +64,8 @@ public class LogRecordTest {
         bidUpdate = new BidUpdate(bid, bidNumber);
         price = new Price(marketBasis, 10);
         priceUpdate = new PriceUpdate(price, bidNumber);
-        incomingBidEvent = new IncomingBidEvent(clusterId, agentId, sessionId, timeStamp, fromAgentId, bidUpdate);
-        outgoingBidEvent = new OutgoingBidEvent(clusterId, agentId, sessionId, timeStamp, bidUpdate);
+        incomingBidEvent = new IncomingBidUpdateEvent(clusterId, agentId, sessionId, timeStamp, fromAgentId, bidUpdate);
+        outgoingBidEvent = new OutgoingBidUpdateEvent(clusterId, agentId, sessionId, timeStamp, bidUpdate);
         incomingPriceUpdateEvent = new IncomingPriceUpdateEvent(clusterId, agentId, sessionId, timeStamp, priceUpdate);
         outgoingPriceUpdateEvent = new OutgoingPriceUpdateEvent(clusterId, agentId, sessionId, timeStamp, priceUpdate);
     }
@@ -75,7 +75,7 @@ public class LogRecordTest {
         Calendar c = Calendar.getInstance();
         c.set(2014, 12, 12);
         Date logTime = c.getTime();
-        BidLogRecord bidLogRecord = new BidLogRecord(incomingBidEvent, logTime, dateFormat);
+        BidUpdateLogRecord bidLogRecord = new BidUpdateLogRecord(incomingBidEvent, logTime, dateFormat);
         assertThat(bidLogRecord.getClusterId(), is(equalTo(clusterId)));
         assertThat(bidLogRecord.getAgentId(), is(equalTo(agentId)));
         assertThat(bidLogRecord.getEventTimestamp(), is(equalTo(timeStamp)));
@@ -89,7 +89,7 @@ public class LogRecordTest {
         Calendar c = Calendar.getInstance();
         c.set(2014, 12, 12);
         Date logTime = c.getTime();
-        BidLogRecord bidLogRecord = new BidLogRecord(outgoingBidEvent, logTime, dateFormat);
+        BidUpdateLogRecord bidLogRecord = new BidUpdateLogRecord(outgoingBidEvent, logTime, dateFormat);
         assertThat(bidLogRecord.getClusterId(), is(equalTo(clusterId)));
         assertThat(bidLogRecord.getAgentId(), is(equalTo(agentId)));
         assertThat(bidLogRecord.getEventTimestamp(), is(equalTo(timeStamp)));

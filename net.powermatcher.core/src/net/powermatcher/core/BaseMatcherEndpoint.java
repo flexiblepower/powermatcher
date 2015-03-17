@@ -14,7 +14,7 @@ import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.messages.PriceUpdate;
-import net.powermatcher.api.monitoring.events.IncomingBidEvent;
+import net.powermatcher.api.monitoring.events.IncomingBidUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.bidcache.AggregatedBid;
 import net.powermatcher.core.bidcache.BidCache;
@@ -53,18 +53,15 @@ public abstract class BaseMatcherEndpoint
     private final Map<String, Session> sessions = new ConcurrentHashMap<String, Session>();
 
     @Override
-    public boolean connectToAgent(Session session) {
-        if (!isInitialized()) {
-            LOGGER.info("Could not connect an agent yet, not yet initialized");
-            return false;
+    public void connectToAgent(Session session) {
+        if (!isConnected()) {
+            throw new IllegalStateException("This matcher is not yet connected to the cluster");
         } else if (!sessions.containsKey(session.getAgentId())) {
             session.setMarketBasis(getMarketBasis());
             sessions.put(session.getAgentId(), session);
             LOGGER.info("Agent connected with session [{}]", session.getSessionId());
-            return true;
         } else {
-            LOGGER.warn("An agent with id [{}] was already connected", session.getAgentId());
-            return false;
+            throw new IllegalStateException("An agent with id [" + session.getAgentId() + "] was already connected");
         }
     }
 
@@ -74,6 +71,7 @@ public abstract class BaseMatcherEndpoint
         if (session.equals(foundSession)) {
             sessions.remove(session.getAgentId());
             bidCache.removeBidOfAgent(session.getAgentId());
+            doUpdate();
             LOGGER.info("Agent disconnected with session [{}]", session.getSessionId());
         }
     }
@@ -120,7 +118,7 @@ public abstract class BaseMatcherEndpoint
         @Override
         public void run() {
             try {
-                if (isInitialized()) {
+                if (isConnected()) {
                     performUpdate(bidCache.aggregate());
                 }
 
@@ -149,13 +147,17 @@ public abstract class BaseMatcherEndpoint
 
         LOGGER.debug("Received from session [{}] bid update [{}] ", session.getSessionId(), bidUpdate);
 
-        publishEvent(new IncomingBidEvent(session.getClusterId(),
-                                          getAgentId(),
-                                          session.getSessionId(),
-                                          context.currentTime(),
-                                          session.getAgentId(),
-                                          bidUpdate));
+        publishEvent(new IncomingBidUpdateEvent(session.getClusterId(),
+                                                getAgentId(),
+                                                session.getSessionId(),
+                                                context.currentTime(),
+                                                session.getAgentId(),
+                                                bidUpdate));
 
+        doUpdate();
+    }
+
+    private void doUpdate() {
         synchronized (bidUpdateCommand) {
             if (!bidUpdateScheduled) {
                 long waitTime = coolDownEnds - context.currentTimeMillis();

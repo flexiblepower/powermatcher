@@ -5,10 +5,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
-import javax.measure.Measure;
-import javax.measure.unit.SI;
 
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.messages.BidUpdate;
@@ -29,7 +28,8 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.flexiblepower.context.FlexiblePowerContext;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +51,7 @@ import com.google.gson.JsonSyntaxException;
 @WebSocket()
 @Component(designateFactory = MatcherEndpointProxyWebsocket.Config.class,
            immediate = true,
-           provide = { ObservableAgent.class, MatcherEndpoint.class })
+           provide = { ObservableAgent.class })
 public class MatcherEndpointProxyWebsocket
     extends BaseAgent
     implements MatcherEndpoint {
@@ -63,7 +63,7 @@ public class MatcherEndpointProxyWebsocket
         @Meta.AD(deflt = "", description = "remote agent endpoint proxy to connect to.")
         String desiredConnectionId();
 
-        @Meta.AD(deflt = "matcherendpointproxy", description = "local agent identification")
+        @Meta.AD(deflt = "matcherendpointproxy", description = "The unique identifier of the agent")
         String agentId();
 
         @Meta.AD(deflt = "ws://localhost:8080/powermatcher/websockets/agentendpoint",
@@ -85,6 +85,14 @@ public class MatcherEndpointProxyWebsocket
 
     private int reconnectDelay, connectTimeout;
 
+    private BundleContext bundleContext;
+
+    private ServiceRegistration<MatcherEndpoint> matcherEndpointServiceRegistration;
+
+    private final ScheduledThreadPoolExecutor executorService = new ScheduledThreadPoolExecutor(1);
+
+    private ScheduledFuture<?> scheduledFuture;
+
     /**
      * OSGi calls this method to activate a managed service.
      * 
@@ -92,10 +100,10 @@ public class MatcherEndpointProxyWebsocket
      *            the configuration properties
      */
     @Activate
-    public synchronized void activate(Map<String, Object> properties) {
+    public synchronized void activate(BundleContext bundleContext, Map<String, Object> properties) {
         // Read configuration properties
         Config config = Configurable.createConfigurable(Config.class, properties);
-        activate(config.agentId());
+        init(config.agentId());
 
         try {
             powermatcherUrl = new URI(config.powermatcherUrl()
@@ -109,19 +117,8 @@ public class MatcherEndpointProxyWebsocket
 
         reconnectDelay = config.reconnectTimeout();
         connectTimeout = config.connectTimeout();
-    }
 
-    /**
-     * OSGi calls this method to deactivate a managed service.
-     */
-    @Deactivate
-    public synchronized void deactivate() {
-        disconnectRemote();
-    }
-
-    @Override
-    public void setContext(FlexiblePowerContext context) {
-        super.setContext(context);
+        this.bundleContext = bundleContext;
 
         Runnable reconnectJob = new Runnable() {
             @Override
@@ -129,9 +126,21 @@ public class MatcherEndpointProxyWebsocket
                 connectRemote();
             }
         };
-        context.scheduleAtFixedRate(reconnectJob,
-                                    Measure.valueOf(1, SI.SECOND),
-                                    Measure.valueOf(reconnectDelay, SI.SECOND));
+
+        scheduledFuture = executorService.scheduleAtFixedRate(reconnectJob,
+                                                              1,
+                                                              reconnectDelay,
+                                                              TimeUnit.SECONDS);
+    }
+
+    /**
+     * OSGi calls this method to deactivate a managed service.
+     */
+    @Deactivate
+    public synchronized void deactivate() {
+        scheduledFuture.cancel(true);
+        disconnectRemote();
+        unregisterAgentEndpoint();
     }
 
     /**
@@ -184,6 +193,9 @@ public class MatcherEndpointProxyWebsocket
             }
         }
 
+        // Unregister the MatcherEndpoint with the OSGI runtime, to disable connections locally
+        unregisterAgentEndpoint();
+
         return true;
     }
 
@@ -225,6 +237,9 @@ public class MatcherEndpointProxyWebsocket
                 // connections
                 ClusterInfoModel clusterInfo = (ClusterInfoModel) pmMessage.getPayload();
                 configure(ModelMapper.convertMarketBasis(clusterInfo.getMarketBasis()), clusterInfo.getClusterId());
+
+                // Register the MatcherEndpoint with the OSGI runtime, to make it available for connections
+                registerAgentEndpoint();
             }
         } catch (JsonSyntaxException e) {
             LOGGER.warn("Unable to understand message from remote agent: {}", message);
@@ -236,15 +251,14 @@ public class MatcherEndpointProxyWebsocket
     private net.powermatcher.api.Session localSession;
 
     @Override
-    public boolean connectToAgent(net.powermatcher.api.Session session) {
-        if (!isInitialized()) {
-            return false;
+    public void connectToAgent(net.powermatcher.api.Session session) {
+        if (!isConnected()) {
+            throw new IllegalStateException("This matcher is not yet connected");
         } else if (localSession == null) {
             localSession = session;
             session.setMarketBasis(getMarketBasis());
-            return true;
         } else {
-            return false;
+            throw new IllegalStateException("The MatcherEndpointProxy may only be connected to 1 agent");
         }
     }
 
@@ -266,6 +280,19 @@ public class MatcherEndpointProxyWebsocket
             } catch (IOException e) {
                 LOGGER.error("Unable to send new bid to remote agent. Reason {}", e);
             }
+        }
+    }
+
+    private void registerAgentEndpoint() {
+        if (matcherEndpointServiceRegistration == null) {
+            matcherEndpointServiceRegistration = bundleContext.registerService(MatcherEndpoint.class, this, null);
+        }
+    }
+
+    private void unregisterAgentEndpoint() {
+        if (matcherEndpointServiceRegistration != null) {
+            matcherEndpointServiceRegistration.unregister();
+            matcherEndpointServiceRegistration = null;
         }
     }
 }

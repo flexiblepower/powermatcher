@@ -9,7 +9,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import net.powermatcher.api.monitoring.events.AgentEvent;
-import net.powermatcher.api.monitoring.events.BidEvent;
+import net.powermatcher.api.monitoring.events.BidUpdateEvent;
 import net.powermatcher.api.monitoring.events.PriceUpdateEvent;
 
 import org.slf4j.Logger;
@@ -102,8 +102,8 @@ public abstract class AgentEventLogger
 
             LogRecord logRecord = null;
 
-            if (event instanceof BidEvent) {
-                logRecord = new BidLogRecord((BidEvent) event, event.getTimestamp(), getDateFormat());
+            if (event instanceof BidUpdateEvent) {
+                logRecord = new BidUpdateLogRecord((BidUpdateEvent) event, event.getTimestamp(), getDateFormat());
             } else if (event instanceof PriceUpdateEvent) {
                 logRecord = new PriceUpdateLogRecord((PriceUpdateEvent) event, event.getTimestamp(),
                                                      getDateFormat());

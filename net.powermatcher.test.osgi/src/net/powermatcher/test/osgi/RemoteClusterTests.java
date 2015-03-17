@@ -7,7 +7,7 @@ import java.util.Map;
 
 import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
-import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
+import net.powermatcher.api.monitoring.events.OutgoingBidUpdateEvent;
 import net.powermatcher.core.BaseMatcherEndpoint;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.bidcache.AggregatedBid;
@@ -97,7 +97,7 @@ public class RemoteClusterTests extends OsgiTestCase {
 
     	// Wait for cluster information to be exchanged
     	// TODO this is not correct, since it must be able to handle missing cluster information on the remote end
-    	Thread.sleep(2000);
+    	// Thread.sleep(2000);
     	
     	// Create local PvPanel
     	pvPanelConfig = clusterHelper.createConfiguration(configAdmin, 
@@ -130,9 +130,9 @@ public class RemoteClusterTests extends OsgiTestCase {
     
     private void checkBidsFullCluster(StoringObserver observer) {
     	// Are any bids available for each agent (at all)
-    	assertFalse(observer.getOutgoingBidEvents(clusterHelper.getAgentIdConcentrator()).isEmpty());
-    	assertFalse(observer.getOutgoingBidEvents(clusterHelper.getAgentIdPvPanel()).isEmpty());
-    	assertFalse(observer.getOutgoingBidEvents(clusterHelper.getAgentIdFreezer()).isEmpty());
+    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdConcentrator()).isEmpty());
+    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdPvPanel()).isEmpty());
+    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdFreezer()).isEmpty());
     	
     	// Validate bidnumbers
     	checkBidNumbers(observer, clusterHelper.getAgentIdConcentrator());
@@ -142,14 +142,14 @@ public class RemoteClusterTests extends OsgiTestCase {
 
     private void checkBidNumbers(StoringObserver observer, String agentId) {
     	// Validate bidnumber incoming from concentrator for correct agent
-    	List<OutgoingBidEvent> agentBids = observer.getOutgoingBidEvents(agentId);
+    	List<OutgoingBidUpdateEvent> agentBids = observer.getOutgoingBidUpdateEvents(agentId);
     	List<IncomingPriceUpdateEvent> receivedPrices = observer.getIncomingPriceUpdateEvents(agentId);
 
     	for (IncomingPriceUpdateEvent priceEvent : receivedPrices) {
     		int priceBidnumber = priceEvent.getPriceUpdate().getBidNumber();
     		boolean validBidNumber = false;
     		
-    		for (OutgoingBidEvent bidEvent : agentBids) {
+    		for (OutgoingBidUpdateEvent bidEvent : agentBids) {
     			if (bidEvent.getBidUpdate().getBidNumber() == priceBidnumber) {
     				validBidNumber = true;
     			}
@@ -160,17 +160,17 @@ public class RemoteClusterTests extends OsgiTestCase {
     }
     
     private void checkBidsClusterNoFreezer(StoringObserver observer, Concentrator concentrator) {
-    	assertFalse(observer.getOutgoingBidEvents(clusterHelper.getAgentIdConcentrator()).isEmpty());
-    	assertFalse(observer.getOutgoingBidEvents(clusterHelper.getAgentIdPvPanel()).isEmpty());
-    	assertTrue(observer.getOutgoingBidEvents(clusterHelper.getAgentIdFreezer()).isEmpty());
+    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdConcentrator()).isEmpty());
+    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdPvPanel()).isEmpty());
+    	assertTrue(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdFreezer()).isEmpty());
 
     	// Check aggregated bid does no longer contain freezer, by checking last aggregated against panel bids
-    	List<OutgoingBidEvent> concentratorBids = observer.getOutgoingBidEvents(clusterHelper.getAgentIdConcentrator());
-    	List<OutgoingBidEvent> panelBids = observer.getOutgoingBidEvents(clusterHelper.getAgentIdPvPanel());
+    	List<OutgoingBidUpdateEvent> concentratorBids = observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdConcentrator());
+    	List<OutgoingBidUpdateEvent> panelBids = observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdPvPanel());
     	
-    	OutgoingBidEvent concentratorBid = concentratorBids.get(concentratorBids.size()-1);
+    	OutgoingBidUpdateEvent concentratorBid = concentratorBids.get(concentratorBids.size()-1);
     	boolean foundBid = false;
-    	for (OutgoingBidEvent panelBid : panelBids) {
+    	for (OutgoingBidUpdateEvent panelBid : panelBids) {
     		if (panelBid.getBidUpdate().getBid().toArrayBid().equals(concentratorBid.getBidUpdate().getBid().toArrayBid())) {
     			foundBid = true;
     		}

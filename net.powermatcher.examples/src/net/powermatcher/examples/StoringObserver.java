@@ -8,9 +8,9 @@ import java.util.Map;
 import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.events.AgentEvent;
-import net.powermatcher.api.monitoring.events.IncomingBidEvent;
+import net.powermatcher.api.monitoring.events.IncomingBidUpdateEvent;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
-import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
+import net.powermatcher.api.monitoring.events.OutgoingBidUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
@@ -27,8 +27,8 @@ import aQute.bnd.annotation.metatype.Meta;
 public class StoringObserver
     implements AgentObserver {
 
-    private final Map<String, List<OutgoingBidEvent>> outgoingBidEvents = new HashMap<String, List<OutgoingBidEvent>>();
-    private final Map<String, List<IncomingBidEvent>> incomingBidEvents = new HashMap<String, List<IncomingBidEvent>>();
+    private final Map<String, List<OutgoingBidUpdateEvent>> outgoingBidUpdateEvents = new HashMap<String, List<OutgoingBidUpdateEvent>>();
+    private final Map<String, List<IncomingBidUpdateEvent>> incomingBidEvents = new HashMap<String, List<IncomingBidUpdateEvent>>();
 
     private final Map<String, List<OutgoingPriceUpdateEvent>> outgoingPriceEvents = new HashMap<String, List<OutgoingPriceUpdateEvent>>();
     private final Map<String, List<IncomingPriceUpdateEvent>> incomingPriceEvents = new HashMap<String, List<IncomingPriceUpdateEvent>>();
@@ -71,7 +71,7 @@ public class StoringObserver
     }
 
     /**
-     * Stores {@link OutgoingBidEvent} and {@link OutgoingPriceUpdateEvent} in an internal list.
+     * Stores {@link OutgoingBidUpdateEvent} and {@link OutgoingPriceUpdateEvent} in an internal list.
      * 
      * Price and Bid events are stored in a separate list.
      * 
@@ -87,13 +87,13 @@ public class StoringObserver
             }
 
             outgoingPriceEvents.get(priceEvent.getAgentId()).add(priceEvent);
-        } else if (event instanceof OutgoingBidEvent) {
-            OutgoingBidEvent bidEvent = (OutgoingBidEvent) event;
-            if (!outgoingBidEvents.containsKey(bidEvent.getAgentId())) {
-                outgoingBidEvents.put(bidEvent.getAgentId(), new ArrayList<OutgoingBidEvent>());
+        } else if (event instanceof OutgoingBidUpdateEvent) {
+            OutgoingBidUpdateEvent bidEvent = (OutgoingBidUpdateEvent) event;
+            if (!outgoingBidUpdateEvents.containsKey(bidEvent.getAgentId())) {
+                outgoingBidUpdateEvents.put(bidEvent.getAgentId(), new ArrayList<OutgoingBidUpdateEvent>());
             }
 
-            outgoingBidEvents.get(bidEvent.getAgentId()).add(bidEvent);
+            outgoingBidUpdateEvents.get(bidEvent.getAgentId()).add(bidEvent);
         } else if (event instanceof IncomingPriceUpdateEvent) {
             IncomingPriceUpdateEvent priceEvent = (IncomingPriceUpdateEvent) event;
             if (!incomingPriceEvents.containsKey(priceEvent.getAgentId())) {
@@ -101,30 +101,30 @@ public class StoringObserver
             }
 
             incomingPriceEvents.get(priceEvent.getAgentId()).add(priceEvent);
-        } else if (event instanceof IncomingBidEvent) {
-            IncomingBidEvent bidEvent = (IncomingBidEvent) event;
+        } else if (event instanceof IncomingBidUpdateEvent) {
+            IncomingBidUpdateEvent bidEvent = (IncomingBidUpdateEvent) event;
             if (!incomingBidEvents.containsKey(bidEvent.getAgentId())) {
-                incomingBidEvents.put(bidEvent.getAgentId(), new ArrayList<IncomingBidEvent>());
+                incomingBidEvents.put(bidEvent.getAgentId(), new ArrayList<IncomingBidUpdateEvent>());
             }
 
             incomingBidEvents.get(bidEvent.getAgentId()).add(bidEvent);
         }
     }
 
-    public List<OutgoingBidEvent> getOutgoingBidEvents(String agentId) {
-        if (!outgoingBidEvents.containsKey(agentId)) {
-            return new ArrayList<OutgoingBidEvent>();
+    public List<OutgoingBidUpdateEvent> getOutgoingBidUpdateEvents(String agentId) {
+        if (!outgoingBidUpdateEvents.containsKey(agentId)) {
+            return new ArrayList<OutgoingBidUpdateEvent>();
         }
 
-        return new ArrayList<OutgoingBidEvent>(outgoingBidEvents.get(agentId));
+        return new ArrayList<OutgoingBidUpdateEvent>(outgoingBidUpdateEvents.get(agentId));
     }
 
-    public List<IncomingBidEvent> getIncomingBidEvents(String agentId) {
+    public List<IncomingBidUpdateEvent> getIncomingBidUpdateEvents(String agentId) {
         if (!incomingBidEvents.containsKey(agentId)) {
-            return new ArrayList<IncomingBidEvent>();
+            return new ArrayList<IncomingBidUpdateEvent>();
         }
 
-        return new ArrayList<IncomingBidEvent>(incomingBidEvents.get(agentId));
+        return new ArrayList<IncomingBidUpdateEvent>(incomingBidEvents.get(agentId));
     }
 
     public List<OutgoingPriceUpdateEvent> getOutgoingPriceUpdateEvents(String agentId) {
@@ -146,7 +146,7 @@ public class StoringObserver
     public void clearEvents() {
         incomingBidEvents.clear();
         incomingPriceEvents.clear();
-        outgoingBidEvents.clear();
+        outgoingBidUpdateEvents.clear();
         outgoingPriceEvents.clear();
     }
 }

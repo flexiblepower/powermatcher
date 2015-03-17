@@ -112,7 +112,7 @@ public class CSVLogger
     private List<String> filter;
 
     /**
-     * The log file {@link BidLogRecord} will be written to.
+     * The log file {@link BidUpdateLogRecord} will be written to.
      */
     private File logFile;
 
@@ -274,8 +274,8 @@ public class CSVLogger
 
             String[] output = null;
 
-            if (logRecord instanceof BidLogRecord) {
-                output = createLineForBidLogRecord((BidLogRecord) logRecord);
+            if (logRecord instanceof BidUpdateLogRecord) {
+                output = createLineForBidLogRecord((BidUpdateLogRecord) logRecord);
             } else if (logRecord instanceof PriceUpdateLogRecord) {
                 output = createLineForPriceUpdateLog((PriceUpdateLogRecord) logRecord);
             }
@@ -297,14 +297,14 @@ public class CSVLogger
     }
 
     /**
-     * Creates a <code>String[]</code> out of a {@link BidLogRecord} to be used in
+     * Creates a <code>String[]</code> out of a {@link BidUpdateLogRecord} to be used in
      * {@link CSVLogger#writeLineToCSV(String[], File)}
      *
      * @param logRecord
-     *            the {@link BidLogRecord} that has to be transformed
+     *            the {@link BidUpdateLogRecord} that has to be transformed
      * @return the <code>String[]</code> representation of logRecord
      */
-    private String[] createLineForBidLogRecord(BidLogRecord logRecord) {
+    private String[] createLineForBidLogRecord(BidUpdateLogRecord logRecord) {
 
         BidUpdate bidUpdate = logRecord.getBidUpdate();
         Bid bid = bidUpdate.getBid();

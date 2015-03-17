@@ -5,7 +5,7 @@ import java.util.Map;
 
 import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
-import net.powermatcher.api.monitoring.events.OutgoingBidEvent;
+import net.powermatcher.api.monitoring.events.OutgoingBidUpdateEvent;
 import net.powermatcher.core.BaseMatcherEndpoint;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.bidcache.AggregatedBid;
@@ -19,31 +19,142 @@ import org.osgi.service.cm.Configuration;
 
 public class BasicClusterTests extends OsgiTestCase {
 
+	private Configuration auctioneerConfig;
+	
+	private Concentrator concentrator;
+	
+	private Configuration concentratorConfig;
+	
+	private Configuration pvPanelConfig;
+	
+	private Configuration freezerConfig;
+	
+	private StoringObserver observer;
+	
     /**
      * Tests a simple buildup of a cluster in OSGI and sanity tests.
      * Custer consists of Auctioneer, Concentrator and 2 agents.
      */
     public void testSimpleClusterBuildUp() throws Exception {
+    	// Create simple cluster
+    	setupCluster();
+    	
+    	//Checking to see if all agents send bids
+    	Thread.sleep(10000);
+    	checkBidsFullCluster(observer);
+    }
+
+    /**
+     * Tests whether agent removal actually makes the bid obsolete of this agent
+     * The agent should also not receive any price updates.
+     */
+    public void testAgentRemoval() throws Exception {
+    	// Create simple cluster
+    	setupCluster();
+    	
+    	// Checking to see if all agents send bids
+    	Thread.sleep(10000);
+    	checkBidsFullCluster(observer);
+    	
+    	// disconnect Freezer
+    	clusterHelper.disconnectAgent(configAdmin, freezerConfig.getPid());
+    	
+    	// Checking to see if the Freezer is no longer participating
+    	observer.clearEvents();
+    	Thread.sleep(10000);
+    	checkBidsClusterNoFreezer(observer, concentrator);
+    	
+    	// Re-add Freezer agent, it should not receive bids from previous freezer
+    	observer.clearEvents();
+    	freezerConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidFreezer() , 
+    			clusterHelper.getFreezerProperties(clusterHelper.getAgentIdFreezer() , clusterHelper.getAgentIdConcentrator() , 4));
+    	Thread.sleep(10000);
+    	checkBidsFullCluster(observer);
+    }
+
+    /**
+     * Tests whether auctioneer removal stops complete cluster but continues when Auctioneer is started again.
+     */
+    public void testAuctioneerRemoval() throws Exception {
+    	// Create simple cluster
+    	setupCluster();
+    	
+    	// Checking to see if all agents send bids
+    	Thread.sleep(10000);
+    	checkBidsFullCluster(observer);
+    	
+    	// disconnect Auctioneer 
+    	clusterHelper.disconnectAgent(configAdmin, auctioneerConfig.getPid());
+    	
+    	//Checking to see if any bids were sent when the autioneer was down.
+    	observer.clearEvents();
+    	Thread.sleep(10000);
+    	checkBidsClusterNoAuctioneer(observer);
+    	
+    	// connect auctioneer, bid should start again
+    	auctioneerConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidAuctioneer(), 
+    			clusterHelper.getAuctioneerProperties(clusterHelper.getAgentIdAuctioneer(), 5000));
+    	clusterHelper.checkActive(scrService, clusterHelper.getFactoryPidAuctioneer());
+    
+    	Thread.sleep(10000);
+    	checkBidsFullCluster(observer);
+    }
+    
+    /**
+     * Disconnect Concentrator and reconnect Concentrator. Check if agents will receive bidUpdates again.
+     * Cluster consists of Auctioneer, Concentrator and 2 agents.
+     */
+    public void testConcentratorRemoval() throws Exception {
+	    // Create simple cluster
+    	setupCluster();
+    	
+    	// Checking to see if all agents send bids
+    	Thread.sleep(10000);
+    	checkBidsFullCluster(observer);
+    	
+    	// disconnect Concentrator 
+    	clusterHelper.disconnectAgent(configAdmin, concentratorConfig.getPid());
+    	
+    	// Checking to see if any bids were sent when the concentrator was down.
+    	observer.clearEvents();
+    	Thread.sleep(10000);
+    	
+    	checkBidsClusterNoConcentrator(observer);
+    	
+    	// Connect concentrator, bid should start again
+    	concentratorConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidConcentrator(), 
+    			clusterHelper.getConcentratorProperties(clusterHelper.getAgentIdAuctioneer(), clusterHelper.getAgentIdAuctioneer(), 5000));
+    	clusterHelper.checkActive(scrService, clusterHelper.getFactoryPidConcentrator());
+    
+    	Thread.sleep(10000);
+    	// TODO this part fails checkBidsFullCluster(observer);
+    }
+    
+    private void setupCluster() throws Exception {
     	// Create Auctioneer
-    	Configuration auctioneerConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidAuctioneer(), clusterHelper.getAuctioneerProperties(clusterHelper.getAgentIdAuctioneer(), 5000));
+    	auctioneerConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidAuctioneer(), 
+    			clusterHelper.getAuctioneerProperties(clusterHelper.getAgentIdAuctioneer(), 5000));
 
     	// Wait for Auctioneer to become active
     	clusterHelper.checkServiceByPid(context, auctioneerConfig.getPid(), Auctioneer.class);
     	
     	// Create Concentrator
-    	Configuration concentratorConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidConcentrator(), clusterHelper.getConcentratorProperties(clusterHelper.getAgentIdConcentrator(), clusterHelper.getAgentIdAuctioneer(), 5000));
+    	concentratorConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidConcentrator(), 
+    			clusterHelper.getConcentratorProperties(clusterHelper.getAgentIdConcentrator(), clusterHelper.getAgentIdAuctioneer(), 5000));
     	
     	// Wait for Concentrator to become active
-    	clusterHelper.checkServiceByPid(context, concentratorConfig.getPid(), Concentrator.class);
+    	concentrator = clusterHelper.getServiceByPid(context, concentratorConfig.getPid(), Concentrator.class);
     	
     	// Create PvPanel
-    	Configuration pvPanelConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidPvPanel(), clusterHelper.getPvPanelProperties(clusterHelper.getAgentIdPvPanel(), clusterHelper.getAgentIdConcentrator(), 4));
+    	pvPanelConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidPvPanel(), 
+    			clusterHelper.getPvPanelProperties(clusterHelper.getAgentIdPvPanel(), clusterHelper.getAgentIdConcentrator(), 4));
     	
     	// Wait for PvPanel to become active
     	clusterHelper.checkServiceByPid(context, pvPanelConfig.getPid(), PVPanelAgent.class);
 
     	// Create Freezer
-    	Configuration freezerConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidFreezer(), clusterHelper.getFreezerProperties(clusterHelper.getAgentIdFreezer(), clusterHelper.getAgentIdConcentrator(), 4));
+    	freezerConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidFreezer(), 
+    			clusterHelper.getFreezerProperties(clusterHelper.getAgentIdFreezer(), clusterHelper.getAgentIdConcentrator(), 4));
     	
     	// Wait for Freezer to become active
     	clusterHelper.checkServiceByPid(context, freezerConfig.getPid(), Freezer.class);
@@ -64,149 +175,14 @@ public class BasicClusterTests extends OsgiTestCase {
     	Configuration storingObserverConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidObserver(), clusterHelper.getStoringObserverProperties());
     	
     	// Wait for StoringObserver to become active
-    	StoringObserver observer = clusterHelper.getServiceByPid(context, storingObserverConfig.getPid(), StoringObserver.class);
-    	
-    	//Checking to see if all agents send bids
-    	Thread.sleep(10000);
-    	checkBidsFullCluster(observer);
-    }
-
-    /**
-     * Tests whether agent removal actually makes the bid obsolete of this agent
-     * The agent should also not receive any price updates.
-     */
-    public void testAgentRemoval() throws Exception {
-    	// Create simple cluster
-    	clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidAuctioneer(), clusterHelper.getAuctioneerProperties(clusterHelper.getAgentIdAuctioneer(), 5000));
-    	Configuration concentratorConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidConcentrator(), clusterHelper.getConcentratorProperties(clusterHelper.getAgentIdConcentrator(), clusterHelper.getAgentIdAuctioneer(), 5000));
-    	Configuration pvPanelConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidPvPanel(), clusterHelper.getPvPanelProperties(clusterHelper.getAgentIdPvPanel() , clusterHelper.getAgentIdConcentrator(), 4));
-    	Configuration freezerConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidFreezer() , clusterHelper.getFreezerProperties(clusterHelper.getAgentIdFreezer(), clusterHelper.getAgentIdConcentrator() , 4));
-    	
-    	// Wait for PvPanel and Freezer to become active
-    	Concentrator concentrator = clusterHelper.getServiceByPid(context, concentratorConfig.getPid(), Concentrator.class);
-    	clusterHelper.checkServiceByPid(context, pvPanelConfig.getPid(), PVPanelAgent.class);
-    	clusterHelper.checkServiceByPid(context, freezerConfig.getPid(), Freezer.class);
-
-    	// Wait a little time for all components to become satisfied / active
-    	Thread.sleep(2000);
-    	
-    	// Create StoringObserver
-    	Configuration storingObserverConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidObserver(), clusterHelper.getStoringObserverProperties());
-    	StoringObserver observer = clusterHelper.getServiceByPid(context, storingObserverConfig.getPid(), StoringObserver.class);
-    	
-    	// Checking to see if all agents send bids
-    	Thread.sleep(10000);
-    	checkBidsFullCluster(observer);
-    	
-    	// disconnect Freezer
-    	clusterHelper.disconnectAgent(configAdmin, freezerConfig.getPid());
-    	
-    	// Checking to see if the Freezer is no longer participating
-    	observer.clearEvents();
-    	Thread.sleep(10000);
-    	checkBidsClusterNoFreezer(observer, concentrator);
-    	
-    	// Re-add Freezer agent, it should not receive bids from previous freezer
-    	observer.clearEvents();
-    	freezerConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidFreezer() , clusterHelper.getFreezerProperties(clusterHelper.getAgentIdFreezer() , clusterHelper.getAgentIdConcentrator() , 4));
-    	Thread.sleep(10000);
-    	checkBidsFullCluster(observer);
-    }
-
-    /**
-     * Tests whether auctioneer removal stops complete cluster but continues when Auctioneer is started again.
-     */
-    public void testAuctioneerRemoval() throws Exception {
-	    // Create simple cluster
-    	Configuration auctioneerConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidAuctioneer() , clusterHelper.getAuctioneerProperties(clusterHelper.getAgentIdAuctioneer(), 5000));
-    	clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidConcentrator(), clusterHelper.getConcentratorProperties(clusterHelper.getAgentIdConcentrator() , clusterHelper.getAgentIdAuctioneer(), 5000));
-    	Configuration pvPanelConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidPvPanel() , clusterHelper.getPvPanelProperties(clusterHelper.getAgentIdPvPanel(), clusterHelper.getAgentIdConcentrator(), 4));
-    	Configuration freezerConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidFreezer(), clusterHelper.getFreezerProperties(clusterHelper.getAgentIdFreezer(), clusterHelper.getAgentIdConcentrator(), 4));
-    	
-    	// Wait for PvPanel and Freezer to become active
-    	clusterHelper.checkServiceByPid(context, pvPanelConfig.getPid(), PVPanelAgent.class);
-    	clusterHelper.checkServiceByPid(context, freezerConfig.getPid(), Freezer.class);
-
-    	// Wait a little time for all components to become satisfied / active
-    	Thread.sleep(2000);
-    	
-    	// Create StoringObserver
-    	Configuration storingObserverConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidObserver(), clusterHelper.getStoringObserverProperties());
-    	StoringObserver observer = clusterHelper.getServiceByPid(context, storingObserverConfig.getPid(), StoringObserver.class);
-    	
-    	// Checking to see if all agents send bids
-    	Thread.sleep(10000);
-    	checkBidsFullCluster(observer);
-    	
-    	// disconnect Auctioneer 
-    	clusterHelper.disconnectAgent(configAdmin, auctioneerConfig.getPid());
-    	
-    	//Checking to see if any bids were sent when the autioneer was down.
-    	observer.clearEvents();
-    	Thread.sleep(10000);
-    	checkBidsClusterNoAuctioneer(observer);
-    	
-    	// connect auctioneer, bid should start again
-    	auctioneerConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidAuctioneer(), clusterHelper.getAuctioneerProperties(clusterHelper.getAgentIdAuctioneer(), 5000));
-    	clusterHelper.checkActive(scrService, clusterHelper.getFactoryPidAuctioneer());
-    
-    	Thread.sleep(10000);
-    	// TODO Reattaching of Auctioneer fails in sessionmanager.
-    	// Disabled this teststep for now
-    	// checkBidsFullCluster(observer);
-    }
-    
-    /**
-     * Disconnect Concentrator and reconnect Concentrator. Check if agents will receive bidUpdates again.
-     * Cluster consists of Auctioneer, Concentrator and 2 agents.
-     */
-    public void testConcentratorRemoval() throws Exception {
-	    // Create simple cluster
-    	clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidAuctioneer() , clusterHelper.getAuctioneerProperties(clusterHelper.getAgentIdAuctioneer(), 5000));
-    	Configuration concentratorConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidConcentrator(), clusterHelper.getConcentratorProperties(clusterHelper.getAgentIdConcentrator(), clusterHelper.getAgentIdAuctioneer(), 5000));
-    	Configuration pvPanelConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidPvPanel() , clusterHelper.getPvPanelProperties(clusterHelper.getAgentIdPvPanel(), clusterHelper.getAgentIdConcentrator(), 4));
-    	Configuration freezerConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidFreezer(), clusterHelper.getFreezerProperties(clusterHelper.getAgentIdFreezer(), clusterHelper.getAgentIdConcentrator(), 4));
-    	
-    	// Wait for PvPanel and Freezer to become active
-    	clusterHelper.checkServiceByPid(context, pvPanelConfig.getPid(), PVPanelAgent.class);
-    	clusterHelper.checkServiceByPid(context, freezerConfig.getPid(), Freezer.class);
-
-    	// Wait a little time for all components to become satisfied / active
-    	Thread.sleep(2000);
-    	
-    	// Create StoringObserver
-    	Configuration storingObserverConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidObserver(), clusterHelper.getStoringObserverProperties());
-    	StoringObserver observer = clusterHelper.getServiceByPid(context, storingObserverConfig.getPid(), StoringObserver.class);
-    	
-    	// Checking to see if all agents send bids
-    	Thread.sleep(10000);
-    	checkBidsFullCluster(observer);
-    	
-    	// disconnect Concentrator 
-    	clusterHelper.disconnectAgent(configAdmin, concentratorConfig.getPid());
-    	
-    	//Checking to see if any bids were sent when the concentrator was down.
-    	observer.clearEvents();
-    	Thread.sleep(10000);
-    	
-    	checkBidsClusterNoConcentrator(observer);
-    	
-    	// connect concentrator, bid should start again
-    	concentratorConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidConcentrator(), clusterHelper.getConcentratorProperties(clusterHelper.getAgentIdAuctioneer(), clusterHelper.getAgentIdAuctioneer(), 5000));
-    	clusterHelper.checkActive(scrService, clusterHelper.getFactoryPidConcentrator());
-    
-//    	Thread.sleep(10000);
-    	
-//    	 TODO:Reattaching of Concentratir fails in sessionmanager.
-//  	 Disabled this teststep for now
-//  	 checkBidsFullCluster(observer);
+    	observer = clusterHelper.getServiceByPid(context, storingObserverConfig.getPid(), StoringObserver.class);
     }
     
     private void checkBidsFullCluster(StoringObserver observer) {
     	// Are any bids available for each agent (at all)
-    	assertFalse(observer.getOutgoingBidEvents(clusterHelper.getAgentIdConcentrator()).isEmpty());
-    	assertFalse(observer.getOutgoingBidEvents(clusterHelper.getAgentIdPvPanel()).isEmpty());
-    	assertFalse(observer.getOutgoingBidEvents(clusterHelper.getAgentIdFreezer()).isEmpty());
+    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdConcentrator()).isEmpty());
+    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdPvPanel()).isEmpty());
+    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdFreezer()).isEmpty());
     	
     	// Validate bidnumbers
     	checkBidNumbers(observer, clusterHelper.getAgentIdConcentrator());
@@ -216,14 +192,14 @@ public class BasicClusterTests extends OsgiTestCase {
 
     private void checkBidNumbers(StoringObserver observer, String agentId) {
     	// Validate bidnumber incoming from concentrator for correct agent
-    	List<OutgoingBidEvent> agentBids = observer.getOutgoingBidEvents(agentId);
+    	List<OutgoingBidUpdateEvent> agentBids = observer.getOutgoingBidUpdateEvents(agentId);
     	List<IncomingPriceUpdateEvent> receivedPrices = observer.getIncomingPriceUpdateEvents(agentId);
 
     	for (IncomingPriceUpdateEvent priceEvent : receivedPrices) {
     		int priceBidnumber = priceEvent.getPriceUpdate().getBidNumber();
     		boolean validBidNumber = false;
     		
-    		for (OutgoingBidEvent bidEvent : agentBids) {
+    		for (OutgoingBidUpdateEvent bidEvent : agentBids) {
     			if (bidEvent.getBidUpdate().getBidNumber() == priceBidnumber) {
     				validBidNumber = true;
     			}
@@ -234,17 +210,17 @@ public class BasicClusterTests extends OsgiTestCase {
     }
     
     private void checkBidsClusterNoFreezer(StoringObserver observer, Concentrator concentrator) {
-    	assertFalse(observer.getOutgoingBidEvents(clusterHelper.getAgentIdConcentrator()).isEmpty());
-    	assertFalse(observer.getOutgoingBidEvents(clusterHelper.getAgentIdPvPanel()).isEmpty());
-    	assertTrue(observer.getOutgoingBidEvents(clusterHelper.getAgentIdFreezer()).isEmpty());
+    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdConcentrator()).isEmpty());
+    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdPvPanel()).isEmpty());
+    	assertTrue(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdFreezer()).isEmpty());
 
     	// Check aggregated bid does no longer contain freezer, by checking last aggregated against panel bids
-    	List<OutgoingBidEvent> concentratorBids = observer.getOutgoingBidEvents(clusterHelper.getAgentIdConcentrator());
-    	List<OutgoingBidEvent> panelBids = observer.getOutgoingBidEvents(clusterHelper.getAgentIdPvPanel());
+    	List<OutgoingBidUpdateEvent> concentratorBids = observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdConcentrator());
+    	List<OutgoingBidUpdateEvent> panelBids = observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdPvPanel());
     	
-    	OutgoingBidEvent concentratorBid = concentratorBids.get(concentratorBids.size()-1);
+    	OutgoingBidUpdateEvent concentratorBid = concentratorBids.get(concentratorBids.size()-1);
     	boolean foundBid = false;
-    	for (OutgoingBidEvent panelBid : panelBids) {
+    	for (OutgoingBidUpdateEvent panelBid : panelBids) {
     		if (panelBid.getBidUpdate().getBid().toArrayBid().equals(concentratorBid.getBidUpdate().getBid().toArrayBid())) {
     			foundBid = true;
     		}
@@ -267,14 +243,14 @@ public class BasicClusterTests extends OsgiTestCase {
     }
     
     private void checkBidsClusterNoAuctioneer(StoringObserver observer) {
-    	assertTrue(observer.getOutgoingBidEvents(clusterHelper.getAgentIdConcentrator()).isEmpty());
-    	assertTrue(observer.getOutgoingBidEvents(clusterHelper.getAgentIdPvPanel() ).isEmpty());
-    	assertTrue(observer.getOutgoingBidEvents(clusterHelper.getAgentIdFreezer()).isEmpty());
+    	assertTrue(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdConcentrator()).isEmpty());
+    	assertTrue(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdPvPanel() ).isEmpty());
+    	assertTrue(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdFreezer()).isEmpty());
     }
     
     private void checkBidsClusterNoConcentrator(StoringObserver observer) {
-    	assertTrue(observer.getOutgoingBidEvents(clusterHelper.getAgentIdPvPanel() ).isEmpty());
-    	assertTrue(observer.getOutgoingBidEvents(clusterHelper.getAgentIdFreezer()).isEmpty());
+    	assertTrue(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdPvPanel() ).isEmpty());
+    	assertTrue(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdFreezer()).isEmpty());
     }
 
 }

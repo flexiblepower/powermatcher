@@ -61,7 +61,7 @@ public class ObjectiveAgent
     @Activate
     public void activate(final Map<String, Object> properties) {
         config = Configurable.createConfigurable(Config.class, properties);
-        activate(config.agentId());
+        init(config.agentId());
 
         LOGGER.info("Objective agent activated");
     }

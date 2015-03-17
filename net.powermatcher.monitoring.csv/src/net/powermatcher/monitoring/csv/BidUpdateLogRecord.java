@@ -5,19 +5,19 @@ import java.util.Date;
 
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.messages.BidUpdate;
-import net.powermatcher.api.monitoring.events.BidEvent;
+import net.powermatcher.api.monitoring.events.BidUpdateEvent;
 
 /**
- * {@link BidLogRecord} is an implementation of {@link LogRecord} that stores a {@link BidEvent}.
+ * {@link BidUpdateLogRecord} is an implementation of {@link LogRecord} that stores a {@link BidUpdateEvent}.
  *
  * @author FAN
  * @version 2.0
  */
-public class BidLogRecord
+public class BidUpdateLogRecord
     extends LogRecord {
 
     /**
-     * The {@link Bid} the {@link BidEvent} was sent for.
+     * The {@link Bid} the {@link BidUpdateEvent} was sent for.
      */
     private final BidUpdate bidUpdate;
 
@@ -25,13 +25,13 @@ public class BidLogRecord
      * A constructor that creates an instance of this class.
      *
      * @param event
-     *            the {@link BidEvent} that needs to be logged
+     *            the {@link BidUpdateEvent} that needs to be logged
      * @param logTime
      *            the time the event was logged
      * @param dateFormat
      *            the {@link DateFormat} that will be used to log the {@link LogRecord}
      */
-    public BidLogRecord(BidEvent event, Date logTime, DateFormat dateFormat) {
+    public BidUpdateLogRecord(BidUpdateEvent event, Date logTime, DateFormat dateFormat) {
         super(event.getClusterId(), event.getAgentId(), logTime, event.getTimestamp(), dateFormat);
 
         bidUpdate = event.getBidUpdate();

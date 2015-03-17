@@ -4,11 +4,34 @@
 	org.apache.felix.scr,\
 	net.powermatcher.api;version=latest,\
 	net.powermatcher.core;version=latest,\
-	net.powermatcher.examples;version=latest,\
 	net.powermatcher.test.helpers;version=latest,\
 	flexiblepower.api,\
 	biz.aQute.junit,\
-	net.powermatcher.remote.websockets;version=latest
+	net.powermatcher.remote.websockets;version=latest,\
+	net.powermatcher.examples;version=latest
+
+-runee: JavaSE-1.7
+-runfw: org.apache.felix.framework;version='[4,5)'
+-runsystempackages:  \
+	sun.reflect
+-runvm: -ea -Dlogback.configurationFile=${workspace}/cnf/conf-local/logback.xml
+Bundle-Version: 2.0.0.${tstamp}
+Private-Package:  \
+	net.powermatcher.test.osgi
+Test-Cases:  \
+	${classes;CONCRETE;EXTENDS;junit.framework.TestCase}
+-runrequires:  \
+	osgi.identity;filter:='(osgi.identity=org.apache.felix.configadmin)',\
+	osgi.identity;filter:='(osgi.identity=org.apache.felix.metatype)',\
+	osgi.identity;filter:='(osgi.identity=org.apache.felix.scr)',\
+	osgi.identity;filter:='(osgi.identity=ch.qos.logback.core)',\
+	osgi.identity;filter:='(osgi.identity=ch.qos.logback.classic)',\
+	osgi.identity;filter:='(osgi.identity=net.powermatcher.core)',\
+	osgi.identity;filter:='(osgi.identity=net.powermatcher.remote.websockets)',\
+	osgi.identity;filter:='(osgi.identity=net.powermatcher.examples)',\
+	osgi.identity;filter:='(osgi.identity=org.apache.felix.webconsole.plugins.ds)',\
+	osgi.identity;filter:='(osgi.identity=org.apache.felix.webconsole.plugins.event)'
+-resolve: auto
 -runbundles:  \
 	biz.aQute.bnd.annotation;version='[2.4.0,2.4.1)',\
 	ch.qos.logback.classic;version='[1.1.2,1.1.3)',\
@@ -32,25 +55,3 @@
 	org.slf4j.osgi-over-slf4j;version='[1.7.7,1.7.8)',\
 	osgi.residential;version='[4.3.0,4.3.1)',\
 	slf4j.api;version='[1.7.7,1.7.8)'
--runee: JavaSE-1.7
--runfw: org.apache.felix.framework;version='[4,5)'
--runsystempackages:  \
-	sun.reflect
--runvm: -ea -Dlogback.configurationFile=${workspace}/cnf/conf-local/logback.xml
-Bundle-Version: 0.0.0.${tstamp}
-Private-Package:  \
-	net.powermatcher.test.osgi
-Test-Cases:  \
-	${classes;CONCRETE;EXTENDS;junit.framework.TestCase}
--runrequires:  \
-	osgi.identity;filter:='(osgi.identity=org.apache.felix.configadmin)',\
-	osgi.identity;filter:='(osgi.identity=org.apache.felix.metatype)',\
-	osgi.identity;filter:='(osgi.identity=org.apache.felix.scr)',\
-	osgi.identity;filter:='(osgi.identity=ch.qos.logback.core)',\
-	osgi.identity;filter:='(osgi.identity=ch.qos.logback.classic)',\
-	osgi.identity;filter:='(osgi.identity=net.powermatcher.core)',\
-	osgi.identity;filter:='(osgi.identity=net.powermatcher.remote.websockets)',\
-	osgi.identity;filter:='(osgi.identity=net.powermatcher.examples)',\
-	osgi.identity;filter:='(osgi.identity=org.apache.felix.webconsole.plugins.ds)',\
-	osgi.identity;filter:='(osgi.identity=org.apache.felix.webconsole.plugins.event)'
--resolve: auto

@@ -9,13 +9,13 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.messages.BidUpdate;
 
 /**
- * An {@link BidEvent} is sent when an {@link Bid} is sent or Received by an {@link AgentEndpoint} or a
+ * An {@link BidUpdateEvent} is sent when an {@link Bid} is sent or Received by an {@link AgentEndpoint} or a
  * {@link MatcherEndpoint}.
  *
  * @author FAN
  * @version 2.0
  */
-public abstract class BidEvent
+public abstract class BidUpdateEvent
     extends AgentEvent {
 
     /**
@@ -42,7 +42,7 @@ public abstract class BidEvent
      * @param bidUpdate
      *            The new {@link BidUpdate} created by the {@link AgentEndpoint} subclass.
      */
-    public BidEvent(String clusterId, String agentId, String sessionId, Date timestamp, BidUpdate bidUpdate) {
+    public BidUpdateEvent(String clusterId, String agentId, String sessionId, Date timestamp, BidUpdate bidUpdate) {
         super(clusterId, agentId, timestamp);
         this.bidUpdate = bidUpdate;
         this.sessionId = sessionId;
