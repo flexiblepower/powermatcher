@@ -156,6 +156,52 @@ public class BasicClusterTests extends OsgiTestCase {
     	// checkBidsFullCluster(observer);
     }
     
+    /**
+     * Disconnect Concentrator and reconnect Concentrator. Check if agents will receive bidUpdates again.
+     * Cluster consists of Auctioneer, Concentrator and 2 agents.
+     */
+    public void testConcentratorRemoval() throws Exception {
+	    // Create simple cluster
+    	clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidAuctioneer() , clusterHelper.getAuctioneerProperties(clusterHelper.getAgentIdAuctioneer(), 5000));
+    	Configuration concentratorConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidConcentrator(), clusterHelper.getConcentratorProperties(clusterHelper.getAgentIdConcentrator(), clusterHelper.getAgentIdAuctioneer(), 5000));
+    	Configuration pvPanelConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidPvPanel() , clusterHelper.getPvPanelProperties(clusterHelper.getAgentIdPvPanel(), clusterHelper.getAgentIdConcentrator(), 4));
+    	Configuration freezerConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidFreezer(), clusterHelper.getFreezerProperties(clusterHelper.getAgentIdFreezer(), clusterHelper.getAgentIdConcentrator(), 4));
+    	
+    	// Wait for PvPanel and Freezer to become active
+    	clusterHelper.checkServiceByPid(context, pvPanelConfig.getPid(), PVPanelAgent.class);
+    	clusterHelper.checkServiceByPid(context, freezerConfig.getPid(), Freezer.class);
+
+    	// Wait a little time for all components to become satisfied / active
+    	Thread.sleep(2000);
+    	
+    	// Create StoringObserver
+    	Configuration storingObserverConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidObserver(), clusterHelper.getStoringObserverProperties());
+    	StoringObserver observer = clusterHelper.getServiceByPid(context, storingObserverConfig.getPid(), StoringObserver.class);
+    	
+    	// Checking to see if all agents send bids
+    	Thread.sleep(10000);
+    	checkBidsFullCluster(observer);
+    	
+    	// disconnect Concentrator 
+    	clusterHelper.disconnectAgent(configAdmin, concentratorConfig.getPid());
+    	
+    	//Checking to see if any bids were sent when the concentrator was down.
+    	observer.clearEvents();
+    	Thread.sleep(10000);
+    	
+    	checkBidsClusterNoConcentrator(observer);
+    	
+    	// connect concentrator, bid should start again
+    	concentratorConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidConcentrator(), clusterHelper.getConcentratorProperties(clusterHelper.getAgentIdAuctioneer(), clusterHelper.getAgentIdAuctioneer(), 5000));
+    	clusterHelper.checkActive(scrService, clusterHelper.getFactoryPidConcentrator());
+    
+//    	Thread.sleep(10000);
+    	
+//    	 TODO:Reattaching of Concentratir fails in sessionmanager.
+//  	 Disabled this teststep for now
+//  	 checkBidsFullCluster(observer);
+    }
+    
     private void checkBidsFullCluster(StoringObserver observer) {
     	// Are any bids available for each agent (at all)
     	assertFalse(observer.getOutgoingBidEvents(clusterHelper.getAgentIdConcentrator()).isEmpty());
@@ -225,4 +271,10 @@ public class BasicClusterTests extends OsgiTestCase {
     	assertTrue(observer.getOutgoingBidEvents(clusterHelper.getAgentIdPvPanel() ).isEmpty());
     	assertTrue(observer.getOutgoingBidEvents(clusterHelper.getAgentIdFreezer()).isEmpty());
     }
+    
+    private void checkBidsClusterNoConcentrator(StoringObserver observer) {
+    	assertTrue(observer.getOutgoingBidEvents(clusterHelper.getAgentIdPvPanel() ).isEmpty());
+    	assertTrue(observer.getOutgoingBidEvents(clusterHelper.getAgentIdFreezer()).isEmpty());
+    }
+
 }
