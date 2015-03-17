@@ -9,6 +9,12 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
+/**
+ * Base case for OSGI testcases 
+ *
+ * @author FAN
+ * @version 2.0
+ */
 public abstract class OsgiTestCase extends TestCase {
 	protected final BundleContext context = FrameworkUtil.getBundle(getClass()).getBundleContext();
     protected ServiceReference<?> scrServiceReference = context.getServiceReference( ScrService.class.getName());
@@ -16,7 +22,10 @@ public abstract class OsgiTestCase extends TestCase {
     protected ConfigurationAdmin configAdmin;
     
     protected ClusterHelper clusterHelper;
-    
+ 
+    /**
+     * Setup tests, which cleans existing OSGI servers and gets reference to configuration admin. 
+     */
     @Override 
     protected void setUp() throws Exception {
     	super.setUp();

@@ -16,6 +16,12 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 
+/**
+ * Helper class which contains basic functionality used in most tests.
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class ClusterHelper {
 
 	public final String FACTORY_PID_AUCTIONEER = "net.powermatcher.core.auctioneer.Auctioneer";
@@ -175,41 +181,5 @@ public class ClusterHelper {
 		}
 		
 		config.delete();
-	}
-
-	public String getFactoryPidAuctioneer() {
-		return FACTORY_PID_AUCTIONEER;
-	}
-	
-	public String getFactoryPidConcentrator() {
-		return FACTORY_PID_CONCENTRATOR;
-	}
-	
-	public String getAgentIdAuctioneer() {
-		return AGENT_ID_AUCTIONEER;
-	}
-	
-	public String getAgentIdConcentrator() {
-		return AGENT_ID_CONCENTRATOR;
-	}
-	
-	public String getFactoryPidPvPanel() {
-		return FACTORY_PID_PV_PANEL;	
-	}
-	
-	public String getAgentIdPvPanel() {
-		return AGENT_ID_PV_PANEL;
-	}
-	
-	public String getAgentIdFreezer() {
-		return AGENT_ID_FREEZER;
-	}
-	
-	public String getFactoryPidObserver() {
-		return FACTORY_PID_OBSERVER;
-	}
-	
-	public String getFactoryPidFreezer() {
-		return FACTORY_PID_FREEZER;
 	}
 }

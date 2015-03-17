@@ -11,33 +11,46 @@ import net.powermatcher.examples.StoringObserver;
 
 import org.osgi.service.cm.Configuration;
 
+/**
+ * Tests bidnumbers with various bid update rates.
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class BidNumbersTests extends OsgiTestCase {
 
 	/**
-     * Tests a simple buildup of a cluster in OSGI and sanity tests.
-     * Custer consists of Auctioneer, Concentrator and 2 agents.
+     * Tests a cluster with a slow and fast agent. The slow agent should receive the same bidnumber.
      */
     public void testVariableRateAgents() throws Exception {
     	// Create Auctioneer
-    	Configuration auctioneerConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidAuctioneer(), clusterHelper.getAuctioneerProperties(clusterHelper.getAgentIdAuctioneer(), 1000));
+    	Configuration auctioneerConfig = clusterHelper.createConfiguration(configAdmin, 
+    			clusterHelper.FACTORY_PID_AUCTIONEER, 
+    			clusterHelper.getAuctioneerProperties(clusterHelper.AGENT_ID_AUCTIONEER, 1000));
 
     	// Wait for Auctioneer to become active
     	clusterHelper.checkServiceByPid(context, auctioneerConfig.getPid(), Auctioneer.class);
     	
     	// Create Concentrator
-    	Configuration concentratorConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidConcentrator(), clusterHelper.getConcentratorProperties(clusterHelper.getAgentIdConcentrator(), clusterHelper.getAgentIdAuctioneer(), 1000));
+    	Configuration concentratorConfig = clusterHelper.createConfiguration(configAdmin, 
+    			clusterHelper.FACTORY_PID_CONCENTRATOR, 
+    			clusterHelper.getConcentratorProperties(clusterHelper.AGENT_ID_CONCENTRATOR, clusterHelper.AGENT_ID_AUCTIONEER, 1000));
     	
     	// Wait for Concentrator to become active
     	clusterHelper.checkServiceByPid(context, concentratorConfig.getPid(), Concentrator.class);
     	
     	// Create PvPanel
-    	Configuration pvPanelConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidPvPanel(), clusterHelper.getPvPanelProperties(clusterHelper.getAgentIdPvPanel() , clusterHelper.getAgentIdConcentrator(), 12));
+    	Configuration pvPanelConfig = clusterHelper.createConfiguration(configAdmin, 
+    			clusterHelper.FACTORY_PID_PV_PANEL, 
+    			clusterHelper.getPvPanelProperties(clusterHelper.AGENT_ID_PV_PANEL, clusterHelper.AGENT_ID_CONCENTRATOR, 12));
     	
     	// Wait for PvPanel to become active
     	clusterHelper.checkServiceByPid(context, pvPanelConfig.getPid(), PVPanelAgent.class);
 
     	// Create Freezer
-    	Configuration freezerConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidFreezer(), clusterHelper.getFreezerProperties(clusterHelper.getAgentIdFreezer(), clusterHelper.getAgentIdConcentrator(), 1));
+    	Configuration freezerConfig = clusterHelper.createConfiguration(configAdmin, 
+    			clusterHelper.FACTORY_PID_FREEZER, 
+    			clusterHelper.getFreezerProperties(clusterHelper.AGENT_ID_FREEZER, clusterHelper.AGENT_ID_CONCENTRATOR, 1));
     	
     	// Wait for Freezer to become active
     	clusterHelper.checkServiceByPid(context, freezerConfig.getPid(), Freezer.class);
@@ -46,16 +59,17 @@ public class BidNumbersTests extends OsgiTestCase {
     	Thread.sleep(2000);
     	
     	// check Auctioneer alive
-    	assertEquals(true, clusterHelper.checkActive(scrService, clusterHelper.getFactoryPidAuctioneer()));
+    	assertEquals(true, clusterHelper.checkActive(scrService, clusterHelper.FACTORY_PID_AUCTIONEER));
     	// check Concentrator alive
-    	assertEquals(true, clusterHelper.checkActive(scrService, clusterHelper.getFactoryPidConcentrator()));
+    	assertEquals(true, clusterHelper.checkActive(scrService, clusterHelper.FACTORY_PID_CONCENTRATOR));
     	// check PvPanel alive
-    	assertEquals(true, clusterHelper.checkActive(scrService, clusterHelper.getFactoryPidPvPanel()));
+    	assertEquals(true, clusterHelper.checkActive(scrService, clusterHelper.FACTORY_PID_PV_PANEL));
     	// check Freezer alive
-    	assertEquals(true, clusterHelper.checkActive(scrService, clusterHelper.getFactoryPidFreezer()));
+    	assertEquals(true, clusterHelper.checkActive(scrService, clusterHelper.FACTORY_PID_FREEZER));
     	
     	//Create StoringObserver
-    	Configuration storingObserverConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidObserver(), clusterHelper.getStoringObserverProperties());
+    	Configuration storingObserverConfig = clusterHelper.createConfiguration(configAdmin, 
+    			clusterHelper.FACTORY_PID_OBSERVER, clusterHelper.getStoringObserverProperties());
     	
     	// Wait for StoringObserver to become active
     	StoringObserver observer = clusterHelper.getServiceByPid(context, storingObserverConfig.getPid(), StoringObserver.class);
@@ -67,17 +81,17 @@ public class BidNumbersTests extends OsgiTestCase {
 
     private void checkBidsFullCluster(StoringObserver observer) throws Exception {
     	// Are any bids available for each agent (at all)
-    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdConcentrator()).isEmpty());
-    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdPvPanel()).isEmpty());
-    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdFreezer()).isEmpty());
+    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.AGENT_ID_CONCENTRATOR).isEmpty());
+    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.AGENT_ID_PV_PANEL).isEmpty());
+    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.AGENT_ID_FREEZER).isEmpty());
     	
     	// Validate bidNumbers of freezer and pvPanel
     	checkBidNumbersWithDifferentPriceUpdates(observer);
     }
     
     private void checkBidNumbersWithDifferentPriceUpdates(StoringObserver observer) throws Exception {
-    	List<IncomingPriceUpdateEvent> priceUpdateEventPvPanel = observer.getIncomingPriceUpdateEvents(clusterHelper.getAgentIdPvPanel());
-    	List<IncomingPriceUpdateEvent> priceUpdateEventFreezer = observer.getIncomingPriceUpdateEvents(clusterHelper.getAgentIdFreezer());
+    	List<IncomingPriceUpdateEvent> priceUpdateEventPvPanel = observer.getIncomingPriceUpdateEvents(clusterHelper.AGENT_ID_PV_PANEL);
+    	List<IncomingPriceUpdateEvent> priceUpdateEventFreezer = observer.getIncomingPriceUpdateEvents(clusterHelper.AGENT_ID_FREEZER);
     	boolean sameBidNumberPvPanel = true;
     	
     	// pvpanel will receive same bidNrs because of slow bidUpdateRate

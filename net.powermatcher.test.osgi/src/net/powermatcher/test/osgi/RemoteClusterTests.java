@@ -1,6 +1,7 @@
 package net.powermatcher.test.osgi;
 
 import java.util.Dictionary;
+
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +21,9 @@ import net.powermatcher.remote.websockets.AgentEndpointProxyWebsocket;
 import net.powermatcher.remote.websockets.MatcherEndpointProxyWebsocket;
 
 import org.osgi.service.cm.Configuration;
+
 public class RemoteClusterTests extends OsgiTestCase {
+
 	private final String FACTORY_PID_AGENT_PROXY = "net.powermatcher.remote.websockets.AgentEndpointProxyWebsocket";
 	private final String FACTORY_PID_MATCHER_PROXY = "net.powermatcher.remote.websockets.MatcherEndpointProxyWebsocket";
 	private final String AGENT_ID_AGENT_PROXY = "aep1";
@@ -35,7 +38,7 @@ public class RemoteClusterTests extends OsgiTestCase {
 	
     /**
      * Tests a simple buildup of a cluster in OSGI and sanity tests.
-     * Custer consists of Auctioneer, Concentrator and 2 remote agents.
+     * Custer consists of Auctioneer, Concentrator, 1 local agent and 1 remote agents.
      */
     public void testSimpleClusterBuildUpWithRemoteAgent() throws Exception {
     	// Setup default remote enabled cluster
@@ -69,20 +72,20 @@ public class RemoteClusterTests extends OsgiTestCase {
     	
     	// Re-add Freezer agent, it should not receive bids from previous freezer
     	observer.clearEvents();
-    	freezerConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidFreezer(), 
-    			clusterHelper.getFreezerProperties(clusterHelper.getAgentIdFreezer() , clusterHelper.getAgentIdConcentrator() , 4));
+    	freezerConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.FACTORY_PID_FREEZER, 
+    			clusterHelper.getFreezerProperties(clusterHelper.AGENT_ID_FREEZER, clusterHelper.AGENT_ID_CONCENTRATOR, 4));
     	Thread.sleep(10000);
     	checkBidsFullCluster(observer);
     }
 
     private void setupRemoteCluster() throws Exception {
     	// Create simple cluster
-    	Configuration auctioneerConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidAuctioneer(), 
-    			clusterHelper.getAuctioneerProperties(clusterHelper.getAgentIdAuctioneer(), 5000));
+    	Configuration auctioneerConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.FACTORY_PID_AUCTIONEER, 
+    			clusterHelper.getAuctioneerProperties(clusterHelper.AGENT_ID_AUCTIONEER, 5000));
     	clusterHelper.checkServiceByPid(context, auctioneerConfig.getPid(), Auctioneer.class);
     	
-    	Configuration concentratorConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidConcentrator(), 
-    			clusterHelper.getConcentratorProperties(clusterHelper.getAgentIdConcentrator(), clusterHelper.getAgentIdAuctioneer(), 5000));
+    	Configuration concentratorConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.FACTORY_PID_CONCENTRATOR, 
+    			clusterHelper.getConcentratorProperties(clusterHelper.AGENT_ID_CONCENTRATOR, clusterHelper.AGENT_ID_AUCTIONEER, 5000));
     	concentrator = clusterHelper.getServiceByPid(context, concentratorConfig.getPid(), Concentrator.class);
  
     	// Create agent proxy
@@ -95,34 +98,33 @@ public class RemoteClusterTests extends OsgiTestCase {
     			getMatcherProxyProperties(AGENT_ID_MATCHER_PROXY, AGENT_ID_AGENT_PROXY));
     	clusterHelper.checkServiceByPid(context, matcherProxyConfiguration.getPid(), MatcherEndpointProxyWebsocket.class);
 
-    	// Wait for cluster information to be exchanged
-    	// TODO this is not correct, since it must be able to handle missing cluster information on the remote end
-    	// Thread.sleep(2000);
-    	
     	// Create local PvPanel
     	pvPanelConfig = clusterHelper.createConfiguration(configAdmin, 
-    			clusterHelper.getFactoryPidPvPanel(), clusterHelper.getPvPanelProperties(clusterHelper.getAgentIdPvPanel(), clusterHelper.getAgentIdConcentrator(), 4));
+    			clusterHelper.FACTORY_PID_PV_PANEL, 
+    			clusterHelper.getPvPanelProperties(clusterHelper.AGENT_ID_PV_PANEL, clusterHelper.AGENT_ID_CONCENTRATOR, 4));
     	clusterHelper.checkServiceByPid(context, pvPanelConfig.getPid(), PVPanelAgent.class);
 
     	// Create remove Freezer -> connected to matcher endpoint proxy
     	freezerConfig = clusterHelper.createConfiguration(configAdmin, 
-    			clusterHelper.getFactoryPidFreezer(), clusterHelper.getFreezerProperties(clusterHelper.getAgentIdFreezer(), AGENT_ID_MATCHER_PROXY, 4));
+    			clusterHelper.FACTORY_PID_FREEZER, 
+    			clusterHelper.getFreezerProperties(clusterHelper.AGENT_ID_FREEZER, AGENT_ID_MATCHER_PROXY, 4));
     	clusterHelper.checkServiceByPid(context, freezerConfig.getPid(), Freezer.class);
     	
     	// Wait a little time for all components to become satisfied / active
     	Thread.sleep(2000);
     	
     	// check Auctioneer alive
-    	assertEquals(true, clusterHelper.checkActive(scrService, clusterHelper.getFactoryPidAuctioneer()));
+    	assertEquals(true, clusterHelper.checkActive(scrService, clusterHelper.FACTORY_PID_AUCTIONEER));
     	// check Concentrator alive
-    	assertEquals(true, clusterHelper.checkActive(scrService, clusterHelper.getFactoryPidConcentrator()));
+    	assertEquals(true, clusterHelper.checkActive(scrService, clusterHelper.FACTORY_PID_CONCENTRATOR));
     	// check PvPanel alive
-    	assertEquals(true, clusterHelper.checkActive(scrService, clusterHelper.getFactoryPidPvPanel()));
+    	assertEquals(true, clusterHelper.checkActive(scrService, clusterHelper.FACTORY_PID_PV_PANEL));
     	// check Freezer alive
-    	assertEquals(true, clusterHelper.checkActive(scrService, clusterHelper.getFactoryPidFreezer()));
+    	assertEquals(true, clusterHelper.checkActive(scrService, clusterHelper.FACTORY_PID_FREEZER));
     	
     	//Create StoringObserver
-    	Configuration storingObserverConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidObserver(), clusterHelper.getStoringObserverProperties());
+    	Configuration storingObserverConfig = clusterHelper.createConfiguration(configAdmin, 
+    			clusterHelper.FACTORY_PID_OBSERVER, clusterHelper.getStoringObserverProperties());
     	
     	// Wait for StoringObserver to become active
     	observer = clusterHelper.getServiceByPid(context, storingObserverConfig.getPid(), StoringObserver.class);
@@ -130,14 +132,14 @@ public class RemoteClusterTests extends OsgiTestCase {
     
     private void checkBidsFullCluster(StoringObserver observer) {
     	// Are any bids available for each agent (at all)
-    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdConcentrator()).isEmpty());
-    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdPvPanel()).isEmpty());
-    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdFreezer()).isEmpty());
+    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.AGENT_ID_CONCENTRATOR).isEmpty());
+    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.AGENT_ID_PV_PANEL).isEmpty());
+    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.AGENT_ID_FREEZER).isEmpty());
     	
     	// Validate bidnumbers
-    	checkBidNumbers(observer, clusterHelper.getAgentIdConcentrator());
-    	checkBidNumbers(observer, clusterHelper.getAgentIdFreezer());
-    	checkBidNumbers(observer, clusterHelper.getAgentIdPvPanel());
+    	checkBidNumbers(observer, clusterHelper.AGENT_ID_CONCENTRATOR);
+    	checkBidNumbers(observer, clusterHelper.AGENT_ID_FREEZER);
+    	checkBidNumbers(observer, clusterHelper.AGENT_ID_PV_PANEL);
     }
 
     private void checkBidNumbers(StoringObserver observer, String agentId) {
@@ -160,13 +162,13 @@ public class RemoteClusterTests extends OsgiTestCase {
     }
     
     private void checkBidsClusterNoFreezer(StoringObserver observer, Concentrator concentrator) {
-    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdConcentrator()).isEmpty());
-    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdPvPanel()).isEmpty());
-    	assertTrue(observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdFreezer()).isEmpty());
+    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.AGENT_ID_CONCENTRATOR).isEmpty());
+    	assertFalse(observer.getOutgoingBidUpdateEvents(clusterHelper.AGENT_ID_PV_PANEL).isEmpty());
+    	assertTrue(observer.getOutgoingBidUpdateEvents(clusterHelper.AGENT_ID_FREEZER).isEmpty());
 
     	// Check aggregated bid does no longer contain freezer, by checking last aggregated against panel bids
-    	List<OutgoingBidUpdateEvent> concentratorBids = observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdConcentrator());
-    	List<OutgoingBidUpdateEvent> panelBids = observer.getOutgoingBidUpdateEvents(clusterHelper.getAgentIdPvPanel());
+    	List<OutgoingBidUpdateEvent> concentratorBids = observer.getOutgoingBidUpdateEvents(clusterHelper.AGENT_ID_CONCENTRATOR);
+    	List<OutgoingBidUpdateEvent> panelBids = observer.getOutgoingBidUpdateEvents(clusterHelper.AGENT_ID_PV_PANEL);
     	
     	OutgoingBidUpdateEvent concentratorBid = concentratorBids.get(concentratorBids.size()-1);
     	boolean foundBid = false;
@@ -182,13 +184,13 @@ public class RemoteClusterTests extends OsgiTestCase {
     	BaseMatcherEndpoint matcherPart = clusterHelper.getPrivateField(concentrator, "matcherPart", BaseMatcherEndpoint.class);
     	BidCache bidCache = clusterHelper.getPrivateField(matcherPart, "bidCache", BidCache.class);
     	AggregatedBid lastBid = clusterHelper.getPrivateField(bidCache, "lastBid", AggregatedBid.class);
-    	assertTrue(lastBid.getAgentBidReferences().containsKey(clusterHelper.getAgentIdPvPanel()));
+    	assertTrue(lastBid.getAgentBidReferences().containsKey(clusterHelper.AGENT_ID_PV_PANEL));
     	assertFalse(lastBid.getAgentBidReferences().containsKey(AGENT_ID_AGENT_PROXY));
 
     	// Validate bidcache contains both agents, but Freezer bid is 0
     	@SuppressWarnings("unchecked")
 		Map<String, BidUpdate> agentBids = (Map<String, BidUpdate>)clusterHelper.getPrivateField(bidCache, "agentBids", Object.class);
-    	assertTrue(agentBids.containsKey(clusterHelper.getAgentIdPvPanel()));
+    	assertTrue(agentBids.containsKey(clusterHelper.AGENT_ID_PV_PANEL));
     	assertFalse(agentBids.containsKey(AGENT_ID_AGENT_PROXY));
     }
     
@@ -205,7 +207,7 @@ public class RemoteClusterTests extends OsgiTestCase {
     	Dictionary<String, Object> properties = new Hashtable<String, Object>();
     	properties.put("agentId", agentId);
     	properties.put("desiredConnectionId", desiredConnectionId);
-    	properties.put("powermatcherUrl", "ws://localhost:8080/powermatcher/websockets/agentendpoint");
+    	properties.put("powermatcherUrl", "ws://localhost:8181/powermatcher/websockets/agentendpoint");
     	properties.put("reconnectTimeout", 30);
     	properties.put("connectTimeout", 60);
 
