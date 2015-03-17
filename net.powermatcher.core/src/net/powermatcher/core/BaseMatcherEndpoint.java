@@ -54,8 +54,8 @@ public abstract class BaseMatcherEndpoint
 
     @Override
     public boolean connectToAgent(Session session) {
-        if (!isInitialized()) {
-            LOGGER.info("Could not connect an agent yet, not yet initialized");
+        if (!isConnected()) {
+            LOGGER.info("Could not connect an agent yet, not yet connected to the cluster");
             return false;
         } else if (!sessions.containsKey(session.getAgentId())) {
             session.setMarketBasis(getMarketBasis());
@@ -121,7 +121,7 @@ public abstract class BaseMatcherEndpoint
         @Override
         public void run() {
             try {
-                if (isInitialized()) {
+                if (isConnected()) {
                     performUpdate(bidCache.aggregate());
                 }
 

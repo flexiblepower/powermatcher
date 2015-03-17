@@ -78,7 +78,7 @@ public class ConcentratorTest {
 
         topSession.disconnect();
         assertNull(mockMatcherAgent.getSession());
-        assertFalse(concentrator.isInitialized());
+        assertFalse(concentrator.isConnected());
         assertNull(mockAgent.getSession());
         assertNull(mockAgent.getClusterId());
         assertNull(mockAgent.getSession());

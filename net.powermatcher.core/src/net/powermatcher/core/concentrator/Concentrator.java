@@ -1,7 +1,6 @@
 package net.powermatcher.core.concentrator;
 
 import java.util.Deque;
-import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -14,6 +13,7 @@ import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.ObservableAgent;
+import net.powermatcher.core.BaseAgent;
 import net.powermatcher.core.BaseAgentEndpoint;
 import net.powermatcher.core.BaseMatcherEndpoint;
 import net.powermatcher.core.auctioneer.Auctioneer;
@@ -47,7 +47,10 @@ public class Concentrator
     implements MatcherEndpoint {
 
     @Meta.OCD
-    public static interface Config {
+    public static interface Config
+        extends BaseAgent.Config {
+
+        @Override
         @Meta.AD(deflt = "concentrator")
         String agentId();
 
@@ -91,12 +94,8 @@ public class Concentrator
      */
     public void activate(Config config) {
         this.config = config;
-        matcherPart.activate(config.agentId());
-        activate(config.agentId(), config.desiredParentId());
-
-        Hashtable<String, Object> properties = new Hashtable<String, Object>();
-        properties.put("agentId", config.agentId());
-
+        matcherPart.activate(config);
+        super.activate(config);
         LOGGER.info("Concentrator [{}], activated", config.agentId());
     }
 

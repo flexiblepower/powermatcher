@@ -59,7 +59,7 @@ public class PotentialSession {
      * @return true if something changed
      */
     public boolean tryConnect() {
-        if (session == null && matcherEndpoint != null) {
+        if (session == null && matcherEndpoint != null && matcherEndpoint.isConnected()) {
             SessionImpl newSession = new SessionImpl(agentEndpoint, matcherEndpoint, this);
             if (matcherEndpoint.connectToAgent(newSession)) {
                 // Success!

@@ -11,6 +11,8 @@ import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingBidUpdateEvent;
 
+import org.flexiblepower.context.FlexiblePowerContext;
+
 /**
  * {@link BaseAgentEndpoint} defines the basic functionality of any Device Agent.
  *
@@ -22,6 +24,17 @@ public abstract class BaseAgentEndpoint
     implements AgentEndpoint {
 
     /**
+     * This configuration description should be extended by the configuration of the implementing agent and should
+     * override the {@link #agentId()} and {@link #desiredParentId()} with their default values and descriptions.
+     * Unfortunately the bnd generator does not detect overriden config objects correctly.
+     */
+    public interface Config
+        extends BaseAgent.Config {
+        /** @return The agent identifier of the parent matcher to which this agent should be connected */
+        String desiredParentId();
+    }
+
+    /**
      * The id of the {@link MatcherEndpoint} this Agent wants to connect to.
      */
     private String desiredParentId;
@@ -29,17 +42,16 @@ public abstract class BaseAgentEndpoint
     /**
      * This method should always be called during activation of the agent. It sets the agentId and desiredParentId.
      *
-     * @param agentId
-     *            The agentId that should be returned when the {@link #getAgentId()} is called.
-     * @param desiredParentId
-     *            The identifier that should be returned when the {@link #getDesiredParentId()} is called.
+     * @param config
+     *            The configuration of this BaseAgent, which provides the agentId and desiredParentId.
      *
      * @throws IllegalArgumentException
      *             when either the agentId or the desiredParentId is null or is an empty string.
      */
-    public void activate(String agentId, String desiredParentId) {
-        super.activate(agentId);
+    public void activate(Config config) {
+        super.activate(config);
 
+        String desiredParentId = config.desiredParentId();
         if (desiredParentId == null || desiredParentId.isEmpty()) {
             throw new IllegalArgumentException("The desiredParentId may not be null or empty");
         }
@@ -47,12 +59,12 @@ public abstract class BaseAgentEndpoint
         this.desiredParentId = desiredParentId;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public boolean isInitialized() {
-        return super.isInitialized() && session != null;
+    public void setContext(FlexiblePowerContext context) {
+        if (desiredParentId == null) {
+            throw new IllegalStateException("The activate method should be called first before the context is set.");
+        }
+        super.setContext(context);
     }
 
     /**
@@ -120,16 +132,17 @@ public abstract class BaseAgentEndpoint
     }
 
     /**
-     * Publishes a new bid to its matcher by creating a new {@link BidUpdate} using a generated bidnumber.
+     * Publishes a new bid to its matcher by creating a new {@link BidUpdate} using a generated bidnumber. The call will
+     * be ignored if {@link #isConnected()} returns <code>false</code>.
      *
      * @param newBid
      *            The new bid that is to be sent to the connected matcher
-     * @return The {@link BidUpdate} that has been set.
+     * @return The {@link BidUpdate} that has been set or <code>null</code> if {@link #isConnected()} returns false.
      */
     protected final BidUpdate publishBid(Bid newBid) {
-        Session session = getSession();
+        if (isConnected()) {
+            Session session = getSession();
 
-        if (isInitialized()) {
             if (lastBidUpdate != null && newBid.equals(lastBidUpdate.getBid())) {
                 // This bid is equal to the previous bid, we should not send an update
                 return lastBidUpdate;
