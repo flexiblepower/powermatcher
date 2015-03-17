@@ -14,7 +14,7 @@
 -runfw: org.apache.felix.framework;version='[4,5)'
 -runsystempackages:  \
 	sun.reflect
--runvm: -ea -Dlogback.configurationFile=${workspace}/cnf/conf-local/logback.xml
+-runvm: -ea
 Bundle-Version: 2.0.0.${tstamp}
 Private-Package:  \
 	net.powermatcher.test.osgi
@@ -28,9 +28,7 @@ Test-Cases:  \
 	osgi.identity;filter:='(osgi.identity=ch.qos.logback.classic)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.remote.websockets)',\
-	osgi.identity;filter:='(osgi.identity=net.powermatcher.examples)',\
-	osgi.identity;filter:='(osgi.identity=org.apache.felix.webconsole.plugins.ds)',\
-	osgi.identity;filter:='(osgi.identity=org.apache.felix.webconsole.plugins.event)'
+	osgi.identity;filter:='(osgi.identity=net.powermatcher.examples)'
 -resolve: auto
 -runbundles:  \
 	biz.aQute.bnd.annotation;version='[2.4.0,2.4.1)',\
@@ -49,9 +47,6 @@ Test-Cases:  \
 	org.apache.felix.http.servlet-api;version='[1.1.0,1.1.1)',\
 	org.apache.felix.metatype;version='[1.0.10,1.0.11)',\
 	org.apache.felix.scr;version='[1.8.2,1.8.3)',\
-	org.apache.felix.webconsole;version='[4.2.2,4.2.3)',\
-	org.apache.felix.webconsole.plugins.ds;version='[1.0.0,1.0.1)',\
-	org.apache.felix.webconsole.plugins.event;version='[1.1.0,1.1.1)',\
 	org.slf4j.osgi-over-slf4j;version='[1.7.7,1.7.8)',\
 	osgi.residential;version='[4.3.0,4.3.1)',\
 	slf4j.api;version='[1.7.7,1.7.8)'
