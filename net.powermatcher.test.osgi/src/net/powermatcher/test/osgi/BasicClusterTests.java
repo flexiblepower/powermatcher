@@ -123,11 +123,11 @@ public class BasicClusterTests extends OsgiTestCase {
     	
     	// Connect concentrator, bid should start again
     	concentratorConfig = clusterHelper.createConfiguration(configAdmin, clusterHelper.getFactoryPidConcentrator(), 
-    			clusterHelper.getConcentratorProperties(clusterHelper.getAgentIdAuctioneer(), clusterHelper.getAgentIdAuctioneer(), 5000));
+    			clusterHelper.getConcentratorProperties(clusterHelper.getAgentIdConcentrator(), clusterHelper.getAgentIdAuctioneer(), 5000));
     	clusterHelper.checkActive(scrService, clusterHelper.getFactoryPidConcentrator());
     
     	Thread.sleep(10000);
-    	// TODO this part fails checkBidsFullCluster(observer);
+    	checkBidsFullCluster(observer);
     }
     
     private void setupCluster() throws Exception {
