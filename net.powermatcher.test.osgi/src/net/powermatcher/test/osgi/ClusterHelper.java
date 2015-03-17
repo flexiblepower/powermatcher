@@ -18,25 +18,25 @@ import org.osgi.util.tracker.ServiceTracker;
 
 public class ClusterHelper {
 
-	private final String FACTORY_PID_AUCTIONEER = "net.powermatcher.core.auctioneer.Auctioneer";
-	private final String FACTORY_PID_CONCENTRATOR = "net.powermatcher.core.concentrator.Concentrator";
-	private final String FACTORY_PID_PV_PANEL = "net.powermatcher.examples.PVPanelAgent";
-	private final String FACTORY_PID_FREEZER = "net.powermatcher.examples.Freezer";
-	private final String FACTORY_PID_OBSERVER = "net.powermatcher.examples.StoringObserver";
+	public final String FACTORY_PID_AUCTIONEER = "net.powermatcher.core.auctioneer.Auctioneer";
+	public final String FACTORY_PID_CONCENTRATOR = "net.powermatcher.core.concentrator.Concentrator";
+	public final String FACTORY_PID_PV_PANEL = "net.powermatcher.examples.PVPanelAgent";
+	public final String FACTORY_PID_FREEZER = "net.powermatcher.examples.Freezer";
+	public final String FACTORY_PID_OBSERVER = "net.powermatcher.examples.StoringObserver";
 	
-	private final String AGENT_ID_AUCTIONEER = "auctioneer";
-	private final String AGENT_ID_CONCENTRATOR = "concentrator";
-	private final String AGENT_ID_PV_PANEL = "pvPanel";
-	private final String AGENT_ID_FREEZER = "freezer";
+	public final String AGENT_ID_AUCTIONEER = "auctioneer";
+	public final String AGENT_ID_CONCENTRATOR = "concentrator";
+	public final String AGENT_ID_PV_PANEL = "pvPanel";
+	public final String AGENT_ID_FREEZER = "freezer";
 
 	public Configuration createConfiguration(ConfigurationAdmin configAdmin, String factoryPid, Dictionary<String, Object> properties) throws Exception {
     	Configuration config = configAdmin.createFactoryConfiguration(factoryPid, null);
 
-    	// create Auctioneer props
+    	// create props
     	config.update(properties);
     	
     	return config;
-    }
+	}
 	
 	public Dictionary<String, Object> getAuctioneerProperties(String agentIdAuctioneer, long minTimeBetweenPriceUpdates) {
     	Dictionary<String, Object> properties = new Hashtable<String, Object>();
@@ -62,11 +62,11 @@ public class ClusterHelper {
     	return properties;
     }
 	
-	public Dictionary<String, Object> getPvPanelProperties(String agentIdPvPanel,String agentIdConcentrator, long bidUpdateRate) throws Exception {
+	public Dictionary<String, Object> getPvPanelProperties(String agentIdPvPanel,String agentIdMatcher, long bidUpdateRate) throws Exception {
     	// create PvPanel props
     	Dictionary<String, Object> properties = new Hashtable<String, Object>();
     	properties.put("agentId", agentIdPvPanel);
-    	properties.put("desiredParentId", agentIdConcentrator);
+    	properties.put("desiredParentId", agentIdMatcher);
     	properties.put("bidUpdateRate", bidUpdateRate);
     	properties.put("minimumDemand", "-700");
     	properties.put("maximumDemand", "-600");
@@ -74,11 +74,11 @@ public class ClusterHelper {
     	return properties;
     }
 	
-    public Dictionary<String, Object> getFreezerProperties(String agentIdFreezer,String agentIdConcentrator, long bidUpdateRate) throws Exception {
+    public Dictionary<String, Object> getFreezerProperties(String agentIdFreezer,String agentIdMatcher, long bidUpdateRate) throws Exception {
     	// create Freezer props
     	Dictionary<String, Object> properties = new Hashtable<String, Object>();
     	properties.put("agentId", agentIdFreezer);
-    	properties.put("desiredParentId", agentIdConcentrator);
+    	properties.put("desiredParentId", agentIdMatcher);
     	properties.put("bidUpdateRate", bidUpdateRate);
     	properties.put("minimumDemand", "100");
     	properties.put("maximumDemand", "121");

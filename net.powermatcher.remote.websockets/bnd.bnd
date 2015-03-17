@@ -8,8 +8,9 @@
     
 Bundle-Version: 2.0.0.${tstamp}
 Service-Component:  *
-Private-Package:  \
-	net.powermatcher.remote.websockets.data,\
-	net.powermatcher.remote.websockets,\
-	net.powermatcher.remote.websockets.json
+
 Web-ContextPath: /powermatcher/websockets
+Export-Package:  \
+	net.powermatcher.remote.websockets,\
+	net.powermatcher.remote.websockets.data,\
+	net.powermatcher.remote.websockets.json
