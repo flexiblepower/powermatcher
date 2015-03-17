@@ -24,39 +24,37 @@ public abstract class BaseAgentEndpoint
     implements AgentEndpoint {
 
     /**
-     * This configuration description should be extended by the configuration of the implementing agent and should
-     * override the {@link #agentId()} and {@link #desiredParentId()} with their default values and descriptions.
-     * Unfortunately the bnd generator does not detect overriden config objects correctly.
-     */
-    public interface Config
-        extends BaseAgent.Config {
-        /** @return The agent identifier of the parent matcher to which this agent should be connected */
-        String desiredParentId();
-    }
-
-    /**
      * The id of the {@link MatcherEndpoint} this Agent wants to connect to.
      */
     private String desiredParentId;
 
     /**
-     * This method should always be called during activation of the agent. It sets the agentId and desiredParentId.
+     * This method should always be called during activation of the agent. It sets the agentId and desiredParentId. This
+     * will also call the {@link #init(String)} method, so that call is no longer needed.
      *
-     * @param config
-     *            The configuration of this BaseAgent, which provides the agentId and desiredParentId.
+     * @param agentId
+     *            The agentId that should be used by this {@link BaseAgent}. This will be returned when the
+     *            {@link #getAgentId()} is called.
+     * @param desiredParentId
+     *            The agentId that should be used by this {@link BaseAgentEndpoint} when determining the desired parent.
+     *            This will be returned when the {@link #getDesiredParentId()} is called.
      *
      * @throws IllegalArgumentException
      *             when either the agentId or the desiredParentId is null or is an empty string.
      */
-    public void activate(Config config) {
-        super.activate(config);
+    protected void init(String agentId, String desiredParentId) {
+        super.init(agentId);
 
-        String desiredParentId = config.desiredParentId();
         if (desiredParentId == null || desiredParentId.isEmpty()) {
             throw new IllegalArgumentException("The desiredParentId may not be null or empty");
         }
 
         this.desiredParentId = desiredParentId;
+    }
+
+    @Override
+    protected void init(String agentId) {
+        throw new AssertionError("This method should not be called directly, call init(agentId, desiredParentId)");
     }
 
     @Override
@@ -150,10 +148,10 @@ public abstract class BaseAgentEndpoint
             BidUpdate update = new BidUpdate(newBid, bidNumberGenerator.incrementAndGet());
             lastBidUpdate = update;
             publishEvent(new OutgoingBidUpdateEvent(getClusterId(),
-                                              getAgentId(),
-                                              session.getSessionId(),
-                                              now(),
-                                              update));
+                                                    getAgentId(),
+                                                    session.getSessionId(),
+                                                    now(),
+                                                    update));
             LOGGER.debug("Sending bid [{}] to {}", update, session.getAgentId());
             session.updateBid(update);
             return update;

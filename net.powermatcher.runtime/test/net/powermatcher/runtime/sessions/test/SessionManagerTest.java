@@ -12,6 +12,7 @@ import net.powermatcher.mock.MockContext;
 import net.powermatcher.mock.MockMatcherAgent;
 import net.powermatcher.runtime.sessions.SessionManager;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -45,6 +46,12 @@ public class SessionManagerTest {
 
         testAgent = new MockAgent(AGENT_ID);
         testAgent.setDesiredParentId("auctioneer");
+    }
+
+    @After
+    public void tearDown() {
+        sessionManager.removeAgentEndpoint(testAgent);
+        sessionManager.removeMatcherEndpoint(auctioneer);
     }
 
     @Test

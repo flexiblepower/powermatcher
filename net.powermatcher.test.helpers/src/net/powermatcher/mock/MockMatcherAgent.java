@@ -36,10 +36,9 @@ public class MockMatcherAgent
      * {@inheritDoc}
      */
     @Override
-    public boolean connectToAgent(Session session) {
+    public void connectToAgent(Session session) {
         session.setMarketBasis(marketBasis);
         this.session = session;
-        return true;
     }
 
     /**

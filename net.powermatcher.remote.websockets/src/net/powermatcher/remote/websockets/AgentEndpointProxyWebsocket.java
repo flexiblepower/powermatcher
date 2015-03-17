@@ -32,14 +32,11 @@ public class AgentEndpointProxyWebsocket
     extends BaseAgentEndpoint {
 
     @Meta.OCD
-    public static interface Config
-        extends BaseAgentEndpoint.Config {
-        @Override
+    public static interface Config {
         @Meta.AD(deflt = "concentrator",
                  description = "The agent identifier of the parent matcher to which this agent should be connected ")
         String desiredParentId();
 
-        @Override
         @Meta.AD(deflt = "agentendpointproxy", description = "The unique identifier of the agent")
         String agentId();
 
@@ -60,7 +57,7 @@ public class AgentEndpointProxyWebsocket
     @Activate
     public void activate(Map<String, Object> properties) {
         Config config = Configurable.createConfigurable(Config.class, properties);
-        activate(config);
+        init(config.agentId(), config.desiredParentId());
         remoteAgentEndpointId = config.remoteAgentEndpointId();
     }
 

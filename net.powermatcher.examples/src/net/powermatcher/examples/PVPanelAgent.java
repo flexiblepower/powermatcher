@@ -47,13 +47,10 @@ public class PVPanelAgent
 
     private static Random generator = new Random();
 
-    public static interface Config
-        extends BaseAgentEndpoint.Config {
-        @Override
+    public static interface Config {
         @Meta.AD(deflt = "pvpanel", description = "The unique identifier of the agent")
         String agentId();
 
-        @Override
         @Meta.AD(deflt = "concentrator",
                  description = "The agent identifier of the parent matcher to which this agent should be connected")
         public String desiredParentId();
@@ -94,7 +91,7 @@ public class PVPanelAgent
     @Activate
     public void activate(Map<String, Object> properties) {
         config = Configurable.createConfigurable(Config.class, properties);
-        activate(config);
+        init(config.agentId(), config.desiredParentId());
 
         minimumDemand = config.minimumDemand();
         maximumDemand = config.maximumDemand();

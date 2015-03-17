@@ -26,16 +26,6 @@ import org.slf4j.LoggerFactory;
 public abstract class BaseAgent
     implements ObservableAgent {
 
-    /**
-     * This configuration description should be extended by the configuration of the implementing agent and should
-     * override the {@link #agentId()} with their default values and descriptions. Unfortunately the bnd generator does
-     * not detect overriden config objects correctly.
-     */
-    public interface Config {
-        /** @return The unique identifier of the agent. */
-        String agentId();
-    }
-
     protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     /**
@@ -46,18 +36,19 @@ public abstract class BaseAgent
     /**
      * This method should always be called during activation of the agent. It sets the identifier of this agent.
      *
-     * @param config
-     *            The configuration of this BaseAgent, which provides the agentId.
+     * @param agentId
+     *            The agentId that should be used by this {@link BaseAgent}. This will be returned weth the
+     *            {@link #getAgentId()} is called.
      *
      * @throws IllegalArgumentException
      *             when the agentId is null or is an empty string.
      */
-    public void activate(Config config) {
-        String agentId = config.agentId();
-        if (agentId == null || agentId.isEmpty()) {
+    protected void init(String agentId) {
+        if (this.agentId != null) {
+            throw new IllegalStateException("Agent already initialized with an AgentId");
+        } else if (agentId == null || agentId.isEmpty()) {
             throw new IllegalArgumentException("The agentId may not be null or empty");
         }
-
         this.agentId = agentId;
     }
 
@@ -88,7 +79,7 @@ public abstract class BaseAgent
      * @return A {@link Date} object, representing the current date and time
      */
     protected Date now() {
-        if (context != null) {
+        if (context == null) {
             throw new IllegalStateException("The FlexiblePowerContext has not been set, is the PowerMatcher runtime active?");
         }
         return context.currentTime();

@@ -61,8 +61,8 @@ public class PotentialSession {
     public boolean tryConnect() {
         if (session == null && matcherEndpoint != null && matcherEndpoint.isConnected()) {
             SessionImpl newSession = new SessionImpl(agentEndpoint, matcherEndpoint, this);
-            if (matcherEndpoint.connectToAgent(newSession)) {
-                // Success!
+            try {
+                matcherEndpoint.connectToAgent(newSession);
                 session = newSession;
                 agentEndpoint.connectToMatcher(newSession);
                 LOGGER.debug("Connected MatcherEndpoint '{}' with AgentEndpoint '{}' with Session {}",
@@ -70,6 +70,11 @@ public class PotentialSession {
                              agentEndpoint.getAgentId(),
                              newSession.getSessionId());
                 return true;
+            } catch (IllegalStateException ex) {
+                LOGGER.warn("Could not connect agent[{}] to matcher[{}]: {}",
+                            agentEndpoint.getAgentId(),
+                            matcherEndpoint.getAgentId(),
+                            ex.getMessage());
             }
         }
         return false;

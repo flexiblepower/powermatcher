@@ -59,12 +59,10 @@ public class MatcherEndpointProxyWebsocket
     private static final Logger LOGGER = LoggerFactory.getLogger(MatcherEndpointProxyWebsocket.class);
 
     @Meta.OCD
-    public static interface Config
-        extends BaseAgent.Config {
+    public static interface Config {
         @Meta.AD(deflt = "", description = "remote agent endpoint proxy to connect to.")
         String desiredConnectionId();
 
-        @Override
         @Meta.AD(deflt = "matcherendpointproxy", description = "The unique identifier of the agent")
         String agentId();
 
@@ -97,7 +95,7 @@ public class MatcherEndpointProxyWebsocket
     public synchronized void activate(Map<String, Object> properties) {
         // Read configuration properties
         Config config = Configurable.createConfigurable(Config.class, properties);
-        activate(config);
+        init(config.agentId());
 
         try {
             powermatcherUrl = new URI(config.powermatcherUrl()
@@ -238,15 +236,14 @@ public class MatcherEndpointProxyWebsocket
     private net.powermatcher.api.Session localSession;
 
     @Override
-    public boolean connectToAgent(net.powermatcher.api.Session session) {
+    public void connectToAgent(net.powermatcher.api.Session session) {
         if (!isConnected()) {
-            return false;
+            throw new IllegalStateException("This matcher is not yet connected");
         } else if (localSession != null) {
             localSession = session;
             session.setMarketBasis(getMarketBasis());
-            return true;
         } else {
-            return false;
+            throw new IllegalStateException("The MatcherEndpointProxy may only be connected to 1 agent");
         }
     }
 

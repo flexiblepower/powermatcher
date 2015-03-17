@@ -55,11 +55,10 @@ public class ConcentratorTest {
         assertThat(concentrator.getDesiredParentId(), is(equalTo(AUCTIONEER_ID)));
     }
 
-    @Test
+    @Test(expected = IllegalStateException.class)
     public void testConnectToAgentBeforeMatcher() {
         Session session = new SimpleSession(new MockAgent("testAgent"), concentrator);
-        boolean connectToAgent = concentrator.connectToAgent(session);
-        assertThat(connectToAgent, is(false));
+        concentrator.connectToAgent(session);
     }
 
     @Test

@@ -7,7 +7,6 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.monitoring.ObservableAgent;
-import net.powermatcher.core.BaseAgent;
 import net.powermatcher.core.BaseMatcherEndpoint;
 import net.powermatcher.core.bidcache.AggregatedBid;
 import net.powermatcher.core.concentrator.Concentrator;
@@ -38,10 +37,7 @@ public class Auctioneer
     implements MatcherEndpoint {
 
     @Meta.OCD
-    public interface Config
-        extends BaseAgent.Config {
-
-        @Override
+    public interface Config {
         @Meta.AD(deflt = "auctioneer")
         String agentId();
 
@@ -79,7 +75,7 @@ public class Auctioneer
     @Activate
     public void activate(final Map<String, ?> properties) {
         config = Configurable.createConfigurable(Config.class, properties);
-        super.activate(config);
+        super.init(config.agentId());
 
         MarketBasis marketBasis = new MarketBasis(config.commodity(),
                                                   config.currency(),

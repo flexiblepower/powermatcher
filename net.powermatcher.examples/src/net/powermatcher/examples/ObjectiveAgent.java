@@ -39,9 +39,7 @@ public class ObjectiveAgent
                                                       .getLogger(ObjectiveAgent.class);
 
     @Meta.OCD
-    public static interface Config
-        extends BaseAgent.Config {
-        @Override
+    public static interface Config {
         @Meta.AD(deflt = "objectiveagent")
         String agentId();
     }
@@ -63,7 +61,7 @@ public class ObjectiveAgent
     @Activate
     public void activate(final Map<String, Object> properties) {
         config = Configurable.createConfigurable(Config.class, properties);
-        activate(config);
+        init(config.agentId());
 
         LOGGER.info("Objective agent activated");
     }

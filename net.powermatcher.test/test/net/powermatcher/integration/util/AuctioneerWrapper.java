@@ -25,9 +25,9 @@ public class AuctioneerWrapper
      * {@inheritDoc}
      */
     @Override
-    public synchronized boolean connectToAgent(Session session) {
+    public synchronized void connectToAgent(Session session) {
         shadowedSessions.add(session);
-        return super.connectToAgent(session);
+        super.connectToAgent(session);
     }
 
     /**
