@@ -40,8 +40,8 @@ public class SessionManagerTest {
     @Before
     public void setUp() {
         auctioneer = new MockMatcherAgent(AUCTIONEER_NAME, CLUSTER_ID);
-
         auctioneer.setContext(new MockContext(0));
+
         sessionManager = new SessionManager();
 
         testAgent = new MockAgent(AGENT_ID);

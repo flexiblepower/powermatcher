@@ -98,4 +98,9 @@ public class MockMatcherAgent
     public void assertTotalBid(double... demandArray) {
         assertArrayEquals(demandArray, lastReceivedBid.getBid().toArrayBid().getDemand(), 0);
     }
+
+    @Override
+    public boolean isConnected() {
+        return true;
+    }
 }

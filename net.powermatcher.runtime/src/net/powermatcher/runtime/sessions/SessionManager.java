@@ -144,7 +144,9 @@ public class SessionManager {
                 }
             }
         }
-        currentSession.disconnect();
+        if (currentSession != null) {
+            currentSession.disconnect();
+        }
     }
 
     /**
