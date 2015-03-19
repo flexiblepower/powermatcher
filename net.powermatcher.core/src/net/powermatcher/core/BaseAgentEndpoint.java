@@ -57,6 +57,14 @@ public abstract class BaseAgentEndpoint
         throw new AssertionError("This method should not be called directly, call init(agentId, desiredParentId)");
     }
 
+    /**
+     * Sets the {@link FlexiblePowerContext} that can be used for scheduling tasks or getting the time (see
+     * {@link #now()}). When overriding this method, you can directly schedule something if needed, but make sure that
+     * the <code>super.setContext(context)</code> is called.
+     *
+     * @param context
+     *            The {@link FlexiblePowerContext} that will be used from now on for scheduling or timing.
+     */
     @Override
     public void setContext(FlexiblePowerContext context) {
         if (desiredParentId == null) {
