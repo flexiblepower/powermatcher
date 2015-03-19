@@ -137,6 +137,14 @@ public class AgentEndpointProxyWebsocket
         }
     }
 
+    @Override
+    public void handlePriceUpdate(PriceUpdate priceUpdate) {
+        super.handlePriceUpdate(priceUpdate);
+        if (isRemoteConnected()) {
+            updateRemotePrice(priceUpdate);
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
