@@ -109,8 +109,8 @@ public class SessionManager {
             // Check if it already exists
             for (PotentialSession ps : potentialSessions.get(matcherId)) {
                 if (agentId.equals(ps.getAgentId())) {
-                    LOGGER.warn("AgentEndpoint added with agentId " + agentId
-                                + ", but it already exists. Ignoring the new one...");
+                    LOGGER.warn("AgentEndpoint added with agentId {}, but it already exists. Ignoring the new one...",
+                                agentId);
                     return;
                 }
             }
@@ -118,6 +118,7 @@ public class SessionManager {
             PotentialSession ps = new PotentialSession(agentEndpoint);
             ps.setMatcherEndpoint(matcherEndpoints.get(matcherId));
             potentialSessions.get(matcherId).add(ps);
+            LOGGER.debug("Agent with id [{}] added", agentId);
         }
         tryConnect();
     }

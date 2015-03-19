@@ -8,6 +8,8 @@ import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;
 
 import org.flexiblepower.context.FlexiblePowerContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
@@ -15,6 +17,7 @@ import aQute.bnd.annotation.component.Reference;
 
 @Component(immediate = true)
 public class AgentInitializer {
+    private static final Logger logger = LoggerFactory.getLogger(AgentInitializer.class);
 
     private final Set<Agent> agents = new HashSet<Agent>();
     private final FlexiblePowerContext runtimeContext = new PowerMatcherContext();
@@ -45,11 +48,14 @@ public class AgentInitializer {
         if (!agents.contains(agent)) {
             agent.setContext(runtimeContext);
             agents.add(agent);
+            logger.debug("Detected agent with id [{}]", agent.getAgentId());
         }
     }
 
     private synchronized void removeAgent(Agent agent) {
-        agents.remove(agent);
+        if (agents.remove(agent)) {
+            logger.debug("Removed agent with id [{}]", agent.getAgentId());
+        }
     }
 
 }
