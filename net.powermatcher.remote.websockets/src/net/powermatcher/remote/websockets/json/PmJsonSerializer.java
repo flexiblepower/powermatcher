@@ -64,7 +64,7 @@ public class PmJsonSerializer {
      */
     public String serializePriceUpdate(final PriceUpdate priceUpdate) {
         PriceUpdateModel priceModel = new PriceUpdateModel();
-        priceModel.setBidNumber(priceModel.getBidNumber());
+        priceModel.setBidNumber(priceUpdate.getBidNumber());
         priceModel.setPriceValue(priceUpdate.getPrice().getPriceValue());
         priceModel.setMarketBasis(ModelMapper.convertMarketBasis(priceUpdate.getPrice().getMarketBasis()));
 
