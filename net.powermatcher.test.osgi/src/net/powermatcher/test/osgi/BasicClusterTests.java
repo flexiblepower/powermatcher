@@ -204,7 +204,6 @@ public class BasicClusterTests
 
         assertEquals(0, getLastObservedPriceUpdate(AGENT_ID_CONCENTRATOR).getPrice().getPriceValue(), 0);
         assertEquals(0, getLastObservedPriceUpdate(AGENT_ID_PV_PANEL).getPrice().getPriceValue(), 0);
-        assertEquals(0, getLastObservedPriceUpdate(AGENT_ID_FREEZER).getPrice().getPriceValue(), 0);
 
         // Check aggregated bid does no longer contain freezer, by checking last aggregated against panel bids
         List<OutgoingBidUpdateEvent> concentratorBids = observer.getOutgoingBidUpdateEvents(AGENT_ID_CONCENTRATOR);
