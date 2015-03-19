@@ -55,8 +55,10 @@ public class Concentrator
         @Override
         protected void performUpdate(AggregatedBid aggregatedBid) {
             Bid bid = transformBid(aggregatedBid);
-            BidUpdate bidUpdate = publishBid(bid);
-            saveBid(aggregatedBid, bidUpdate);
+            synchronized (sentBids) {
+                BidUpdate bidUpdate = publishBid(bid);
+                saveBid(aggregatedBid, bidUpdate);
+            }
         }
     }
 
