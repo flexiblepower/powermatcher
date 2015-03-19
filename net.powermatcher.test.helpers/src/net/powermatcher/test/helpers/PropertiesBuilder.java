@@ -1,6 +1,8 @@
 package net.powermatcher.test.helpers;
 
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 
 import net.powermatcher.api.data.MarketBasis;
@@ -45,5 +47,9 @@ public class PropertiesBuilder {
 
     public Map<String, Object> build() {
         return new HashMap<String, Object>(properties);
+    }
+
+    public Dictionary<String, Object> buildDict() {
+        return new Hashtable<String, Object>(properties);
     }
 }

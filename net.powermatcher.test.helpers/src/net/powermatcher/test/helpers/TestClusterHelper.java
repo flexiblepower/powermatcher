@@ -1,8 +1,5 @@
 package net.powermatcher.test.helpers;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -99,10 +96,18 @@ public class TestClusterHelper
         for (int i = 0; i < expectedIds.length; i++) {
             MockAgent agent = getAgent(i);
             if (expectedIds[i] < 0) {
-                assertNull(agent.getLastPriceUpdate());
+                if (agent.getLastPriceUpdate() == null) {
+                    throw new AssertionError("Last price update of agent " + i + " is null");
+                }
             } else {
-                assertEquals(price, agent.getLastPriceUpdate().getPrice());
-                assertEquals(expectedIds[i], agent.getLastPriceUpdate().getBidNumber());
+                if (!agent.getLastPriceUpdate().getPrice().equals(price)) {
+                    throw new AssertionError("expected: " + price + " got: " + agent.getLastPriceUpdate().getPrice());
+                }
+                if (agent.getLastPriceUpdate().getBidNumber() != expectedIds[i]) {
+                    throw new AssertionError("expected: " + expectedIds[i]
+                                             + "  got: "
+                                             + agent.getLastPriceUpdate().getBidNumber());
+                }
             }
         }
     }

@@ -1,7 +1,6 @@
 package net.powermatcher.mock;
 
-import static org.junit.Assert.assertArrayEquals;
-
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -95,8 +94,16 @@ public class MockMatcherAgent
         return clusterId;
     }
 
-    public void assertTotalBid(double... demandArray) {
-        assertArrayEquals(demandArray, lastReceivedBid.getBid().toArrayBid().getDemand(), 0);
+    public void assertTotalBid(double... expectedDemand) {
+        double[] realDemand = lastReceivedBid.getBid().toArrayBid().getDemand();
+        if (expectedDemand.length != realDemand.length) {
+            throw new AssertionError(Arrays.toString(expectedDemand) + " != " + Arrays.toString(realDemand));
+        }
+        for (int ix = 0; ix < expectedDemand.length; ix++) {
+            if (expectedDemand[ix] != realDemand[ix]) {
+                throw new AssertionError(Arrays.toString(expectedDemand) + " != " + Arrays.toString(realDemand));
+            }
+        }
     }
 
     @Override

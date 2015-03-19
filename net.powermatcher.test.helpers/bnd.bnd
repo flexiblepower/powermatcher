@@ -1,4 +1,4 @@
--buildpath: ${pm-buildpath}, junit, flexiblepower.api
+-buildpath: ${pm-buildpath}, flexiblepower.api
 
 Bundle-Version: 2.0.0.${qualifier}
 Bundle-Description: A library for testing purposes, that should be statically linked. \
