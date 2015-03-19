@@ -12,7 +12,7 @@ import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.concentrator.Concentrator;
 import net.powermatcher.mock.MockContext;
-import net.powermatcher.test.helpers.PropertieBuilder;
+import net.powermatcher.test.helpers.PropertiesBuilder;
 import net.powermatcher.test.helpers.TestClusterHelper;
 
 import org.junit.Before;
@@ -40,7 +40,7 @@ public class OscillationPreventionTest {
     public void setUpCluster() {
         // Create auctioneer
         auctioneer = new Auctioneer();
-        auctioneer.activate(new PropertieBuilder().agentId(AUCTIONEER_ID)
+        auctioneer.activate(new PropertiesBuilder().agentId(AUCTIONEER_ID)
                                                   .clusterId("testCluster")
                                                   .marketBasis(TestClusterHelper.DEFAULT_MB)
                                                   .minTimeBetweenPriceUpdates(1000)
@@ -49,7 +49,7 @@ public class OscillationPreventionTest {
 
         // create concentrator
         concentrator = new Concentrator();
-        concentrator.activate(new PropertieBuilder().agentId(CONCENTRATOR_ID)
+        concentrator.activate(new PropertiesBuilder().agentId(CONCENTRATOR_ID)
                                                     .desiredParentId(AUCTIONEER_ID)
                                                     .minTimeBetweenBidUpdates(1000)
                                                     .build());

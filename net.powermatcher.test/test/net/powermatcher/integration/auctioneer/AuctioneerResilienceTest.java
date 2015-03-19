@@ -12,7 +12,7 @@ import net.powermatcher.integration.util.AuctioneerWrapper;
 import net.powermatcher.integration.util.CsvBidReader;
 import net.powermatcher.integration.util.CsvExpectedResultsReader;
 import net.powermatcher.mock.MockAgent;
-import net.powermatcher.test.helpers.PropertieBuilder;
+import net.powermatcher.test.helpers.PropertiesBuilder;
 import net.powermatcher.test.helpers.TestClusterHelper;
 
 import org.junit.After;
@@ -34,7 +34,7 @@ public class AuctioneerResilienceTest
 
         MarketBasis marketBasis = resultsReader.getMarketBasis();
         auctioneer = new AuctioneerWrapper();
-        Map<String, Object> auctioneerProperties = new PropertieBuilder().agentId("auctioneer")
+        Map<String, Object> auctioneerProperties = new PropertiesBuilder().agentId("auctioneer")
                                                                          .marketBasis(marketBasis)
                                                                          .minTimeBetweenPriceUpdates(1000)
                                                                          .clusterId("testCluster")

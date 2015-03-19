@@ -10,7 +10,7 @@ import net.powermatcher.core.auctioneer.ObjectiveAuctioneer;
 import net.powermatcher.core.bidcache.AggregatedBid;
 import net.powermatcher.core.bidcache.BidCache;
 import net.powermatcher.mock.MockObjectiveAgent;
-import net.powermatcher.test.helpers.PropertieBuilder;
+import net.powermatcher.test.helpers.PropertiesBuilder;
 import net.powermatcher.test.helpers.TestClusterHelper;
 
 import org.junit.After;
@@ -37,7 +37,7 @@ public class ObjectiveAuctioneerTest {
 
     @Before
     public void setUp() throws Exception {
-        objectiveauctioneer.activate(new PropertieBuilder().agentId(OBJECTIVE_AUCTIONEER_NAME)
+        objectiveauctioneer.activate(new PropertiesBuilder().agentId(OBJECTIVE_AUCTIONEER_NAME)
                                                            .clusterId("testCluster")
                                                            .marketBasis(marketBasis)
                                                            .minTimeBetweenPriceUpdates(1000)

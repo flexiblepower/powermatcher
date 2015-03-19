@@ -5,35 +5,35 @@ import java.util.Map;
 
 import net.powermatcher.api.data.MarketBasis;
 
-public class PropertieBuilder {
+public class PropertiesBuilder {
     private final Map<String, Object> properties = new HashMap<String, Object>();
 
-    public PropertieBuilder add(String name, Object value) {
+    public PropertiesBuilder add(String name, Object value) {
         properties.put(name, value);
         return this;
     }
 
-    public PropertieBuilder agentId(String agentId) {
+    public PropertiesBuilder agentId(String agentId) {
         return add("agentId", agentId);
     }
 
-    public PropertieBuilder clusterId(String clusterId) {
+    public PropertiesBuilder clusterId(String clusterId) {
         return add("clusterId", clusterId);
     }
 
-    public PropertieBuilder desiredParentId(String desiredParentId) {
+    public PropertiesBuilder desiredParentId(String desiredParentId) {
         return add("desiredParentId", desiredParentId);
     }
 
-    public PropertieBuilder minTimeBetweenBidUpdates(int minTimeBetweenBidUpdates) {
+    public PropertiesBuilder minTimeBetweenBidUpdates(int minTimeBetweenBidUpdates) {
         return add("minTimeBetweenBidUpdates", minTimeBetweenBidUpdates);
     }
 
-    public PropertieBuilder minTimeBetweenPriceUpdates(int minTimeBetweenPriceUpdates) {
+    public PropertiesBuilder minTimeBetweenPriceUpdates(int minTimeBetweenPriceUpdates) {
         return add("minTimeBetweenPriceUpdates", minTimeBetweenPriceUpdates);
     }
 
-    public PropertieBuilder marketBasis(MarketBasis marketBasis) {
+    public PropertiesBuilder marketBasis(MarketBasis marketBasis) {
         add("commodity", marketBasis.getCommodity());
         add("currency", marketBasis.getCurrency());
         add("maximumPrice", marketBasis.getMaximumPrice());

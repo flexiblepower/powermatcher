@@ -19,7 +19,7 @@ import net.powermatcher.mock.MockAgent;
 import net.powermatcher.mock.MockContext;
 import net.powermatcher.mock.MockMatcherAgent;
 import net.powermatcher.mock.SimpleSession;
-import net.powermatcher.test.helpers.PropertieBuilder;
+import net.powermatcher.test.helpers.PropertiesBuilder;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -42,7 +42,7 @@ public class ConcentratorTest {
 
     @Before
     public void setUp() {
-        concentrator.activate(new PropertieBuilder().agentId(CONCENTRATOR_ID)
+        concentrator.activate(new PropertiesBuilder().agentId(CONCENTRATOR_ID)
                                                     .desiredParentId(AUCTIONEER_ID)
                                                     .minTimeBetweenBidUpdates(MIN_TIME_BETWEEN_BIDS)
                                                     .build());
