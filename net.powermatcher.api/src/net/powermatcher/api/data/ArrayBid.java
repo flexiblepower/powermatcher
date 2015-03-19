@@ -121,7 +121,7 @@ public class ArrayBid
         }
 
         /**
-         * Makes sure the whole array is filled, then creates the ArrayBid with the Builder's internal values
+         * Makes sure the whole array is filled, then creates the ArrayBid with the Builder's internal values.
          *
          * @return The created ArrayBid
          * @throws IllegalArgumentException
@@ -268,7 +268,8 @@ public class ArrayBid
 
                 if (demandIsEqual(targetDemand, middleDemand)) {
                     // A point with the target demand is found, select this point
-                    leftIx = rightIx = middleIx;
+                    leftIx = middleIx;
+                    rightIx = middleIx;
                 } else if (middleDemand > targetDemand) {
                     // If the middle demand is bigger than the target demand, we set the left to the middle
                     leftIx = middleIx;

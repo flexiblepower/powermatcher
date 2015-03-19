@@ -13,7 +13,7 @@ import net.powermatcher.api.data.Price;
 public interface ObjectiveEndpoint {
 
     /**
-     * This method is called by the Auctioneer when it will send the price
+     * This method is called by the Auctioneer when it will send the price.
      *
      * @param price
      *            the {@link Price} sent by the Auctioneer.

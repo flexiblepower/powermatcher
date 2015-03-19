@@ -92,7 +92,7 @@ public class PriceStep {
     }
 
     /**
-     * Creates a {@link Price}, based on the {@link MarketBasis} as the priceStep
+     * Creates a {@link Price}, based on the {@link MarketBasis} as the priceStep.
      *
      * @return the new {@link Price}
      */

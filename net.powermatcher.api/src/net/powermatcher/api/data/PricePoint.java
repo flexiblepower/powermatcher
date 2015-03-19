@@ -38,7 +38,7 @@ public class PricePoint
     }
 
     /**
-     * A copy constructor used to create a PricePoint with a new {@link MarketBasis}
+     * A copy constructor used to create a PricePoint with a new {@link MarketBasis}.
      *
      * @param marketBasis
      *            the new {@link MarketBasis}
