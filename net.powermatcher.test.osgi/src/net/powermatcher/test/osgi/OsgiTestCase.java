@@ -1,5 +1,7 @@
 package net.powermatcher.test.osgi;
 
+import java.util.List;
+
 import junit.framework.TestCase;
 
 import org.osgi.framework.BundleContext;
@@ -15,6 +17,24 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class OsgiTestCase
     extends TestCase {
+
+    public static <T> T getLast(List<T> list) {
+        assertFalse(list.isEmpty());
+        return list.get(list.size() - 1);
+    }
+
+    public static <T> void assertEmpty(List<T> list) {
+        if (!list.isEmpty()) {
+            throw new AssertionError("list is not empty");
+        }
+    }
+
+    public static <T> void assertNotEmpty(List<T> list) {
+        if (list.isEmpty()) {
+            throw new AssertionError("list is empty");
+        }
+    }
+
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     protected final BundleContext context = FrameworkUtil.getBundle(getClass()).getBundleContext();

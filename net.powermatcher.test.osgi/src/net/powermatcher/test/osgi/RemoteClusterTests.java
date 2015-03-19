@@ -1,14 +1,12 @@
 package net.powermatcher.test.osgi;
 
-import java.util.List;
-import java.util.Map;
+import static net.powermatcher.test.osgi.ClusterHelper.AGENT_ID_AUCTIONEER;
 
-import net.powermatcher.api.messages.BidUpdate;
+import java.util.List;
+
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingBidUpdateEvent;
-import net.powermatcher.core.BaseMatcherEndpoint;
 import net.powermatcher.core.bidcache.AggregatedBid;
-import net.powermatcher.core.bidcache.BidCache;
 import net.powermatcher.core.concentrator.Concentrator;
 import net.powermatcher.examples.StoringObserver;
 import net.powermatcher.test.helpers.PropertiesBuilder;
@@ -165,21 +163,10 @@ public class RemoteClusterTests
         assertTrue("Concentrator still contains freezer bid", foundBid);
 
         // Validate last aggregated bid contains only pvPanel
-        BaseMatcherEndpoint matcherPart = clusterHelper.getPrivateField(concentrator,
-                                                                        "matcherPart",
-                                                                        BaseMatcherEndpoint.class);
-        BidCache bidCache = clusterHelper.getPrivateField(matcherPart, "bidCache", BidCache.class);
-        AggregatedBid lastBid = clusterHelper.getPrivateField(bidCache, "lastBid", AggregatedBid.class);
+        AggregatedBid lastBid = (AggregatedBid) getLast(observer.getIncomingBidUpdateEvents(AGENT_ID_AUCTIONEER)).getBidUpdate()
+                                                                                                                 .getBid();
         assertTrue(lastBid.getAgentBidReferences().containsKey(ClusterHelper.AGENT_ID_PV_PANEL));
         assertFalse(lastBid.getAgentBidReferences().containsKey(AGENT_ID_AGENT_PROXY));
-
-        // Validate bidcache contains both agents, but Freezer bid is 0
-        @SuppressWarnings("unchecked")
-        Map<String, BidUpdate> agentBids = (Map<String, BidUpdate>) clusterHelper.getPrivateField(bidCache,
-                                                                                                  "agentBids",
-                                                                                                  Object.class);
-        assertTrue(agentBids.containsKey(ClusterHelper.AGENT_ID_PV_PANEL));
-        assertFalse(agentBids.containsKey(AGENT_ID_AGENT_PROXY));
     }
 
     private PropertiesBuilder getAgentProxyProperties(String agentId,

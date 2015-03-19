@@ -1,7 +1,6 @@
 package net.powermatcher.test.osgi;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -166,8 +165,8 @@ public class ClusterHelper
         return new PropertiesBuilder().agentId(agentId)
                                       .desiredParentId(desiredParentId)
                                       .add("bidUpdateRate", bidUpdateRate)
-                                      .add("minimumDemand", 100)
-                                      .add("maximumDemand", 121);
+                                      .add("minimumDemand", 1000)
+                                      .add("maximumDemand", 1210);
     }
 
     public Configuration createFreezer(int bidUpdateRate) throws IOException {
@@ -259,34 +258,6 @@ public class ClusterHelper
         }
 
         throw new AssertionError("The service with pid " + pid + "never came online");
-    }
-
-    public <T> T getPrivateField(Object agent, String field, Class<T> type) {
-        T result = null;
-        Field privateField = null;
-        try {
-            privateField = agent.getClass().getDeclaredField(field);
-        } catch (NoSuchFieldException e) {
-            try {
-                privateField = agent.getClass().getSuperclass().getDeclaredField(field);
-            } catch (NoSuchFieldException e2) {
-                TestCase.fail("Failed to get " + type.getSimpleName() + ", reason: " + e2);
-            }
-        }
-
-        // Read value from field
-        if (privateField != null) {
-            try {
-                privateField.setAccessible(true);
-                result = type.cast(privateField.get(agent));
-            } catch (IllegalArgumentException e) {
-                TestCase.fail("Failed to get " + type.getSimpleName() + ", reason: " + e);
-            } catch (IllegalAccessException e) {
-                TestCase.fail("Failed to get " + type.getSimpleName() + ", reason: " + e);
-            }
-        }
-
-        return result;
     }
 
     public void disconnectAgent(ConfigurationAdmin configAdmin, String agentPid) throws Exception,
