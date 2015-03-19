@@ -96,8 +96,8 @@ public class TestClusterHelper
         for (int i = 0; i < expectedIds.length; i++) {
             MockAgent agent = getAgent(i);
             if (expectedIds[i] < 0) {
-                if (agent.getLastPriceUpdate() == null) {
-                    throw new AssertionError("Last price update of agent " + i + " is null");
+                if (agent.getLastPriceUpdate() != null) {
+                    throw new AssertionError("Last price update of agent " + i + " is not null");
                 }
             } else {
                 if (!agent.getLastPriceUpdate().getPrice().equals(price)) {
