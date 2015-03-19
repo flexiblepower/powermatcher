@@ -1,151 +1,266 @@
 package net.powermatcher.test.osgi;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import junit.framework.TestCase;
+import net.powermatcher.api.data.MarketBasis;
+import net.powermatcher.core.auctioneer.Auctioneer;
+import net.powermatcher.core.concentrator.Concentrator;
+import net.powermatcher.examples.Freezer;
+import net.powermatcher.examples.PVPanelAgent;
+import net.powermatcher.examples.StoringObserver;
+import net.powermatcher.test.helpers.PropertiesBuilder;
 
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.ScrService;
+import org.junit.Assert;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Helper class which contains basic functionality used in most tests.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
-public class ClusterHelper {
+public class ClusterHelper
+    implements ServiceListener {
 
-	public final String FACTORY_PID_AUCTIONEER = "net.powermatcher.core.auctioneer.Auctioneer";
-	public final String FACTORY_PID_CONCENTRATOR = "net.powermatcher.core.concentrator.Concentrator";
-	public final String FACTORY_PID_PV_PANEL = "net.powermatcher.examples.PVPanelAgent";
-	public final String FACTORY_PID_FREEZER = "net.powermatcher.examples.Freezer";
-	public final String FACTORY_PID_OBSERVER = "net.powermatcher.examples.StoringObserver";
-	
-	public final String AGENT_ID_AUCTIONEER = "auctioneer";
-	public final String AGENT_ID_CONCENTRATOR = "concentrator";
-	public final String AGENT_ID_PV_PANEL = "pvPanel";
-	public final String AGENT_ID_FREEZER = "freezer";
+    private static final int MAX_TIMEOUT = 10000; // 10 seconds
 
-	public Configuration createConfiguration(ConfigurationAdmin configAdmin, String factoryPid, Dictionary<String, Object> properties) throws Exception {
-    	Configuration config = configAdmin.createFactoryConfiguration(factoryPid, null);
+    public static final MarketBasis DEFAULT_MARKETBASIS = new MarketBasis("electricity", "EUR", 100, 0, 1);
 
-    	// create props
-    	config.update(properties);
-    	
-    	return config;
-	}
-	
-	public Dictionary<String, Object> getAuctioneerProperties(String agentIdAuctioneer, long minTimeBetweenPriceUpdates) {
-    	Dictionary<String, Object> properties = new Hashtable<String, Object>();
-    	properties.put("agentId", agentIdAuctioneer);
-    	properties.put("clusterId", "DefaultCluster");
-    	properties.put("commodity", "electricity");
-    	properties.put("currency", "EUR");
-    	properties.put("priceSteps", 100);
-    	properties.put("minimumPrice", 0.0);
-    	properties.put("maximumPrice", 1.0);
-    	properties.put("bidTimeout", 600);
-    	properties.put("minTimeBetweenPriceUpdates", minTimeBetweenPriceUpdates);
-    	
-    	return properties;
-    }
-	
-	public Dictionary<String, Object> getConcentratorProperties(String agentIdConcentrator, String agentIdAuctioneer, long minTimeBetweenBidUpdates) throws Exception {
-    	Dictionary<String, Object> properties = new Hashtable<String, Object>();
-    	properties.put("agentId", agentIdConcentrator);
-    	properties.put("desiredParentId", agentIdAuctioneer);
-    	properties.put("minTimeBetweenBidUpdates", minTimeBetweenBidUpdates);
-    	
-    	return properties;
-    }
-	
-	public Dictionary<String, Object> getPvPanelProperties(String agentIdPvPanel,String agentIdMatcher, long bidUpdateRate) throws Exception {
-    	// create PvPanel props
-    	Dictionary<String, Object> properties = new Hashtable<String, Object>();
-    	properties.put("agentId", agentIdPvPanel);
-    	properties.put("desiredParentId", agentIdMatcher);
-    	properties.put("bidUpdateRate", bidUpdateRate);
-    	properties.put("minimumDemand", "-700");
-    	properties.put("maximumDemand", "-600");
-    	
-    	return properties;
-    }
-	
-    public Dictionary<String, Object> getFreezerProperties(String agentIdFreezer,String agentIdMatcher, long bidUpdateRate) throws Exception {
-    	// create Freezer props
-    	Dictionary<String, Object> properties = new Hashtable<String, Object>();
-    	properties.put("agentId", agentIdFreezer);
-    	properties.put("desiredParentId", agentIdMatcher);
-    	properties.put("bidUpdateRate", bidUpdateRate);
-    	properties.put("minimumDemand", "100");
-    	properties.put("maximumDemand", "121");
-    	
-    	return properties;
+    public static final String FACTORY_PID_AUCTIONEER = Auctioneer.class.getName();
+    public static final String FACTORY_PID_CONCENTRATOR = Concentrator.class.getName();
+    public static final String FACTORY_PID_PV_PANEL = PVPanelAgent.class.getName();
+    public static final String FACTORY_PID_FREEZER = Freezer.class.getName();
+    public static final String FACTORY_PID_OBSERVER = StoringObserver.class.getName();
+
+    public static final String AGENT_ID_AUCTIONEER = "auctioneer";
+    public static final String AGENT_ID_CONCENTRATOR = "concentrator";
+    public static final String AGENT_ID_PV_PANEL = "pvPanel";
+    public static final String AGENT_ID_FREEZER = "freezer";
+
+    private final BundleContext context;
+
+    private final ServiceTracker<ScrService, ScrService> scrServiceTracker;
+    private final ScrService scrService;
+
+    private final ServiceTracker<ConfigurationAdmin, ConfigurationAdmin> adminServiceTracker;
+    private final ConfigurationAdmin admin;
+
+    private final Set<ServiceReference<?>> savedReferences = new HashSet<ServiceReference<?>>();
+
+    public ClusterHelper(BundleContext context) throws InterruptedException, IOException, InvalidSyntaxException {
+        this.context = context;
+        context.addServiceListener(this);
+
+        scrServiceTracker = new ServiceTracker<ScrService, ScrService>(context, ScrService.class, null);
+        scrServiceTracker.open();
+        scrService = scrServiceTracker.waitForService(MAX_TIMEOUT);
+        Assert.assertNotNull(scrService);
+
+        adminServiceTracker = new ServiceTracker<ConfigurationAdmin, ConfigurationAdmin>(context,
+                                                                                         ConfigurationAdmin.class,
+                                                                                         null);
+        adminServiceTracker.open();
+        admin = adminServiceTracker.waitForService(MAX_TIMEOUT);
+        Assert.assertNotNull(admin);
+
+        // Cleanup running agents to start with clean test
+        Configuration[] configs = admin.listConfigurations(null);
+        if (configs != null) {
+            for (Configuration config : configs) {
+                config.delete();
+            }
+        }
     }
 
-    public Dictionary<String, Object> getStoringObserverProperties() throws Exception {
-    	Dictionary<String, Object> properties = new Hashtable<String, Object>();
-    	properties.put("observableAgent_filter", "");
+    public void close() {
+        adminServiceTracker.close();
+        scrServiceTracker.close();
+        context.removeServiceListener(this);
+        for (Iterator<ServiceReference<?>> it = savedReferences.iterator(); it.hasNext();) {
+            context.ungetService(it.next());
+            it.remove();
+        }
+    }
 
-    	return properties;    	
+    public Configuration createConfiguration(String factoryPid, PropertiesBuilder builder) throws IOException {
+        Configuration config = admin.createFactoryConfiguration(factoryPid, null);
+        config.update(builder.buildDict());
+        return config;
     }
- 
-    public boolean checkActive(ScrService scrService, final String factoryPid) throws Exception {
-		Component[] components = scrService.getComponents(factoryPid);
-		boolean activeAgent = false;
-	
-		for (Component comp : components) {
-			if (comp.getConfigurationPid().equals(factoryPid)) {
-				if (comp.getState() == Component.STATE_ACTIVE) {
-					activeAgent = true;
-				}
-			}
-		}
-		return activeAgent;
-	}
-    
-    public <T> void checkServiceByPid(BundleContext context, String pid, Class<T> type) throws InterruptedException {
-    	T service = getServiceByPid(context, pid, type);
-    	TestCase.assertNotNull(service);
-    }
-    
-    public <T> T getService(BundleContext context, Class<T> type) throws InterruptedException {
-        ServiceTracker<T, T> serviceTracker = 
-                new ServiceTracker<T, T>(context, type, null);
-        serviceTracker.open();
-        T result = (T)serviceTracker.waitForService(10000);
 
-        TestCase.assertNotNull(result);
-        
-        return result;
-    }
-    
-    public <T> T getServiceByPid(BundleContext context, String pid, Class<T> type) throws InterruptedException {
-    	String filter = "(" + Constants.SERVICE_PID + "=" + pid + ")";
-    	
-        ServiceTracker<T, T> serviceTracker;
-        T result = null;
-		try {
-			serviceTracker = new ServiceTracker<T, T>(context, FrameworkUtil.createFilter(filter), null);
-		
-	        serviceTracker.open();
-	        result = type.cast(serviceTracker.waitForService(10000));
-		} catch (InvalidSyntaxException e) {
-			TestCase.fail(e.getMessage());
-		}
+    // Auctioneer creation helpers
 
-		return result;
+    public PropertiesBuilder createAuctioneerProperties(String agentId, int minTimeBetweenPriceUpdates) {
+        return new PropertiesBuilder().agentId(agentId)
+                                      .clusterId("DefaultCluster")
+                                      .marketBasis(DEFAULT_MARKETBASIS)
+                                      .minTimeBetweenPriceUpdates(minTimeBetweenPriceUpdates);
     }
-    
+
+    public Configuration createAuctioneer(int minTimeBetweenPriceUpdates) throws IOException {
+        return createAuctioneer(AGENT_ID_AUCTIONEER, minTimeBetweenPriceUpdates);
+    }
+
+    public Configuration createAuctioneer(String agentId, int minTimeBetweenPriceUpdates) throws IOException {
+        return createConfiguration(FACTORY_PID_AUCTIONEER,
+                                   createAuctioneerProperties(agentId, minTimeBetweenPriceUpdates));
+    }
+
+    // Concentrator creation helpers
+    public PropertiesBuilder createConcentratorProperties(String agentId,
+                                                          String desiredParentId,
+                                                          int minTimeBetweenBidUpdates) throws IOException {
+        return new PropertiesBuilder().agentId(agentId)
+                                      .desiredParentId(desiredParentId)
+                                      .minTimeBetweenBidUpdates(minTimeBetweenBidUpdates);
+    }
+
+    public Configuration createConcentrator(int minTimeBetweenBidUpdates) throws IOException {
+        return createConcentrator(AGENT_ID_CONCENTRATOR, AGENT_ID_AUCTIONEER, minTimeBetweenBidUpdates);
+    }
+
+    public Configuration createConcentrator(String agentId,
+                                            String desiredParentId,
+                                            int minTimeBetweenBidUpdates) throws IOException {
+        return createConfiguration(FACTORY_PID_CONCENTRATOR,
+                                   createConcentratorProperties(agentId, desiredParentId, minTimeBetweenBidUpdates));
+    }
+
+    // PV Panel helpers
+
+    public PropertiesBuilder createPvPanelProperties(String agentId, String desiredParentId, int bidUpdateRate) {
+        return new PropertiesBuilder().agentId(agentId)
+                                      .desiredParentId(desiredParentId)
+                                      .add("bidUpdateRate", bidUpdateRate)
+                                      .add("minimumDemand", -700)
+                                      .add("maximumDemand", -600);
+    }
+
+    public Configuration createPvPanel(int bidUpdateRate) throws IOException {
+        return createPvPanel(AGENT_ID_PV_PANEL, AGENT_ID_CONCENTRATOR, bidUpdateRate);
+    }
+
+    public Configuration createPvPanel(String agentId, String desiredParentId, int bidUpdateRate) throws IOException {
+        return createConfiguration(FACTORY_PID_PV_PANEL,
+                                   createPvPanelProperties(agentId, desiredParentId, bidUpdateRate));
+    }
+
+    // Freezer helpers
+
+    public PropertiesBuilder createFreezerProperties(String agentId, String desiredParentId, int bidUpdateRate) {
+        return new PropertiesBuilder().agentId(agentId)
+                                      .desiredParentId(desiredParentId)
+                                      .add("bidUpdateRate", bidUpdateRate)
+                                      .add("minimumDemand", 100)
+                                      .add("maximumDemand", 121);
+    }
+
+    public Configuration createFreezer(int bidUpdateRate) throws IOException {
+        return createFreezer(AGENT_ID_FREEZER, AGENT_ID_CONCENTRATOR, bidUpdateRate);
+    }
+
+    public Configuration createFreezer(String agentId, String desiredParentId, int bidUpdateRate) throws IOException {
+        return createConfiguration(FACTORY_PID_FREEZER,
+                                   createFreezerProperties(agentId, desiredParentId, bidUpdateRate));
+    }
+
+    // Helpers for Storing Observer
+
+    public PropertiesBuilder getStoringObserverProperties() {
+        return new PropertiesBuilder().add("observableAgent_filter", "");
+    }
+
+    public Configuration createStoringObserver() throws IOException {
+        return createConfiguration(FACTORY_PID_OBSERVER, getStoringObserverProperties());
+    }
+
+    public synchronized Component getComponent(final String pid) throws InterruptedException {
+        long deadline = System.currentTimeMillis() + MAX_TIMEOUT;
+        while (System.currentTimeMillis() < deadline) {
+            Component[] components = scrService.getComponents();
+            for (Component comp : components) {
+                Object componentPid = comp.getProperties().get(Constants.SERVICE_PID);
+                if (pid.equals(componentPid)) {
+                    return comp;
+                }
+            }
+            wait(100);
+        }
+
+        throw new AssertionError("Could not find a component for pid " + pid);
+    }
+
+    public synchronized void waitForComponentToBecomeActive(final String pid) throws InterruptedException {
+        Component component = getComponent(pid);
+
+        long deadline = System.currentTimeMillis() + MAX_TIMEOUT;
+        while (System.currentTimeMillis() < deadline) {
+            if (component.getState() == Component.STATE_ACTIVE) {
+                return;
+            }
+            wait(100);
+        }
+        throw new AssertionError("Component for pid " + pid + " never became active");
+    }
+
+    public synchronized void waitForService(Configuration configuration) throws InterruptedException {
+        String pid = configuration.getPid();
+        String filter = "(" + Constants.SERVICE_PID + "=" + pid + ")";
+
+        try {
+            long deadline = System.currentTimeMillis() + MAX_TIMEOUT;
+            while (System.currentTimeMillis() < deadline) {
+                ServiceReference<?>[] references = context.getServiceReferences((String) null, filter);
+                if (references != null) {
+                    return;
+                }
+                wait(MAX_TIMEOUT);
+            }
+        } catch (InvalidSyntaxException ex) {
+            throw new AssertionError("Invalid filted to find a pid " + pid, ex);
+        }
+
+        throw new AssertionError("The service with pid " + pid + "never came online");
+    }
+
+    @SuppressWarnings("unchecked")
+    public synchronized <T> T getServiceByPid(Configuration configuration) throws InterruptedException {
+        String pid = configuration.getPid();
+        String filter = "(" + Constants.SERVICE_PID + "=" + pid + ")";
+
+        try {
+            long deadline = System.currentTimeMillis() + MAX_TIMEOUT;
+            while (System.currentTimeMillis() < deadline) {
+                ServiceReference<?>[] references = context.getServiceReferences((String) null, filter);
+                if (references != null) {
+                    ServiceReference<?> reference = references[0];
+                    savedReferences.add(reference);
+                    return (T) context.getService(reference);
+                }
+                wait(MAX_TIMEOUT);
+            }
+        } catch (InvalidSyntaxException ex) {
+            throw new AssertionError("Invalid filted to find a pid " + pid, ex);
+        }
+
+        throw new AssertionError("The service with pid " + pid + "never came online");
+    }
+
     public <T> T getPrivateField(Object agent, String field, Class<T> type) {
         T result = null;
         Field privateField = null;
@@ -165,21 +280,28 @@ public class ClusterHelper {
                 privateField.setAccessible(true);
                 result = type.cast(privateField.get(agent));
             } catch (IllegalArgumentException e) {
-            	TestCase.fail("Failed to get " + type.getSimpleName() + ", reason: " + e);
+                TestCase.fail("Failed to get " + type.getSimpleName() + ", reason: " + e);
             } catch (IllegalAccessException e) {
-            	TestCase.fail("Failed to get " + type.getSimpleName() + ", reason: " + e);
+                TestCase.fail("Failed to get " + type.getSimpleName() + ", reason: " + e);
             }
         }
 
         return result;
     }
-    
-	public void disconnectAgent(ConfigurationAdmin configAdmin, String agentPid) throws Exception, InvalidSyntaxException {
-		Configuration config = configAdmin.getConfiguration(agentPid);
-		if (config == null) {
-			TestCase.fail("Config for agent " + agentPid + " does not exist, but should be.");
-		}
-		
-		config.delete();
-	}
+
+    public void disconnectAgent(ConfigurationAdmin configAdmin, String agentPid) throws Exception,
+                                                                                InvalidSyntaxException {
+        Configuration config = configAdmin.getConfiguration(agentPid);
+        if (config == null) {
+            TestCase.fail("Config for agent " + agentPid + " does not exist, but should be.");
+        }
+
+        config.delete();
+    }
+
+    @Override
+    public synchronized void serviceChanged(ServiceEvent event) {
+        // Some service changed, notify all waiting stuff
+        notifyAll();
+    }
 }
