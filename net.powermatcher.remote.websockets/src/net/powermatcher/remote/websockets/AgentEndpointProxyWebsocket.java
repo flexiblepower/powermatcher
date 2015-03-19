@@ -25,7 +25,7 @@ import aQute.bnd.annotation.metatype.Meta;
 /**
  * WebSocket implementation of an {@link AgentEndpointProxy}. Enabled two agents to communicate via WebSockets and JSON
  * over a TCP connection.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
@@ -58,7 +58,7 @@ public class AgentEndpointProxyWebsocket
 
     /**
      * OSGi calls this method to activate a managed service.
-     * 
+     *
      * @param properties
      *            the configuration properties
      */
@@ -114,7 +114,7 @@ public class AgentEndpointProxyWebsocket
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * This specific implementation checks the if the websocket is open.
      */
     public boolean isRemoteConnected() {
@@ -123,7 +123,7 @@ public class AgentEndpointProxyWebsocket
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * This specific implementation serializes the {@link PriceUpdate} to json and sends it through the websocket.
      */
     public void updateRemotePrice(PriceUpdate newPrice) {
@@ -133,8 +133,7 @@ public class AgentEndpointProxyWebsocket
             String message = serializer.serializePriceUpdate(newPrice);
             remoteSession.getRemote().sendString(message);
         } catch (IOException e) {
-            LOGGER.warn(
-                        "Unable to send price update to remote agent, reason {}", e);
+            LOGGER.warn("Unable to send price update to remote agent, reason {}", e);
         }
     }
 
