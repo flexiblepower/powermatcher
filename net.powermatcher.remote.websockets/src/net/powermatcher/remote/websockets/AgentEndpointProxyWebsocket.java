@@ -33,10 +33,11 @@ public class AgentEndpointProxyWebsocket
 
     @Meta.OCD
     public static interface Config {
-        @Meta.AD(deflt = "concentrator", description = "desired parent to connect to")
+        @Meta.AD(deflt = "concentrator",
+                 description = "The agent identifier of the parent matcher to which this agent should be connected ")
         String desiredParentId();
 
-        @Meta.AD(deflt = "agentendpointproxy", description = "local agent identification")
+        @Meta.AD(deflt = "agentendpointproxy", description = "The unique identifier of the agent")
         String agentId();
 
         @Meta.AD(deflt = "matcherendpointproxy", description = "Remote matcher endpoint proxy")
@@ -56,7 +57,7 @@ public class AgentEndpointProxyWebsocket
     @Activate
     public void activate(Map<String, Object> properties) {
         Config config = Configurable.createConfigurable(Config.class, properties);
-        activate(config.agentId(), config.desiredParentId());
+        init(config.agentId(), config.desiredParentId());
         remoteAgentEndpointId = config.remoteAgentEndpointId();
     }
 
@@ -130,7 +131,7 @@ public class AgentEndpointProxyWebsocket
     }
 
     private void sendCusterInformation() {
-        if (!isRemoteConnected() || !isInitialized()) {
+        if (!isRemoteConnected() || !isConnected()) {
             // Skip sending information
             return;
         }

@@ -53,18 +53,15 @@ public abstract class BaseMatcherEndpoint
     private final Map<String, Session> sessions = new ConcurrentHashMap<String, Session>();
 
     @Override
-    public boolean connectToAgent(Session session) {
-        if (!isInitialized()) {
-            LOGGER.info("Could not connect an agent yet, not yet initialized");
-            return false;
+    public void connectToAgent(Session session) {
+        if (!isConnected()) {
+            throw new IllegalStateException("This matcher is not yet connected to the cluster");
         } else if (!sessions.containsKey(session.getAgentId())) {
             session.setMarketBasis(getMarketBasis());
             sessions.put(session.getAgentId(), session);
             LOGGER.info("Agent connected with session [{}]", session.getSessionId());
-            return true;
         } else {
-            LOGGER.warn("An agent with id [{}] was already connected", session.getAgentId());
-            return false;
+            throw new IllegalStateException("An agent with id [" + session.getAgentId() + "] was already connected");
         }
     }
 
@@ -121,7 +118,7 @@ public abstract class BaseMatcherEndpoint
         @Override
         public void run() {
             try {
-                if (isInitialized()) {
+                if (isConnected()) {
                     performUpdate(bidCache.aggregate());
                 }
 
@@ -151,11 +148,11 @@ public abstract class BaseMatcherEndpoint
         LOGGER.debug("Received from session [{}] bid update [{}] ", session.getSessionId(), bidUpdate);
 
         publishEvent(new IncomingBidUpdateEvent(session.getClusterId(),
-                                          getAgentId(),
-                                          session.getSessionId(),
-                                          context.currentTime(),
-                                          session.getAgentId(),
-                                          bidUpdate));
+                                                getAgentId(),
+                                                session.getSessionId(),
+                                                context.currentTime(),
+                                                session.getAgentId(),
+                                                bidUpdate));
 
         doUpdate();
     }

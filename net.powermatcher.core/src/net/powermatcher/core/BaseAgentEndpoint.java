@@ -11,6 +11,8 @@ import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingBidUpdateEvent;
 
+import org.flexiblepower.context.FlexiblePowerContext;
+
 /**
  * {@link BaseAgentEndpoint} defines the basic functionality of any Device Agent.
  *
@@ -27,18 +29,21 @@ public abstract class BaseAgentEndpoint
     private String desiredParentId;
 
     /**
-     * This method should always be called during activation of the agent. It sets the agentId and desiredParentId.
+     * This method should always be called during activation of the agent. It sets the agentId and desiredParentId. This
+     * will also call the {@link #init(String)} method, so that call is no longer needed.
      *
      * @param agentId
-     *            The agentId that should be returned when the {@link #getAgentId()} is called.
+     *            The agentId that should be used by this {@link BaseAgent}. This will be returned when the
+     *            {@link #getAgentId()} is called.
      * @param desiredParentId
-     *            The identifier that should be returned when the {@link #getDesiredParentId()} is called.
+     *            The agentId that should be used by this {@link BaseAgentEndpoint} when determining the desired parent.
+     *            This will be returned when the {@link #getDesiredParentId()} is called.
      *
      * @throws IllegalArgumentException
      *             when either the agentId or the desiredParentId is null or is an empty string.
      */
-    public void activate(String agentId, String desiredParentId) {
-        super.activate(agentId);
+    protected void init(String agentId, String desiredParentId) {
+        super.init(agentId);
 
         if (desiredParentId == null || desiredParentId.isEmpty()) {
             throw new IllegalArgumentException("The desiredParentId may not be null or empty");
@@ -47,12 +52,17 @@ public abstract class BaseAgentEndpoint
         this.desiredParentId = desiredParentId;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public boolean isInitialized() {
-        return super.isInitialized() && session != null;
+    protected void init(String agentId) {
+        throw new AssertionError("This method should not be called directly, call init(agentId, desiredParentId)");
+    }
+
+    @Override
+    public void setContext(FlexiblePowerContext context) {
+        if (desiredParentId == null) {
+            throw new IllegalStateException("The activate method should be called first before the context is set.");
+        }
+        super.setContext(context);
     }
 
     /**
@@ -120,16 +130,17 @@ public abstract class BaseAgentEndpoint
     }
 
     /**
-     * Publishes a new bid to its matcher by creating a new {@link BidUpdate} using a generated bidnumber.
+     * Publishes a new bid to its matcher by creating a new {@link BidUpdate} using a generated bidnumber. The call will
+     * be ignored if {@link #isConnected()} returns <code>false</code>.
      *
      * @param newBid
      *            The new bid that is to be sent to the connected matcher
-     * @return The {@link BidUpdate} that has been set.
+     * @return The {@link BidUpdate} that has been set or <code>null</code> if {@link #isConnected()} returns false.
      */
     protected final BidUpdate publishBid(Bid newBid) {
-        Session session = getSession();
+        if (isConnected()) {
+            Session session = getSession();
 
-        if (isInitialized()) {
             if (lastBidUpdate != null && newBid.equals(lastBidUpdate.getBid())) {
                 // This bid is equal to the previous bid, we should not send an update
                 return lastBidUpdate;
@@ -137,10 +148,10 @@ public abstract class BaseAgentEndpoint
             BidUpdate update = new BidUpdate(newBid, bidNumberGenerator.incrementAndGet());
             lastBidUpdate = update;
             publishEvent(new OutgoingBidUpdateEvent(getClusterId(),
-                                              getAgentId(),
-                                              session.getSessionId(),
-                                              now(),
-                                              update));
+                                                    getAgentId(),
+                                                    session.getSessionId(),
+                                                    now(),
+                                                    update));
             LOGGER.debug("Sending bid [{}] to {}", update, session.getAgentId());
             session.updateBid(update);
             return update;

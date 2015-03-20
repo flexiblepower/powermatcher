@@ -36,10 +36,9 @@ public class MockMatcherAgent
      * {@inheritDoc}
      */
     @Override
-    public boolean connectToAgent(Session session) {
+    public void connectToAgent(Session session) {
         session.setMarketBasis(marketBasis);
         this.session = session;
-        return true;
     }
 
     /**
@@ -98,5 +97,10 @@ public class MockMatcherAgent
 
     public void assertTotalBid(double... demandArray) {
         assertArrayEquals(demandArray, lastReceivedBid.getBid().toArrayBid().getDemand(), 0);
+    }
+
+    @Override
+    public boolean isConnected() {
+        return true;
     }
 }

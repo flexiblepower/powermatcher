@@ -22,10 +22,10 @@ public interface MatcherEndpoint
      * @param session
      *            the {@link Session} that will link this {@link AgentEndpoint} with a {@link MatcherEndpoint}.
      *
-     * @return <code>true</code> if the {@link AgentEndpoint} instance could be linked to this {@link MatcherEndpoint}
-     *         instance.
+     * @throws IllegalArgumentException
+     *             when this matcher is not connected to the cluster (e.g. {@link #isConnected()} returns false)
      */
-    boolean connectToAgent(Session session);
+    void connectToAgent(Session session);
 
     /**
      * Notifies the {@link Agent} that this {@link MatcherEndpoint} instance is disconnected from the

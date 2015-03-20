@@ -15,15 +15,15 @@ import java.util.Locale;
  */
 public class MarketBasis {
     /**
-     * A {@link DecimalFormatSymbols} that is language/country-neutral
+     * A {@link DecimalFormatSymbols} that is language/country-neutral.
      */
     public static final DecimalFormatSymbols ROOT_SYMBOLS = DecimalFormatSymbols.getInstance(Locale.ROOT);
     /**
-     * The {@link DecimalFormat} that should be used to print prices
+     * The {@link DecimalFormat} that should be used to print prices.
      */
     public static final DecimalFormat PRICE_FORMAT = new DecimalFormat("0.##", ROOT_SYMBOLS);
     /**
-     * The {@link DecimalFormat} that should be used to print demand
+     * The {@link DecimalFormat} that should be used to print demand.
      */
     public static final DecimalFormat DEMAND_FORMAT = new DecimalFormat("0.###E0", ROOT_SYMBOLS);
 

@@ -42,17 +42,18 @@ import aQute.bnd.annotation.metatype.Meta;
 public class PVPanelAgent
     extends BaseAgentEndpoint
     implements AgentEndpoint {
-    private static final Logger LOGGER = LoggerFactory
-                                                      .getLogger(PVPanelAgent.class);
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PVPanelAgent.class);
 
     private static Random generator = new Random();
 
     public static interface Config {
-        @Meta.AD(deflt = "concentrator")
-        String desiredParentId();
-
-        @Meta.AD(deflt = "pvpanel")
+        @Meta.AD(deflt = "pvpanel", description = "The unique identifier of the agent")
         String agentId();
+
+        @Meta.AD(deflt = "concentrator",
+                 description = "The agent identifier of the parent matcher to which this agent should be connected")
+        public String desiredParentId();
 
         @Meta.AD(deflt = "30", description = "Number of seconds between bid updates")
         long bidUpdateRate();
@@ -90,7 +91,7 @@ public class PVPanelAgent
     @Activate
     public void activate(Map<String, Object> properties) {
         config = Configurable.createConfigurable(Config.class, properties);
-        activate(config.agentId(), config.desiredParentId());
+        init(config.agentId(), config.desiredParentId());
 
         minimumDemand = config.minimumDemand();
         maximumDemand = config.maximumDemand();
@@ -113,11 +114,8 @@ public class PVPanelAgent
      * {@inheritDoc}
      */
     void doBidUpdate() {
-        if (isInitialized()) {
-            double demand = minimumDemand + (maximumDemand - minimumDemand)
-                            * generator.nextDouble();
-            publishBid(Bid.flatDemand(getMarketBasis(), demand));
-        }
+        double demand = minimumDemand + (maximumDemand - minimumDemand) * generator.nextDouble();
+        publishBid(Bid.flatDemand(getMarketBasis(), demand));
     }
 
     /**

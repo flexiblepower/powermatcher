@@ -150,4 +150,8 @@ public class MockAgent
 
     }
 
+    @Override
+    public boolean isConnected() {
+        return session != null;
+    }
 }

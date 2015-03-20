@@ -37,17 +37,18 @@ public abstract class BaseAgent
      * This method should always be called during activation of the agent. It sets the identifier of this agent.
      *
      * @param agentId
-     *            The (locally) unique identifie of this agentId that should be returned when the {@link #getAgentId()}
-     *            is called.
+     *            The agentId that should be used by this {@link BaseAgent}. This will be returned weth the
+     *            {@link #getAgentId()} is called.
      *
      * @throws IllegalArgumentException
      *             when the agentId is null or is an empty string.
      */
-    public void activate(String agentId) {
-        if (agentId == null || agentId.isEmpty()) {
+    protected void init(String agentId) {
+        if (this.agentId != null) {
+            throw new IllegalStateException("Agent already initialized with an AgentId");
+        } else if (agentId == null || agentId.isEmpty()) {
             throw new IllegalArgumentException("The agentId may not be null or empty");
         }
-
         this.agentId = agentId;
     }
 
@@ -78,7 +79,9 @@ public abstract class BaseAgent
      * @return A {@link Date} object, representing the current date and time
      */
     protected Date now() {
-        checkInitialized();
+        if (context == null) {
+            throw new IllegalStateException("The FlexiblePowerContext has not been set, is the PowerMatcher runtime active?");
+        }
         return context.currentTime();
     }
 
@@ -95,7 +98,7 @@ public abstract class BaseAgent
      */
     protected void configure(MarketBasis marketBasis, String clusterId) {
         if (agentId == null) {
-            throw new IllegalStateException("The activate method should be called first before the context is set.");
+            throw new IllegalStateException("The activate method should be called first before the agent is configured.");
         } else if (marketBasis == null) {
             throw new IllegalArgumentException("The MarketBasis can not be null");
         } else if (clusterId == null) {
@@ -112,27 +115,28 @@ public abstract class BaseAgent
     }
 
     /**
-     * {@inheritDoc}
+     * @throws IllegalStateException
+     *             When this is called before the agent is connected to the cluster.
      */
     @Override
     public String getClusterId() {
-        checkInitialized();
+        checkConnected();
         return clusterId;
     }
 
     /**
      * @return The {@link MarketBasis} that this agent is using.
      * @throws IllegalStateException
-     *             When this is called before the agent is initialized.
+     *             When this is called before the agent is connected to the cluster.
      */
     public MarketBasis getMarketBasis() {
-        checkInitialized();
+        checkConnected();
         return marketBasis;
     }
 
-    private void checkInitialized() {
-        if (!isInitialized()) {
-            throw new IllegalStateException("This agent is not yet fully initialized.");
+    private void checkConnected() {
+        if (!isConnected()) {
+            throw new IllegalStateException("This agent is not connected to the cluster.");
         }
     }
 
@@ -142,7 +146,8 @@ public abstract class BaseAgent
      *
      * @return true when the {@link #activate(String)}
      */
-    public boolean isInitialized() {
+    @Override
+    public boolean isConnected() {
         return context != null && clusterId != null;
     }
 
