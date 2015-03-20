@@ -64,7 +64,7 @@ public class RemoteClusterTests
         checkBidsClusterNoFreezer();
 
         // Re-add Freezer agent, it should not receive bids from previous freezer
-        logger.info("Resconnecting the freezer");
+        logger.info("Reconnecting the freezer");
         clusterHelper.getComponent(freezerConfig.getPid()).enable();
 
         observer.clearEvents();
@@ -82,7 +82,7 @@ public class RemoteClusterTests
         Configuration agentProxyConfiguration = clusterHelper.createConfiguration(FACTORY_PID_AGENT_PROXY,
                                                                                   getAgentProxyProperties(AGENT_ID_AGENT_PROXY,
                                                                                                           ClusterHelper.AGENT_ID_CONCENTRATOR,
-                                                                                                          "remoteAgentEndpointId"));
+                                                                                                          AGENT_ID_MATCHER_PROXY));
         clusterHelper.waitForService(agentProxyConfiguration);
 
         // Create matcher proxy
@@ -195,7 +195,7 @@ public class RemoteClusterTests
                                       .add("desiredConnectionId", desiredConnectionId)
                                       .add("powermatcherUrl",
                                            "ws://localhost:8181/powermatcher/websockets/agentendpoint")
-                                      .add("reconnectTimeout", 30)
+                                      .add("reconnectTimeout", 1)
                                       .add("connectTimeout", 60);
     }
 }
