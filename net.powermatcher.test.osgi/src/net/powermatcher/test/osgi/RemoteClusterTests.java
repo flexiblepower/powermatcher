@@ -78,17 +78,9 @@ public class RemoteClusterTests
         Configuration concentratorConfig = clusterHelper.createConcentrator(5000);
         clusterHelper.waitForService(concentratorConfig);
 
-        // Create agent proxy
-        Configuration agentProxyConfiguration = clusterHelper.createConfiguration(FACTORY_PID_AGENT_PROXY,
-                                                                                  getAgentProxyProperties(AGENT_ID_AGENT_PROXY,
-                                                                                                          ClusterHelper.AGENT_ID_CONCENTRATOR,
-                                                                                                          AGENT_ID_MATCHER_PROXY));
-        clusterHelper.waitForService(agentProxyConfiguration);
-
         // Create matcher proxy
         Configuration matcherProxyConfiguration = clusterHelper.createConfiguration(FACTORY_PID_MATCHER_PROXY,
-                                                                                    getMatcherProxyProperties(AGENT_ID_MATCHER_PROXY,
-                                                                                                              AGENT_ID_AGENT_PROXY));
+                                                                                    getMatcherProxyProperties(AGENT_ID_MATCHER_PROXY));
         clusterHelper.waitForService(matcherProxyConfiguration);
 
         // Create local PvPanel
@@ -101,7 +93,8 @@ public class RemoteClusterTests
 
         clusterHelper.waitForComponentToBecomeActive(auctioneerConfig.getPid());
         clusterHelper.waitForComponentToBecomeActive(concentratorConfig.getPid());
-        clusterHelper.waitForComponentToBecomeActive(agentProxyConfiguration.getPid());
+        // TODO check for new agent proxy
+        // clusterHelper.waitForComponentToBecomeActive(agentProxyConfiguration.getPid());
         clusterHelper.waitForComponentToBecomeActive(matcherProxyConfiguration.getPid());
         clusterHelper.waitForComponentToBecomeActive(pvPanelConfig.getPid());
         clusterHelper.waitForComponentToBecomeActive(freezerConfig.getPid());
@@ -190,9 +183,9 @@ public class RemoteClusterTests
                                       .add("remoteAgentEndpointId", remoteAgentEndpointId);
     }
 
-    private PropertiesBuilder getMatcherProxyProperties(String agentId, String desiredConnectionId) {
+    private PropertiesBuilder getMatcherProxyProperties(String agentId) {
         return new PropertiesBuilder().agentId(agentId)
-                                      .add("desiredConnectionId", desiredConnectionId)
+                                      .minTimeBetweenBidUpdates(1000)
                                       .add("powermatcherUrl",
                                            "ws://localhost:8181/powermatcher/websockets/agentendpoint")
                                       .add("reconnectTimeout", 1)

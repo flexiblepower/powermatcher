@@ -1,7 +1,5 @@
 package net.powermatcher.core.concentrator;
 
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.Map;
 
 import net.powermatcher.api.AgentEndpoint;
@@ -30,12 +28,12 @@ import aQute.bnd.annotation.metatype.Meta;
  * <p>
  * This class represents a {@link Concentrator} component where several instances can be created.
  * </p>
- *
+ * 
  * <p>
  * The {@link Concentrator} receives {@link Bid} from the agents and forwards this in an aggregate {@link Bid} up in the
  * hierarchy to a {@link Concentrator} or to the {@link Auctioneer}. It will receive price updates from the
  * {@link Auctioneer} and forward them to its connected agents.
- *
+ * 
  * @author FAN
  * @version 2.0
  */
@@ -44,6 +42,8 @@ import aQute.bnd.annotation.metatype.Meta;
 public class Concentrator
     extends BaseAgentEndpoint
     implements MatcherEndpoint {
+
+    private final BidHistoryStore sentBids = new BidHistoryStore();
 
     private final class MatcherPart
         extends BaseMatcherEndpoint {
@@ -57,7 +57,7 @@ public class Concentrator
             Bid bid = transformBid(aggregatedBid);
             synchronized (sentBids) {
                 BidUpdate bidUpdate = publishBid(bid);
-                saveBid(aggregatedBid, bidUpdate);
+                sentBids.saveBid(aggregatedBid, bidUpdate);
             }
         }
     }
@@ -75,15 +75,13 @@ public class Concentrator
         long minTimeBetweenBidUpdates();
     }
 
-    private static final int MAX_BIDS = 900;
-
     private final MatcherPart matcherPart = new MatcherPart();
 
     protected Config config;
 
     /**
      * OSGi calls this method to activate a managed service.
-     *
+     * 
      * @param properties
      *            the configuration properties
      */
@@ -94,7 +92,7 @@ public class Concentrator
 
     /**
      * Convenient activate method that takes a {@link Config} object. This also makes subclassing easier.
-     *
+     * 
      * @param config
      *            The {@link Config} object that configures this concentrator
      */
@@ -140,7 +138,7 @@ public class Concentrator
         super.handlePriceUpdate(priceUpdate);
 
         try {
-            SentBidInformation info = retrieveAggregatedBid(priceUpdate.getBidNumber());
+            SentBidInformation info = sentBids.retrieveAggregatedBid(priceUpdate.getBidNumber());
             Price price = transformPrice(priceUpdate.getPrice(), info);
             matcherPart.publishPrice(price, info.getOriginalBid());
         } catch (IllegalArgumentException ex) {
@@ -150,7 +148,7 @@ public class Concentrator
 
     /**
      * This method should be overridden when the bid that will be sent has to be changed.
-     *
+     * 
      * @param aggregatedBid
      *            The (input) aggregated bid as calculated normally (the sum of all the bids of the agents).
      * @return The bid that will be sent to the matcher that is connected to this {@link Concentrator}.
@@ -162,7 +160,7 @@ public class Concentrator
     /**
      * This method should be overridden when the price that will be sent down has to be changed. This is called just
      * before the price will be sent down to the connected agents.
-     *
+     * 
      * @param price
      *            The input price update as received from the connected matcher.
      * @param info
@@ -171,50 +169,6 @@ public class Concentrator
      */
     protected Price transformPrice(Price price, SentBidInformation info) {
         return price;
-    }
-
-    // This part keeps track of send bids to be able to retrieve them later
-
-    private final Deque<SentBidInformation> sentBids = new LinkedList<SentBidInformation>();
-
-    void saveBid(final AggregatedBid aggregatedBid, final BidUpdate sentBidUpdate) {
-        SentBidInformation info = new SentBidInformation(aggregatedBid, sentBidUpdate);
-
-        synchronized (sentBids) {
-            sentBids.add(info);
-
-            if (sentBids.size() > MAX_BIDS) {
-                LOGGER.warn("The number of generated bids is becoming very big, possible memory leak?");
-                while (sentBids.size() > MAX_BIDS) {
-                    sentBids.removeFirst();
-                }
-            }
-        }
-    }
-
-    private SentBidInformation retrieveAggregatedBid(int bidNumberReference) {
-        synchronized (sentBids) {
-            // First check if we have actually sent a bid with that number
-            boolean found = false;
-            for (SentBidInformation info : sentBids) {
-                if (info.getBidNumber() == bidNumberReference) {
-                    found = true;
-                }
-            }
-
-            // If we haven't, then throw an exception
-            if (!found) {
-                throw new IllegalArgumentException("No bid with bidNumber " + bidNumberReference + " is available");
-            }
-
-            // If we have, drop all older bids and return the found info
-            SentBidInformation info = sentBids.peek();
-            while (info.getBidNumber() != bidNumberReference) {
-                sentBids.removeFirst();
-                info = sentBids.peek();
-            }
-            return info;
-        }
     }
 
     // These method make sure that we implement the MatcherEndpoint

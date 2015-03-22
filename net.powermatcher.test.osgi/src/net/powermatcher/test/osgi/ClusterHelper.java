@@ -29,7 +29,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Helper class which contains basic functionality used in most tests.
- *
+ * 
  * @author FAN
  * @version 2.0
  */
@@ -81,7 +81,11 @@ public class ClusterHelper
         Configuration[] configs = admin.listConfigurations(null);
         if (configs != null) {
             for (Configuration config : configs) {
-                config.delete();
+                try {
+                    config.delete();
+                } catch (IllegalStateException e) {
+                    // Conifig already deleted by other means.
+                }
             }
         }
     }
