@@ -269,6 +269,8 @@ public class PowermatcherWebSocket {
             info.getLocalAgentConfig().delete();
         } catch (IOException e) {
             LOGGER.warn("Failed to delete agentProxy [{}], reason: {}", info.getLocalAgentId(), e);
+        } catch (IllegalStateException e) {
+            LOGGER.info("AgentProxy configuration already deleted [{}], reason: {}", info.getLocalAgentId());
         }
     }
 
