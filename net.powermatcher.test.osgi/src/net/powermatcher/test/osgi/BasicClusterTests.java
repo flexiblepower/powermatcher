@@ -17,7 +17,7 @@ import org.osgi.service.cm.Configuration;
 
 /**
  * Basic cluster tests and tests buildup and agent removal.
- *
+ * 
  * @author FAN
  * @version 2.0
  */
@@ -32,6 +32,7 @@ public class BasicClusterTests
      * agents.
      */
     public void testSimpleClusterBuildUp() throws Exception {
+        LOGGER.info("TEST: testSimpleClusterBuildUp");
         // Create simple cluster
         setupCluster();
 
@@ -45,6 +46,8 @@ public class BasicClusterTests
      * price updates.
      */
     public void testAgentRemoval() throws Exception {
+        LOGGER.info("TEST: testAgentRemoval");
+
         // Create simple cluster
         setupCluster();
 
@@ -72,6 +75,8 @@ public class BasicClusterTests
      * Tests whether auctioneer removal stops complete cluster but continues when Auctioneer is started again.
      */
     public void testAuctioneerRemoval() throws Exception {
+        LOGGER.info("TEST: testAuctioneerRemoval");
+
         // Create simple cluster
         setupCluster();
 
@@ -99,6 +104,8 @@ public class BasicClusterTests
      * consists of Auctioneer, Concentrator and 2 agents.
      */
     public void testConcentratorRemoval() throws Exception {
+        LOGGER.info("TEST: testConcentratorRemoval");
+
         // Create simple cluster
         setupCluster();
 
@@ -147,6 +154,7 @@ public class BasicClusterTests
 
         // Create StoringObserver
         observer = clusterHelper.getServiceByPid(clusterHelper.createStoringObserver());
+        observer.clearEvents();
     }
 
     private PriceUpdate getLastObservedPriceUpdate(String agentId) {

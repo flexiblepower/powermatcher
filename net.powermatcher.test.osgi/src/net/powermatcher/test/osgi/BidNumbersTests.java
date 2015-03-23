@@ -9,7 +9,7 @@ import org.osgi.service.cm.Configuration;
 
 /**
  * Tests bidnumbers with various bid update rates.
- *
+ * 
  * @author FAN
  * @version 2.0
  */
@@ -20,6 +20,8 @@ public class BidNumbersTests
      * Tests a cluster with a slow and fast agent. The slow agent should receive the same bidnumber.
      */
     public void testVariableRateAgents() throws Exception {
+        LOGGER.info("TEST: testVariableRateAgents");
+
         // Create Auctioneer and wait for it
         Configuration auctioneerConfig = clusterHelper.createAuctioneer(1000);
         clusterHelper.waitForService(auctioneerConfig);

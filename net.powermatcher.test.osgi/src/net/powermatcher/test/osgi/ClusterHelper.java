@@ -87,6 +87,9 @@ public class ClusterHelper
                     // Conifig already deleted by other means.
                 }
             }
+
+            // Wait a small time for all components to shutdown
+            Thread.sleep(1000);
         }
     }
 

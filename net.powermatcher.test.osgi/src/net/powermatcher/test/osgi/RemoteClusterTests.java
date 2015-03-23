@@ -34,6 +34,8 @@ public class RemoteClusterTests
      * local agent and 1 remote agents.
      */
     public void testSimpleClusterBuildUpWithRemoteAgent() throws Exception {
+        LOGGER.info("TEST: testSimpleClusterBuildUpWithRemoteAgent");
+
         // Setup default remote enabled cluster
         setupRemoteCluster();
 
@@ -47,6 +49,8 @@ public class RemoteClusterTests
      * price updates. After attaching the remote agent, bids must be complete again.
      */
     public void testAgentRemoval() throws Exception {
+        LOGGER.info("TEST: testAgentRemoval");
+
         // Setup default remote enabled cluster
         setupRemoteCluster();
 
@@ -55,7 +59,7 @@ public class RemoteClusterTests
         checkBidsFullCluster();
 
         // disconnect Freezer
-        logger.info("Disconnecting the freezer");
+        LOGGER.info("Disconnecting the freezer");
         clusterHelper.getComponent(freezerConfig.getPid()).disable();
 
         // Checking to see if the Freezer is no longer participating
@@ -64,7 +68,7 @@ public class RemoteClusterTests
         checkBidsClusterNoFreezer();
 
         // Re-add Freezer agent, it should not receive bids from previous freezer
-        logger.info("Reconnecting the freezer");
+        LOGGER.info("Reconnecting the freezer");
         clusterHelper.getComponent(freezerConfig.getPid()).enable();
 
         observer.clearEvents();
