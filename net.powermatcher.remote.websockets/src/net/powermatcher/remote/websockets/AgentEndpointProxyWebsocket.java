@@ -5,6 +5,7 @@ import java.util.Map;
 
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
+import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
@@ -37,14 +38,9 @@ public class AgentEndpointProxyWebsocket
 
         @Meta.AD(deflt = "agentendpointproxy", description = "The unique identifier of the agent")
         String agentId();
-
-        @Meta.AD(deflt = "matcherendpointproxy", description = "Remote matcher endpoint proxy")
-        String remoteAgentEndpointId();
     }
 
     private org.eclipse.jetty.websocket.api.Session remoteSession;
-
-    private String remoteAgentEndpointId;
 
     /**
      * OSGi calls this method to activate a managed service.
@@ -56,7 +52,6 @@ public class AgentEndpointProxyWebsocket
     public void activate(Map<String, Object> properties) {
         Config config = Configurable.createConfigurable(Config.class, properties);
         init(config.agentId(), config.desiredParentId());
-        remoteAgentEndpointId = config.remoteAgentEndpointId();
     }
 
     /**
@@ -71,31 +66,37 @@ public class AgentEndpointProxyWebsocket
         super.deactivate();
     }
 
-    public String getRemoteAgentEndpointId() {
-        return remoteAgentEndpointId;
-    }
-
+    /**
+     * Remote matcherProxy has connected, send cluster information (if available).
+     * 
+     * @param session
+     *            remote session created by MatcherProxy
+     */
     public void
-            remoteAgentConnected(org.eclipse.jetty.websocket.api.Session session) {
+            remoteMatcherProxyConnected(org.eclipse.jetty.websocket.api.Session session) {
         remoteSession = session;
 
         // Notify the remote agent about the cluster
         sendCusterInformation();
     }
 
-    public void remoteAgentDisconnected() {
+    /**
+     * Remote matcherProxy has disconnected.
+     */
+    public void remoteMatcherProxyDisconnected() {
         remoteSession = null;
     }
 
     /**
-     * {@inheritDoc}
-     * 
-     * This specific implementation checks the if the websocket is open.
+     * Checks whether the websocket is open.
      */
     public boolean isRemoteConnected() {
         return remoteSession != null && remoteSession.isOpen();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void handlePriceUpdate(PriceUpdate priceUpdate) {
         super.handlePriceUpdate(priceUpdate);
@@ -138,11 +139,13 @@ public class AgentEndpointProxyWebsocket
                 remoteSession.disconnect();
             }
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn("Unable to disconnect remote session, reason {}", e);
         }
     }
 
+    /**
+     * Send cluster information containing Cluster Id and {@link MarketBasis}
+     */
     private void sendCusterInformation() {
         if (!isRemoteConnected() || !isConnected()) {
             // Skip sending information
@@ -158,6 +161,11 @@ public class AgentEndpointProxyWebsocket
         }
     }
 
+    /**
+     * Update the received BidUpdate from MatcherProxy to local MatcherEndpoint.
+     * 
+     * @param bidUpdate
+     */
     public void updateLocalBid(BidUpdate bidUpdate) {
         if (isConnected()) {
             getSession().updateBid(bidUpdate);

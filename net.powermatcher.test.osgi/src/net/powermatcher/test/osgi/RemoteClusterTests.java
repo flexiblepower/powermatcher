@@ -19,7 +19,7 @@ import org.osgi.service.cm.Configuration;
 public class RemoteClusterTests
     extends OsgiTestCase {
 
-    private final String FACTORY_PID_AGENT_PROXY = "net.powermatcher.remote.websockets.AgentEndpointProxyWebsocket";
+    private final String PID_PM_WEBSOCKET = "net.powermatcher.remote.websockets.PowermatcherWebSocket";
     private final String FACTORY_PID_MATCHER_PROXY = "net.powermatcher.remote.websockets.MatcherEndpointProxyWebsocket";
     private final String AGENT_ID_AGENT_PROXY = "aep1";
     private final String AGENT_ID_MATCHER_PROXY = "mep1";
@@ -81,6 +81,9 @@ public class RemoteClusterTests
         Configuration auctioneerConfig = clusterHelper.createAuctioneer(5000);
         Configuration concentratorConfig = clusterHelper.createConcentrator(5000);
         clusterHelper.waitForService(concentratorConfig);
+
+        // Create Powermatcher Websocket
+        clusterHelper.createConfiguration(PID_PM_WEBSOCKET, getPmSocketProperties(AGENT_ID_CONCENTRATOR));
 
         // Create matcher proxy
         Configuration matcherProxyConfiguration = clusterHelper.createConfiguration(FACTORY_PID_MATCHER_PROXY,
@@ -180,11 +183,8 @@ public class RemoteClusterTests
         assertFalse(lastBid.getAgentBidReferences().containsKey(AGENT_ID_AGENT_PROXY));
     }
 
-    private PropertiesBuilder getAgentProxyProperties(String agentId,
-                                                      String agentIdMatcher,
-                                                      String remoteAgentEndpointId) {
-        return new PropertiesBuilder().agentId(agentId).desiredParentId(agentIdMatcher)
-                                      .add("remoteAgentEndpointId", remoteAgentEndpointId);
+    private PropertiesBuilder getPmSocketProperties(String desiredParentId) {
+        return new PropertiesBuilder().desiredParentId(desiredParentId);
     }
 
     private PropertiesBuilder getMatcherProxyProperties(String agentId) {

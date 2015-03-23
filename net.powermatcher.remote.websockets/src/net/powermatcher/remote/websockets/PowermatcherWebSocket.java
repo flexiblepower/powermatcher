@@ -28,9 +28,12 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
+import aQute.bnd.annotation.metatype.Configurable;
+import aQute.bnd.annotation.metatype.Meta;
 
 /**
  * Receiving end of the WebSocket implementation for PowerMatcher.
@@ -39,23 +42,25 @@ import aQute.bnd.annotation.component.Reference;
  * @version 2.0
  */
 @WebSocket
-@Component(immediate = true)
+@Component(designate = PowermatcherWebSocket.Config.class, immediate = true)
 public class PowermatcherWebSocket {
     private static final Logger LOGGER = LoggerFactory.getLogger(PowermatcherWebSocket.class);
 
-    /*
-     * private static final List<String> connectedRemoteAgents = new ArrayList<String>();
-     * 
-     * private static final Map<Session, String> remoteSessions = Collections.synchronizedMap(new HashMap<Session,
-     * String>()); private static final Map<String, AgentEndpointProxyWebsocket> localAgents =
-     * Collections.synchronizedMap(new HashMap<String, AgentEndpointProxyWebsocket>());
-     * 
-     * private static final Map<String, Configuration> localAgentConfigurations = Collections.synchronizedMap(new
-     * HashMap<String, Configuration>());
-     */
+    @Meta.OCD
+    public static interface Config {
+        @Meta.AD(deflt = "concentrator",
+                 description = "The agent identifier of the parent matcher to which agent proxies should be connected ")
+                String
+                desiredParentId();
+    }
+
+    private static String desiredParentId;
 
     private static ConfigurationAdmin configurationAdmin;
 
+    /**
+     * Internal info class which holds the remote and local connection information.
+     */
     private class ConnectionInfo {
         private String remoteAgentId;
         private Session remoteSession;
@@ -105,43 +110,107 @@ public class PowermatcherWebSocket {
         }
     }
 
-    private static final List<ConnectionInfo> connectioninfo = new ArrayList<ConnectionInfo>();
+    private static final List<ConnectionInfo> connectionInfo = new ArrayList<ConnectionInfo>();
 
+    /**
+     * Add connectionInfo to list.
+     * 
+     * @param info
+     *            the info to add
+     */
+    private void addInfo(ConnectionInfo info) {
+        synchronized (connectionInfo) {
+            connectionInfo.add(info);
+        }
+    }
+
+    /**
+     * Find connectionInfo based on local agentId
+     * 
+     * @param localAgentId
+     *            id of agentProxy
+     * @return connectionInfo or null when not found
+     */
     private ConnectionInfo findInfoByLocalId(String localAgentId) {
-        for (ConnectionInfo info : connectioninfo) {
-            if (info.getLocalAgentId().equals(localAgentId)) {
-                return info;
+        synchronized (connectionInfo) {
+            for (ConnectionInfo info : connectionInfo) {
+                if (info.getLocalAgentId().equals(localAgentId)) {
+                    return info;
+                }
             }
         }
 
         return null;
     }
 
+    /**
+     * Find connectionInfo based on remote agentId
+     * 
+     * @param remoteAgentId
+     *            id of matcherProxy
+     * @return connectionInfo or null when not found
+     */
     private ConnectionInfo findInfoByRemoteId(String remoteAgentId) {
-        for (ConnectionInfo info : connectioninfo) {
-            if (info.getRemoteAgentId().equals(remoteAgentId)) {
-                return info;
+        synchronized (connectionInfo) {
+            for (ConnectionInfo info : connectionInfo) {
+                if (info.getRemoteAgentId().equals(remoteAgentId)) {
+                    return info;
+                }
             }
         }
 
         return null;
     }
 
+    /**
+     * Find connectionInfo based on remote session
+     * 
+     * @param remoteSession
+     *            remote session created by matcherProxy
+     * @return connectionInfo or null when not found
+     */
     private ConnectionInfo findInfoByRemoteSession(Session remoteSession) {
-        for (ConnectionInfo info : connectioninfo) {
-            if (info.getRemoteSession().equals(remoteSession)) {
-                return info;
+        synchronized (connectionInfo) {
+            for (ConnectionInfo info : connectionInfo) {
+                if (info.getRemoteSession().equals(remoteSession)) {
+                    return info;
+                }
             }
         }
 
         return null;
     }
 
+    /**
+     * Remove connectionInfo based on remote agentId
+     * 
+     * @param remoteAgentId
+     *            id of matcherProxy
+     * @return connectionInfo or null when not found
+     */
     private void removeInfoByRemoteId(String remoteAgentId) {
-        ConnectionInfo remove = null;
-        remove = findInfoByRemoteId(remoteAgentId);
-        if (remove != null) {
-            connectioninfo.remove(remove);
+        synchronized (connectionInfo) {
+            ConnectionInfo remove = null;
+            remove = findInfoByRemoteId(remoteAgentId);
+            if (remove != null) {
+                connectionInfo.remove(remove);
+            }
+        }
+    }
+
+    /**
+     * Disconnect and remove every connected remote agent
+     */
+    private void disconnectAll() {
+        synchronized (connectionInfo) {
+            // Disconnect every connected remote agent
+            for (ConnectionInfo info : connectionInfo) {
+                if (info.getRemoteSession() != null) {
+                    info.getRemoteSession().close();
+                }
+            }
+
+            connectionInfo.clear();
         }
     }
 
@@ -150,20 +219,18 @@ public class PowermatcherWebSocket {
         configurationAdmin = cadmin;
     }
 
+    @Activate
+    public void activate(Map<String, Object> properties) {
+        Config config = Configurable.createConfigurable(Config.class, properties);
+        desiredParentId = config.desiredParentId();
+    }
+
     /**
      * OSGi calls this method to deactivate a managed service.
      */
     @Deactivate
     public synchronized void deactivate() {
-        // Remove local agents
-        // TODO
-
-        // Disconnect every connected remote agent
-        for (ConnectionInfo info : connectioninfo) {
-            if (info.getRemoteSession() != null) {
-                info.getRemoteSession().close();
-            }
-        }
+        disconnectAll();
     }
 
     /**
@@ -171,7 +238,6 @@ public class PowermatcherWebSocket {
      * 
      * @param proxy
      */
-
     @Reference(dynamic = true, multiple = true, optional = true)
     public synchronized void
             addProxy(AgentEndpointProxyWebsocket proxy) {
@@ -186,7 +252,7 @@ public class PowermatcherWebSocket {
         }
 
         info.setLocalAgent(proxy);
-        proxy.remoteAgentConnected(info.getRemoteSession());
+        proxy.remoteMatcherProxyConnected(info.getRemoteSession());
     }
 
     /**
@@ -194,7 +260,6 @@ public class PowermatcherWebSocket {
      * 
      * @param proxy
      */
-
     public synchronized void removeProxy(AgentEndpointProxyWebsocket proxy) {
         LOGGER.info("Deregistered AgentEndpointProxy: [{}]", proxy.getAgentId());
     }
@@ -258,11 +323,10 @@ public class PowermatcherWebSocket {
         }
 
         // Remove remote session from agent proxy and local session collection
-        connectioninfo.remove(info);
-        LOGGER.info("Agent disconnect detected remote agent: [{}], local agent", info.getLocalAgent()
-                                                                                     .getRemoteAgentEndpointId(),
+        removeInfoByRemoteId(info.getRemoteAgentId());
+        LOGGER.info("Agent disconnect detected remote agent: [{}], local agent", info.getRemoteAgentId(),
                     info.getLocalAgentId());
-        info.getLocalAgent().remoteAgentDisconnected();
+        info.getLocalAgent().remoteMatcherProxyDisconnected();
 
         // Delete agentProxy
         try {
@@ -293,7 +357,7 @@ public class PowermatcherWebSocket {
 
         // Find associated local agentproxy
         LOGGER.info("Received bid update from remote agent [{}] for local agent [{}]",
-                    info.getLocalAgent().getRemoteAgentEndpointId(), info.getLocalAgent().getAgentId());
+                    info.getRemoteAgentId(), info.getLocalAgent().getAgentId());
 
         // Decode the JSON data
         PmJsonSerializer serializer = new PmJsonSerializer();
@@ -304,6 +368,14 @@ public class PowermatcherWebSocket {
         info.getLocalAgent().updateLocalBid(newBid);
     }
 
+    /**
+     * Create instance of new agentProxy
+     * 
+     * @param remoteMatcherEndpointId
+     *            id of remote matcherproxy
+     * @param remoteSession
+     *            remote session created by matcherproxy
+     */
     private void createAgentProxy(String remoteMatcherEndpointId, Session remoteSession) {
         // Generate unique agentId for agentProxy
         String newAgentId = UUID.randomUUID().toString();
@@ -311,23 +383,28 @@ public class PowermatcherWebSocket {
         // Create instance of new agent
         Dictionary<String, Object> properties = new Hashtable<String, Object>();
         properties.put("agentId", newAgentId);
-        // TODO concentrator is hardcoded, should be configurable
-        properties.put("desiredParentId", "concentrator");
-        properties.put("remoteAgentEndpointId", remoteMatcherEndpointId);
+        properties.put("desiredParentId", desiredParentId);
 
         Configuration agentConfig;
         try {
             agentConfig = configurationAdmin.createFactoryConfiguration(AgentEndpointProxyWebsocket.class.getName(),
                                                                         null);
-            // Store remote session, will be added later to local agent after it registered itself.
+            // Store connection info. The AgentProxy instance will be added after it registered itself (addReference)
             ConnectionInfo info = new ConnectionInfo();
             info.setRemoteAgentId(remoteMatcherEndpointId);
             info.setRemoteSession(remoteSession);
             info.setLocalAgentConfig(agentConfig);
             info.setLocalAgentId(newAgentId);
-            connectioninfo.add(info);
+            addInfo(info);
 
+            // Create instance of agentProxy
             agentConfig.update(properties);
+        } catch (IllegalStateException e) {
+            LOGGER.warn("ConfigurationAdmin is not available, unable to create new AgentProxy [{}], rejecting connection from remote agent [{}]",
+                        e,
+                        remoteMatcherEndpointId);
+            remoteSession.close();
+            removeInfoByRemoteId(remoteMatcherEndpointId);
         } catch (IOException e) {
             LOGGER.warn("Failed to create new agent enpoint proxy instance [{}], rejecting connection from remote agent [{}]",
                         e,

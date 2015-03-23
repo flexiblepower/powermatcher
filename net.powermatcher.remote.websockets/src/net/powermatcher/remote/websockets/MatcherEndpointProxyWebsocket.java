@@ -149,7 +149,7 @@ public class MatcherEndpointProxyWebsocket
     public synchronized void deactivate() {
         scheduledFuture.cancel(true);
         disconnectRemote();
-        unregisterAgentEndpoint();
+        unregisterMatcherEndpoint();
     }
 
     /**
@@ -203,7 +203,7 @@ public class MatcherEndpointProxyWebsocket
         }
 
         // Unregister the MatcherEndpoint with the OSGI runtime, to disable connections locally
-        unregisterAgentEndpoint();
+        unregisterMatcherEndpoint();
 
         return true;
     }
@@ -218,19 +218,35 @@ public class MatcherEndpointProxyWebsocket
         return super.isConnected() && isRemoteConnected();
     }
 
+    /**
+     * Determines whether the Websocket is connected.
+     * 
+     * @return true when connected, false otherwise
+     */
     public boolean isRemoteConnected() {
         return remoteSession != null && remoteSession.isOpen();
     }
 
+    /**
+     * 
+     * @param statusCode
+     * @param reason
+     */
     @OnWebSocketClose
     public void onDisconnect(int statusCode, String reason) {
         LOGGER.info("Connection closed: {} - {}", statusCode, reason);
         remoteSession = null;
 
         // Unregister the MatcherEndpoint with the OSGI runtime, to disable connections locally
-        unregisterAgentEndpoint();
+        unregisterMatcherEndpoint();
     }
 
+    /**
+     * Handle Websocket receive message
+     * 
+     * @param message
+     *            the message received via Websockets
+     */
     @OnWebSocketMessage
     public void onMessage(String message) {
         LOGGER.debug("Received message from remote agent {}", message);
@@ -258,26 +274,16 @@ public class MatcherEndpointProxyWebsocket
                           minTimeBetweenBidUpdates);
 
                 // Register the MatcherEndpoint with the OSGI runtime, to make it available for connections
-                registerAgentEndpoint();
+                registerMatcherEndpoint();
             }
         } catch (JsonSyntaxException e) {
             LOGGER.warn("Unable to understand message from remote agent: {}", message);
         }
     }
 
-    private void registerAgentEndpoint() {
-        if (matcherEndpointServiceRegistration == null) {
-            matcherEndpointServiceRegistration = bundleContext.registerService(MatcherEndpoint.class, this, null);
-        }
-    }
-
-    private void unregisterAgentEndpoint() {
-        if (matcherEndpointServiceRegistration != null) {
-            matcherEndpointServiceRegistration.unregister();
-            matcherEndpointServiceRegistration = null;
-        }
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void performUpdate(AggregatedBid aggregatedBid) {
         synchronized (sentBids) {
@@ -288,6 +294,13 @@ public class MatcherEndpointProxyWebsocket
         }
     }
 
+    /**
+     * Publish an AggregatedBid via Websockets to {@link AgentProxy}
+     * 
+     * @param newBid
+     *            the bid to publish
+     * @return bidupdate containing bidnumber and published bid
+     */
     private BidUpdate publishBid(AggregatedBid newBid) {
         if (isConnected() && isRemoteConnected()) {
             try {
@@ -305,5 +318,24 @@ public class MatcherEndpointProxyWebsocket
         }
 
         return null;
+    }
+
+    /**
+     * Register the MatcherEndpoint service
+     */
+    private void registerMatcherEndpoint() {
+        if (matcherEndpointServiceRegistration == null) {
+            matcherEndpointServiceRegistration = bundleContext.registerService(MatcherEndpoint.class, this, null);
+        }
+    }
+
+    /**
+     * Unregister the MatcherEndpoint service
+     */
+    private void unregisterMatcherEndpoint() {
+        if (matcherEndpointServiceRegistration != null) {
+            matcherEndpointServiceRegistration.unregister();
+            matcherEndpointServiceRegistration = null;
+        }
     }
 }
