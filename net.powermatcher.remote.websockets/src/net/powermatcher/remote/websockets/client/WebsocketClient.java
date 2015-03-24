@@ -302,11 +302,11 @@ public class WebsocketClient
             try {
                 BidUpdate update = new BidUpdate(newBid, bidNumberGenerator.incrementAndGet());
 
-                PmJsonSerializer serializer = new
-                                              PmJsonSerializer();
+                PmJsonSerializer serializer = new PmJsonSerializer();
                 String message = serializer.serializeBidUpdate(update);
                 remoteSession.getRemote().sendString(message);
 
+                LOGGER.debug("Sent bid update to server {}", update);
                 return update;
             } catch (IOException e) {
                 LOGGER.error("Unable to send new bid to remote agent. Reason {}", e);
