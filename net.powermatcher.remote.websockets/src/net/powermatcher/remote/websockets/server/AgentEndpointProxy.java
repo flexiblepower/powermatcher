@@ -91,8 +91,9 @@ public class AgentEndpointProxy
     @Override
     public void deactivate() {
         if (serviceRegistration != null) {
-            serviceRegistration.unregister();
+            ServiceRegistration<?> reg = serviceRegistration;
             serviceRegistration = null;
+            reg.unregister();
         }
         if (remoteSession != null && remoteSession.isOpen()) {
             remoteSession.close();
