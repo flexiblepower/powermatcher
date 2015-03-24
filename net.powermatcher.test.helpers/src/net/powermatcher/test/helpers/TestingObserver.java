@@ -14,6 +14,10 @@ import net.powermatcher.api.monitoring.events.AgentEvent;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingBidUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
 import aQute.bnd.annotation.metatype.Meta;
@@ -28,6 +32,8 @@ import aQute.bnd.annotation.metatype.Meta;
 @Component(immediate = true, designate = TestingObserver.Config.class)
 public class TestingObserver
     implements AgentObserver {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestingObserver.class);
 
     private final BlockingQueue<AgentEvent> eventQueue = new LinkedBlockingQueue<AgentEvent>();
 
@@ -87,6 +93,9 @@ public class TestingObserver
     }
 
     public void expectBidsFrom(long timeout, String... agentIds) throws InterruptedException {
+        LOGGER.debug("expectedBidsFrom({})", Arrays.toString(agentIds));
+        eventQueue.clear();
+
         long deadline = System.currentTimeMillis() + timeout * 1000;
         long waitTime = timeout * 1000;
 
@@ -103,11 +112,14 @@ public class TestingObserver
                     throw new AssertionError("Got a unexpected bid update from: " + agentEvent.getAgentId());
                 }
 
+                LOGGER.debug("Correctly detected bid from {}", agentEvent.getAgentId());
                 stillLookingFor.remove(agentEvent.getAgentId());
                 if (stillLookingFor.isEmpty()) {
+                    LOGGER.info("Found all expected bids");
                     return; // Normal completion!
                 }
             }
+
             waitTime = deadline - System.currentTimeMillis();
         }
 
@@ -116,8 +128,12 @@ public class TestingObserver
 
     public void
             expectReceivingPriceUpdate(int timeout, Price expectedPrice, String... agentIds) throws InterruptedException {
+        LOGGER.debug("expectReceivingPriceUpdate({}, {})", expectedPrice, Arrays.toString(agentIds));
+        eventQueue.clear();
+
         long deadline = System.currentTimeMillis() + timeout * 1000;
         long waitTime = timeout * 1000;
+        Price wrongPrice = null;
 
         Set<String> agentIdSet = new HashSet<String>(Arrays.asList(agentIds));
         Set<String> stillLookingFor = new HashSet<String>(agentIdSet);
@@ -136,17 +152,26 @@ public class TestingObserver
                 if (detectedPrice.equals(expectedPrice)) {
                     stillLookingFor.remove(agentEvent.getAgentId());
                     if (stillLookingFor.isEmpty()) {
+                        LOGGER.info("Found all expected price updates");
                         return; // Normal completion!
                     }
+                } else {
+                    wrongPrice = detectedPrice;
+                    LOGGER.debug("Detected wrong price, waiting a bit longer: {}", detectedPrice);
                 }
             }
             waitTime = deadline - System.currentTimeMillis();
         }
 
-        throw new AssertionError("Did not detect incoming price updates from " + stillLookingFor);
+        if (wrongPrice != null) {
+            throw new AssertionError("Only detected a wrong price of " + wrongPrice + ", expected " + expectedPrice);
+        } else {
+            throw new AssertionError("Did not detect incoming price updates from " + stillLookingFor);
+        }
     }
 
     public void expectNothing(int timeout) throws InterruptedException {
+        LOGGER.debug("expectNothing()");
         eventQueue.clear();
         AgentEvent event = eventQueue.poll(timeout, TimeUnit.SECONDS);
         if (event != null) {

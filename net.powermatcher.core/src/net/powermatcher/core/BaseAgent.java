@@ -141,7 +141,7 @@ public abstract class BaseAgent
     }
 
     /**
-     * Indicates if the agent is ready. This is only true after {@link #activate(String)} and
+     * Indicates if the agent is ready. This is only true after {@link #init(String)} and
      * {@link #configure(MarketBasis, String)} are called.
      *
      * @return true when the {@link #activate(String)}

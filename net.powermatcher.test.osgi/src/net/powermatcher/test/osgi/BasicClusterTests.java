@@ -112,6 +112,7 @@ public class BasicClusterTests
     }
 
     private void checkBidsFullCluster() throws InterruptedException {
+        Thread.sleep(300); // Just to be sure everything has shut down correctly
         observer.expectBidsFrom(10, AGENT_ID_CONCENTRATOR, AGENT_ID_PV_PANEL, AGENT_ID_FREEZER);
         observer.expectReceivingPriceUpdate(10,
                                             new Price(ClusterHelper.DEFAULT_MARKETBASIS, 1),
@@ -121,6 +122,7 @@ public class BasicClusterTests
     }
 
     private void checkBidsClusterNoFreezer() throws InterruptedException {
+        Thread.sleep(300); // Just to be sure everything has shut down correctly
         observer.expectBidsFrom(10, AGENT_ID_CONCENTRATOR, AGENT_ID_PV_PANEL);
         observer.expectReceivingPriceUpdate(10,
                                             new Price(ClusterHelper.DEFAULT_MARKETBASIS, 0),
@@ -129,6 +131,7 @@ public class BasicClusterTests
     }
 
     private void checkBidsNoCluster() throws InterruptedException {
+        Thread.sleep(300); // Just to be sure everything has shut down correctly
         observer.expectNothing(5);
     }
 }

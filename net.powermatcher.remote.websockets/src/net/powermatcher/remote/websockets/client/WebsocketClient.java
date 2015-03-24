@@ -108,9 +108,10 @@ public class WebsocketClient
      *
      * @param properties
      *            the configuration properties
+     * @throws Exception
      */
     @Activate
-    public synchronized void activate(BundleContext bundleContext, Map<String, Object> properties) {
+    public synchronized void activate(BundleContext bundleContext, Map<String, Object> properties) throws Exception {
         // Read configuration properties
         Config config = Configurable.createConfigurable(Config.class, properties);
         init(config.agentId());
@@ -129,13 +130,20 @@ public class WebsocketClient
 
         this.bundleContext = bundleContext;
 
+        client = new WebSocketClient();
+        try {
+            client.start();
+        } catch (Exception e) {
+            LOGGER.warn("Could not start websocket client: " + e.getMessage(), e);
+            throw e;
+        }
+
         Runnable reconnectJob = new Runnable() {
             @Override
             public void run() {
                 connectRemote();
             }
         };
-
         scheduledFuture = executorService.scheduleAtFixedRate(reconnectJob,
                                                               1,
                                                               reconnectDelay,
@@ -147,6 +155,11 @@ public class WebsocketClient
      */
     @Deactivate
     public synchronized void deactivate() {
+        try {
+            client.stop();
+        } catch (Exception e) {
+            LOGGER.warn("Could not stop websocket client: " + e.getMessage(), e);
+        }
         scheduledFuture.cancel(true);
         disconnectRemote();
         unregisterMatcherEndpoint();
@@ -157,21 +170,16 @@ public class WebsocketClient
      *
      * This specific implementation opens a websocket.
      */
-    public synchronized void connectRemote() {
+    private synchronized void connectRemote() {
         if (!isRemoteConnected()) {
             // Try to setup a new websocket connection.
-            client = new WebSocketClient();
-            ClientUpgradeRequest request = new ClientUpgradeRequest();
-
             try {
-                client.start();
+                ClientUpgradeRequest request = new ClientUpgradeRequest();
                 Future<Session> connectFuture = client.connect(this, powermatcherUrl, request);
-                LOGGER.info("Connecting to : {}", request);
+                LOGGER.info("Connecting to : {}", request.getRequestURI());
 
                 // Wait configurable time for remote to respond
-                Session newRemoteSession = connectFuture.get(connectTimeout, TimeUnit.SECONDS);
-
-                remoteSession = newRemoteSession;
+                remoteSession = connectFuture.get(connectTimeout, TimeUnit.SECONDS);
             } catch (Exception e) {
                 LOGGER.error("Unable to connect to remote agent. Reason {}", e);
                 remoteSession = null;
@@ -184,28 +192,11 @@ public class WebsocketClient
      *
      * This specific implementation closes the open websocket.
      */
-    public synchronized boolean disconnectRemote() {
+    private synchronized void disconnectRemote() {
         // Terminate remote session (if any)
         if (isRemoteConnected()) {
             remoteSession.close(new CloseStatus(0, "Normal disconnect"));
         }
-
-        remoteSession = null;
-
-        // Stop the client
-        if (client != null && !client.isStopped()) {
-            try {
-                client.stop();
-            } catch (Exception e) {
-                LOGGER.warn("Unable to disconnect, reason: [{}]", e);
-                return false;
-            }
-        }
-
-        // Unregister the MatcherEndpoint with the OSGI runtime, to disable connections locally
-        unregisterMatcherEndpoint();
-
-        return true;
     }
 
     /**
@@ -236,8 +227,7 @@ public class WebsocketClient
     public void onDisconnect(int statusCode, String reason) {
         LOGGER.info("Connection closed: {} - {}", statusCode, reason);
         remoteSession = null;
-
-        // Unregister the MatcherEndpoint with the OSGI runtime, to disable connections locally
+        unconfigure();
         unregisterMatcherEndpoint();
     }
 
@@ -256,25 +246,31 @@ public class WebsocketClient
             PmJsonSerializer serializer = new PmJsonSerializer();
             PmMessage pmMessage = serializer.deserialize(message);
 
-            // Handle specific message
-            if (pmMessage.getPayloadType() == PayloadType.PRICE_UPDATE) {
-                // Relay price update to local agents
-                PriceUpdate priceUpdate = ModelMapper.mapPriceUpdate((PriceUpdateModel) pmMessage.getPayload());
+            if (!isConnected()) {
+                if (pmMessage.getPayloadType() == PayloadType.CLUSTERINFO) {
+                    // Sync marketbasis and clusterid with local session, for new
+                    // connections
+                    ClusterInfoModel clusterInfo = (ClusterInfoModel) pmMessage.getPayload();
+                    configure(ModelMapper.convertMarketBasis(clusterInfo.getMarketBasis()),
+                              clusterInfo.getClusterId(),
+                              minTimeBetweenBidUpdates);
 
-                SentBidInformation info = sentBids.retrieveAggregatedBid(priceUpdate.getBidNumber());
-                publishPrice(priceUpdate.getPrice(), info.getOriginalBid());
-            }
+                    // Register the MatcherEndpoint with the OSGI runtime, to make it available for connections
+                    registerMatcherEndpoint();
+                } else {
+                    LOGGER.warn("Got unexpected message type [{}], expected CLUSTERINFO", pmMessage.getPayloadType());
+                }
+            } else {
+                // Handle specific message
+                if (pmMessage.getPayloadType() == PayloadType.PRICE_UPDATE) {
+                    // Relay price update to local agents
+                    PriceUpdate priceUpdate = ModelMapper.mapPriceUpdate((PriceUpdateModel) pmMessage.getPayload());
 
-            if (pmMessage.getPayloadType() == PayloadType.CLUSTERINFO) {
-                // Sync marketbasis and clusterid with local session, for new
-                // connections
-                ClusterInfoModel clusterInfo = (ClusterInfoModel) pmMessage.getPayload();
-                configure(ModelMapper.convertMarketBasis(clusterInfo.getMarketBasis()),
-                          clusterInfo.getClusterId(),
-                          minTimeBetweenBidUpdates);
-
-                // Register the MatcherEndpoint with the OSGI runtime, to make it available for connections
-                registerMatcherEndpoint();
+                    SentBidInformation info = sentBids.retrieveAggregatedBid(priceUpdate.getBidNumber());
+                    publishPrice(priceUpdate.getPrice(), info.getOriginalBid());
+                } else {
+                    LOGGER.warn("Got unexpected message type [{}], expected PRICE_UPDATE", pmMessage.getPayloadType());
+                }
             }
         } catch (JsonSyntaxException e) {
             LOGGER.warn("Unable to understand message from remote agent: {}", message);

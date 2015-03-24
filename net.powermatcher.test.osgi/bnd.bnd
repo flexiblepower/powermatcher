@@ -13,7 +13,7 @@ Test-Cases:  ${classes;CONCRETE;EXTENDS;junit.framework.TestCase}
 -runee: JavaSE-1.7
 -runfw: org.apache.felix.framework;version='[4,5)'
 -runproperties: org.osgi.service.http.port=8181
-#-runvm: -Dlogback.configurationFile=${workspace}/cnf/conf-local/logback.xml
+-runvm: -Dlogback.configurationFile=${workspace}/cnf/conf-local/logback.xml
 -resolve: auto
 -runrequires:  \
 	osgi.identity;filter:='(osgi.identity=org.apache.felix.configadmin)',\

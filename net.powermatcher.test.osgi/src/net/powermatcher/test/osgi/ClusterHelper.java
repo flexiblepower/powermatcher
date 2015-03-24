@@ -58,6 +58,7 @@ public class ClusterHelper
     private final ConfigurationAdmin admin;
 
     private final Set<ServiceReference<?>> savedReferences = new HashSet<ServiceReference<?>>();
+    private final Set<Configuration> savedConfigs = new HashSet<Configuration>();
 
     public ClusterHelper(BundleContext context) throws InterruptedException, IOException, InvalidSyntaxException {
         this.context = context;
@@ -77,33 +78,36 @@ public class ClusterHelper
 
         // Cleanup running agents to start with clean test
         Configuration[] configs = admin.listConfigurations(null);
-        if (configs != null) {
-            for (Configuration config : configs) {
-                try {
-                    config.delete();
-                } catch (IllegalStateException e) {
-                    // Conifig already deleted by other means.
-                }
-            }
-
-            // Wait a small time for all components to shutdown
-            Thread.sleep(1000);
-        }
+        Assert.assertNull("There are still active configurations. Maybe the previous test didn't clean up properly?",
+                          configs);
     }
 
     public void close() {
-        adminServiceTracker.close();
-        scrServiceTracker.close();
         context.removeServiceListener(this);
         for (Iterator<ServiceReference<?>> it = savedReferences.iterator(); it.hasNext();) {
             context.ungetService(it.next());
             it.remove();
+        }
+        for (Iterator<Configuration> it = savedConfigs.iterator(); it.hasNext();) {
+            try {
+                it.next().delete();
+            } catch (IOException e) {
+            }
+            it.remove();
+        }
+        adminServiceTracker.close();
+        scrServiceTracker.close();
+
+        try {
+            Thread.sleep(500); // Give everything time to shut down correctly
+        } catch (InterruptedException e) {
         }
     }
 
     public Configuration createConfiguration(String factoryPid, PropertiesBuilder builder) throws IOException {
         Configuration config = admin.createFactoryConfiguration(factoryPid, null);
         config.update(builder.buildDict());
+        savedConfigs.add(config);
         return config;
     }
 

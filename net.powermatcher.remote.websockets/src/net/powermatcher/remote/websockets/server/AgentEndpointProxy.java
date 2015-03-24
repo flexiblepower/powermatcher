@@ -74,6 +74,7 @@ public class AgentEndpointProxy
                                                                           AgentEndpoint.class.getName() },
                                                             this,
                                                             null);
+        LOGGER.debug("Connected to remote agent {} on {}", remoteAgentId, remoteSession.getRemoteAddress());
     }
 
     /**
@@ -109,6 +110,7 @@ public class AgentEndpointProxy
     @Override
     public void onWebSocketClose(int statusCode, String reason) {
         deactivate();
+        LOGGER.debug("Disconnected session [{}], code = {}, reason = {}", getAgentId(), statusCode, reason);
     }
 
     @Override
@@ -132,6 +134,8 @@ public class AgentEndpointProxy
                                                     newBid));
             LOGGER.debug("Sending bid [{}] to {}", newBid, session.getAgentId());
             getSession().updateBid(newBid);
+        } else {
+            LOGGER.warn("Got a message, while not connected? {}", newBid);
         }
     }
 

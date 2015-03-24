@@ -67,6 +67,8 @@ public class SessionManager {
             for (PotentialSession ps : potentialSessions.get(agentId)) {
                 ps.setMatcherEndpoint(matcherEndpoint);
             }
+
+            LOGGER.debug("Agent with id [{}] added", agentId);
         }
 
         tryConnect();
