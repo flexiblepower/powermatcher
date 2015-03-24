@@ -3,14 +3,9 @@ package net.powermatcher.test.osgi;
 import static net.powermatcher.test.osgi.ClusterHelper.AGENT_ID_CONCENTRATOR;
 import static net.powermatcher.test.osgi.ClusterHelper.AGENT_ID_FREEZER;
 import static net.powermatcher.test.osgi.ClusterHelper.AGENT_ID_PV_PANEL;
-
-import java.util.List;
-
-import net.powermatcher.api.messages.PriceUpdate;
-import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
-import net.powermatcher.api.monitoring.events.OutgoingBidUpdateEvent;
+import net.powermatcher.api.data.Price;
 import net.powermatcher.test.helpers.PropertiesBuilder;
-import net.powermatcher.test.helpers.StoringObserver;
+import net.powermatcher.test.helpers.TestingObserver;
 
 import org.osgi.service.cm.Configuration;
 
@@ -20,11 +15,11 @@ public class RemoteClusterTests
     private final String PID_PM_WEBSOCKET = "net.powermatcher.remote.websockets.server.PowermatcherWebSocketServlet";
     private final String FACTORY_PID_WEBSOCKET_CLIENT = "net.powermatcher.remote.websockets.client.WebsocketClient";
     private final String AGENT_ID_WEBSOCKET_CLIENT = "websocket-client";
+    private final String AGENT_ID_WEBSOCKET_SERVER = "remote-127.0.0.1-websocket-client";
 
-    private StoringObserver observer;
+    private TestingObserver observer;
 
-    private Configuration pvPanelConfig;
-    private Configuration freezerConfig;
+    private Configuration pvPanelConfig, freezerConfig, concentratorConfig, auctioneerConfig;
 
     /**
      * Tests a simple buildup of a cluster in OSGI and sanity tests. Custer consists of Auctioneer, Concentrator, 1
@@ -32,12 +27,7 @@ public class RemoteClusterTests
      */
     public void testSimpleClusterBuildUpWithRemoteAgent() throws Exception {
         LOGGER.info("TEST: testSimpleClusterBuildUpWithRemoteAgent");
-
-        // Setup default remote enabled cluster
         setupRemoteCluster();
-
-        // Checking to see if all agents send bids
-        Thread.sleep(10000);
         checkBidsFullCluster();
     }
 
@@ -47,36 +37,41 @@ public class RemoteClusterTests
      */
     public void testAgentRemoval() throws Exception {
         LOGGER.info("TEST: testAgentRemoval");
-
-        // Setup default remote enabled cluster
         setupRemoteCluster();
-
-        // Checking to see if all agents send bids
-        Thread.sleep(10000);
         checkBidsFullCluster();
 
         // disconnect Freezer
         LOGGER.info("Disconnecting the freezer");
         clusterHelper.getComponent(freezerConfig.getPid()).disable();
-
-        // Checking to see if the Freezer is no longer participating
-        observer.clearEvents();
-        Thread.sleep(10000);
         checkBidsClusterNoFreezer();
 
         // Re-add Freezer agent, it should not receive bids from previous freezer
         LOGGER.info("Reconnecting the freezer");
         clusterHelper.getComponent(freezerConfig.getPid()).enable();
+        checkBidsFullCluster();
+    }
 
-        observer.clearEvents();
-        Thread.sleep(10000);
+    /**
+     * Tests whether concentrator removal disables the whole cluster.
+     */
+    public void testConcentratorRemoval() throws Exception {
+        LOGGER.info("TEST: testConcentratorRemoval");
+        setupRemoteCluster();
+        checkBidsFullCluster();
+
+        LOGGER.info("Disconnecting the concentrator");
+        clusterHelper.getComponent(concentratorConfig.getPid()).disable();
+        checkBidsNoCluster();
+
+        LOGGER.info("Reconnecting the concentrator");
+        clusterHelper.getComponent(concentratorConfig.getPid()).enable();
         checkBidsFullCluster();
     }
 
     private void setupRemoteCluster() throws Exception {
         // Create simple cluster
-        Configuration auctioneerConfig = clusterHelper.createAuctioneer(5000);
-        Configuration concentratorConfig = clusterHelper.createConcentrator(5000);
+        auctioneerConfig = clusterHelper.createAuctioneer(1000);
+        concentratorConfig = clusterHelper.createConcentrator(1000);
         clusterHelper.waitForService(concentratorConfig);
 
         // Create Powermatcher Websocket
@@ -89,11 +84,11 @@ public class RemoteClusterTests
         clusterHelper.waitForService(websocketClientConfiguration);
 
         // Create local PvPanel
-        pvPanelConfig = clusterHelper.createPvPanel(4);
+        pvPanelConfig = clusterHelper.createPvPanel(1);
         clusterHelper.waitForService(pvPanelConfig);
 
         // Create remove Freezer -> connected to matcher endpoint proxy
-        freezerConfig = clusterHelper.createFreezer(ClusterHelper.AGENT_ID_FREEZER, AGENT_ID_WEBSOCKET_CLIENT, 4);
+        freezerConfig = clusterHelper.createFreezer(ClusterHelper.AGENT_ID_FREEZER, AGENT_ID_WEBSOCKET_CLIENT, 1);
         clusterHelper.waitForService(freezerConfig);
 
         clusterHelper.waitForComponentToBecomeActive(auctioneerConfig.getPid());
@@ -107,63 +102,31 @@ public class RemoteClusterTests
         observer = clusterHelper.getServiceByPid(clusterHelper.createStoringObserver());
     }
 
-    private PriceUpdate getLastObservedPriceUpdate(String agentId) {
-        return getLast(observer.getIncomingPriceUpdateEvents(agentId)).getPriceUpdate();
+    private void checkBidsFullCluster() throws InterruptedException {
+        observer.expectBidsFrom(10,
+                                AGENT_ID_CONCENTRATOR,
+                                AGENT_ID_PV_PANEL,
+                                AGENT_ID_FREEZER,
+                                AGENT_ID_WEBSOCKET_SERVER);
+        observer.expectReceivingPriceUpdate(10,
+                                            new Price(ClusterHelper.DEFAULT_MARKETBASIS, 1),
+                                            AGENT_ID_CONCENTRATOR,
+                                            AGENT_ID_WEBSOCKET_SERVER,
+                                            AGENT_ID_PV_PANEL,
+                                            AGENT_ID_FREEZER);
     }
 
-    private void checkBidsFullCluster() {
-        // Are any bids available for each agent (at all)
-        assertNotEmpty(observer.getOutgoingBidUpdateEvents(AGENT_ID_CONCENTRATOR));
-        assertNotEmpty(observer.getOutgoingBidUpdateEvents(AGENT_ID_PV_PANEL));
-        assertNotEmpty(observer.getOutgoingBidUpdateEvents(AGENT_ID_FREEZER));
-
-        // Did all the parts receive a price?
-        assertNotEmpty(observer.getIncomingPriceUpdateEvents(AGENT_ID_CONCENTRATOR));
-        assertNotEmpty(observer.getIncomingPriceUpdateEvents(AGENT_ID_PV_PANEL));
-        assertNotEmpty(observer.getIncomingPriceUpdateEvents(AGENT_ID_FREEZER));
-
-        assertEquals(1, getLastObservedPriceUpdate(AGENT_ID_CONCENTRATOR).getPrice().getPriceValue(), 0);
-        assertEquals(1, getLastObservedPriceUpdate(AGENT_ID_PV_PANEL).getPrice().getPriceValue(), 0);
-        assertEquals(1, getLastObservedPriceUpdate(AGENT_ID_FREEZER).getPrice().getPriceValue(), 0);
-
-        // Validate bidnumbers
-        checkBidNumbers(AGENT_ID_CONCENTRATOR);
-        checkBidNumbers(AGENT_ID_PV_PANEL);
-        checkBidNumbers(AGENT_ID_FREEZER);
+    private void checkBidsClusterNoFreezer() throws InterruptedException {
+        observer.expectBidsFrom(10, AGENT_ID_CONCENTRATOR, AGENT_ID_PV_PANEL, AGENT_ID_WEBSOCKET_SERVER);
+        observer.expectReceivingPriceUpdate(10,
+                                            new Price(ClusterHelper.DEFAULT_MARKETBASIS, 0),
+                                            AGENT_ID_CONCENTRATOR,
+                                            AGENT_ID_WEBSOCKET_SERVER,
+                                            AGENT_ID_PV_PANEL);
     }
 
-    private void checkBidNumbers(String agentId) {
-        // Validate bidnumber incoming from concentrator for correct agent
-        List<OutgoingBidUpdateEvent> agentBids = observer.getOutgoingBidUpdateEvents(agentId);
-        List<IncomingPriceUpdateEvent> receivedPrices = observer.getIncomingPriceUpdateEvents(agentId);
-
-        for (IncomingPriceUpdateEvent priceEvent : receivedPrices) {
-            int priceBidnumber = priceEvent.getPriceUpdate().getBidNumber();
-            boolean validBidNumber = false;
-
-            for (OutgoingBidUpdateEvent bidEvent : agentBids) {
-                if (bidEvent.getBidUpdate().getBidNumber() == priceBidnumber) {
-                    validBidNumber = true;
-                }
-            }
-
-            assertTrue("Price bidnumber " + priceBidnumber + " is unknown in bids for agent " + agentId, validBidNumber);
-        }
-    }
-
-    private void checkBidsClusterNoFreezer() {
-        assertNotEmpty(observer.getOutgoingBidUpdateEvents(ClusterHelper.AGENT_ID_CONCENTRATOR));
-        assertNotEmpty(observer.getOutgoingBidUpdateEvents(ClusterHelper.AGENT_ID_PV_PANEL));
-        assertEmpty(observer.getOutgoingBidUpdateEvents(ClusterHelper.AGENT_ID_FREEZER));
-
-        // Did all the parts receive a price except the freezer?
-        assertNotEmpty(observer.getIncomingPriceUpdateEvents(AGENT_ID_CONCENTRATOR));
-        assertNotEmpty(observer.getIncomingPriceUpdateEvents(AGENT_ID_PV_PANEL));
-        assertEmpty(observer.getIncomingPriceUpdateEvents(AGENT_ID_FREEZER));
-
-        // Check that the price is 0 (all production, no consumption)
-        assertEquals(0, getLastObservedPriceUpdate(AGENT_ID_CONCENTRATOR).getPrice().getPriceValue(), 0);
-        assertEquals(0, getLastObservedPriceUpdate(AGENT_ID_PV_PANEL).getPrice().getPriceValue(), 0);
+    private void checkBidsNoCluster() throws InterruptedException {
+        observer.expectNothing(5);
     }
 
     private PropertiesBuilder getPmSocketProperties(String desiredParentId) {

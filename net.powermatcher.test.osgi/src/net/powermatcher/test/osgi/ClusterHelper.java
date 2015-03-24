@@ -10,7 +10,7 @@ import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.concentrator.Concentrator;
 import net.powermatcher.test.helpers.PropertiesBuilder;
-import net.powermatcher.test.helpers.StoringObserver;
+import net.powermatcher.test.helpers.TestingObserver;
 
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.ScrService;
@@ -42,7 +42,7 @@ public class ClusterHelper
     public static final String FACTORY_PID_CONCENTRATOR = Concentrator.class.getName();
     public static final String FACTORY_PID_PV_PANEL = "net.powermatcher.examples.PVPanelAgent";
     public static final String FACTORY_PID_FREEZER = "net.powermatcher.examples.Freezer";
-    public static final String FACTORY_PID_OBSERVER = StoringObserver.class.getName();
+    public static final String FACTORY_PID_OBSERVER = TestingObserver.class.getName();
 
     public static final String AGENT_ID_AUCTIONEER = "auctioneer";
     public static final String AGENT_ID_CONCENTRATOR = "concentrator";
