@@ -160,7 +160,7 @@ public abstract class BaseAgentEndpoint
                                                     session.getSessionId(),
                                                     now(),
                                                     update));
-            LOGGER.debug("Sending bid [{}] to {}", update, session.getAgentId());
+            LOGGER.debug("Sending bid [{}] to {}", update, session.getMatcherId());
             session.updateBid(update);
             return update;
         } else {
