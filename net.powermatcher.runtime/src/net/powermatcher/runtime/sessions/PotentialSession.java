@@ -85,11 +85,13 @@ public class PotentialSession {
      * the {@link AgentEndpoint} or the {@link SessionManager} can trigger a disconnect.
      */
     public void disconnected() {
-        LOGGER.debug("Session {} between MatcherEndpoint '{}' with AgentEndpoint '{}' was disconnected",
-                     session.getSessionId(),
-                     matcherEndpoint.getAgentId(),
-                     agentEndpoint.getAgentId());
-        session = null;
+        if (session != null) {
+            LOGGER.debug("Session {} between MatcherEndpoint '{}' with AgentEndpoint '{}' was disconnected",
+                         session.getSessionId(),
+                         matcherEndpoint.getAgentId(),
+                         agentEndpoint.getAgentId());
+            session = null;
+        }
     }
 
     /**
