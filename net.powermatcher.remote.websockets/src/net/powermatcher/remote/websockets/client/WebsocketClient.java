@@ -298,7 +298,7 @@ public class WebsocketClient
      * @return bidupdate containing bidnumber and published bid
      */
     private BidUpdate publishBid(AggregatedBid newBid) {
-        if (isConnected() && isRemoteConnected()) {
+        if (isConnected()) {
             try {
                 BidUpdate update = new BidUpdate(newBid, bidNumberGenerator.incrementAndGet());
 
@@ -311,6 +311,9 @@ public class WebsocketClient
             } catch (IOException e) {
                 LOGGER.error("Unable to send new bid to remote agent. Reason {}", e);
             }
+        } else {
+            LOGGER.info("Can not send new bid, not connected (remote.isOpen={})",
+                        remoteSession == null ? false : remoteSession.isOpen());
         }
 
         return null;
