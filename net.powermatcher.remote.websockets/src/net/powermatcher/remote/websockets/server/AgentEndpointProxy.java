@@ -125,17 +125,19 @@ public class AgentEndpointProxy
         PmMessage pmMessage = serializer.deserialize(message);
         BidUpdate newBid = ModelMapper.mapBidUpdate((BidModel) pmMessage.getPayload());
 
-        if (isConnected()) {
-            net.powermatcher.api.Session session = getSession();
-            publishEvent(new OutgoingBidUpdateEvent(getClusterId(),
-                                                    getAgentId(),
-                                                    session.getSessionId(),
-                                                    now(),
-                                                    newBid));
-            LOGGER.debug("Sending bid [{}] to {}", newBid, session.getAgentId());
-            getSession().updateBid(newBid);
-        } else {
-            LOGGER.warn("Got a message, while not connected? {}", newBid);
+        synchronized (this) {
+            if (isConnected()) {
+                net.powermatcher.api.Session session = getSession();
+                publishEvent(new OutgoingBidUpdateEvent(getClusterId(),
+                                                        getAgentId(),
+                                                        session.getSessionId(),
+                                                        now(),
+                                                        newBid));
+                LOGGER.debug("Sending bid [{}] to {}", newBid, session.getAgentId());
+                getSession().updateBid(newBid);
+            } else {
+                LOGGER.warn("Got a message, while not connected? {}", newBid);
+            }
         }
     }
 
