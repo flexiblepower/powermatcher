@@ -68,7 +68,7 @@ public abstract class BaseAgent
     @Override
     public void setContext(FlexiblePowerContext context) {
         if (agentId == null) {
-            throw new IllegalStateException("The activate method should be called first before the context is set.");
+            throw new IllegalStateException("The init method should be called first before the context is set.");
         }
         this.context = context;
     }
@@ -98,7 +98,7 @@ public abstract class BaseAgent
      */
     protected void configure(MarketBasis marketBasis, String clusterId) {
         if (agentId == null) {
-            throw new IllegalStateException("The activate method should be called first before the agent is configured.");
+            throw new IllegalStateException("The init method should be called first before the agent is configured.");
         } else if (marketBasis == null) {
             throw new IllegalArgumentException("The MarketBasis can not be null");
         } else if (clusterId == null) {
@@ -144,7 +144,7 @@ public abstract class BaseAgent
      * Indicates if the agent is ready. This is only true after {@link #init(String)} and
      * {@link #configure(MarketBasis, String)} are called.
      *
-     * @return true when the {@link #activate(String)}
+     * @return true when the {@link #init(String)} and {@link #configure(MarketBasis, String)} methods have been called
      */
     @Override
     public boolean isConnected() {
