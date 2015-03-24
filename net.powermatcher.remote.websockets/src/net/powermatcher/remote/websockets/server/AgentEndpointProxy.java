@@ -1,12 +1,19 @@
 package net.powermatcher.remote.websockets.server;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URLDecoder;
+import java.util.Collections;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
+import net.powermatcher.api.monitoring.events.OutgoingBidUpdateEvent;
 import net.powermatcher.core.BaseAgentEndpoint;
 import net.powermatcher.remote.websockets.data.BidModel;
 import net.powermatcher.remote.websockets.data.PmMessage;
@@ -48,7 +55,16 @@ public class AgentEndpointProxy
     public void onWebSocketConnect(Session remoteSession) {
         this.remoteSession = remoteSession;
 
-        String agentId = "websocket-" + remoteSession.getRemoteAddress() + "-agent";
+        Map<String, String> query = splitQuery(remoteSession.getUpgradeRequest().getRequestURI());
+        String remoteAgentId = query.get("agentId");
+        if (remoteAgentId == null || remoteAgentId.isEmpty()) {
+            remoteSession.close();
+            LOGGER.warn("Rejecting connection from remote agent from [{}], missing the agentId",
+                        remoteSession.getRemoteAddress());
+            return;
+        }
+
+        String agentId = "remote-" + remoteSession.getRemoteAddress().getHostString() + "-" + remoteAgentId;
         this.init(agentId, desiredParentId);
 
         Hashtable<String, Object> properties = new Hashtable<String, Object>();
@@ -58,6 +74,31 @@ public class AgentEndpointProxy
                                                                           AgentEndpoint.class.getName() },
                                                             this,
                                                             null);
+    }
+
+    /**
+     * Get the queryparams from the URL used to connect.
+     *
+     * @param url
+     *            the URL
+     * @return the key value pairs of the queryparams.
+     * @throws UnsupportedEncodingException
+     *             when URL is incorrect.
+     */
+    private static Map<String, String> splitQuery(URI url) {
+        try {
+            Map<String, String> query_pairs = new LinkedHashMap<String, String>();
+            String query = url.getQuery();
+            String[] pairs = query.split("&");
+            for (String pair : pairs) {
+                int idx = pair.indexOf("=");
+                query_pairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"),
+                                URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+            }
+            return query_pairs;
+        } catch (UnsupportedEncodingException ex) {
+            return Collections.emptyMap();
+        }
     }
 
     @Override
@@ -82,8 +123,14 @@ public class AgentEndpointProxy
         PmMessage pmMessage = serializer.deserialize(message);
         BidUpdate newBid = ModelMapper.mapBidUpdate((BidModel) pmMessage.getPayload());
 
-        // Relay bid update to local agent
         if (isConnected()) {
+            net.powermatcher.api.Session session = getSession();
+            publishEvent(new OutgoingBidUpdateEvent(getClusterId(),
+                                                    getAgentId(),
+                                                    session.getSessionId(),
+                                                    now(),
+                                                    newBid));
+            LOGGER.debug("Sending bid [{}] to {}", newBid, session.getAgentId());
             getSession().updateBid(newBid);
         }
     }
