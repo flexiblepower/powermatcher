@@ -2,7 +2,7 @@
 	biz.aQute.junit,\
 	net.powermatcher.core;version=latest,\
 	net.powermatcher.examples;version=latest,\
-	net.powermatcher.remote.websockets;version=latest,\
+	net.powermatcher.remote.websockets.server;version=latest,\
 	net.powermatcher.test.helpers;version=latest,\
 	org.apache.felix.scr
 
@@ -13,19 +13,21 @@ Test-Cases:  ${classes;CONCRETE;EXTENDS;junit.framework.TestCase}
 -runee: JavaSE-1.7
 -runfw: org.apache.felix.framework;version='[4,5)'
 -runproperties: org.osgi.service.http.port=8181
--runvm: -ea -Dlogback.configurationFile=${workspace}/cnf/conf-local/logback.xml
+#-runvm: -Dlogback.configurationFile=${workspace}/cnf/conf-local/logback.xml
 -resolve: auto
 -runrequires:  \
 	osgi.identity;filter:='(osgi.identity=org.apache.felix.configadmin)',\
 	osgi.identity;filter:='(osgi.identity=org.apache.felix.metatype)',\
 	osgi.identity;filter:='(osgi.identity=org.apache.felix.scr)',\
+	osgi.identity;filter:='(osgi.identity=org.apache.felix.http.whiteboard)',\
 	osgi.identity;filter:='(osgi.identity=ch.qos.logback.core)',\
 	osgi.identity;filter:='(osgi.identity=ch.qos.logback.classic)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core)',\
-	osgi.identity;filter:='(osgi.identity=net.powermatcher.remote.websockets)',\
+	osgi.identity;filter:='(osgi.identity=net.powermatcher.remote.websockets.client)',\
+	osgi.identity;filter:='(osgi.identity=net.powermatcher.remote.websockets.server)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.test.helpers)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.examples)'
--runbundles:  \
+-runbundles: \
 	biz.aQute.bnd.annotation;version='[2.4.0,2.4.1)',\
 	ch.qos.logback.classic;version='[1.1.2,1.1.3)',\
 	ch.qos.logback.core;version='[1.1.2,1.1.3)',\
@@ -34,13 +36,15 @@ Test-Cases:  ${classes;CONCRETE;EXTENDS;junit.framework.TestCase}
 	net.powermatcher.api;version=latest,\
 	net.powermatcher.core;version=latest,\
 	net.powermatcher.examples;version=latest,\
-	net.powermatcher.remote.websockets;version=latest,\
+	net.powermatcher.remote.websockets.client;version=latest,\
+	net.powermatcher.remote.websockets.server;version=latest,\
 	net.powermatcher.runtime;version=latest,\
 	net.powermatcher.test.helpers;version=latest,\
 	org.apache.felix.configadmin;version='[1.8.0,1.8.1)',\
 	org.apache.felix.http.api;version='[2.3.2,2.3.3)',\
 	org.apache.felix.http.jetty;version='[3.0.2,3.0.3)',\
 	org.apache.felix.http.servlet-api;version='[1.1.0,1.1.1)',\
+	org.apache.felix.http.whiteboard;version='[2.3.2,2.3.3)',\
 	org.apache.felix.metatype;version='[1.0.10,1.0.11)',\
 	org.apache.felix.scr;version='[1.8.2,1.8.3)',\
 	org.slf4j.osgi-over-slf4j;version='[1.7.7,1.7.8)',\

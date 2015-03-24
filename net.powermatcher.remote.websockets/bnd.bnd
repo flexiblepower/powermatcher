@@ -4,13 +4,8 @@
 	com.google.gson,\
     org.apache.felix.http.servlet-api;version=latest,\
     org.apache.felix.http.jetty;version=latest
--includeresource: {OSGI-INF/permissions.perm=permissions.perm}, WEB-INF/web.xml=${project}/web.xml
+-includeresource: \
+	{OSGI-INF/permissions.perm=permissions.perm},\
+	../cnf/gradle/LICENSE.txt
     
-Bundle-Version: 2.0.0.${tstamp}
-Service-Component:  *
-
-Web-ContextPath: /powermatcher/websockets
-Export-Package:  \
-	net.powermatcher.remote.websockets,\
-	net.powermatcher.remote.websockets.data,\
-	net.powermatcher.remote.websockets.json
+-sub: *.bnd

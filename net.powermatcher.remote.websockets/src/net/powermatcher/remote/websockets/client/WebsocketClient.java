@@ -1,4 +1,4 @@
-package net.powermatcher.remote.websockets;
+package net.powermatcher.remote.websockets.client;
 
 import java.io.IOException;
 import java.net.URI;
@@ -48,25 +48,25 @@ import com.google.gson.JsonSyntaxException;
 /**
  * WebSocket implementation of an {@link MatcherEndpointProxy}. Enabled two agents to communicate via WebSockets and
  * JSON over a TCP connection.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
 @WebSocket()
-@Component(designateFactory = MatcherEndpointProxyWebsocket.Config.class,
+@Component(designateFactory = WebsocketClient.Config.class,
            immediate = true,
            provide = { ObservableAgent.class })
-public class MatcherEndpointProxyWebsocket
+public class WebsocketClient
     extends BaseMatcherEndpoint {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MatcherEndpointProxyWebsocket.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebsocketClient.class);
 
-    @Meta.OCD
+    @Meta.OCD(description = "Remote client over websockets configuration")
     public static interface Config {
         @Meta.AD(deflt = "matcherendpointproxy", description = "The unique identifier of the agent")
         String agentId();
 
-        @Meta.AD(deflt = "ws://localhost:8080/powermatcher/websockets/agentendpoint",
+        @Meta.AD(deflt = "ws://localhost:8080/powermatcher/websocket",
                  description = "URL of powermatcher websocket endpoint.")
         String powermatcherUrl();
 
@@ -105,7 +105,7 @@ public class MatcherEndpointProxyWebsocket
 
     /**
      * OSGi calls this method to activate a managed service.
-     * 
+     *
      * @param properties
      *            the configuration properties
      */
@@ -154,7 +154,7 @@ public class MatcherEndpointProxyWebsocket
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * This specific implementation opens a websocket.
      */
     public synchronized void connectRemote() {
@@ -181,7 +181,7 @@ public class MatcherEndpointProxyWebsocket
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * This specific implementation closes the open websocket.
      */
     public synchronized boolean disconnectRemote() {
@@ -210,7 +210,7 @@ public class MatcherEndpointProxyWebsocket
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * This specific implementation checks to see if the websocket is open.
      */
     @Override
@@ -220,7 +220,7 @@ public class MatcherEndpointProxyWebsocket
 
     /**
      * Determines whether the Websocket is connected.
-     * 
+     *
      * @return true when connected, false otherwise
      */
     public boolean isRemoteConnected() {
@@ -228,7 +228,7 @@ public class MatcherEndpointProxyWebsocket
     }
 
     /**
-     * 
+     *
      * @param statusCode
      * @param reason
      */
@@ -243,7 +243,7 @@ public class MatcherEndpointProxyWebsocket
 
     /**
      * Handle Websocket receive message
-     * 
+     *
      * @param message
      *            the message received via Websockets
      */
@@ -296,7 +296,7 @@ public class MatcherEndpointProxyWebsocket
 
     /**
      * Publish an AggregatedBid via Websockets to {@link AgentProxy}
-     * 
+     *
      * @param newBid
      *            the bid to publish
      * @return bidupdate containing bidnumber and published bid

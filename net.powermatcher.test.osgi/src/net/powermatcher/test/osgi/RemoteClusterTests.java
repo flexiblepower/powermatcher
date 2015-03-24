@@ -1,6 +1,5 @@
 package net.powermatcher.test.osgi;
 
-import static net.powermatcher.test.osgi.ClusterHelper.AGENT_ID_AUCTIONEER;
 import static net.powermatcher.test.osgi.ClusterHelper.AGENT_ID_CONCENTRATOR;
 import static net.powermatcher.test.osgi.ClusterHelper.AGENT_ID_FREEZER;
 import static net.powermatcher.test.osgi.ClusterHelper.AGENT_ID_PV_PANEL;
@@ -10,7 +9,6 @@ import java.util.List;
 import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingBidUpdateEvent;
-import net.powermatcher.core.bidcache.AggregatedBid;
 import net.powermatcher.examples.StoringObserver;
 import net.powermatcher.test.helpers.PropertiesBuilder;
 
@@ -19,10 +17,9 @@ import org.osgi.service.cm.Configuration;
 public class RemoteClusterTests
     extends OsgiTestCase {
 
-    private final String PID_PM_WEBSOCKET = "net.powermatcher.remote.websockets.PowermatcherWebSocket";
-    private final String FACTORY_PID_MATCHER_PROXY = "net.powermatcher.remote.websockets.MatcherEndpointProxyWebsocket";
-    private final String AGENT_ID_AGENT_PROXY = "aep1";
-    private final String AGENT_ID_MATCHER_PROXY = "mep1";
+    private final String PID_PM_WEBSOCKET = "net.powermatcher.remote.websockets.server.PowermatcherWebSocketServlet";
+    private final String FACTORY_PID_WEBSOCKET_CLIENT = "net.powermatcher.remote.websockets.client.WebsocketClient";
+    private final String AGENT_ID_WEBSOCKET_CLIENT = "websocket-client";
 
     private StoringObserver observer;
 
@@ -83,26 +80,26 @@ public class RemoteClusterTests
         clusterHelper.waitForService(concentratorConfig);
 
         // Create Powermatcher Websocket
-        clusterHelper.createConfiguration(PID_PM_WEBSOCKET, getPmSocketProperties(AGENT_ID_CONCENTRATOR));
+        Configuration serverConfiguration = clusterHelper.createConfiguration(PID_PM_WEBSOCKET,
+                                                                              getPmSocketProperties(AGENT_ID_CONCENTRATOR));
 
         // Create matcher proxy
-        Configuration matcherProxyConfiguration = clusterHelper.createConfiguration(FACTORY_PID_MATCHER_PROXY,
-                                                                                    getMatcherProxyProperties(AGENT_ID_MATCHER_PROXY));
-        clusterHelper.waitForService(matcherProxyConfiguration);
+        Configuration websocketClientConfiguration = clusterHelper.createConfiguration(FACTORY_PID_WEBSOCKET_CLIENT,
+                                                                                       getWebsocketClientProperties(AGENT_ID_WEBSOCKET_CLIENT));
+        clusterHelper.waitForService(websocketClientConfiguration);
 
         // Create local PvPanel
         pvPanelConfig = clusterHelper.createPvPanel(4);
         clusterHelper.waitForService(pvPanelConfig);
 
         // Create remove Freezer -> connected to matcher endpoint proxy
-        freezerConfig = clusterHelper.createFreezer(ClusterHelper.AGENT_ID_FREEZER, AGENT_ID_MATCHER_PROXY, 4);
+        freezerConfig = clusterHelper.createFreezer(ClusterHelper.AGENT_ID_FREEZER, AGENT_ID_WEBSOCKET_CLIENT, 4);
         clusterHelper.waitForService(freezerConfig);
 
         clusterHelper.waitForComponentToBecomeActive(auctioneerConfig.getPid());
         clusterHelper.waitForComponentToBecomeActive(concentratorConfig.getPid());
-        // TODO check for new agent proxy
-        // clusterHelper.waitForComponentToBecomeActive(agentProxyConfiguration.getPid());
-        clusterHelper.waitForComponentToBecomeActive(matcherProxyConfiguration.getPid());
+        clusterHelper.waitForComponentToBecomeActive(serverConfiguration.getPid());
+        clusterHelper.waitForComponentToBecomeActive(websocketClientConfiguration.getPid());
         clusterHelper.waitForComponentToBecomeActive(pvPanelConfig.getPid());
         clusterHelper.waitForComponentToBecomeActive(freezerConfig.getPid());
 
@@ -155,43 +152,29 @@ public class RemoteClusterTests
     }
 
     private void checkBidsClusterNoFreezer() {
-        assertFalse(observer.getOutgoingBidUpdateEvents(ClusterHelper.AGENT_ID_CONCENTRATOR).isEmpty());
-        assertFalse(observer.getOutgoingBidUpdateEvents(ClusterHelper.AGENT_ID_PV_PANEL).isEmpty());
-        assertTrue(observer.getOutgoingBidUpdateEvents(ClusterHelper.AGENT_ID_FREEZER).isEmpty());
+        assertNotEmpty(observer.getOutgoingBidUpdateEvents(ClusterHelper.AGENT_ID_CONCENTRATOR));
+        assertNotEmpty(observer.getOutgoingBidUpdateEvents(ClusterHelper.AGENT_ID_PV_PANEL));
+        assertEmpty(observer.getOutgoingBidUpdateEvents(ClusterHelper.AGENT_ID_FREEZER));
 
-        // Check aggregated bid does no longer contain freezer, by checking last aggregated against panel bids
-        List<OutgoingBidUpdateEvent> concentratorBids = observer.getOutgoingBidUpdateEvents(ClusterHelper.AGENT_ID_CONCENTRATOR);
-        List<OutgoingBidUpdateEvent> panelBids = observer.getOutgoingBidUpdateEvents(ClusterHelper.AGENT_ID_PV_PANEL);
+        // Did all the parts receive a price except the freezer?
+        assertNotEmpty(observer.getIncomingPriceUpdateEvents(AGENT_ID_CONCENTRATOR));
+        assertNotEmpty(observer.getIncomingPriceUpdateEvents(AGENT_ID_PV_PANEL));
+        assertEmpty(observer.getIncomingPriceUpdateEvents(AGENT_ID_FREEZER));
 
-        OutgoingBidUpdateEvent concentratorBid = concentratorBids.get(concentratorBids.size() - 1);
-        boolean foundBid = false;
-        for (OutgoingBidUpdateEvent panelBid : panelBids) {
-            if (panelBid.getBidUpdate()
-                        .getBid()
-                        .toArrayBid()
-                        .equals(concentratorBid.getBidUpdate().getBid().toArrayBid())) {
-                foundBid = true;
-            }
-        }
-
-        assertTrue("Concentrator still contains freezer bid", foundBid);
-
-        // Validate last aggregated bid contains only pvPanel
-        AggregatedBid lastBid = (AggregatedBid) getLast(observer.getIncomingBidUpdateEvents(AGENT_ID_AUCTIONEER)).getBidUpdate()
-                                                                                                                 .getBid();
-        assertTrue(lastBid.getAgentBidReferences().containsKey(ClusterHelper.AGENT_ID_PV_PANEL));
-        assertFalse(lastBid.getAgentBidReferences().containsKey(AGENT_ID_AGENT_PROXY));
+        // Check that the price is 0 (all production, no consumption)
+        assertEquals(0, getLastObservedPriceUpdate(AGENT_ID_CONCENTRATOR).getPrice().getPriceValue(), 0);
+        assertEquals(0, getLastObservedPriceUpdate(AGENT_ID_PV_PANEL).getPrice().getPriceValue(), 0);
     }
 
     private PropertiesBuilder getPmSocketProperties(String desiredParentId) {
-        return new PropertiesBuilder().desiredParentId(desiredParentId);
+        return new PropertiesBuilder().desiredParentId(desiredParentId).add("alias", "/powermatcher/websocket");
     }
 
-    private PropertiesBuilder getMatcherProxyProperties(String agentId) {
+    private PropertiesBuilder getWebsocketClientProperties(String agentId) {
         return new PropertiesBuilder().agentId(agentId)
                                       .minTimeBetweenBidUpdates(1000)
                                       .add("powermatcherUrl",
-                                           "ws://localhost:8181/powermatcher/websockets/agentendpoint")
+                                           "ws://localhost:8181/powermatcher/websocket")
                                       .add("reconnectTimeout", 1)
                                       .add("connectTimeout", 60);
     }
