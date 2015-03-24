@@ -1,4 +1,4 @@
-package net.powermatcher.examples;
+package net.powermatcher.test.helpers;
 
 import java.util.ArrayList;
 import java.util.HashMap;

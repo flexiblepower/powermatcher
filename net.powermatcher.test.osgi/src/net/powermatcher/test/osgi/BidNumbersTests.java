@@ -3,7 +3,7 @@ package net.powermatcher.test.osgi;
 import java.util.List;
 
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
-import net.powermatcher.examples.StoringObserver;
+import net.powermatcher.test.helpers.StoringObserver;
 
 import org.osgi.service.cm.Configuration;
 

@@ -11,7 +11,7 @@ import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingBidUpdateEvent;
 import net.powermatcher.core.bidcache.AggregatedBid;
-import net.powermatcher.examples.StoringObserver;
+import net.powermatcher.test.helpers.StoringObserver;
 
 import org.osgi.service.cm.Configuration;
 

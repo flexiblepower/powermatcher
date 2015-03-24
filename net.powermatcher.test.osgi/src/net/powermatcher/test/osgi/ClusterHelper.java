@@ -9,10 +9,8 @@ import junit.framework.TestCase;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.concentrator.Concentrator;
-import net.powermatcher.examples.Freezer;
-import net.powermatcher.examples.PVPanelAgent;
-import net.powermatcher.examples.StoringObserver;
 import net.powermatcher.test.helpers.PropertiesBuilder;
+import net.powermatcher.test.helpers.StoringObserver;
 
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.ScrService;
@@ -29,7 +27,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Helper class which contains basic functionality used in most tests.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
@@ -42,8 +40,8 @@ public class ClusterHelper
 
     public static final String FACTORY_PID_AUCTIONEER = Auctioneer.class.getName();
     public static final String FACTORY_PID_CONCENTRATOR = Concentrator.class.getName();
-    public static final String FACTORY_PID_PV_PANEL = PVPanelAgent.class.getName();
-    public static final String FACTORY_PID_FREEZER = Freezer.class.getName();
+    public static final String FACTORY_PID_PV_PANEL = "net.powermatcher.examples.PVPanelAgent";
+    public static final String FACTORY_PID_FREEZER = "net.powermatcher.examples.Freezer";
     public static final String FACTORY_PID_OBSERVER = StoringObserver.class.getName();
 
     public static final String AGENT_ID_AUCTIONEER = "auctioneer";
