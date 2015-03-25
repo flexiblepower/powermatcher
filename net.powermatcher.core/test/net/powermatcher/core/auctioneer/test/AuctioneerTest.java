@@ -14,6 +14,7 @@ import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.events.AgentEvent;
+import net.powermatcher.api.monitoring.events.AggregatedBidEvent;
 import net.powermatcher.api.monitoring.events.IncomingBidUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.auctioneer.Auctioneer;
@@ -57,6 +58,7 @@ public class AuctioneerTest {
 
         private IncomingBidUpdateEvent incomingBidEvent;
         private OutgoingPriceUpdateEvent outgoingPriceEvent;
+        private AggregatedBidEvent aggregatedBidEvent;
 
         /**
          * {@inheritDoc}
@@ -71,6 +73,11 @@ public class AuctioneerTest {
             } else if (event instanceof OutgoingPriceUpdateEvent) {
                 if (outgoingPriceEvent != null) {
                     fail("OutgoingPriceEvent fired more than once");
+                }
+                outgoingPriceEvent = (OutgoingPriceUpdateEvent) event;
+            } else if (event instanceof AggregatedBidEvent) {
+                if (aggregatedBidEvent != null) {
+                    fail("AggregatedBidEvent fired more than once");
                 }
                 outgoingPriceEvent = (OutgoingPriceUpdateEvent) event;
             } else {
