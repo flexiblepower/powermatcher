@@ -209,7 +209,7 @@ public abstract class BaseAgent
             try {
                 observer.handleAgentEvent(event);
             } catch (RuntimeException ex) {
-                LOGGER.warn("Could not public an event to observer [{}]: {}", observer, ex.getMessage());
+                LOGGER.warn("Could not publish an event to observer [{}]: {}", observer, ex.getMessage());
             }
         }
     }
