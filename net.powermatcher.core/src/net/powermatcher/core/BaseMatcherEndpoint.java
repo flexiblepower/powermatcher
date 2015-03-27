@@ -134,16 +134,18 @@ public abstract class BaseMatcherEndpoint
 
     @Override
     public void handleBidUpdate(Session session, BidUpdate bidUpdate) {
-        if (session == null || !sessions.containsKey(session.getAgentId())) {
-            throw new IllegalStateException("No session found");
-        }
+        synchronized (sessions) {
+            if (session == null || !sessions.containsKey(session.getAgentId())) {
+                throw new IllegalStateException("No session found");
+            }
 
-        if (bidUpdate == null || !bidUpdate.getBid().getMarketBasis().equals(getMarketBasis())) {
-            throw new InvalidParameterException("Marketbasis new bid differs from marketbasis auctioneer");
-        }
+            if (bidUpdate == null || !bidUpdate.getBid().getMarketBasis().equals(getMarketBasis())) {
+                throw new InvalidParameterException("Marketbasis new bid differs from marketbasis auctioneer");
+            }
 
-        // Update agent in aggregatedBids
-        bidCache.updateAgentBid(session.getAgentId(), bidUpdate);
+            // Update agent in aggregatedBids
+            bidCache.updateAgentBid(session.getAgentId(), bidUpdate);
+        }
 
         LOGGER.debug("Received from session [{}] bid update [{}] ", session.getSessionId(), bidUpdate);
 

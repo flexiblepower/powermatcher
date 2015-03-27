@@ -1,22 +1,22 @@
 package net.powermatcher.core.concentrator;
 
 import java.util.Deque;
-import java.util.LinkedList;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.core.bidcache.AggregatedBid;
 
 /**
  * This store keeps track of send bids to be able to retrieve them later
- * 
+ *
  * @author FAN
  * @version 2.0
- * 
+ *
  */
 public class BidHistoryStore {
     private static final int MAX_BIDS = 900;
 
-    private final Deque<SentBidInformation> sentBids = new LinkedList<SentBidInformation>();
+    private final Deque<SentBidInformation> sentBids = new LinkedBlockingDeque<SentBidInformation>();
 
     public void saveBid(final AggregatedBid aggregatedBid, final BidUpdate sentBidUpdate) {
         SentBidInformation info = new SentBidInformation(aggregatedBid, sentBidUpdate);

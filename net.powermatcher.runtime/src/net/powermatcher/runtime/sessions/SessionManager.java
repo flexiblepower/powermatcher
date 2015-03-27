@@ -51,7 +51,7 @@ public class SessionManager {
     public void addMatcherEndpoint(MatcherEndpoint matcherEndpoint) {
         String agentId = matcherEndpoint.getAgentId();
 
-        synchronized (this) {
+        synchronized (potentialSessions) {
             // Check for duplicate
             if (matcherEndpoints.containsKey(agentId)) {
                 LOGGER.warn("MatcherEndpoint added with agentId " + agentId
@@ -84,12 +84,12 @@ public class SessionManager {
     public void removeMatcherEndpoint(MatcherEndpoint matcherEndpoint) {
         String agentId = matcherEndpoint.getAgentId();
 
-        for (PotentialSession ps : potentialSessions.get(agentId)) {
-            // PotentialSessions are disconnected, but are not removed
-            ps.disconnect();
-            ps.setMatcherEndpoint(null);
-        }
-        synchronized (this) {
+        synchronized (potentialSessions) {
+            for (PotentialSession ps : potentialSessions.get(agentId)) {
+                // PotentialSessions are disconnected, but are not removed
+                ps.disconnect();
+                ps.setMatcherEndpoint(null);
+            }
             matcherEndpoints.remove(agentId);
         }
     }
@@ -104,7 +104,7 @@ public class SessionManager {
     public void addAgentEndpoint(AgentEndpoint agentEndpoint) {
         String agentId = agentEndpoint.getAgentId();
         String matcherId = agentEndpoint.getDesiredParentId();
-        synchronized (this) {
+        synchronized (potentialSessions) {
             if (!potentialSessions.containsKey(matcherId)) {
                 potentialSessions.put(matcherId, new ArrayList<PotentialSession>());
             }
@@ -136,7 +136,7 @@ public class SessionManager {
         String agentId = agentEndpoint.getAgentId();
         String matcherId = agentEndpoint.getDesiredParentId();
         PotentialSession currentSession = null;
-        synchronized (this) {
+        synchronized (potentialSessions) {
             Iterator<PotentialSession> it = potentialSessions.get(matcherId).iterator();
             while (it.hasNext()) {
                 PotentialSession ps = it.next();
@@ -161,10 +161,12 @@ public class SessionManager {
         boolean somethingChanged;
         do {
             somethingChanged = false;
-            for (List<PotentialSession> list : potentialSessions.values()) {
-                for (PotentialSession ps : list) {
-                    if (ps.tryConnect()) {
-                        somethingChanged = true;
+            synchronized (potentialSessions) {
+                for (List<PotentialSession> list : potentialSessions.values()) {
+                    for (PotentialSession ps : list) {
+                        if (ps.tryConnect()) {
+                            somethingChanged = true;
+                        }
                     }
                 }
             }

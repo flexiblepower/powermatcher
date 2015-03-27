@@ -12,6 +12,8 @@ import net.powermatcher.api.messages.PriceUpdate;
 public class SessionImpl
     implements Session {
 
+    final Object lock = new Object();
+
     private final String sessionId;
     private final AgentEndpoint agentEndpoint;
     private final MatcherEndpoint matcherEndpoint;
@@ -63,18 +65,31 @@ public class SessionImpl
 
     @Override
     public void updatePrice(PriceUpdate priceUpdate) {
-        agentEndpoint.handlePriceUpdate(priceUpdate);
+        synchronized (lock) {
+            if (!disconnected) {
+                agentEndpoint.handlePriceUpdate(priceUpdate);
+            }
+        }
     }
 
     @Override
     public void updateBid(BidUpdate bidUpdate) {
-        matcherEndpoint.handleBidUpdate(this, bidUpdate);
+        synchronized (lock) {
+            if (!disconnected) {
+                matcherEndpoint.handleBidUpdate(this, bidUpdate);
+            }
+        }
     }
+
+    private volatile boolean disconnected = false;
 
     @Override
     public void disconnect() {
-        agentEndpoint.matcherEndpointDisconnected(this);
-        matcherEndpoint.agentEndpointDisconnected(this);
-        potentialSession.disconnected();
+        synchronized (lock) {
+            disconnected = true;
+            agentEndpoint.matcherEndpointDisconnected(this);
+            matcherEndpoint.agentEndpointDisconnected(this);
+            potentialSession.disconnected();
+        }
     }
 }

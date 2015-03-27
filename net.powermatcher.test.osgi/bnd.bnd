@@ -13,15 +13,13 @@ Test-Cases:  ${classes;CONCRETE;EXTENDS;junit.framework.TestCase}
 -runee: JavaSE-1.7
 -runfw: org.apache.felix.framework;version='[4,5)'
 -runproperties: org.osgi.service.http.port=8181
--runvm: -Dlogback.configurationFile=${workspace}/cnf/conf-local/logback.xml
+-runvm: -Dlogback.configurationFile=${workspace}/cnf/conf-local/logback-min.xml
 -resolve: auto
 -runrequires:  \
 	osgi.identity;filter:='(osgi.identity=org.apache.felix.configadmin)',\
 	osgi.identity;filter:='(osgi.identity=org.apache.felix.metatype)',\
 	osgi.identity;filter:='(osgi.identity=org.apache.felix.scr)',\
 	osgi.identity;filter:='(osgi.identity=org.apache.felix.http.whiteboard)',\
-	osgi.identity;filter:='(osgi.identity=ch.qos.logback.core)',\
-	osgi.identity;filter:='(osgi.identity=ch.qos.logback.classic)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.core)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.remote.websockets.client)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.remote.websockets.server)',\

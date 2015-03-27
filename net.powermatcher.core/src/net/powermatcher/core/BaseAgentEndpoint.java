@@ -26,7 +26,7 @@ public abstract class BaseAgentEndpoint
     /**
      * The id of the {@link MatcherEndpoint} this Agent wants to connect to.
      */
-    private String desiredParentId;
+    private volatile String desiredParentId;
 
     /**
      * This method should always be called during activation of the agent. It sets the agentId and desiredParentId. This
@@ -97,24 +97,28 @@ public abstract class BaseAgentEndpoint
      * {@inheritDoc}
      */
     @Override
-    public synchronized void connectToMatcher(Session session) {
-        if (this.session != null) {
-            throw new IllegalStateException("Already connected to agent " + session.getMatcherId());
-        }
+    public void connectToMatcher(Session session) {
+        synchronized (lock) {
+            if (this.session != null) {
+                throw new IllegalStateException("Already connected to agent " + session.getMatcherId());
+            }
 
-        configure(session.getMarketBasis(), session.getClusterId());
-        bidNumberGenerator.set(0);
-        this.session = session;
+            configure(session.getMarketBasis(), session.getClusterId());
+            bidNumberGenerator.set(0);
+            this.session = session;
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public synchronized void matcherEndpointDisconnected(Session session) {
-        this.session = null;
-        unconfigure();
-        lastBidUpdate = null;
+    public void matcherEndpointDisconnected(Session session) {
+        synchronized (lock) {
+            this.session = null;
+            unconfigure();
+            lastBidUpdate = null;
+        }
     }
 
     public void deactivate() {

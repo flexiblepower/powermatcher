@@ -17,7 +17,7 @@ public class PotentialSession {
 
     private final AgentEndpoint agentEndpoint;
     private MatcherEndpoint matcherEndpoint;
-    private SessionImpl session;
+    private volatile SessionImpl session;
 
     public PotentialSession(AgentEndpoint agentEndpoint) {
         if (agentEndpoint == null) {
@@ -60,21 +60,25 @@ public class PotentialSession {
      */
     public boolean tryConnect() {
         if (session == null && matcherEndpoint != null && matcherEndpoint.isConnected()) {
-            SessionImpl newSession = new SessionImpl(agentEndpoint, matcherEndpoint, this);
-            try {
-                matcherEndpoint.connectToAgent(newSession);
-                session = newSession;
-                agentEndpoint.connectToMatcher(newSession);
-                LOGGER.debug("Connected MatcherEndpoint '{}' with AgentEndpoint '{}' with Session {}",
-                             matcherEndpoint.getAgentId(),
-                             agentEndpoint.getAgentId(),
-                             newSession.getSessionId());
-                return true;
-            } catch (IllegalStateException ex) {
-                LOGGER.warn("Could not connect agent[{}] to matcher[{}]: {}",
-                            agentEndpoint.getAgentId(),
-                            matcherEndpoint.getAgentId(),
-                            ex.getMessage());
+            session = new SessionImpl(agentEndpoint, matcherEndpoint, this);
+            synchronized (session.lock) {
+                try {
+                    // This synchronized block makes sure the whole connection is made before updates can be sent
+                    // Also see that in the SessionImpl the update*() methods are synchronized
+                    matcherEndpoint.connectToAgent(session);
+                    agentEndpoint.connectToMatcher(session);
+                    LOGGER.debug("Connected MatcherEndpoint '{}' with AgentEndpoint '{}' with Session {}",
+                                 matcherEndpoint.getAgentId(),
+                                 agentEndpoint.getAgentId(),
+                                 session.getSessionId());
+                    return true;
+                } catch (IllegalStateException ex) {
+                    session = null;
+                    LOGGER.warn("Could not connect agent[{}] to matcher[{}]: {}",
+                                agentEndpoint.getAgentId(),
+                                matcherEndpoint.getAgentId(),
+                                ex.getMessage());
+                }
             }
         }
         return false;

@@ -1,0 +1,17 @@
+<configuration debug="true">
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%-36.36thread] %-5level %-36.36logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+	
+	<timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss"/>
+	
+	<logger level="info" name="net.powermatcher" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+    
+    <root level="error">
+        <appender-ref ref="STDOUT" level="error" />
+    </root>
+</configuration>

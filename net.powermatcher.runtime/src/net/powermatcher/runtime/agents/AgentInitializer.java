@@ -1,7 +1,6 @@
 package net.powermatcher.runtime.agents;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import net.powermatcher.api.Agent;
 import net.powermatcher.api.AgentEndpoint;
@@ -19,7 +18,7 @@ import aQute.bnd.annotation.component.Reference;
 public class AgentInitializer {
     private static final Logger logger = LoggerFactory.getLogger(AgentInitializer.class);
 
-    private final Set<Agent> agents = new HashSet<Agent>();
+    private final ConcurrentSkipListSet<String> agents = new ConcurrentSkipListSet<String>();
     private final FlexiblePowerContext runtimeContext = new PowerMatcherContext();
 
     @Activate
@@ -44,16 +43,15 @@ public class AgentInitializer {
         removeAgent(matcherEndpoint);
     }
 
-    private synchronized void addAgent(Agent agent) {
-        if (!agents.contains(agent)) {
+    private void addAgent(Agent agent) {
+        if (agents.add(agent.getAgentId())) {
             agent.setContext(runtimeContext);
-            agents.add(agent);
             logger.debug("Detected agent with id [{}]", agent.getAgentId());
         }
     }
 
-    private synchronized void removeAgent(Agent agent) {
-        if (agents.remove(agent)) {
+    private void removeAgent(Agent agent) {
+        if (agents.remove(agent.getAgentId())) {
             logger.debug("Removed agent with id [{}]", agent.getAgentId());
         }
     }
