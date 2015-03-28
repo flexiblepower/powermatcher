@@ -34,46 +34,54 @@ public abstract class BaseMatcherEndpoint
     };
 
     public void configure(MarketBasis marketBasis, String clusterId, long minTimeBetweenUpdates) {
-        super.configure(marketBasis, clusterId);
-        bidCache = new BidCache(marketBasis);
-        this.minTimeBetweenUpdates = minTimeBetweenUpdates;
+        synchronized (lock) {
+            super.configure(marketBasis, clusterId);
+            bidCache = new BidCache(marketBasis);
+            this.minTimeBetweenUpdates = minTimeBetweenUpdates;
+        }
     }
 
     @Override
     public void unconfigure() {
-        for (Iterator<Session> it = sessions.values().iterator(); it.hasNext();) {
-            Session session = it.next();
-            session.disconnect();
-            it.remove();
+        synchronized (lock) {
+            for (Iterator<Session> it = sessions.values().iterator(); it.hasNext();) {
+                Session session = it.next();
+                session.disconnect();
+                it.remove();
+            }
+            super.unconfigure();
+            bidCache = null;
+            minTimeBetweenUpdates = 0;
         }
-        super.unconfigure();
-        bidCache = null;
-        minTimeBetweenUpdates = 0;
     }
 
     private final Map<String, Session> sessions = new ConcurrentHashMap<String, Session>();
 
     @Override
     public void connectToAgent(Session session) {
-        if (!isConnected()) {
-            throw new IllegalStateException("This matcher is not yet connected to the cluster");
-        } else if (!sessions.containsKey(session.getAgentId())) {
-            session.setMarketBasis(getMarketBasis());
-            sessions.put(session.getAgentId(), session);
-            LOGGER.info("Agent connected with session [{}]", session.getSessionId());
-        } else {
-            throw new IllegalStateException("An agent with id [" + session.getAgentId() + "] was already connected");
+        synchronized (lock) {
+            if (!isConnected()) {
+                throw new IllegalStateException("This matcher is not yet connected to the cluster");
+            } else if (!sessions.containsKey(session.getAgentId())) {
+                session.setMarketBasis(getMarketBasis());
+                sessions.put(session.getAgentId(), session);
+                LOGGER.info("Agent connected with session [{}]", session.getSessionId());
+            } else {
+                throw new IllegalStateException("An agent with id [" + session.getAgentId() + "] was already connected");
+            }
         }
     }
 
     @Override
     public void agentEndpointDisconnected(Session session) {
-        Session foundSession = sessions.get(session.getAgentId());
-        if (session.equals(foundSession)) {
-            sessions.remove(session.getAgentId());
-            bidCache.removeBidOfAgent(session.getAgentId());
-            doUpdate();
-            LOGGER.info("Agent disconnected with session [{}]", session.getSessionId());
+        synchronized (lock) {
+            Session foundSession = sessions.get(session.getAgentId());
+            if (session.equals(foundSession)) {
+                sessions.remove(session.getAgentId());
+                bidCache.removeBidOfAgent(session.getAgentId());
+                doUpdate();
+                LOGGER.info("Agent disconnected with session [{}]", session.getSessionId());
+            }
         }
     }
 
@@ -119,9 +127,14 @@ public abstract class BaseMatcherEndpoint
         @Override
         public void run() {
             try {
-                if (isConnected()) {
-                    AggregatedBid aggregatedBid = bidCache.aggregate();
-                    publishEvent(new AggregatedBidEvent(getClusterId(), getAgentId(), now(), aggregatedBid));
+                AggregatedBid aggregatedBid = null;
+                synchronized (lock) {
+                    if (isConnected()) {
+                        aggregatedBid = bidCache.aggregate();
+                        publishEvent(new AggregatedBidEvent(getClusterId(), getAgentId(), now(), aggregatedBid));
+                    }
+                }
+                if (aggregatedBid != null) {
                     performUpdate(aggregatedBid);
                 }
 
@@ -137,18 +150,16 @@ public abstract class BaseMatcherEndpoint
 
     @Override
     public void handleBidUpdate(Session session, BidUpdate bidUpdate) {
-        synchronized (sessions) {
-            if (session == null || !sessions.containsKey(session.getAgentId())) {
-                throw new IllegalStateException("No session found");
-            }
-
-            if (bidUpdate == null || !bidUpdate.getBid().getMarketBasis().equals(getMarketBasis())) {
-                throw new InvalidParameterException("Marketbasis new bid differs from marketbasis auctioneer");
-            }
-
-            // Update agent in aggregatedBids
-            bidCache.updateAgentBid(session.getAgentId(), bidUpdate);
+        if (session == null || !sessions.containsKey(session.getAgentId())) {
+            throw new IllegalStateException("No session found");
         }
+
+        if (bidUpdate == null || !bidUpdate.getBid().getMarketBasis().equals(getMarketBasis())) {
+            throw new InvalidParameterException("Marketbasis new bid differs from marketbasis auctioneer");
+        }
+
+        // Update agent in aggregatedBids
+        bidCache.updateAgentBid(session.getAgentId(), bidUpdate);
 
         LOGGER.debug("Received from session [{}] bid update [{}] ", session.getSessionId(), bidUpdate);
 

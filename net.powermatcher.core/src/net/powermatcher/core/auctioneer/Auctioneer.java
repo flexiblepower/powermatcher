@@ -74,16 +74,18 @@ public class Auctioneer
      */
     @Activate
     public void activate(final Map<String, ?> properties) {
-        config = Configurable.createConfigurable(Config.class, properties);
-        super.init(config.agentId());
+        synchronized (lock) {
+            config = Configurable.createConfigurable(Config.class, properties);
+            super.init(config.agentId());
 
-        MarketBasis marketBasis = new MarketBasis(config.commodity(),
-                                                  config.currency(),
-                                                  config.priceSteps(),
-                                                  config.minimumPrice(),
-                                                  config.maximumPrice());
+            MarketBasis marketBasis = new MarketBasis(config.commodity(),
+                                                      config.currency(),
+                                                      config.priceSteps(),
+                                                      config.minimumPrice(),
+                                                      config.maximumPrice());
 
-        configure(marketBasis, config.clusterId(), config.minTimeBetweenPriceUpdates());
+            configure(marketBasis, config.clusterId(), config.minTimeBetweenPriceUpdates());
+        }
     }
 
     /**

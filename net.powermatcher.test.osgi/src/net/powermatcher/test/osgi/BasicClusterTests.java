@@ -85,11 +85,11 @@ public class BasicClusterTests
 
     private void setupCluster() throws Exception {
         // Create Auctioneer and wait for it
-        auctioneerConfig = clusterHelper.createAuctioneer(1000);
+        auctioneerConfig = clusterHelper.createAuctioneer(0);
         clusterHelper.waitForService(auctioneerConfig);
 
         // Create Concentrator and wait for it
-        concentratorConfig = clusterHelper.createConcentrator(1000);
+        concentratorConfig = clusterHelper.createConcentrator(0);
         clusterHelper.waitForService(concentratorConfig);
 
         // Create PvPanel and wait for it

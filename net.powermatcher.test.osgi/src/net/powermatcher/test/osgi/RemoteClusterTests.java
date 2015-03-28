@@ -70,8 +70,8 @@ public class RemoteClusterTests
 
     private void setupRemoteCluster() throws Exception {
         // Create simple cluster
-        auctioneerConfig = clusterHelper.createAuctioneer(1000);
-        concentratorConfig = clusterHelper.createConcentrator(1000);
+        auctioneerConfig = clusterHelper.createAuctioneer(0);
+        concentratorConfig = clusterHelper.createConcentrator(0);
         clusterHelper.waitForService(concentratorConfig);
 
         // Create Powermatcher Websocket
@@ -138,7 +138,7 @@ public class RemoteClusterTests
 
     private PropertiesBuilder getWebsocketClientProperties(String agentId) {
         return new PropertiesBuilder().agentId(agentId)
-                                      .minTimeBetweenBidUpdates(1000)
+                                      .minTimeBetweenBidUpdates(0)
                                       .add("powermatcherUrl",
                                            "ws://localhost:8181/powermatcher/websocket")
                                       .add("reconnectTimeout", 1)

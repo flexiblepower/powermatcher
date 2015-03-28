@@ -28,12 +28,12 @@ import aQute.bnd.annotation.metatype.Meta;
  * <p>
  * This class represents a {@link Concentrator} component where several instances can be created.
  * </p>
- * 
+ *
  * <p>
  * The {@link Concentrator} receives {@link Bid} from the agents and forwards this in an aggregate {@link Bid} up in the
  * hierarchy to a {@link Concentrator} or to the {@link Auctioneer}. It will receive price updates from the
  * {@link Auctioneer} and forward them to its connected agents.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
@@ -81,7 +81,7 @@ public class Concentrator
 
     /**
      * OSGi calls this method to activate a managed service.
-     * 
+     *
      * @param properties
      *            the configuration properties
      */
@@ -92,21 +92,25 @@ public class Concentrator
 
     /**
      * Convenient activate method that takes a {@link Config} object. This also makes subclassing easier.
-     * 
+     *
      * @param config
      *            The {@link Config} object that configures this concentrator
      */
     public void activate(Config config) {
-        this.config = config;
-        matcherPart.init(config.agentId());
-        super.init(config.agentId(), config.desiredParentId());
-        LOGGER.info("Concentrator [{}], activated", config.agentId());
+        synchronized (lock) {
+            this.config = config;
+            matcherPart.init(config.agentId());
+            super.init(config.agentId(), config.desiredParentId());
+            LOGGER.info("Concentrator [{}], activated", config.agentId());
+        }
     }
 
     @Override
     public void setContext(FlexiblePowerContext context) {
-        super.setContext(context);
-        matcherPart.setContext(context);
+        synchronized (lock) {
+            super.setContext(context);
+            matcherPart.setContext(context);
+        }
     }
 
     /**
@@ -115,19 +119,24 @@ public class Concentrator
     @Override
     @Deactivate
     public void deactivate() {
+        matcherEndpointDisconnected(null); // The session parameters is not used in the implementation
         LOGGER.info("Concentrator [{}], deactivated", config.agentId());
     }
 
     @Override
     public void connectToMatcher(Session session) {
-        super.connectToMatcher(session);
-        matcherPart.configure(session.getMarketBasis(), session.getClusterId(), config.minTimeBetweenBidUpdates());
+        synchronized (lock) {
+            super.connectToMatcher(session);
+            matcherPart.configure(session.getMarketBasis(), session.getClusterId(), config.minTimeBetweenBidUpdates());
+        }
     }
 
     @Override
-    public synchronized void matcherEndpointDisconnected(Session session) {
-        matcherPart.unconfigure();
-        super.matcherEndpointDisconnected(session);
+    public void matcherEndpointDisconnected(Session session) {
+        synchronized (lock) {
+            matcherPart.unconfigure();
+            super.matcherEndpointDisconnected(session);
+        }
     }
 
     /**
@@ -148,7 +157,7 @@ public class Concentrator
 
     /**
      * This method should be overridden when the bid that will be sent has to be changed.
-     * 
+     *
      * @param aggregatedBid
      *            The (input) aggregated bid as calculated normally (the sum of all the bids of the agents).
      * @return The bid that will be sent to the matcher that is connected to this {@link Concentrator}.
@@ -160,7 +169,7 @@ public class Concentrator
     /**
      * This method should be overridden when the price that will be sent down has to be changed. This is called just
      * before the price will be sent down to the connected agents.
-     * 
+     *
      * @param price
      *            The input price update as received from the connected matcher.
      * @param info
