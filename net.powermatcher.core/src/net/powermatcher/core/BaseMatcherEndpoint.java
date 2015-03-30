@@ -141,13 +141,13 @@ public abstract class BaseMatcherEndpoint
                 if (aggregatedBid != null) {
                     performUpdate(aggregatedBid);
                 }
-
+            } catch (RuntimeException e) {
+                LOGGER.error("doBidUpate failed for matcher " + getAgentId(), e);
+            } finally {
                 synchronized (this) {
                     bidUpdateScheduled = false;
                     coolDownEnds = context.currentTimeMillis() + minTimeBetweenUpdates;
                 }
-            } catch (RuntimeException e) {
-                LOGGER.error("doBidUpate failed for matcher " + getAgentId(), e);
             }
         }
     };
