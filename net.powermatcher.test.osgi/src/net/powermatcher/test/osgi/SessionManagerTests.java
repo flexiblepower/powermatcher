@@ -165,7 +165,7 @@ public class SessionManagerTests
         TestMatcher testMatcher = new TestMatcher(bundleContext);
 
         List<AgentCreator> creators = new ArrayList<SessionManagerTests.AgentCreator>();
-        int THREAD_COUNT = 100, AGENTS_PER_THREAD = 100;
+        int THREAD_COUNT = 20, AGENTS_PER_THREAD = 20;
         for (int ix = 0; ix < THREAD_COUNT; ix++) {
             creators.add(new AgentCreator(bundleContext, AGENTS_PER_THREAD));
         }

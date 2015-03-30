@@ -94,7 +94,7 @@ public class TestingObserver
 
     public void expectBidsFrom(long timeout, String... agentIds) throws InterruptedException {
         LOGGER.debug("expectedBidsFrom({})", Arrays.toString(agentIds));
-        eventQueue.clear();
+        clear();
 
         long deadline = System.currentTimeMillis() + timeout * 1000;
         long waitTime = timeout * 1000;
@@ -129,7 +129,7 @@ public class TestingObserver
     public void
             expectReceivingPriceUpdate(int timeout, Price expectedPrice, String... agentIds) throws InterruptedException {
         LOGGER.debug("expectReceivingPriceUpdate({}, {})", expectedPrice, Arrays.toString(agentIds));
-        eventQueue.clear();
+        clear();
 
         long deadline = System.currentTimeMillis() + timeout * 1000;
         long waitTime = timeout * 1000;
@@ -172,11 +172,16 @@ public class TestingObserver
 
     public void expectNothing(int timeout) throws InterruptedException {
         LOGGER.debug("expectNothing()");
-        eventQueue.clear();
+        clear();
         AgentEvent event = eventQueue.poll(timeout, TimeUnit.SECONDS);
         if (event != null) {
             throw new AssertionError("Expected no more event, got: " + event);
         }
+    }
+
+    private void clear() throws InterruptedException {
+        Thread.sleep(50); // For (aggregated) bids that could happen for a short while, because of disconnects
+        eventQueue.clear();
     }
 
     public void clearEvents() {
