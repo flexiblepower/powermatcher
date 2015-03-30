@@ -21,6 +21,7 @@ import net.powermatcher.remote.websockets.json.ModelMapper;
 import net.powermatcher.remote.websockets.json.PmJsonSerializer;
 
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.WebSocketException;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -167,7 +168,7 @@ public class AgentEndpointProxy
             PmJsonSerializer serializer = new PmJsonSerializer();
             String message = serializer.serializePriceUpdate(priceUpdate);
             remoteSession.getRemote().sendString(message);
-        } catch (IOException e) {
+        } catch (IOException | WebSocketException e) {
             LOGGER.warn("Unable to send price update to remote agent, reason {}", e);
         }
     }
