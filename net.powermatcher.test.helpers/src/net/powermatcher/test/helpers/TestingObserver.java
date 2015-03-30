@@ -180,7 +180,7 @@ public class TestingObserver
     }
 
     private void clear() throws InterruptedException {
-        Thread.sleep(50); // For (aggregated) bids that could happen for a short while, because of disconnects
+        Thread.sleep(200); // For (aggregated) bids that could happen for a short while, because of disconnects
         eventQueue.clear();
     }
 

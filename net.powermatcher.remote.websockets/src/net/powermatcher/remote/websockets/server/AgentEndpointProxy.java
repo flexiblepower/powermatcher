@@ -128,7 +128,7 @@ public class AgentEndpointProxy
         PmMessage pmMessage = serializer.deserialize(message);
         BidUpdate newBid = ModelMapper.mapBidUpdate((BidModel) pmMessage.getPayload());
 
-        synchronized (this) {
+        synchronized (lock) {
             if (isConnected()) {
                 net.powermatcher.api.Session session = getSession();
                 publishEvent(new OutgoingBidUpdateEvent(getClusterId(),
