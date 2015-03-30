@@ -54,28 +54,30 @@ public class AgentEndpointProxy
 
     @Override
     public void onWebSocketConnect(Session remoteSession) {
-        this.remoteSession = remoteSession;
+        synchronized (lock) {
+            this.remoteSession = remoteSession;
 
-        Map<String, String> query = splitQuery(remoteSession.getUpgradeRequest().getRequestURI());
-        String remoteAgentId = query.get("agentId");
-        if (remoteAgentId == null || remoteAgentId.isEmpty()) {
-            remoteSession.close();
-            LOGGER.warn("Rejecting connection from remote agent from [{}], missing the agentId",
-                        remoteSession.getRemoteAddress());
-            return;
+            Map<String, String> query = splitQuery(remoteSession.getUpgradeRequest().getRequestURI());
+            String remoteAgentId = query.get("agentId");
+            if (remoteAgentId == null || remoteAgentId.isEmpty()) {
+                remoteSession.close();
+                LOGGER.warn("Rejecting connection from remote agent from [{}], missing the agentId",
+                            remoteSession.getRemoteAddress());
+                return;
+            }
+
+            String agentId = "remote-" + remoteSession.getRemoteAddress().getHostString() + "-" + remoteAgentId;
+            this.init(agentId, desiredParentId);
+
+            Hashtable<String, Object> properties = new Hashtable<String, Object>();
+            properties.put("agentId", agentId);
+            properties.put("desiredParentId", desiredParentId);
+            serviceRegistration = bundleContext.registerService(new String[] { ObservableAgent.class.getName(),
+                                                                              AgentEndpoint.class.getName() },
+                                                                this,
+                                                                null);
+            LOGGER.debug("Connected to remote agent {} on {}", remoteAgentId, remoteSession.getRemoteAddress());
         }
-
-        String agentId = "remote-" + remoteSession.getRemoteAddress().getHostString() + "-" + remoteAgentId;
-        this.init(agentId, desiredParentId);
-
-        Hashtable<String, Object> properties = new Hashtable<String, Object>();
-        properties.put("agentId", agentId);
-        properties.put("desiredParentId", desiredParentId);
-        serviceRegistration = bundleContext.registerService(new String[] { ObservableAgent.class.getName(),
-                                                                          AgentEndpoint.class.getName() },
-                                                            this,
-                                                            null);
-        LOGGER.debug("Connected to remote agent {} on {}", remoteAgentId, remoteSession.getRemoteAddress());
     }
 
     /**
@@ -144,16 +146,18 @@ public class AgentEndpointProxy
 
     @Override
     public void deactivate() {
-        if (serviceRegistration != null) {
-            ServiceRegistration<?> reg = serviceRegistration;
-            serviceRegistration = null;
-            reg.unregister();
+        synchronized (lock) {
+            if (serviceRegistration != null) {
+                ServiceRegistration<?> reg = serviceRegistration;
+                serviceRegistration = null;
+                reg.unregister();
+            }
+            if (remoteSession != null && remoteSession.isOpen()) {
+                remoteSession.close();
+                remoteSession = null;
+            }
+            super.deactivate();
         }
-        if (remoteSession != null && remoteSession.isOpen()) {
-            remoteSession.close();
-            remoteSession = null;
-        }
-        super.deactivate();
     }
 
     /**
@@ -163,13 +167,17 @@ public class AgentEndpointProxy
     public void handlePriceUpdate(PriceUpdate priceUpdate) {
         super.handlePriceUpdate(priceUpdate);
 
-        try {
-            // Create price update message
-            PmJsonSerializer serializer = new PmJsonSerializer();
-            String message = serializer.serializePriceUpdate(priceUpdate);
-            remoteSession.getRemote().sendString(message);
-        } catch (IOException | WebSocketException e) {
-            LOGGER.warn("Unable to send price update to remote agent, reason {}", e);
+        synchronized (lock) {
+            if (isConnected()) {
+                try {
+                    // Create price update message
+                    PmJsonSerializer serializer = new PmJsonSerializer();
+                    String message = serializer.serializePriceUpdate(priceUpdate);
+                    remoteSession.getRemote().sendString(message);
+                } catch (IOException | WebSocketException e) {
+                    LOGGER.warn("Unable to send price update to remote agent, reason {}", e);
+                }
+            }
         }
     }
 
@@ -178,15 +186,17 @@ public class AgentEndpointProxy
      */
     @Override
     public void connectToMatcher(net.powermatcher.api.Session session) {
-        super.connectToMatcher(session);
+        synchronized (lock) {
+            super.connectToMatcher(session);
 
-        // Local matcher is connected, provide cluster information to remote // agent.
-        try {
-            PmJsonSerializer serializer = new PmJsonSerializer();
-            String message = serializer.serializeClusterInfo(getClusterId(), getMarketBasis());
-            remoteSession.getRemote().sendString(message);
-        } catch (IOException e) {
-            LOGGER.warn("Unable to send price update to remote agent, reason {}", e);
+            // Local matcher is connected, provide cluster information to remote // agent.
+            try {
+                PmJsonSerializer serializer = new PmJsonSerializer();
+                String message = serializer.serializeClusterInfo(getClusterId(), getMarketBasis());
+                remoteSession.getRemote().sendString(message);
+            } catch (IOException e) {
+                LOGGER.warn("Unable to send price update to remote agent, reason {}", e);
+            }
         }
     }
 
