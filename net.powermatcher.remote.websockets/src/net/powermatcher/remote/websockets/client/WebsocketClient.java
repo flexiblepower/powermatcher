@@ -27,6 +27,7 @@ import net.powermatcher.remote.websockets.json.PmJsonSerializer;
 
 import org.eclipse.jetty.websocket.api.CloseStatus;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.WebSocketException;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
@@ -308,7 +309,7 @@ public class WebsocketClient
 
                 LOGGER.debug("Sent bid update to server {}", update);
                 return update;
-            } catch (IOException e) {
+            } catch (IOException | WebSocketException e) {
                 LOGGER.error("Unable to send new bid to remote agent. Reason {}", e);
             }
         } else {
