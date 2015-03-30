@@ -28,7 +28,8 @@ public abstract class BaseAgent
     /**
      * This lock is used for locking different actions on the agent. For example, when changing the state (calling
      * {@link #configure(MarketBasis, String)} or {@link #unconfigure()}). This lock should only be used in the methods
-     * that change the state and nowhere else, to prevent deadlocks.
+     * that change the state and nowhere else, to prevent deadlocks. E.g. during the biding, aggregation or determining
+     * price, this lock should not be used. If really needed (usually it isn't) you should use a separate lock.
      */
     protected final Object lock = new Object();
 
