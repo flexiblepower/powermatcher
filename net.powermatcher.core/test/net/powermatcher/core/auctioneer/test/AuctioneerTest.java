@@ -21,7 +21,7 @@ import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.mock.MockAgent;
 import net.powermatcher.mock.MockContext;
 import net.powermatcher.mock.SimpleSession;
-import net.powermatcher.test.helpers.PropertieBuilder;
+import net.powermatcher.test.helpers.PropertiesBuilder;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +43,7 @@ public class AuctioneerTest {
     @Before
     public void setUp() {
         auctioneer = new Auctioneer();
-        auctioneer.activate(new PropertieBuilder().agentId(AUCTIONEER_ID)
+        auctioneer.activate(new PropertiesBuilder().agentId(AUCTIONEER_ID)
                                                   .clusterId(CLUSTER_ID)
                                                   .marketBasis(marketBasis)
                                                   .minTimeBetweenPriceUpdates(1000)

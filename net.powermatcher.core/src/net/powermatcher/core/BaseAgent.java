@@ -25,13 +25,20 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class BaseAgent
     implements ObservableAgent {
+    /**
+     * This lock is used for locking different actions on the agent. For example, when changing the state (calling
+     * {@link #configure(MarketBasis, String)} or {@link #unconfigure()}). This lock should only be used in the methods
+     * that change the state and nowhere else, to prevent deadlocks. E.g. during the biding, aggregation or determining
+     * price, this lock should not be used. If really needed (usually it isn't) you should use a separate lock.
+     */
+    protected final Object lock = new Object();
 
     protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     /**
      * The id of this Agent.
      */
-    private String agentId;
+    private volatile String agentId;
 
     /**
      * This method should always be called during activation of the agent. It sets the identifier of this agent.
@@ -44,12 +51,14 @@ public abstract class BaseAgent
      *             when the agentId is null or is an empty string.
      */
     protected void init(String agentId) {
-        if (this.agentId != null) {
-            throw new IllegalStateException("Agent already initialized with an AgentId");
-        } else if (agentId == null || agentId.isEmpty()) {
-            throw new IllegalArgumentException("The agentId may not be null or empty");
+        synchronized (lock) {
+            if (this.agentId != null) {
+                throw new IllegalStateException("Agent already initialized with an AgentId");
+            } else if (agentId == null || agentId.isEmpty()) {
+                throw new IllegalArgumentException("The agentId may not be null or empty");
+            }
+            this.agentId = agentId;
         }
-        this.agentId = agentId;
     }
 
     /**
@@ -60,17 +69,19 @@ public abstract class BaseAgent
         return agentId;
     }
 
-    protected FlexiblePowerContext context;
+    protected volatile FlexiblePowerContext context;
 
     /**
      * @see net.powermatcher.api.Agent#setContext(org.flexiblepower.context.FlexiblePowerContext)
      */
     @Override
     public void setContext(FlexiblePowerContext context) {
-        if (agentId == null) {
-            throw new IllegalStateException("The activate method should be called first before the context is set.");
+        synchronized (lock) {
+            if (agentId == null) {
+                throw new IllegalStateException("The init method should be called first before the context is set.");
+            }
+            this.context = context;
         }
-        this.context = context;
     }
 
     /**
@@ -79,14 +90,16 @@ public abstract class BaseAgent
      * @return A {@link Date} object, representing the current date and time
      */
     protected Date now() {
-        if (context == null) {
-            throw new IllegalStateException("The FlexiblePowerContext has not been set, is the PowerMatcher runtime active?");
+        synchronized (lock) {
+            if (context == null) {
+                throw new IllegalStateException("The FlexiblePowerContext has not been set, is the PowerMatcher runtime active?");
+            }
+            return context.currentTime();
         }
-        return context.currentTime();
     }
 
-    private String clusterId;
-    private MarketBasis marketBasis;
+    private volatile String clusterId;
+    private volatile MarketBasis marketBasis;
 
     /**
      * Configures the agent to use a specific {@link MarketBasis} and a cluster identifier.
@@ -97,21 +110,25 @@ public abstract class BaseAgent
      *            The (locally) unique identifier for the cluster this agent is a part of.
      */
     protected void configure(MarketBasis marketBasis, String clusterId) {
-        if (agentId == null) {
-            throw new IllegalStateException("The activate method should be called first before the agent is configured.");
-        } else if (marketBasis == null) {
-            throw new IllegalArgumentException("The MarketBasis can not be null");
-        } else if (clusterId == null) {
-            throw new IllegalArgumentException("The clusterId can not be null");
-        }
+        synchronized (lock) {
+            if (agentId == null) {
+                throw new IllegalStateException("The init method should be called first before the agent is configured.");
+            } else if (marketBasis == null) {
+                throw new IllegalArgumentException("The MarketBasis can not be null");
+            } else if (clusterId == null) {
+                throw new IllegalArgumentException("The clusterId can not be null");
+            }
 
-        this.clusterId = clusterId;
-        this.marketBasis = marketBasis;
+            this.clusterId = clusterId;
+            this.marketBasis = marketBasis;
+        }
     }
 
     protected void unconfigure() {
-        clusterId = null;
-        marketBasis = null;
+        synchronized (lock) {
+            clusterId = null;
+            marketBasis = null;
+        }
     }
 
     /**
@@ -135,16 +152,26 @@ public abstract class BaseAgent
     }
 
     private void checkConnected() {
-        if (!isConnected()) {
-            throw new IllegalStateException("This agent is not connected to the cluster.");
+        synchronized (lock) {
+            if (!isConnected()) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("The agent [").append(agentId).append("] is not connected to the cluster. ");
+                if (context == null) {
+                    sb.append("Missing FlexiblePowerContext. ");
+                }
+                if (clusterId == null) {
+                    sb.append("Not connected to the cluster. ");
+                }
+                throw new IllegalStateException(sb.toString());
+            }
         }
     }
 
     /**
-     * Indicates if the agent is ready. This is only true after {@link #activate(String)} and
+     * Indicates if the agent is ready. This is only true after {@link #init(String)} and
      * {@link #configure(MarketBasis, String)} are called.
      *
-     * @return true when the {@link #activate(String)}
+     * @return true when the {@link #init(String)} and {@link #configure(MarketBasis, String)} methods have been called
      */
     @Override
     public boolean isConnected() {

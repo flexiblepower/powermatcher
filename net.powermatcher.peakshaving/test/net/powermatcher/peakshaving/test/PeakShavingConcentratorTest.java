@@ -13,7 +13,7 @@ import net.powermatcher.mock.MockContext;
 import net.powermatcher.mock.MockMatcherAgent;
 import net.powermatcher.mock.SimpleSession;
 import net.powermatcher.peakshaving.PeakShavingConcentrator;
-import net.powermatcher.test.helpers.PropertieBuilder;
+import net.powermatcher.test.helpers.PropertiesBuilder;
 
 import org.junit.Test;
 
@@ -37,7 +37,7 @@ public class PeakShavingConcentratorTest {
     private final MockAgent deviceAgent = new MockAgent(DEVICE_AGENT_ID);
 
     public void setUp(double floor, double ceiling) throws Exception {
-        peakShavingConcentrator.activate(new PropertieBuilder().agentId(CONCENTRATOR_NAME)
+        peakShavingConcentrator.activate(new PropertiesBuilder().agentId(CONCENTRATOR_NAME)
                                                                .desiredParentId(AUCTIONEER_ID)
                                                                .minTimeBetweenBidUpdates(1000)
                                                                .add("floor", floor)

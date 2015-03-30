@@ -26,7 +26,7 @@ public abstract class BaseAgentEndpoint
     /**
      * The id of the {@link MatcherEndpoint} this Agent wants to connect to.
      */
-    private String desiredParentId;
+    private volatile String desiredParentId;
 
     /**
      * This method should always be called during activation of the agent. It sets the agentId and desiredParentId. This
@@ -57,6 +57,14 @@ public abstract class BaseAgentEndpoint
         throw new AssertionError("This method should not be called directly, call init(agentId, desiredParentId)");
     }
 
+    /**
+     * Sets the {@link FlexiblePowerContext} that can be used for scheduling tasks or getting the time (see
+     * {@link #now()}). When overriding this method, you can directly schedule something if needed, but make sure that
+     * the <code>super.setContext(context)</code> is called.
+     *
+     * @param context
+     *            The {@link FlexiblePowerContext} that will be used from now on for scheduling or timing.
+     */
     @Override
     public void setContext(FlexiblePowerContext context) {
         if (desiredParentId == null) {
@@ -89,24 +97,28 @@ public abstract class BaseAgentEndpoint
      * {@inheritDoc}
      */
     @Override
-    public synchronized void connectToMatcher(Session session) {
-        if (this.session != null) {
-            throw new IllegalStateException("Already connected to agent " + session.getMatcherId());
-        }
+    public void connectToMatcher(Session session) {
+        synchronized (lock) {
+            if (this.session != null) {
+                throw new IllegalStateException("Already connected to agent " + session.getMatcherId());
+            }
 
-        configure(session.getMarketBasis(), session.getClusterId());
-        bidNumberGenerator.set(0);
-        this.session = session;
+            configure(session.getMarketBasis(), session.getClusterId());
+            bidNumberGenerator.set(0);
+            this.session = session;
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public synchronized void matcherEndpointDisconnected(Session session) {
-        this.session = null;
-        unconfigure();
-        lastBidUpdate = null;
+    public void matcherEndpointDisconnected(Session session) {
+        synchronized (lock) {
+            this.session = null;
+            unconfigure();
+            lastBidUpdate = null;
+        }
     }
 
     public void deactivate() {
@@ -152,7 +164,7 @@ public abstract class BaseAgentEndpoint
                                                     session.getSessionId(),
                                                     now(),
                                                     update));
-            LOGGER.debug("Sending bid [{}] to {}", update, session.getAgentId());
+            LOGGER.debug("Sending bid [{}] to {}", update, session.getMatcherId());
             session.updateBid(update);
             return update;
         } else {

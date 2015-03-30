@@ -2,7 +2,7 @@ package net.powermatcher.integration.auctioneer;
 
 import static org.junit.Assert.assertEquals;
 import net.powermatcher.core.auctioneer.Auctioneer;
-import net.powermatcher.test.helpers.PropertieBuilder;
+import net.powermatcher.test.helpers.PropertiesBuilder;
 import net.powermatcher.test.helpers.TestClusterHelper;
 
 import org.junit.After;
@@ -28,7 +28,7 @@ public class AuctioneerTest {
     public void setUp() {
         // Init Auctioneer
         auctioneer = new Auctioneer();
-        auctioneer.activate(new PropertieBuilder().agentId(AUCTIONEER_NAME)
+        auctioneer.activate(new PropertiesBuilder().agentId(AUCTIONEER_NAME)
                                                   .clusterId("testCluster")
                                                   .minTimeBetweenPriceUpdates(1000)
                                                   .marketBasis(TestClusterHelper.DEFAULT_MB)

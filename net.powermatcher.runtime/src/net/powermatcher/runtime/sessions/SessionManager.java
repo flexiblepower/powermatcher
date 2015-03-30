@@ -51,7 +51,7 @@ public class SessionManager {
     public void addMatcherEndpoint(MatcherEndpoint matcherEndpoint) {
         String agentId = matcherEndpoint.getAgentId();
 
-        synchronized (this) {
+        synchronized (potentialSessions) {
             // Check for duplicate
             if (matcherEndpoints.containsKey(agentId)) {
                 LOGGER.warn("MatcherEndpoint added with agentId " + agentId
@@ -67,6 +67,8 @@ public class SessionManager {
             for (PotentialSession ps : potentialSessions.get(agentId)) {
                 ps.setMatcherEndpoint(matcherEndpoint);
             }
+
+            LOGGER.debug("Agent with id [{}] added", agentId);
         }
 
         tryConnect();
@@ -82,12 +84,12 @@ public class SessionManager {
     public void removeMatcherEndpoint(MatcherEndpoint matcherEndpoint) {
         String agentId = matcherEndpoint.getAgentId();
 
-        for (PotentialSession ps : potentialSessions.get(agentId)) {
-            // PotentialSessions are disconnected, but are not removed
-            ps.disconnect();
-            ps.setMatcherEndpoint(null);
-        }
-        synchronized (this) {
+        synchronized (potentialSessions) {
+            for (PotentialSession ps : potentialSessions.get(agentId)) {
+                // PotentialSessions are disconnected, but are not removed
+                ps.disconnect();
+                ps.setMatcherEndpoint(null);
+            }
             matcherEndpoints.remove(agentId);
         }
     }
@@ -102,15 +104,15 @@ public class SessionManager {
     public void addAgentEndpoint(AgentEndpoint agentEndpoint) {
         String agentId = agentEndpoint.getAgentId();
         String matcherId = agentEndpoint.getDesiredParentId();
-        synchronized (this) {
+        synchronized (potentialSessions) {
             if (!potentialSessions.containsKey(matcherId)) {
                 potentialSessions.put(matcherId, new ArrayList<PotentialSession>());
             }
             // Check if it already exists
             for (PotentialSession ps : potentialSessions.get(matcherId)) {
                 if (agentId.equals(ps.getAgentId())) {
-                    LOGGER.warn("AgentEndpoint added with agentId " + agentId
-                                + ", but it already exists. Ignoring the new one...");
+                    LOGGER.warn("AgentEndpoint added with agentId {}, but it already exists. Ignoring the new one...",
+                                agentId);
                     return;
                 }
             }
@@ -118,6 +120,7 @@ public class SessionManager {
             PotentialSession ps = new PotentialSession(agentEndpoint);
             ps.setMatcherEndpoint(matcherEndpoints.get(matcherId));
             potentialSessions.get(matcherId).add(ps);
+            LOGGER.debug("Agent with id [{}] added", agentId);
         }
         tryConnect();
     }
@@ -133,7 +136,7 @@ public class SessionManager {
         String agentId = agentEndpoint.getAgentId();
         String matcherId = agentEndpoint.getDesiredParentId();
         PotentialSession currentSession = null;
-        synchronized (this) {
+        synchronized (potentialSessions) {
             Iterator<PotentialSession> it = potentialSessions.get(matcherId).iterator();
             while (it.hasNext()) {
                 PotentialSession ps = it.next();
@@ -158,10 +161,12 @@ public class SessionManager {
         boolean somethingChanged;
         do {
             somethingChanged = false;
-            for (List<PotentialSession> list : potentialSessions.values()) {
-                for (PotentialSession ps : list) {
-                    if (ps.tryConnect()) {
-                        somethingChanged = true;
+            synchronized (potentialSessions) {
+                for (List<PotentialSession> list : potentialSessions.values()) {
+                    for (PotentialSession ps : list) {
+                        if (ps.tryConnect()) {
+                            somethingChanged = true;
+                        }
                     }
                 }
             }

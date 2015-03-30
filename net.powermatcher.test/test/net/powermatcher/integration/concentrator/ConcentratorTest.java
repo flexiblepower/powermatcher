@@ -2,7 +2,7 @@ package net.powermatcher.integration.concentrator;
 
 import net.powermatcher.core.concentrator.Concentrator;
 import net.powermatcher.mock.MockMatcherAgent;
-import net.powermatcher.test.helpers.PropertieBuilder;
+import net.powermatcher.test.helpers.PropertiesBuilder;
 import net.powermatcher.test.helpers.TestClusterHelper;
 
 import org.junit.After;
@@ -34,7 +34,7 @@ public class ConcentratorTest {
     public void setUp() throws Exception {
         // Concentrator to be tested
         concentrator = new Concentrator();
-        concentrator.activate(new PropertieBuilder().agentId(CONCENTRATOR_NAME)
+        concentrator.activate(new PropertiesBuilder().agentId(CONCENTRATOR_NAME)
                                                     .desiredParentId(AUCTIONEER_NAME)
                                                     .minTimeBetweenBidUpdates(1000)
                                                     .build());

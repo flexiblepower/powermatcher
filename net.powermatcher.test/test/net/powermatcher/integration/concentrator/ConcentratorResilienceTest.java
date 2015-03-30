@@ -13,7 +13,7 @@ import net.powermatcher.integration.util.CsvBidReader;
 import net.powermatcher.integration.util.CsvExpectedResultsReader;
 import net.powermatcher.mock.MockAgent;
 import net.powermatcher.mock.MockMatcherAgent;
-import net.powermatcher.test.helpers.PropertieBuilder;
+import net.powermatcher.test.helpers.PropertiesBuilder;
 import net.powermatcher.test.helpers.TestClusterHelper;
 
 import org.junit.After;
@@ -41,7 +41,7 @@ public class ConcentratorResilienceTest
 
         MarketBasis marketBasis = resultsReader.getMarketBasis();
         concentrator = new ConcentratorWrapper();
-        concentrator.activate(new PropertieBuilder().agentId(CONCENTRATOR_NAME)
+        concentrator.activate(new PropertiesBuilder().agentId(CONCENTRATOR_NAME)
                                                     .desiredParentId(MATCHERAGENTNAME)
                                                     .minTimeBetweenBidUpdates(1000)
                                                     .build());

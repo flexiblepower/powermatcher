@@ -14,7 +14,7 @@ public abstract class Bid {
     protected static final double SMALLEST_DEMAND = 1e-6;
 
     /**
-     * Tests if the difference between the 2 demand values is less that {@link #SMALLEST_DEMAND}
+     * Tests if the difference between the 2 demand values is less that {@link #SMALLEST_DEMAND}.
      *
      * @param demand1
      *            The first demand

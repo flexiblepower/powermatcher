@@ -2,7 +2,6 @@ package net.powermatcher.examples;
 
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
 import javax.measure.Measure;
@@ -15,7 +14,6 @@ import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PricePoint;
 import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
-import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.core.BaseAgentEndpoint;
 
 import org.flexiblepower.context.FlexiblePowerContext;
@@ -114,8 +112,10 @@ public class PVPanelAgent
      * {@inheritDoc}
      */
     void doBidUpdate() {
-        double demand = minimumDemand + (maximumDemand - minimumDemand) * generator.nextDouble();
-        publishBid(Bid.flatDemand(getMarketBasis(), demand));
+        if (isConnected()) {
+            double demand = minimumDemand + (maximumDemand - minimumDemand) * generator.nextDouble();
+            publishBid(Bid.flatDemand(getMarketBasis(), demand));
+        }
     }
 
     /**
@@ -123,18 +123,12 @@ public class PVPanelAgent
      */
     @Override
     public synchronized void handlePriceUpdate(PriceUpdate priceUpdate) {
-        LOGGER.debug("Received price update [{}], current bidNr = {}",
-                     priceUpdate, getLastBidUpdate().getBidNumber());
-        publishEvent(new IncomingPriceUpdateEvent(getClusterId(),
-                                                  getAgentId(),
-                                                  getSession().getSessionId(),
-                                                  now(),
-                                                  priceUpdate));
+        super.handlePriceUpdate(priceUpdate);
+        // Nothing to control for a PV panel
     }
 
     /**
-     * @param the
-     *            new {@link ScheduledExecutorService} value.
+     * {@inheritDoc}
      */
     @Override
     public void setContext(FlexiblePowerContext context) {

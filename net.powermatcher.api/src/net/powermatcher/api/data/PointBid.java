@@ -48,7 +48,7 @@ public class PointBid
         }
 
         /**
-         * Adds the supplied pricePoint the PricePoint array
+         * Adds the supplied pricePoint the PricePoint array.
          *
          * @param pricePoint
          *            The point to add
@@ -73,7 +73,7 @@ public class PointBid
         }
 
         /**
-         * Uses the supplied parameters to create a new PointBid
+         * Uses the supplied parameters to create a new PointBid.
          *
          * @return The created {@link PointBid}
          * @throws IllegalArgumentException
@@ -176,7 +176,8 @@ public class PointBid
 
                 if (demandIsEqual(targetDemand, middleDemand)) {
                     // A point with the target demand is found, select this point
-                    leftIx = rightIx = middleIx;
+                    leftIx = middleIx;
+                    rightIx = middleIx;
                 } else if (middleDemand > targetDemand) {
                     // If the middle demand is bigger than the target demand, we set the left to the middle
                     leftIx = middleIx;

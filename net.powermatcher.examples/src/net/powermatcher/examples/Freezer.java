@@ -13,7 +13,6 @@ import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PricePoint;
 import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
-import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.core.BaseAgentEndpoint;
 
 import org.flexiblepower.context.FlexiblePowerContext;
@@ -126,13 +125,8 @@ public class Freezer
      */
     @Override
     public void handlePriceUpdate(PriceUpdate priceUpdate) {
-        LOGGER.debug("Received price update [{}], current bidNr = {}",
-                     priceUpdate, getLastBidUpdate().getBidNumber());
-        publishEvent(new IncomingPriceUpdateEvent(getClusterId(),
-                                                  getAgentId(),
-                                                  getSession().getSessionId(),
-                                                  now(),
-                                                  priceUpdate));
+        super.handlePriceUpdate(priceUpdate);
+        // We actually don't do anything with the price here, but it would normally change the state of the freezer
     }
 
     @Override

@@ -1,3 +1,6 @@
+javac.source: 1.7
+javac.target: 1.7
+
 -include: cnf/gradle/base.bnd
 
 Bundle-Category: PowerMatcher
@@ -10,6 +13,4 @@ test: \
 	junit;version=latest,\
 	org.hamcrest.core;version=latest,\
 	org.mockito.mockito-all;version=latest,\
-	net.powermatcher.test.helpers;version=latest,\
-	ch.qos.logback.classic;version=latest,\
-	ch.qos.logback.core;version=latest
+	net.powermatcher.test.helpers;version=latest

@@ -87,7 +87,7 @@ public class PowerMatcherContext
     }
 
     public PowerMatcherContext() {
-        super(2);
+        super(Runtime.getRuntime().availableProcessors() * 2);
         setKeepAliveTime(5, TimeUnit.MINUTES);
     }
 
