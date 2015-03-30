@@ -99,7 +99,11 @@ public abstract class BaseMatcherEndpoint
                                                           priceUpdate));
                 LOGGER.debug("New price: {}, session {}", priceUpdate, session.getSessionId());
 
-                session.updatePrice(priceUpdate);
+                try {
+                    session.updatePrice(priceUpdate);
+                } catch (RuntimeException ex) {
+                    LOGGER.warn("Unexpected exception while send priceupdate to " + session.getAgentId(), ex);
+                }
             }
         }
     }
