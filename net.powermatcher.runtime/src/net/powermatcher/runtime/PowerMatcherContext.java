@@ -1,4 +1,4 @@
-package net.powermatcher.runtime.agents;
+package net.powermatcher.runtime;
 
 import java.util.Date;
 import java.util.concurrent.Callable;

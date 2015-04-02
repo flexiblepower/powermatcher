@@ -10,7 +10,7 @@ import net.powermatcher.api.Session;
 import net.powermatcher.mock.MockAgent;
 import net.powermatcher.mock.MockContext;
 import net.powermatcher.mock.MockMatcherAgent;
-import net.powermatcher.runtime.sessions.SessionManager;
+import net.powermatcher.runtime.SessionManager;
 
 import org.junit.After;
 import org.junit.Before;
