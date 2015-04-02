@@ -115,41 +115,39 @@ public class WebsocketClient
     public void activate(BundleContext bundleContext, Map<String, Object> properties) throws Exception {
         // Read configuration properties
         Config config = Configurable.createConfigurable(Config.class, properties);
-        synchronized (lock) {
-            init(config.agentId());
+        init(config.agentId());
 
-            try {
-                powermatcherUrl = new URI(config.powermatcherUrl() + "?agentId=" + getAgentId());
-            } catch (URISyntaxException e) {
-                LOGGER.error("Malformed URL for powermatcher websocket endpoint. Reason {}", e);
-                return;
-            }
-
-            reconnectDelay = config.reconnectTimeout();
-            connectTimeout = config.connectTimeout();
-            minTimeBetweenBidUpdates = config.minTimeBetweenBidUpdates();
-
-            this.bundleContext = bundleContext;
-
-            client = new WebSocketClient();
-            try {
-                client.start();
-            } catch (Exception e) {
-                LOGGER.warn("Could not start websocket client: " + e.getMessage(), e);
-                throw e;
-            }
-
-            Runnable reconnectJob = new Runnable() {
-                @Override
-                public void run() {
-                    connectRemote();
-                }
-            };
-            scheduledFuture = executorService.scheduleAtFixedRate(reconnectJob,
-                                                                  1,
-                                                                  reconnectDelay,
-                                                                  TimeUnit.SECONDS);
+        try {
+            powermatcherUrl = new URI(config.powermatcherUrl() + "?agentId=" + getAgentId());
+        } catch (URISyntaxException e) {
+            LOGGER.error("Malformed URL for powermatcher websocket endpoint. Reason {}", e);
+            return;
         }
+
+        reconnectDelay = config.reconnectTimeout();
+        connectTimeout = config.connectTimeout();
+        minTimeBetweenBidUpdates = config.minTimeBetweenBidUpdates();
+
+        this.bundleContext = bundleContext;
+
+        client = new WebSocketClient();
+        try {
+            client.start();
+        } catch (Exception e) {
+            LOGGER.warn("Could not start websocket client: " + e.getMessage(), e);
+            throw e;
+        }
+
+        Runnable reconnectJob = new Runnable() {
+            @Override
+            public void run() {
+                connectRemote();
+            }
+        };
+        scheduledFuture = executorService.scheduleAtFixedRate(reconnectJob,
+                                                              1,
+                                                              reconnectDelay,
+                                                              TimeUnit.SECONDS);
     }
 
     /**
@@ -157,16 +155,14 @@ public class WebsocketClient
      */
     @Deactivate
     public void deactivate() {
-        synchronized (lock) {
-            try {
-                client.stop();
-            } catch (Exception e) {
-                LOGGER.warn("Could not stop websocket client: " + e.getMessage(), e);
-            }
-            scheduledFuture.cancel(true);
-            disconnectRemote();
-            unregisterMatcherEndpoint();
+        try {
+            client.stop();
+        } catch (Exception e) {
+            LOGGER.warn("Could not stop websocket client: " + e.getMessage(), e);
         }
+        unregisterMatcherEndpoint();
+        scheduledFuture.cancel(true);
+        disconnectRemote();
     }
 
     /**
@@ -175,20 +171,18 @@ public class WebsocketClient
      * This specific implementation opens a websocket.
      */
     private void connectRemote() {
-        synchronized (lock) {
-            if (!isRemoteConnected()) {
-                // Try to setup a new websocket connection.
-                try {
-                    ClientUpgradeRequest request = new ClientUpgradeRequest();
-                    Future<Session> connectFuture = client.connect(this, powermatcherUrl, request);
-                    LOGGER.info("Connecting to : {}", request.getRequestURI());
+        if (!isRemoteConnected()) {
+            // Try to setup a new websocket connection.
+            try {
+                ClientUpgradeRequest request = new ClientUpgradeRequest();
+                Future<Session> connectFuture = client.connect(this, powermatcherUrl, request);
+                LOGGER.info("Connecting to : {}", request.getRequestURI());
 
-                    // Wait configurable time for remote to respond
-                    remoteSession = connectFuture.get(connectTimeout, TimeUnit.SECONDS);
-                } catch (Exception e) {
-                    LOGGER.error("Unable to connect to remote agent. Reason {}", e);
-                    remoteSession = null;
-                }
+                // Wait configurable time for remote to respond
+                remoteSession = connectFuture.get(connectTimeout, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                LOGGER.error("Unable to connect to remote agent. Reason {}", e);
+                remoteSession = null;
             }
         }
     }
@@ -199,11 +193,9 @@ public class WebsocketClient
      * This specific implementation closes the open websocket.
      */
     private void disconnectRemote() {
-        synchronized (lock) {
-            // Terminate remote session (if any)
-            if (isRemoteConnected()) {
-                remoteSession.close(new CloseStatus(0, "Normal disconnect"));
-            }
+        // Terminate remote session (if any)
+        if (isRemoteConnected()) {
+            remoteSession.close(new CloseStatus(0, "Normal disconnect"));
         }
     }
 
@@ -233,12 +225,10 @@ public class WebsocketClient
      */
     @OnWebSocketClose
     public void onDisconnect(int statusCode, String reason) {
-        synchronized (lock) {
-            LOGGER.info("Connection closed: {} - {}", statusCode, reason);
-            remoteSession = null;
-            unconfigure();
-            unregisterMatcherEndpoint();
-        }
+        LOGGER.info("Connection closed: {} - {}", statusCode, reason);
+        remoteSession = null;
+        unconfigure();
+        unregisterMatcherEndpoint();
     }
 
     /**
@@ -308,26 +298,23 @@ public class WebsocketClient
      * @return bidupdate containing bidnumber and published bid
      */
     private BidUpdate publishBid(AggregatedBid newBid) {
-        synchronized (lock) {
-            if (isConnected()) {
-                try {
-                    BidUpdate update = new BidUpdate(newBid, bidNumberGenerator.incrementAndGet());
+        BidUpdate update = new BidUpdate(newBid, bidNumberGenerator.incrementAndGet());
+        PmJsonSerializer serializer = new PmJsonSerializer();
+        String message = serializer.serializeBidUpdate(update);
 
-                    PmJsonSerializer serializer = new PmJsonSerializer();
-                    String message = serializer.serializeBidUpdate(update);
-                    remoteSession.getRemote().sendString(message);
-
-                    LOGGER.debug("Sent bid update to server {}", update);
-                    return update;
-                } catch (IOException | WebSocketException e) {
-                    LOGGER.error("Unable to send new bid to remote agent. Reason {}", e);
-                    return null;
-                }
-            } else {
-                LOGGER.info("Can not send new bid, not connected (remote.isOpen={})",
-                            remoteSession == null ? false : remoteSession.isOpen());
+        if (isConnected()) {
+            try {
+                remoteSession.getRemote().sendString(message);
+                LOGGER.debug("Sent bid update to server {}", update);
+                return update;
+            } catch (IOException | WebSocketException | NullPointerException e) {
+                LOGGER.error("Unable to send new bid to remote agent. Reason {}", e);
                 return null;
             }
+        } else {
+            LOGGER.info("Can not send new bid, not connected (remote.isOpen={})",
+                        remoteSession == null ? false : remoteSession.isOpen());
+            return null;
         }
     }
 

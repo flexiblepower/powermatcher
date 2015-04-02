@@ -57,7 +57,9 @@ public class Concentrator
             Bid bid = transformBid(aggregatedBid);
             synchronized (sentBids) {
                 BidUpdate bidUpdate = publishBid(bid);
-                sentBids.saveBid(aggregatedBid, bidUpdate);
+                if (bidUpdate != null) {
+                    sentBids.saveBid(aggregatedBid, bidUpdate);
+                }
             }
         }
     }
@@ -97,20 +99,16 @@ public class Concentrator
      *            The {@link Config} object that configures this concentrator
      */
     public void activate(Config config) {
-        synchronized (lock) {
-            this.config = config;
-            matcherPart.init(config.agentId());
-            super.init(config.agentId(), config.desiredParentId());
-            LOGGER.info("Concentrator [{}], activated", config.agentId());
-        }
+        this.config = config;
+        matcherPart.init(config.agentId());
+        super.init(config.agentId(), config.desiredParentId());
+        LOGGER.info("Concentrator [{}], activated", config.agentId());
     }
 
     @Override
     public void setContext(FlexiblePowerContext context) {
-        synchronized (lock) {
-            super.setContext(context);
-            matcherPart.setContext(context);
-        }
+        super.setContext(context);
+        matcherPart.setContext(context);
     }
 
     /**
@@ -119,21 +117,21 @@ public class Concentrator
     @Override
     @Deactivate
     public void deactivate() {
-        matcherEndpointDisconnected(null); // The session parameters is not used in the implementation
+        if (isConnected()) {
+            matcherEndpointDisconnected(getSession());
+        }
         LOGGER.info("Concentrator [{}], deactivated", config.agentId());
     }
 
     @Override
     public void connectToMatcher(Session session) {
-        synchronized (lock) {
-            super.connectToMatcher(session);
-            matcherPart.configure(session.getMarketBasis(), session.getClusterId(), config.minTimeBetweenBidUpdates());
-        }
+        super.connectToMatcher(session);
+        matcherPart.configure(session.getMarketBasis(), session.getClusterId(), config.minTimeBetweenBidUpdates());
     }
 
     @Override
     public void matcherEndpointDisconnected(Session session) {
-        synchronized (lock) {
+        synchronized (session) {
             matcherPart.unconfigure();
             super.matcherEndpointDisconnected(session);
         }

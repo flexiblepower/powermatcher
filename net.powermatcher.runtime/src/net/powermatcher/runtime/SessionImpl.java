@@ -16,8 +16,6 @@ public class SessionImpl
     implements Session {
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionImpl.class);
 
-    final Object lock = new Object();
-
     private final String sessionId;
     private final AgentEndpoint agentEndpoint;
     private final MatcherEndpoint matcherEndpoint;
@@ -80,38 +78,32 @@ public class SessionImpl
     }
 
     @Override
-    public void updatePrice(PriceUpdate priceUpdate) {
-        synchronized (lock) {
-            if (connected) {
-                agentEndpoint.handlePriceUpdate(priceUpdate);
-            } else {
-                LOGGER.warn("Sending a price update before it is connected from agent ["
-                            + matcherEndpoint.getAgentId()
-                            + "]");
-            }
+    public synchronized void updatePrice(PriceUpdate priceUpdate) {
+        if (connected) {
+            agentEndpoint.handlePriceUpdate(priceUpdate);
+        } else {
+            LOGGER.debug("Sending a price update while not connected from agent ["
+                         + matcherEndpoint.getAgentId()
+                         + "]");
         }
     }
 
     @Override
-    public void updateBid(BidUpdate bidUpdate) {
-        synchronized (lock) {
-            if (connected) {
-                matcherEndpoint.handleBidUpdate(this, bidUpdate);
-            } else {
-                LOGGER.warn("Sending a bid update before it is connected from agent ["
-                            + agentEndpoint.getAgentId()
-                            + "]");
-            }
+    public synchronized void updateBid(BidUpdate bidUpdate) {
+        if (connected) {
+            matcherEndpoint.handleBidUpdate(this, bidUpdate);
+        } else {
+            LOGGER.debug("Sending a bid update while not connected from agent ["
+                         + agentEndpoint.getAgentId()
+                         + "]");
         }
     }
 
     @Override
-    public void disconnect() {
-        synchronized (lock) {
-            connected = false;
-            agentEndpoint.matcherEndpointDisconnected(this);
-            matcherEndpoint.agentEndpointDisconnected(this);
-            potentialSession.disconnected();
-        }
+    public synchronized void disconnect() {
+        connected = false;
+        agentEndpoint.matcherEndpointDisconnected(this);
+        matcherEndpoint.agentEndpointDisconnected(this);
+        potentialSession.disconnected();
     }
 }

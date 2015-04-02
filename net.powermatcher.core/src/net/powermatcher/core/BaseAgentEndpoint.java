@@ -98,15 +98,13 @@ public abstract class BaseAgentEndpoint
      */
     @Override
     public void connectToMatcher(Session session) {
-        synchronized (lock) {
-            if (this.session != null) {
-                throw new IllegalStateException("Already connected to agent " + session.getMatcherId());
-            }
-
-            configure(session.getMarketBasis(), session.getClusterId());
-            bidNumberGenerator.set(0);
-            this.session = session;
+        if (this.session != null) {
+            throw new IllegalStateException("Already connected to agent " + session.getMatcherId());
         }
+
+        configure(session.getMarketBasis(), session.getClusterId());
+        bidNumberGenerator.set(0);
+        this.session = session;
     }
 
     /**
@@ -114,11 +112,9 @@ public abstract class BaseAgentEndpoint
      */
     @Override
     public void matcherEndpointDisconnected(Session session) {
-        synchronized (lock) {
-            this.session = null;
-            unconfigure();
-            lastBidUpdate = null;
-        }
+        this.session = null;
+        unconfigure();
+        lastBidUpdate = null;
     }
 
     public void deactivate() {

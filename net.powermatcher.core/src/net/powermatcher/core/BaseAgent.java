@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import net.powermatcher.api.Agent;
 import net.powermatcher.api.data.MarketBasis;
@@ -25,16 +27,11 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class BaseAgent
     implements ObservableAgent {
-    /**
-     * This lock is used for locking different actions on the agent. For example, when changing the state (calling
-     * {@link #configure(MarketBasis, String)} or {@link #unconfigure()}). This lock should only be used in the methods
-     * that change the state and nowhere else, to prevent deadlocks. E.g. during the biding, aggregation or determining
-     * price, this lock should not be used. If really needed (usually it isn't) you should use a separate lock.
-     */
-    protected final Object lock = new Object();
 
     protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
+    protected final ReadWriteLock lock = new ReentrantReadWriteLock();
+    
     /**
      * The id of this Agent.
      */
@@ -51,14 +48,12 @@ public abstract class BaseAgent
      *             when the agentId is null or is an empty string.
      */
     protected void init(String agentId) {
-        synchronized (lock) {
-            if (this.agentId != null) {
-                throw new IllegalStateException("Agent already initialized with an AgentId");
-            } else if (agentId == null || agentId.isEmpty()) {
-                throw new IllegalArgumentException("The agentId may not be null or empty");
-            }
-            this.agentId = agentId;
+        if (this.agentId != null) {
+            throw new IllegalStateException("Agent already initialized with an AgentId");
+        } else if (agentId == null || agentId.isEmpty()) {
+            throw new IllegalArgumentException("The agentId may not be null or empty");
         }
+        this.agentId = agentId;
     }
 
     /**
@@ -76,12 +71,10 @@ public abstract class BaseAgent
      */
     @Override
     public void setContext(FlexiblePowerContext context) {
-        synchronized (lock) {
-            if (agentId == null) {
-                throw new IllegalStateException("The init method should be called first before the context is set.");
-            }
-            this.context = context;
+        if (agentId == null) {
+            throw new IllegalStateException("The init method should be called first before the context is set.");
         }
+        this.context = context;
     }
 
     /**
@@ -90,12 +83,10 @@ public abstract class BaseAgent
      * @return A {@link Date} object, representing the current date and time
      */
     protected Date now() {
-        synchronized (lock) {
-            if (context == null) {
-                throw new IllegalStateException("The FlexiblePowerContext has not been set, is the PowerMatcher runtime active?");
-            }
-            return context.currentTime();
+        if (context == null) {
+            throw new IllegalStateException("The FlexiblePowerContext has not been set, is the PowerMatcher runtime active?");
         }
+        return context.currentTime();
     }
 
     private volatile String clusterId;
@@ -110,25 +101,21 @@ public abstract class BaseAgent
      *            The (locally) unique identifier for the cluster this agent is a part of.
      */
     protected void configure(MarketBasis marketBasis, String clusterId) {
-        synchronized (lock) {
-            if (agentId == null) {
-                throw new IllegalStateException("The init method should be called first before the agent is configured.");
-            } else if (marketBasis == null) {
-                throw new IllegalArgumentException("The MarketBasis can not be null");
-            } else if (clusterId == null) {
-                throw new IllegalArgumentException("The clusterId can not be null");
-            }
-
-            this.clusterId = clusterId;
-            this.marketBasis = marketBasis;
+        if (agentId == null) {
+            throw new IllegalStateException("The init method should be called first before the agent is configured.");
+        } else if (marketBasis == null) {
+            throw new IllegalArgumentException("The MarketBasis can not be null");
+        } else if (clusterId == null) {
+            throw new IllegalArgumentException("The clusterId can not be null");
         }
+
+        this.clusterId = clusterId;
+        this.marketBasis = marketBasis;
     }
 
     protected void unconfigure() {
-        synchronized (lock) {
-            clusterId = null;
-            marketBasis = null;
-        }
+        clusterId = null;
+        marketBasis = null;
     }
 
     /**
@@ -152,18 +139,16 @@ public abstract class BaseAgent
     }
 
     private void checkConnected() {
-        synchronized (lock) {
-            if (!isConnected()) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("The agent [").append(agentId).append("] is not connected to the cluster. ");
-                if (context == null) {
-                    sb.append("Missing FlexiblePowerContext. ");
-                }
-                if (clusterId == null) {
-                    sb.append("Not connected to the cluster. ");
-                }
-                throw new IllegalStateException(sb.toString());
+        if (!isConnected()) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("The agent [").append(agentId).append("] is not connected to the cluster. ");
+            if (context == null) {
+                sb.append("Missing FlexiblePowerContext. ");
             }
+            if (clusterId == null) {
+                sb.append("Not connected to the cluster. ");
+            }
+            throw new IllegalStateException(sb.toString());
         }
     }
 

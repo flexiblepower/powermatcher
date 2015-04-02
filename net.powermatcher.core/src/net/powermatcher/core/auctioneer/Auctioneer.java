@@ -64,8 +64,6 @@ public class Auctioneer
         long minTimeBetweenPriceUpdates();
     }
 
-    private Config config;
-
     /**
      * OSGi calls this method to activate a managed service.
      *
@@ -74,18 +72,16 @@ public class Auctioneer
      */
     @Activate
     public void activate(final Map<String, ?> properties) {
-        synchronized (lock) {
-            config = Configurable.createConfigurable(Config.class, properties);
-            super.init(config.agentId());
+        Config config = Configurable.createConfigurable(Config.class, properties);
+        super.init(config.agentId());
 
-            MarketBasis marketBasis = new MarketBasis(config.commodity(),
-                                                      config.currency(),
-                                                      config.priceSteps(),
-                                                      config.minimumPrice(),
-                                                      config.maximumPrice());
+        MarketBasis marketBasis = new MarketBasis(config.commodity(),
+                                                  config.currency(),
+                                                  config.priceSteps(),
+                                                  config.minimumPrice(),
+                                                  config.maximumPrice());
 
-            configure(marketBasis, config.clusterId(), config.minTimeBetweenPriceUpdates());
-        }
+        configure(marketBasis, config.clusterId(), config.minTimeBetweenPriceUpdates());
     }
 
     /**

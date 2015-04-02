@@ -61,7 +61,7 @@ public class PotentialSession {
     public boolean tryConnect() {
         if (session == null && matcherEndpoint != null && matcherEndpoint.isConnected()) {
             session = new SessionImpl(agentEndpoint, matcherEndpoint, this);
-            synchronized (session.lock) {
+            synchronized (session) {
                 try {
                     // This synchronized block makes sure the whole connection is made before updates can be sent
                     // Also see that in the SessionImpl the update*() methods are synchronized
