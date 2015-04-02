@@ -45,7 +45,7 @@ import com.google.gson.reflect.TypeToken;
  * @author FAN
  * @version 1.0
  */
-@Component(provide = Servlet.class, designate = PeakShavingConcentrator.Config.class)
+@Component(provide = Servlet.class, designate = PeakShavingConcentratorServlet.Config.class)
 public class PeakShavingConcentratorServlet
     extends HttpServlet {
 
