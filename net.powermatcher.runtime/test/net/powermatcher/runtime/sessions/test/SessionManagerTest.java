@@ -7,6 +7,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import net.powermatcher.api.Session;
+import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.mock.MockAgent;
 import net.powermatcher.mock.MockContext;
 import net.powermatcher.mock.MockMatcherAgent;
@@ -40,6 +41,7 @@ public class SessionManagerTest {
     @Before
     public void setUp() {
         auctioneer = new MockMatcherAgent(AUCTIONEER_NAME, CLUSTER_ID);
+        auctioneer.setMarketBasis(new MarketBasis("something", "YYY", 10, 0, 1));
         auctioneer.setContext(new MockContext(0));
 
         sessionManager = new SessionManager();
