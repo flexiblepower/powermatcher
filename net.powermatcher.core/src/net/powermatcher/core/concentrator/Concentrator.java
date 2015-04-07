@@ -151,7 +151,7 @@ public class Concentrator
             Price price = transformPrice(priceUpdate.getPrice(), info);
             matcherPart.publishPrice(price, info.getOriginalBid());
         } catch (IllegalArgumentException ex) {
-            LOGGER.warn("Received a price update for a bid that I never sent, id: {}", priceUpdate.getBidNumber());
+            LOGGER.warn(ex.getMessage(), ex);
         }
     }
 
