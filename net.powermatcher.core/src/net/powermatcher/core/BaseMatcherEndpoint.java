@@ -9,6 +9,7 @@ import java.util.concurrent.Future;
 import javax.measure.Measure;
 import javax.measure.unit.SI;
 
+import net.powermatcher.api.Agent;
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.MarketBasis;
@@ -25,22 +26,171 @@ public abstract class BaseMatcherEndpoint
     extends BaseAgent
     implements MatcherEndpoint {
 
-    private BidCache bidCache;
+    public static final Agent.Status NOT_CONNECTED = new Agent.Status() {
+        @Override
+        public boolean isConnected() {
+            return false;
+        }
 
-    private long minTimeBetweenUpdates;
+        @Override
+        public MarketBasis getMarketBasis() {
+            throw new IllegalStateException("Agent not connected to a cluster");
+        }
 
-    @Override
-    protected void configure(MarketBasis marketBasis, String clusterId) {
-        throw new AssertionError("The configure method of the BaseMatcherEndpoint should not be called directly, use the configure(marketBasis, clusterId, minTimeBetweenBids)");
+        @Override
+        public String getClusterId() {
+            throw new IllegalStateException("Agent not connected to a cluster");
+        }
     };
 
-    public void configure(MarketBasis marketBasis, String clusterId, long minTimeBetweenUpdates) {
-        super.configure(marketBasis, clusterId);
-        bidCache = new BidCache(marketBasis);
-        this.minTimeBetweenUpdates = minTimeBetweenUpdates;
+    /**
+     * The {@link Connected} object describes the current status and configuration of an {@link BaseMatcherEndpoint}.
+     * This status can be queried through the {@link BaseMatcherEndpoint#getStatus()} method and will give a snapshot of
+     * the state at that time.
+     */
+    public static class Connected
+        implements Agent.Status {
+        private final String clusterId;
+        private final MarketBasis marketBasis;
+
+        /**
+         * Creates a new {@link Connected} object.
+         *
+         * @param clusterId
+         *            the current cluster identifier of the cluster this matcher is connected to
+         * @param marketBasis
+         *            the {@link MarketBasis} of the cluster this matcher is connected to
+         */
+        public Connected(String clusterId, MarketBasis marketBasis) {
+            if (clusterId == null) {
+                throw new NullPointerException("clusterId");
+            } else if (marketBasis == null) {
+                throw new NullPointerException("marketBasis");
+            }
+            this.clusterId = clusterId;
+            this.marketBasis = marketBasis;
+        }
+
+        @Override
+        public String getClusterId() {
+            return clusterId;
+        }
+
+        @Override
+        public MarketBasis getMarketBasis() {
+            return marketBasis;
+        }
+
+        @Override
+        public boolean isConnected() {
+            return true;
+        }
+    }
+
+    public class RateLimitedBidPublisher
+        implements Runnable {
+        private final long minTimeBetweenUpdates;
+
+        // Timestamp at which the cool down period ends (and the Concentrator is allow to send a new BidUpdate again)
+        private volatile long coolDownEnds = 0;
+
+        // Indicates if there is already a BidUpdate scheduled at the end of the cooldown period
+        private volatile Future<?> bidUpdateSchedule = null;
+
+        public RateLimitedBidPublisher(long minTimeBetweenUpdates) {
+            this.minTimeBetweenUpdates = minTimeBetweenUpdates;
+        }
+
+        @Override
+        public void run() {
+            final Agent.Status currentStatus = getStatus();
+            try {
+                if (currentStatus.isConnected()) {
+                    AggregatedBid aggregatedBid = bidCache.aggregate();
+                    publishEvent(new AggregatedBidEvent(currentStatus.getClusterId(),
+                                                        getAgentId(),
+                                                        now(),
+                                                        aggregatedBid));
+                    performUpdate(aggregatedBid);
+                }
+            } catch (RuntimeException e) {
+                LOGGER.error("doBidUpate failed for matcher " + getAgentId(), e);
+            } finally {
+                synchronized (this) {
+                    bidUpdateSchedule = null;
+                    coolDownEnds = context.currentTimeMillis() + minTimeBetweenUpdates;
+                }
+            }
+        }
+
+        synchronized void schedule() {
+            if (bidUpdateSchedule == null) {
+                long waitTime = coolDownEnds - context.currentTimeMillis();
+                if (waitTime > 0) {
+                    // We're in the cooldown period
+                    bidUpdateSchedule = context.schedule(this,
+                                                         Measure.valueOf(waitTime, SI.MILLI(SI.SECOND)));
+                } else {
+                    // Not in a cooldown period, do it right away!
+                    bidUpdateSchedule = context.submit(this);
+                }
+            }
+        }
+
+        synchronized void cancel() {
+            if (bidUpdateSchedule != null) {
+                bidUpdateSchedule.cancel(false);
+                bidUpdateSchedule = null;
+            }
+        }
+    }
+
+    private volatile String agentId;
+    private volatile Agent.Status status;
+    private volatile BidCache bidCache;
+    private volatile RateLimitedBidPublisher bidUpdater;
+
+    public BaseMatcherEndpoint() {
+        status = NOT_CONNECTED;
+        agentId = null;
+        bidCache = null;
+        bidUpdater = null;
     }
 
     @Override
+    public String getAgentId() {
+        return agentId;
+    }
+
+    @Override
+    public Agent.Status getStatus() {
+        return status;
+    }
+
+    /**
+     * This method should always be called during activation of the agent. It sets the agentId and desiredParentId. This
+     * will also call the {@link #init(String)} method, so that call is no longer needed.
+     *
+     * @param agentId
+     *            The agentId that should be used by this {@link Agent}. This will be returned when the
+     *            {@link #getStatus()} is called.
+     *
+     * @throws IllegalArgumentException
+     *             when either the agentId or the desiredParentId is null or is an empty string.
+     */
+    protected void init(String agentId) {
+        if (agentId == null || agentId.isEmpty()) {
+            throw new IllegalArgumentException("The agentId may not be null or empty");
+        }
+        this.agentId = agentId;
+    }
+
+    public void configure(MarketBasis marketBasis, String clusterId, long minTimeBetweenUpdates) {
+        bidCache = new BidCache(marketBasis);
+        status = new Connected(clusterId, marketBasis);
+        bidUpdater = new RateLimitedBidPublisher(minTimeBetweenUpdates);
+    }
+
     public void unconfigure() {
         for (Iterator<Session> it = sessions.values().iterator(); it.hasNext();) {
             Session session = it.next();
@@ -48,10 +198,10 @@ public abstract class BaseMatcherEndpoint
             it.remove();
         }
 
-        cancelUpdate();
-        super.unconfigure();
+        bidUpdater.cancel();
+        bidUpdater = null;
         bidCache = null;
-        minTimeBetweenUpdates = 0;
+        status = NOT_CONNECTED;
     }
 
     private final Map<String, Session> sessions = new ConcurrentHashMap<String, Session>();
@@ -59,10 +209,11 @@ public abstract class BaseMatcherEndpoint
     @Override
     public void connectToAgent(Session session) {
         synchronized (sessions) {
-            if (!isConnected()) {
+            Agent.Status currentStatus = getStatus();
+            if (!currentStatus.isConnected()) {
                 throw new IllegalStateException("This matcher is not yet connected to the cluster");
             } else if (!sessions.containsKey(session.getAgentId())) {
-                session.setMarketBasis(getMarketBasis());
+                session.setMarketBasis(currentStatus.getMarketBasis());
                 sessions.put(session.getAgentId(), session);
                 LOGGER.info("Agent connected with session [{}]", session.getSessionId());
             } else {
@@ -78,7 +229,7 @@ public abstract class BaseMatcherEndpoint
             if (session.equals(foundSession)) {
                 sessions.remove(session.getAgentId());
                 bidCache.removeBidOfAgent(session.getAgentId());
-                doUpdate();
+                bidUpdater.schedule();
                 LOGGER.info("Agent disconnected with session [{}]", session.getSessionId());
             }
         }
@@ -91,7 +242,7 @@ public abstract class BaseMatcherEndpoint
             Integer bidNumber = references.get(session.getAgentId());
             if (bidNumber != null) {
                 PriceUpdate priceUpdate = new PriceUpdate(price, bidNumber);
-                publishEvent(new OutgoingPriceUpdateEvent(session.getClusterId(),
+                publishEvent(new OutgoingPriceUpdateEvent(status.getClusterId(),
                                                           getAgentId(),
                                                           session.getSessionId(),
                                                           context.currentTime(),
@@ -113,46 +264,19 @@ public abstract class BaseMatcherEndpoint
 
     protected abstract void performUpdate(AggregatedBid aggregatedBid);
 
-    /**
-     * Timestamp at which the cool down period ends (and the Concentrator is allow to send a new BidUpdate again)
-     */
-    private volatile long coolDownEnds = 0;
-
-    /**
-     * Indicates if there is already a BidUpdate scheduled at the end of the cooldown period
-     */
-    private volatile Future<?> bidUpdateSchedule = null;
-
-    /**
-     * Runnable which generates a BidUpdate and sets the bidUpdateScheduled and coolDownEnds fields
-     */
-    private final Runnable bidUpdateCommand = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                if (isConnected()) {
-                    AggregatedBid aggregatedBid = bidCache.aggregate();
-                    publishEvent(new AggregatedBidEvent(getClusterId(), getAgentId(), now(), aggregatedBid));
-                    performUpdate(aggregatedBid);
-                }
-            } catch (RuntimeException e) {
-                LOGGER.error("doBidUpate failed for matcher " + getAgentId(), e);
-            } finally {
-                synchronized (this) {
-                    bidUpdateSchedule = null;
-                    coolDownEnds = context.currentTimeMillis() + minTimeBetweenUpdates;
-                }
-            }
-        }
-    };
-
     @Override
     public void handleBidUpdate(Session session, BidUpdate bidUpdate) {
+        Agent.Status currentStatus = getStatus();
+
+        if (!currentStatus.isConnected()) {
+            throw new IllegalStateException("Not connected to the cluster");
+        }
+
         if (session == null || !sessions.containsKey(session.getAgentId())) {
             throw new IllegalStateException("No session found");
         }
 
-        if (bidUpdate == null || !bidUpdate.getBid().getMarketBasis().equals(getMarketBasis())) {
+        if (bidUpdate == null || !bidUpdate.getBid().getMarketBasis().equals(currentStatus.getMarketBasis())) {
             throw new InvalidParameterException("Marketbasis new bid differs from marketbasis auctioneer");
         }
 
@@ -161,38 +285,13 @@ public abstract class BaseMatcherEndpoint
 
         LOGGER.debug("Received from session [{}] bid update [{}] ", session.getSessionId(), bidUpdate);
 
-        publishEvent(new IncomingBidUpdateEvent(session.getClusterId(),
+        publishEvent(new IncomingBidUpdateEvent(currentStatus.getClusterId(),
                                                 getAgentId(),
                                                 session.getSessionId(),
                                                 context.currentTime(),
                                                 session.getAgentId(),
                                                 bidUpdate));
 
-        doUpdate();
-    }
-
-    private void doUpdate() {
-        synchronized (bidUpdateCommand) {
-            if (bidUpdateSchedule == null) {
-                long waitTime = coolDownEnds - context.currentTimeMillis();
-                if (waitTime > 0) {
-                    // We're in the cooldown period
-                    bidUpdateSchedule = context.schedule(bidUpdateCommand,
-                                                         Measure.valueOf(waitTime, SI.MILLI(SI.SECOND)));
-                } else {
-                    // Not in a cooldown period, do it right away!
-                    bidUpdateSchedule = context.submit(bidUpdateCommand);
-                }
-            }
-        }
-    }
-
-    private void cancelUpdate() {
-        synchronized (bidUpdateCommand) {
-            if (bidUpdateSchedule != null) {
-                bidUpdateSchedule.cancel(false);
-                bidUpdateSchedule = null;
-            }
-        }
+        bidUpdater.schedule();
     }
 }

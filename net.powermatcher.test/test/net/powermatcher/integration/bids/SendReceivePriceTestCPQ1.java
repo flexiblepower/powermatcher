@@ -12,7 +12,7 @@ import java.util.zip.DataFormatException;
 
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.messages.PriceUpdate;
-import net.powermatcher.mock.MockAgent;
+import net.powermatcher.mock.MockDeviceAgent;
 
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -287,7 +287,7 @@ public class SendReceivePriceTestCPQ1
         auctioneer.publishPrice(priceUpdate);
 
         // Verify the price received by the agents
-        for (MockAgent agent : cluster) {
+        for (MockDeviceAgent agent : cluster) {
             assertEquals(price.getPriceValue(), agent.getLastPriceUpdate().getPrice().getPriceValue(), 0);
         }
     }

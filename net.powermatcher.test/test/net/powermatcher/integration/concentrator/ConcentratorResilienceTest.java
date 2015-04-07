@@ -11,7 +11,7 @@ import net.powermatcher.integration.base.ResilienceTest;
 import net.powermatcher.integration.util.ConcentratorWrapper;
 import net.powermatcher.integration.util.CsvBidReader;
 import net.powermatcher.integration.util.CsvExpectedResultsReader;
-import net.powermatcher.mock.MockAgent;
+import net.powermatcher.mock.MockDeviceAgent;
 import net.powermatcher.mock.MockMatcherAgent;
 import net.powermatcher.test.helpers.PropertiesBuilder;
 import net.powermatcher.test.helpers.TestClusterHelper;
@@ -42,12 +42,11 @@ public class ConcentratorResilienceTest
         MarketBasis marketBasis = resultsReader.getMarketBasis();
         concentrator = new ConcentratorWrapper();
         concentrator.activate(new PropertiesBuilder().agentId(CONCENTRATOR_NAME)
-                                                    .desiredParentId(MATCHERAGENTNAME)
-                                                    .minTimeBetweenBidUpdates(1000)
-                                                    .build());
+                                                     .desiredParentId(MATCHERAGENTNAME)
+                                                     .minTimeBetweenBidUpdates(1000)
+                                                     .build());
 
-        auctioneer = new MockMatcherAgent(MATCHERAGENTNAME, "testCluster");
-        auctioneer.setMarketBasis(marketBasis);
+        auctioneer = new MockMatcherAgent(MATCHERAGENTNAME, "testCluster", marketBasis);
 
         cluster = new TestClusterHelper(marketBasis, concentrator);
         cluster.connect(concentrator, auctioneer);
@@ -66,7 +65,7 @@ public class ConcentratorResilienceTest
         double expPrice = resultsReader.getEquilibriumPrice();
 
         // Verify the price received by the agents
-        for (MockAgent agent : cluster) {
+        for (MockDeviceAgent agent : cluster) {
             assertNotNull("agent " + agent.getAgentId() + " did not receive a price update", agent.getLastPriceUpdate());
             assertEquals(expPrice, agent.getLastPriceUpdate().getPrice().getPriceValue(), 0);
         }

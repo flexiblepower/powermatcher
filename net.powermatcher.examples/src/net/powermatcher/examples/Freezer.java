@@ -8,6 +8,7 @@ import javax.measure.Measure;
 import javax.measure.unit.SI;
 
 import net.powermatcher.api.AgentEndpoint;
+import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.PointBid;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PricePoint;
@@ -110,13 +111,15 @@ public class Freezer
      * {@inheritDoc}
      */
     void doBidUpdate() {
-        if (isConnected()) {
+        AgentEndpoint.Status currentStatus = getStatus();
+        if (currentStatus.isConnected()) {
             double demand = minimumDemand + (maximumDemand - minimumDemand)
                             * generator.nextDouble();
 
-            publishBid(new PointBid.Builder(getMarketBasis()).add(getMarketBasis().getMinimumPrice(), demand)
-                                                             .add(getMarketBasis().getMaximumPrice(), minimumDemand)
-                                                             .build());
+            MarketBasis mb = currentStatus.getMarketBasis();
+            publishBid(new PointBid.Builder(mb).add(mb.getMinimumPrice(), demand)
+                                               .add(mb.getMaximumPrice(), minimumDemand)
+                                               .build());
         }
     }
 

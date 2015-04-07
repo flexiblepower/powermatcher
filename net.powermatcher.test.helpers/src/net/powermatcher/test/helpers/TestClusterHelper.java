@@ -13,20 +13,20 @@ import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.messages.PriceUpdate;
-import net.powermatcher.mock.MockAgent;
 import net.powermatcher.mock.MockContext;
+import net.powermatcher.mock.MockDeviceAgent;
 import net.powermatcher.mock.MockMatcherAgent;
 import net.powermatcher.mock.SimpleSession;
 
 public class TestClusterHelper
-    implements Closeable, Iterable<MockAgent> {
+    implements Closeable, Iterable<MockDeviceAgent> {
     public static final MarketBasis DEFAULT_MB = new MarketBasis("electricity", "EUR", 11, 0, 10);
 
     private final AtomicInteger idGenerator;
 
     private final MockContext context;
 
-    private final List<MockAgent> agents;
+    private final List<MockDeviceAgent> agents;
     private final List<SimpleSession> sessions;
 
     private final MarketBasis marketBasis;
@@ -44,7 +44,7 @@ public class TestClusterHelper
 
         context = new MockContext(0);
 
-        agents = new ArrayList<MockAgent>();
+        agents = new ArrayList<MockDeviceAgent>();
         sessions = new ArrayList<SimpleSession>();
 
         this.marketBasis = marketBasis;
@@ -55,16 +55,15 @@ public class TestClusterHelper
         }
     }
 
-    public MockAgent addAgent() {
+    public MockDeviceAgent addAgent() {
         return addAgents(1).get(0);
     }
 
-    public List<MockAgent> addAgents(int nrOfAgents) {
-        List<MockAgent> newAgents = new ArrayList<MockAgent>(nrOfAgents);
+    public List<MockDeviceAgent> addAgents(int nrOfAgents) {
+        List<MockDeviceAgent> newAgents = new ArrayList<MockDeviceAgent>(nrOfAgents);
         for (int ix = 0; ix < nrOfAgents; ix++) {
             String agentId = "agent" + idGenerator.incrementAndGet();
-            MockAgent newAgent = new MockAgent(agentId);
-            newAgent.setDesiredParentId(matcher.getAgentId());
+            MockDeviceAgent newAgent = new MockDeviceAgent(agentId, matcher.getAgentId());
             agents.add(newAgent);
             newAgents.add(newAgent);
 
@@ -94,7 +93,7 @@ public class TestClusterHelper
         Price price = new Price(marketBasis, Math.random() * marketBasis.getMaximumPrice());
         matcher.publishPrice(new PriceUpdate(price, matcher.getLastReceivedBid().getBidNumber()));
         for (int i = 0; i < expectedIds.length; i++) {
-            MockAgent agent = getAgent(i);
+            MockDeviceAgent agent = getAgent(i);
             if (expectedIds[i] < 0) {
                 if (agent.getLastPriceUpdate() != null) {
                     throw new AssertionError("Last price update of agent " + i + " is not null");
@@ -121,7 +120,7 @@ public class TestClusterHelper
         agents.clear();
     }
 
-    public MockAgent getAgent(int ix) {
+    public MockDeviceAgent getAgent(int ix) {
         if (agents.size() <= ix) {
             addAgents(agents.size() - ix + 1);
         }
@@ -138,7 +137,7 @@ public class TestClusterHelper
 
     public List<PriceUpdate> getPriceUpdates() {
         List<PriceUpdate> updates = new ArrayList<PriceUpdate>(agents.size());
-        for (MockAgent agent : agents) {
+        for (MockDeviceAgent agent : agents) {
             updates.add(agent.getLastPriceUpdate());
         }
         return updates;
@@ -158,7 +157,7 @@ public class TestClusterHelper
     }
 
     @Override
-    public Iterator<MockAgent> iterator() {
+    public Iterator<MockDeviceAgent> iterator() {
         return Collections.unmodifiableList(agents).iterator();
     }
 

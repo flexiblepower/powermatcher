@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.ObservableAgent;
@@ -141,18 +142,19 @@ public class ObjectiveAgent
      */
     private void handleAggregatedBid(Bid aggregatedBid) {
         LOGGER.info("Received aggregated bid: [{}] ", aggregatedBid.toArrayBid().getDemand());
-        if (isConnected()) {
+        AgentEndpoint.Status currentStatus = getStatus();
+        if (currentStatus.isConnected()) {
             // Can the cluster produce more than the asked amount of energy?
             if (aggregatedBid.getMinimumDemand() < -1000) {
                 // The cluster has the ability to produce config.flexibilityToUse() Watts
                 // We ask the cluster to produce config.flexibilityToUse() by demanding this amount of energy in an
                 // non flexible bid
                 LOGGER.info("Asking the cluster to produce 1000W");
-                publishBid(Bid.flatDemand(getMarketBasis(), 1000));
+                publishBid(Bid.flatDemand(currentStatus.getMarketBasis(), 1000));
             } else {
                 // We don't ask anything from the cluster, we send a must off bid
                 LOGGER.info("Not asking the cluster to produce 1000W");
-                publishBid(Bid.flatDemand(getMarketBasis(), 0));
+                publishBid(Bid.flatDemand(currentStatus.getMarketBasis(), 0));
             }
         }
     }

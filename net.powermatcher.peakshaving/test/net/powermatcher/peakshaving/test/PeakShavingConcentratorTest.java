@@ -8,8 +8,8 @@ import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.messages.PriceUpdate;
-import net.powermatcher.mock.MockAgent;
 import net.powermatcher.mock.MockContext;
+import net.powermatcher.mock.MockDeviceAgent;
 import net.powermatcher.mock.MockMatcherAgent;
 import net.powermatcher.mock.SimpleSession;
 import net.powermatcher.peakshaving.PeakShavingConcentrator;
@@ -32,21 +32,18 @@ public class PeakShavingConcentratorTest {
 
     private final MockContext context = new MockContext(0);
 
-    private final MockMatcherAgent matcher = new MockMatcherAgent(AUCTIONEER_ID, CLUSTER_ID);
+    private final MockMatcherAgent matcher = new MockMatcherAgent(AUCTIONEER_ID, CLUSTER_ID, marketBasis);
     private final PeakShavingConcentrator peakShavingConcentrator = new PeakShavingConcentrator();
-    private final MockAgent deviceAgent = new MockAgent(DEVICE_AGENT_ID);
+    private final MockDeviceAgent deviceAgent = new MockDeviceAgent(DEVICE_AGENT_ID, CONCENTRATOR_NAME);
 
     public void setUp(double floor, double ceiling) throws Exception {
         peakShavingConcentrator.activate(new PropertiesBuilder().agentId(CONCENTRATOR_NAME)
-                                                               .desiredParentId(AUCTIONEER_ID)
-                                                               .minTimeBetweenBidUpdates(1000)
-                                                               .add("floor", floor)
-                                                               .add("ceiling", ceiling)
-                                                               .build());
+                                                                .desiredParentId(AUCTIONEER_ID)
+                                                                .minTimeBetweenBidUpdates(1000)
+                                                                .add("floor", floor)
+                                                                .add("ceiling", ceiling)
+                                                                .build());
         peakShavingConcentrator.setContext(context);
-
-        // Set the market basis for the matcher
-        matcher.setMarketBasis(marketBasis);
 
         // Connect the 3 parts to each other
         new SimpleSession(peakShavingConcentrator, matcher).connect();

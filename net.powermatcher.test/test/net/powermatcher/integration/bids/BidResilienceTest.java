@@ -11,7 +11,7 @@ import net.powermatcher.integration.util.AuctioneerWrapper;
 import net.powermatcher.integration.util.ConcentratorWrapper;
 import net.powermatcher.integration.util.CsvBidReader;
 import net.powermatcher.integration.util.CsvExpectedResultsReader;
-import net.powermatcher.mock.MockAgent;
+import net.powermatcher.mock.MockDeviceAgent;
 import net.powermatcher.mock.MockContext;
 import net.powermatcher.test.helpers.PropertiesBuilder;
 import net.powermatcher.test.helpers.TestClusterHelper;
@@ -79,7 +79,7 @@ public class BidResilienceTest
         double expPrice = resultsReader.getEquilibriumPrice();
 
         // Verify the price received by the agents
-        for (MockAgent agent : cluster) {
+        for (MockDeviceAgent agent : cluster) {
             assertEquals(expPrice, agent.getLastPriceUpdate().getPrice().getPriceValue(), 0);
         }
     }

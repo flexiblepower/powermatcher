@@ -8,8 +8,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.MarketBasis;
-import net.powermatcher.mock.MockAgent;
 import net.powermatcher.mock.MockContext;
+import net.powermatcher.mock.MockDeviceAgent;
 import net.powermatcher.mock.MockMatcherAgent;
 import net.powermatcher.runtime.SessionManager;
 
@@ -36,18 +36,16 @@ public class SessionManagerTest {
 
     private SessionManager sessionManager;
     private MockMatcherAgent auctioneer;
-    private MockAgent testAgent;
+    private MockDeviceAgent testAgent;
 
     @Before
     public void setUp() {
-        auctioneer = new MockMatcherAgent(AUCTIONEER_NAME, CLUSTER_ID);
-        auctioneer.setMarketBasis(new MarketBasis("something", "YYY", 10, 0, 1));
+        auctioneer = new MockMatcherAgent(AUCTIONEER_NAME, CLUSTER_ID, new MarketBasis("something", "YYY", 10, 0, 1));
         auctioneer.setContext(new MockContext(0));
 
         sessionManager = new SessionManager();
 
-        testAgent = new MockAgent(AGENT_ID);
-        testAgent.setDesiredParentId("auctioneer");
+        testAgent = new MockDeviceAgent(AGENT_ID, "auctioneer");
     }
 
     @After
@@ -71,8 +69,7 @@ public class SessionManagerTest {
         // test if session is the same after adding a new agent
         int hashCode = agentSession.hashCode();
 
-        MockAgent agent2 = new MockAgent(AGENT_ID);
-        agent2.setDesiredParentId(AUCTIONEER_NAME);
+        MockDeviceAgent agent2 = new MockDeviceAgent(AGENT_ID, AUCTIONEER_NAME);
 
         sessionManager.addAgentEndpoint(agent2);
         int newCode = testAgent.getSession().hashCode();

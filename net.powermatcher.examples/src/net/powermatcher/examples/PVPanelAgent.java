@@ -112,9 +112,10 @@ public class PVPanelAgent
      * {@inheritDoc}
      */
     void doBidUpdate() {
-        if (isConnected()) {
+        AgentEndpoint.Status currentStatus = getStatus();
+        if (currentStatus.isConnected()) {
             double demand = minimumDemand + (maximumDemand - minimumDemand) * generator.nextDouble();
-            publishBid(Bid.flatDemand(getMarketBasis(), demand));
+            publishBid(Bid.flatDemand(currentStatus.getMarketBasis(), demand));
         }
     }
 

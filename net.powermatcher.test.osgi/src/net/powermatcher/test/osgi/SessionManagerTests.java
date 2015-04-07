@@ -68,7 +68,7 @@ public class SessionManagerTests
             context.submit(new Runnable() {
                 @Override
                 public void run() {
-                    publishBid(Bid.flatDemand(getMarketBasis(), Math.random() * 100));
+                    publishBid(Bid.flatDemand(getStatus().getMarketBasis(), Math.random() * 100));
                 }
             });
         }

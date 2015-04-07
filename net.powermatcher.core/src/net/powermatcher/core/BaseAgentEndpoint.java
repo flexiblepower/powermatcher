@@ -2,16 +2,15 @@ package net.powermatcher.core;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import net.powermatcher.api.Agent;
 import net.powermatcher.api.AgentEndpoint;
-import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.Bid;
+import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingBidUpdateEvent;
-
-import org.flexiblepower.context.FlexiblePowerContext;
 
 /**
  * {@link BaseAgentEndpoint} defines the basic functionality of any Device Agent.
@@ -23,10 +22,102 @@ public abstract class BaseAgentEndpoint
     extends BaseAgent
     implements AgentEndpoint {
 
+    public static final AgentEndpoint.Status NOT_CONNECTED = new AgentEndpoint.Status() {
+        @Override
+        public String getClusterId() {
+            throw new IllegalStateException("Agent not connected to a cluster");
+        }
+
+        @Override
+        public MarketBasis getMarketBasis() {
+            throw new IllegalStateException("Agent not connected to a cluster");
+        }
+
+        @Override
+        public Session getSession() {
+            throw new IllegalStateException("Agent not connected to a cluster");
+        }
+
+        @Override
+        public boolean isConnected() {
+            return false;
+        }
+    };
+
     /**
-     * The id of the {@link MatcherEndpoint} this Agent wants to connect to.
+     * The {@link Connected} object describes the current status and configuration of an {@link AgentEndpoint}. This
+     * status can be queried through the {@link Agent#getStatus()} method and will give a snapshot of the state at that
+     * time.
      */
-    private volatile String desiredParentId;
+    public static class Connected
+        implements AgentEndpoint.Status {
+
+        private final Session session;
+
+        /**
+         * Creates a new {@link Connected} object.
+         *
+         * @param session
+         *            the current {@link Session} of the {@link AgentEndpoint}.
+         */
+        public Connected(Session session) {
+            if (session == null) {
+                throw new NullPointerException();
+            }
+            this.session = session;
+        }
+
+        @Override
+        public String getClusterId() {
+            return session.getClusterId();
+        }
+
+        @Override
+        public MarketBasis getMarketBasis() {
+            return session.getMarketBasis();
+        }
+
+        @Override
+        public Session getSession() {
+            return session;
+        }
+
+        @Override
+        public boolean isConnected() {
+            return true;
+        }
+    }
+
+    private final AtomicInteger bidNumberGenerator;
+
+    private volatile AgentEndpoint.Status status;
+
+    private volatile BidUpdate lastBidUpdate;
+
+    private String agentId, desiredParentId;
+
+    public BaseAgentEndpoint() {
+        bidNumberGenerator = new AtomicInteger();
+        status = NOT_CONNECTED;
+        lastBidUpdate = null;
+        agentId = null;
+        desiredParentId = null;
+    }
+
+    @Override
+    public String getAgentId() {
+        return agentId;
+    }
+
+    @Override
+    public String getDesiredParentId() {
+        return desiredParentId;
+    }
+
+    @Override
+    public AgentEndpoint.Status getStatus() {
+        return status;
+    }
 
     /**
      * This method should always be called during activation of the agent. It sets the agentId and desiredParentId. This
@@ -43,68 +134,28 @@ public abstract class BaseAgentEndpoint
      *             when either the agentId or the desiredParentId is null or is an empty string.
      */
     protected void init(String agentId, String desiredParentId) {
-        super.init(agentId);
-
+        if (agentId == null || agentId.isEmpty()) {
+            throw new IllegalArgumentException("The agentId may not be null or empty");
+        }
         if (desiredParentId == null || desiredParentId.isEmpty()) {
             throw new IllegalArgumentException("The desiredParentId may not be null or empty");
         }
-
+        this.agentId = agentId;
         this.desiredParentId = desiredParentId;
     }
-
-    @Override
-    protected void init(String agentId) {
-        throw new AssertionError("This method should not be called directly, call init(agentId, desiredParentId)");
-    }
-
-    /**
-     * Sets the {@link FlexiblePowerContext} that can be used for scheduling tasks or getting the time (see
-     * {@link #now()}). When overriding this method, you can directly schedule something if needed, but make sure that
-     * the <code>super.setContext(context)</code> is called.
-     *
-     * @param context
-     *            The {@link FlexiblePowerContext} that will be used from now on for scheduling or timing.
-     */
-    @Override
-    public void setContext(FlexiblePowerContext context) {
-        if (desiredParentId == null) {
-            throw new IllegalStateException("The activate method should be called first before the context is set.");
-        }
-        super.setContext(context);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getDesiredParentId() {
-        return desiredParentId;
-    }
-
-    private final AtomicInteger bidNumberGenerator = new AtomicInteger();
-
-    /**
-     * The last {@link Bid} received by this BaseDeviceAgent
-     */
-    private volatile BidUpdate lastBidUpdate;
-
-    /**
-     * The current {@link Session} this BaseDeviceAgent is linked in.
-     */
-    private volatile Session session;
 
     /**
      * {@inheritDoc}
      */
     @Override
     public void connectToMatcher(Session session) {
-        if (this.session != null) {
+        if (status.isConnected()) {
             throw new IllegalStateException("Already connected to agent " + session.getMatcherId());
         }
 
-        configure(session.getMarketBasis(), session.getClusterId());
         bidNumberGenerator.set(0);
-        this.session = session;
+        lastBidUpdate = null;
+        status = new Connected(session);
     }
 
     /**
@@ -112,22 +163,14 @@ public abstract class BaseAgentEndpoint
      */
     @Override
     public void matcherEndpointDisconnected(Session session) {
-        this.session = null;
-        unconfigure();
-        lastBidUpdate = null;
+        status = NOT_CONNECTED;
     }
 
     public void deactivate() {
-        if (session != null) {
-            session.disconnect();
+        AgentEndpoint.Status currentStatus = getStatus();
+        if (currentStatus.isConnected()) {
+            currentStatus.getSession().disconnect();
         }
-    }
-
-    /**
-     * @return the current value of session.
-     */
-    public final Session getSession() {
-        return session;
     }
 
     /**
@@ -146,22 +189,21 @@ public abstract class BaseAgentEndpoint
      * @return The {@link BidUpdate} that has been set or <code>null</code> if {@link #isConnected()} returns false.
      */
     protected final BidUpdate publishBid(Bid newBid) {
-        if (isConnected()) {
-            Session session = getSession();
-
+        AgentEndpoint.Status currentStatus = getStatus();
+        if (currentStatus.isConnected()) {
             if (lastBidUpdate != null && newBid.equals(lastBidUpdate.getBid())) {
                 // This bid is equal to the previous bid, we should not send an update
                 return lastBidUpdate;
             }
             BidUpdate update = new BidUpdate(newBid, bidNumberGenerator.incrementAndGet());
             lastBidUpdate = update;
-            publishEvent(new OutgoingBidUpdateEvent(getClusterId(),
+            publishEvent(new OutgoingBidUpdateEvent(status.getClusterId(),
                                                     getAgentId(),
-                                                    session.getSessionId(),
+                                                    status.getSession().getSessionId(),
                                                     now(),
                                                     update));
-            LOGGER.debug("Sending bid [{}] to {}", update, session.getMatcherId());
-            session.updateBid(update);
+            LOGGER.debug("Sending bid [{}] to {}", update, status.getSession().getMatcherId());
+            status.getSession().updateBid(update);
             return update;
         } else {
             return null;
@@ -176,17 +218,21 @@ public abstract class BaseAgentEndpoint
      */
     @Override
     public void handlePriceUpdate(PriceUpdate priceUpdate) {
+
         if (priceUpdate == null) {
             String message = "Price cannot be null";
             LOGGER.error(message);
             throw new IllegalArgumentException(message);
         }
 
-        LOGGER.debug("Received price update [{}]", priceUpdate);
-        publishEvent(new IncomingPriceUpdateEvent(getClusterId(),
-                                                  getAgentId(),
-                                                  session.getSessionId(),
-                                                  context.currentTime(),
-                                                  priceUpdate));
+        AgentEndpoint.Status currentStatus = getStatus();
+        if (currentStatus.isConnected()) {
+            LOGGER.debug("Received price update [{}]", priceUpdate);
+            publishEvent(new IncomingPriceUpdateEvent(status.getClusterId(),
+                                                      getAgentId(),
+                                                      status.getSession().getSessionId(),
+                                                      context.currentTime(),
+                                                      priceUpdate));
+        }
     }
 }

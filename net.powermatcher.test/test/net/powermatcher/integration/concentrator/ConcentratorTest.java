@@ -35,15 +35,14 @@ public class ConcentratorTest {
         // Concentrator to be tested
         concentrator = new Concentrator();
         concentrator.activate(new PropertiesBuilder().agentId(CONCENTRATOR_NAME)
-                                                    .desiredParentId(AUCTIONEER_NAME)
-                                                    .minTimeBetweenBidUpdates(1000)
-                                                    .build());
+                                                     .desiredParentId(AUCTIONEER_NAME)
+                                                     .minTimeBetweenBidUpdates(1000)
+                                                     .build());
 
         cluster = new TestClusterHelper(concentrator);
 
         // Matcher
-        matcher = new MockMatcherAgent(AUCTIONEER_NAME, "testCluster");
-        matcher.setMarketBasis(TestClusterHelper.DEFAULT_MB);
+        matcher = new MockMatcherAgent(AUCTIONEER_NAME, "testCluster", TestClusterHelper.DEFAULT_MB);
 
         cluster.connect(concentrator, matcher);
     }

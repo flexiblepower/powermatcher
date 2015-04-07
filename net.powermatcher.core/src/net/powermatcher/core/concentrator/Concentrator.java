@@ -117,8 +117,10 @@ public class Concentrator
     @Override
     @Deactivate
     public void deactivate() {
-        if (isConnected()) {
-            matcherEndpointDisconnected(getSession());
+        AgentEndpoint.Status currentStatus = getStatus();
+
+        if (currentStatus.isConnected()) {
+            matcherEndpointDisconnected(currentStatus.getSession());
         }
         LOGGER.info("Concentrator [{}], deactivated", config.agentId());
     }
