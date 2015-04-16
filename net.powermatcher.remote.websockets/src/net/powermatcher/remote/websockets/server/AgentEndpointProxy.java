@@ -48,11 +48,6 @@ public class AgentEndpointProxy
     }
 
     @Override
-    public boolean isConnected() {
-        return super.isConnected() && remoteSession != null && remoteSession.isOpen();
-    }
-
-    @Override
     public void onWebSocketConnect(Session remoteSession) {
         this.remoteSession = remoteSession;
 
@@ -66,7 +61,7 @@ public class AgentEndpointProxy
         }
 
         String agentId = "remote-" + remoteSession.getRemoteAddress().getHostString() + "-" + remoteAgentId;
-        this.init(agentId, desiredParentId);
+        init(agentId, desiredParentId);
 
         Hashtable<String, Object> properties = new Hashtable<String, Object>();
         properties.put("agentId", agentId);
@@ -126,15 +121,16 @@ public class AgentEndpointProxy
         PmMessage pmMessage = serializer.deserialize(message);
         BidUpdate newBid = ModelMapper.mapBidUpdate((BidModel) pmMessage.getPayload());
 
-        if (isConnected()) {
-            net.powermatcher.api.Session session = getSession();
-            publishEvent(new OutgoingBidUpdateEvent(getClusterId(),
+        AgentEndpoint.Status currentStatus = getStatus();
+        if (currentStatus.isConnected()) {
+            net.powermatcher.api.Session session = currentStatus.getSession();
+            publishEvent(new OutgoingBidUpdateEvent(currentStatus.getClusterId(),
                                                     getAgentId(),
                                                     session.getSessionId(),
                                                     now(),
                                                     newBid));
             LOGGER.debug("Sending bid [{}] to {}", newBid, session.getAgentId());
-            getSession().updateBid(newBid);
+            currentStatus.getSession().updateBid(newBid);
         } else {
             LOGGER.warn("Got a message, while not connected? {}", newBid);
         }
@@ -165,12 +161,10 @@ public class AgentEndpointProxy
         PmJsonSerializer serializer = new PmJsonSerializer();
         String message = serializer.serializePriceUpdate(priceUpdate);
 
-        if (isConnected()) {
-            try {
-                remoteSession.getRemote().sendString(message);
-            } catch (IOException | WebSocketException | NullPointerException e) {
-                LOGGER.warn("Unable to send price update to remote agent, reason {}", e);
-            }
+        try {
+            remoteSession.getRemote().sendString(message);
+        } catch (IOException | WebSocketException | NullPointerException e) {
+            LOGGER.warn("Unable to send price update to remote agent, reason {}", e);
         }
     }
 
@@ -183,7 +177,8 @@ public class AgentEndpointProxy
 
         // Local matcher is connected, provide cluster information to remote // agent.
         PmJsonSerializer serializer = new PmJsonSerializer();
-        String message = serializer.serializeClusterInfo(getClusterId(), getMarketBasis());
+        AgentEndpoint.Status currentStatus = getStatus();
+        String message = serializer.serializeClusterInfo(currentStatus.getClusterId(), currentStatus.getMarketBasis());
         try {
             remoteSession.getRemote().sendString(message);
         } catch (IOException | WebSocketException | NullPointerException e) {

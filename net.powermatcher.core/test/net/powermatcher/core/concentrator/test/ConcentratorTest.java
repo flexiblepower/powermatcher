@@ -15,8 +15,8 @@ import net.powermatcher.api.data.Price;
 import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.core.concentrator.Concentrator;
-import net.powermatcher.mock.MockAgent;
 import net.powermatcher.mock.MockContext;
+import net.powermatcher.mock.MockDeviceAgent;
 import net.powermatcher.mock.MockMatcherAgent;
 import net.powermatcher.mock.SimpleSession;
 import net.powermatcher.test.helpers.PropertiesBuilder;
@@ -43,9 +43,9 @@ public class ConcentratorTest {
     @Before
     public void setUp() {
         concentrator.activate(new PropertiesBuilder().agentId(CONCENTRATOR_ID)
-                                                    .desiredParentId(AUCTIONEER_ID)
-                                                    .minTimeBetweenBidUpdates(MIN_TIME_BETWEEN_BIDS)
-                                                    .build());
+                                                     .desiredParentId(AUCTIONEER_ID)
+                                                     .minTimeBetweenBidUpdates(MIN_TIME_BETWEEN_BIDS)
+                                                     .build());
         concentrator.setContext(context);
     }
 
@@ -57,55 +57,44 @@ public class ConcentratorTest {
 
     @Test(expected = IllegalStateException.class)
     public void testConnectToAgentBeforeMatcher() {
-        Session session = new SimpleSession(new MockAgent("testAgent"), concentrator);
+        Session session = new SimpleSession(new MockDeviceAgent("testAgent", CONCENTRATOR_ID), concentrator);
         concentrator.connectToAgent(session);
     }
 
     @Test
     public void testMatcherEndpointDisconnected() {
-        MockMatcherAgent mockMatcherAgent = new MockMatcherAgent(AUCTIONEER_ID, CLUSTER_ID);
-        mockMatcherAgent.setMarketBasis(marketBasis);
-
-        MockAgent mockAgent = new MockAgent("testAgent");
-        mockAgent.setDesiredParentId(CONCENTRATOR_ID);
+        MockMatcherAgent mockMatcherAgent = new MockMatcherAgent(AUCTIONEER_ID, CLUSTER_ID, marketBasis);
+        MockDeviceAgent mockAgent = new MockDeviceAgent("testAgent", CONCENTRATOR_ID);
 
         SimpleSession topSession = new SimpleSession(concentrator, mockMatcherAgent);
         topSession.connect();
         new SimpleSession(mockAgent, concentrator).connect();
 
-        assertNotNull(mockAgent.getClusterId());
+        assertNotNull(mockAgent.getStatus().getClusterId());
 
         topSession.disconnect();
         assertNull(mockMatcherAgent.getSession());
-        assertFalse(concentrator.isConnected());
-        assertNull(mockAgent.getSession());
-        assertNull(mockAgent.getClusterId());
+        assertFalse(concentrator.getStatus().isConnected());
         assertNull(mockAgent.getSession());
     }
 
     @Test
     public void testAgentEndpointDisconnected() {
-        MockMatcherAgent mockMatcherAgent = new MockMatcherAgent(AUCTIONEER_ID, CLUSTER_ID);
-        mockMatcherAgent.setDesiredParentId("test");
-        mockMatcherAgent.setMarketBasis(marketBasis);
-        MockAgent mockAgent = new MockAgent("testAgent");
-        mockAgent.setDesiredParentId(CONCENTRATOR_ID);
+        MockMatcherAgent mockMatcherAgent = new MockMatcherAgent(AUCTIONEER_ID, CLUSTER_ID, marketBasis);
+        MockDeviceAgent mockAgent = new MockDeviceAgent("testAgent", CONCENTRATOR_ID);
 
         new SimpleSession(concentrator, mockMatcherAgent).connect();
         SimpleSession agentSession = new SimpleSession(mockAgent, concentrator);
         agentSession.connect();
 
         assertNotNull(mockMatcherAgent.getSession());
-        assertNotNull(mockAgent.getClusterId());
+        assertNotNull(mockAgent.getStatus().getClusterId());
 
         agentSession.disconnect();
 
         assertNotNull(mockMatcherAgent.getSession());
-        assertNotNull(concentrator.getClusterId(), is(CLUSTER_ID));
+        assertNotNull(concentrator.getStatus().getClusterId(), is(CLUSTER_ID));
         assertNull(mockAgent.getSession());
-        assertNull(mockAgent.getClusterId());
-        assertNull(mockAgent.getSession());
-
     }
 
     @Test(expected = IllegalStateException.class)
@@ -116,11 +105,8 @@ public class ConcentratorTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testupdateBidDifferentMarketBasis() {
-        MockMatcherAgent mockMatcherAgent = new MockMatcherAgent(AUCTIONEER_ID, CLUSTER_ID);
-        mockMatcherAgent.setDesiredParentId("test");
-        mockMatcherAgent.setMarketBasis(marketBasis);
-        MockAgent mockAgent = new MockAgent("testAgent");
-        mockAgent.setDesiredParentId(CONCENTRATOR_ID);
+        MockMatcherAgent mockMatcherAgent = new MockMatcherAgent(AUCTIONEER_ID, CLUSTER_ID, marketBasis);
+        MockDeviceAgent mockAgent = new MockDeviceAgent("testAgent", CONCENTRATOR_ID);
 
         new SimpleSession(concentrator, mockMatcherAgent).connect();
         new SimpleSession(mockAgent, concentrator).connect();
@@ -133,11 +119,8 @@ public class ConcentratorTest {
 
     @Test
     public void testUpdateBid() {
-        MockMatcherAgent mockMatcherAgent = new MockMatcherAgent(AUCTIONEER_ID, CLUSTER_ID);
-        mockMatcherAgent.setMarketBasis(marketBasis);
-        mockMatcherAgent.setDesiredParentId("test");
-        MockAgent mockAgent = new MockAgent("testAgent");
-        mockAgent.setDesiredParentId(CONCENTRATOR_ID);
+        MockMatcherAgent mockMatcherAgent = new MockMatcherAgent(AUCTIONEER_ID, CLUSTER_ID, marketBasis);
+        MockDeviceAgent mockAgent = new MockDeviceAgent("testAgent", CONCENTRATOR_ID);
 
         new SimpleSession(concentrator, mockMatcherAgent).connect();
         new SimpleSession(mockAgent, concentrator).connect();
@@ -158,11 +141,8 @@ public class ConcentratorTest {
 
     @Test
     public void testUpdatePrice() {
-        MockMatcherAgent mockMatcherAgent = new MockMatcherAgent(AUCTIONEER_ID, CLUSTER_ID);
-        mockMatcherAgent.setMarketBasis(marketBasis);
-        mockMatcherAgent.setDesiredParentId("test");
-        MockAgent mockAgent = new MockAgent("testAgent");
-        mockAgent.setDesiredParentId(CONCENTRATOR_ID);
+        MockMatcherAgent mockMatcherAgent = new MockMatcherAgent(AUCTIONEER_ID, CLUSTER_ID, marketBasis);
+        MockDeviceAgent mockAgent = new MockDeviceAgent("testAgent", CONCENTRATOR_ID);
 
         new SimpleSession(concentrator, mockMatcherAgent).connect();
         new SimpleSession(mockAgent, concentrator).connect();
@@ -183,11 +163,8 @@ public class ConcentratorTest {
 
     @Test
     public void testTiming() {
-        MockMatcherAgent mockMatcherAgent = new MockMatcherAgent(AUCTIONEER_ID, CLUSTER_ID);
-        mockMatcherAgent.setMarketBasis(marketBasis);
-        mockMatcherAgent.setDesiredParentId("test");
-        MockAgent mockAgent = new MockAgent("testAgent");
-        mockAgent.setDesiredParentId(CONCENTRATOR_ID);
+        MockMatcherAgent mockMatcherAgent = new MockMatcherAgent(AUCTIONEER_ID, CLUSTER_ID, marketBasis);
+        MockDeviceAgent mockAgent = new MockDeviceAgent("testAgent", CONCENTRATOR_ID);
 
         new SimpleSession(concentrator, mockMatcherAgent).connect();
         new SimpleSession(mockAgent, concentrator).connect();

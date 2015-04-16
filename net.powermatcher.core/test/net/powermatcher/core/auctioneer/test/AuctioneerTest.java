@@ -18,8 +18,8 @@ import net.powermatcher.api.monitoring.events.AggregatedBidEvent;
 import net.powermatcher.api.monitoring.events.IncomingBidUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
 import net.powermatcher.core.auctioneer.Auctioneer;
-import net.powermatcher.mock.MockAgent;
 import net.powermatcher.mock.MockContext;
+import net.powermatcher.mock.MockDeviceAgent;
 import net.powermatcher.mock.SimpleSession;
 import net.powermatcher.test.helpers.PropertiesBuilder;
 
@@ -44,10 +44,10 @@ public class AuctioneerTest {
     public void setUp() {
         auctioneer = new Auctioneer();
         auctioneer.activate(new PropertiesBuilder().agentId(AUCTIONEER_ID)
-                                                  .clusterId(CLUSTER_ID)
-                                                  .marketBasis(marketBasis)
-                                                  .minTimeBetweenPriceUpdates(1000)
-                                                  .build());
+                                                   .clusterId(CLUSTER_ID)
+                                                   .marketBasis(marketBasis)
+                                                   .minTimeBetweenPriceUpdates(1000)
+                                                   .build());
 
         mockContext = new MockContext(0);
         auctioneer.setContext(mockContext);
@@ -95,13 +95,13 @@ public class AuctioneerTest {
     public void testDeactivate() {
         auctioneer.deactivate();
         try {
-            auctioneer.getClusterId();
+            auctioneer.getStatus().getClusterId();
             fail("Expected an IllegalStateException after being deactivated");
         } catch (IllegalStateException ex) {
             // Expected
         }
         try {
-            auctioneer.getMarketBasis();
+            auctioneer.getStatus().getMarketBasis();
             fail("Expected an IllegalStateException after being deactivated");
         } catch (IllegalStateException ex) {
             // Expected
@@ -110,27 +110,24 @@ public class AuctioneerTest {
 
     @Test
     public void testConnectToAgent() {
-        MockAgent agent = new MockAgent("agent1");
-        agent.setDesiredParentId(AUCTIONEER_ID);
+        MockDeviceAgent agent = new MockDeviceAgent("agent1", AUCTIONEER_ID);
         new SimpleSession(agent, auctioneer).connect();
         Session session = agent.getSession();
-        assertThat(session.getClusterId(), is(equalTo(auctioneer.getClusterId())));
+        assertThat(session.getClusterId(), is(equalTo(auctioneer.getStatus().getClusterId())));
         assertThat(session.getMarketBasis(), is(equalTo(marketBasis)));
     }
 
     @Test
     public void testAgentEndpointDisconnected() {
-        MockAgent agent = new MockAgent("agent1");
-        agent.setDesiredParentId(AUCTIONEER_ID);
+        MockDeviceAgent agent = new MockDeviceAgent("agent1", AUCTIONEER_ID);
         SimpleSession session = new SimpleSession(agent, auctioneer);
         session.connect();
         assertThat(agent.getSession(), is(notNullValue()));
-        assertThat(agent.getClusterId(), is(notNullValue()));
+        assertThat(agent.getStatus().getClusterId(), is(notNullValue()));
 
         session.disconnect();
 
         assertThat(agent.getSession(), is(nullValue()));
-        assertThat(agent.getClusterId(), is(nullValue()));
         assertThat(agent.getSession(), is(nullValue()));
     }
 
@@ -142,8 +139,7 @@ public class AuctioneerTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testupdateBidDifferentMarketBasis() {
-        MockAgent mockAgent = new MockAgent("mockAgent");
-        mockAgent.setDesiredParentId(AUCTIONEER_ID);
+        MockDeviceAgent mockAgent = new MockDeviceAgent("mockAgent", AUCTIONEER_ID);
         new SimpleSession(mockAgent, auctioneer).connect();
 
         auctioneer.handleBidUpdate(mockAgent.getSession(),
@@ -153,8 +149,7 @@ public class AuctioneerTest {
     @Test
     public void testUpdateBid() {
         String agentName = "mockAgent";
-        MockAgent mockAgent = new MockAgent(agentName);
-        mockAgent.setDesiredParentId(AUCTIONEER_ID);
+        MockDeviceAgent mockAgent = new MockDeviceAgent(agentName, AUCTIONEER_ID);
 
         AuctioneerObserver observer = new AuctioneerObserver();
         auctioneer.addObserver(observer);
@@ -173,8 +168,7 @@ public class AuctioneerTest {
     @Test
     public void testPublishPriceUpdate() {
         String agentName = "mockAgent";
-        MockAgent mockAgent = new MockAgent(agentName);
-        mockAgent.setDesiredParentId(AUCTIONEER_ID);
+        MockDeviceAgent mockAgent = new MockDeviceAgent(agentName, AUCTIONEER_ID);
 
         AuctioneerObserver observer = new AuctioneerObserver();
         auctioneer.addObserver(observer);

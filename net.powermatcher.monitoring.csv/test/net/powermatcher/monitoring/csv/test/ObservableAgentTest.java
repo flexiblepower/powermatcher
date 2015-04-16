@@ -11,7 +11,7 @@ import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.events.AgentEvent;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
-import net.powermatcher.mock.MockAgent;
+import net.powermatcher.mock.MockDeviceAgent;
 import net.powermatcher.mock.MockObserver;
 
 import org.junit.Test;
@@ -28,7 +28,7 @@ public class ObservableAgentTest {
     public void oneObserverTest() {
         MockObserver observer = new MockObserver();
 
-        MockAgent observable = new MockAgent("agentId");
+        MockDeviceAgent observable = new MockDeviceAgent("agentId", "matcherId");
         observable.addObserver(observer);
         observable.publishEvent(createDummyEvent());
 
@@ -40,7 +40,7 @@ public class ObservableAgentTest {
         MockObserver observer1 = new MockObserver();
         MockObserver observer2 = new MockObserver();
 
-        MockAgent observable = new MockAgent("agentId");
+        MockDeviceAgent observable = new MockDeviceAgent("agentId", "matcherId");
         observable.addObserver(observer1);
         observable.addObserver(observer2);
         observable.publishEvent(createDummyEvent());
@@ -54,7 +54,7 @@ public class ObservableAgentTest {
         MockObserver observer1 = new MockObserver();
         MockObserver observer2 = new MockObserver();
 
-        MockAgent observable = new MockAgent("agentId");
+        MockDeviceAgent observable = new MockDeviceAgent("agentId", "matcherId");
         observable.addObserver(observer1);
         observable.addObserver(observer2);
         observable.removeObserver(observer2);
@@ -68,7 +68,7 @@ public class ObservableAgentTest {
     public void duplicateRemoveObserversTest() {
         MockObserver observer1 = new MockObserver();
 
-        MockAgent observable = new MockAgent("agentId");
+        MockDeviceAgent observable = new MockDeviceAgent("agentId", "matcherId");
         observable.addObserver(observer1);
         observable.removeObserver(observer1);
         observable.removeObserver(observer1);
@@ -76,7 +76,7 @@ public class ObservableAgentTest {
 
     @Test
     public void noObserversTest() {
-        MockAgent observable = new MockAgent("agentId");
+        MockDeviceAgent observable = new MockDeviceAgent("agentId", "matcherId");
 
         MockObserver observer1 = new MockObserver();
         observable.addObserver(observer1);

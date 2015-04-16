@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.zip.DataFormatException;
 
 import net.powermatcher.api.messages.PriceUpdate;
-import net.powermatcher.mock.MockAgent;
+import net.powermatcher.mock.MockDeviceAgent;
 
 import org.junit.Test;
 
@@ -54,7 +54,7 @@ public class SendReceivePriceTestCPF1
         // The bidnumber should be zero, since the original bid has a bidnumber
         // of 0
         int bidNumber = 1;
-        for (MockAgent agent : cluster) {
+        for (MockDeviceAgent agent : cluster) {
             assertEquals(priceUpdate.getPrice(), agent.getLastPriceUpdate().getPrice());
             assertEquals(bidNumber++, agent.getLastPriceUpdate().getBidNumber());
         }

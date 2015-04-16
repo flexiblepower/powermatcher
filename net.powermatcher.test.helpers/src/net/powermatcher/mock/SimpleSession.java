@@ -58,7 +58,7 @@ public class SimpleSession
 
     @Override
     public String getClusterId() {
-        return matcher.getClusterId();
+        return matcher.getStatus().getClusterId();
     }
 
     @Override

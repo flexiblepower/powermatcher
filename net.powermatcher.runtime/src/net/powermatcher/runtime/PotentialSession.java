@@ -1,5 +1,6 @@
 package net.powermatcher.runtime;
 
+import net.powermatcher.api.Agent.Status;
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
@@ -58,27 +59,31 @@ public class PotentialSession {
      *
      * @return true if something changed
      */
-    public boolean tryConnect() {
-        if (session == null && matcherEndpoint != null && matcherEndpoint.isConnected()) {
-            session = new SessionImpl(agentEndpoint, matcherEndpoint, this);
-            synchronized (session) {
-                try {
-                    // This synchronized block makes sure the whole connection is made before updates can be sent
-                    // Also see that in the SessionImpl the update*() methods are synchronized
-                    matcherEndpoint.connectToAgent(session);
-                    agentEndpoint.connectToMatcher(session);
-                    LOGGER.debug("Connected MatcherEndpoint '{}' with AgentEndpoint '{}' with Session {}",
-                                 matcherEndpoint.getAgentId(),
-                                 agentEndpoint.getAgentId(),
-                                 session.getSessionId());
-                    session.setConnected();
-                    return true;
-                } catch (IllegalStateException ex) {
-                    session = null;
-                    LOGGER.warn("Could not connect agent[{}] to matcher[{}]: {}",
-                                agentEndpoint.getAgentId(),
-                                matcherEndpoint.getAgentId(),
-                                ex.getMessage());
+    public synchronized boolean tryConnect() {
+        if (session == null && matcherEndpoint != null) {
+            Status matcherStatus = matcherEndpoint.getStatus();
+            Status agentStatus = agentEndpoint.getStatus();
+            if (matcherStatus.isConnected() && !agentStatus.isConnected()) {
+                session = new SessionImpl(agentEndpoint, matcherEndpoint, this);
+                synchronized (session) {
+                    try {
+                        // This synchronized block makes sure the whole connection is made before updates can be sent
+                        // Also see that in the SessionImpl the update*() methods are synchronized
+                        matcherEndpoint.connectToAgent(session);
+                        agentEndpoint.connectToMatcher(session);
+                        LOGGER.debug("Connected MatcherEndpoint '{}' with AgentEndpoint '{}' with Session {}",
+                                     matcherEndpoint.getAgentId(),
+                                     agentEndpoint.getAgentId(),
+                                     session.getSessionId());
+                        session.setConnected();
+                        return true;
+                    } catch (IllegalStateException ex) {
+                        session = null;
+                        LOGGER.warn("Could not connect agent[{}] to matcher[{}]: {}",
+                                    agentEndpoint.getAgentId(),
+                                    matcherEndpoint.getAgentId(),
+                                    ex.getMessage());
+                    }
                 }
             }
         }
@@ -89,7 +94,7 @@ public class PotentialSession {
      * This method is called from the {@link SessionImpl} when the session is disconnected. The {@link MatcherEndpoint},
      * the {@link AgentEndpoint} or the {@link SessionManager} can trigger a disconnect.
      */
-    public void disconnected() {
+    public synchronized void disconnected() {
         if (session != null) {
             LOGGER.debug("Session {} between MatcherEndpoint '{}' with AgentEndpoint '{}' was disconnected",
                          session.getSessionId(),
@@ -102,7 +107,7 @@ public class PotentialSession {
     /**
      * Disconnect the current session (if any)
      */
-    public void disconnect() {
+    public synchronized void disconnect() {
         if (session != null) {
             // This method will call this.disconnected()
             session.disconnect();

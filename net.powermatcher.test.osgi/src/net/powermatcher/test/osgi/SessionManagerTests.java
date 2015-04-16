@@ -37,6 +37,7 @@ public class SessionManagerTests
 
         public TestAgent(BundleContext bundleContext) {
             init("testagent-" + agentCounter.incrementAndGet(), MATCHER_ID);
+            LOGGER.debug("Initialized agent with id {}", getAgentId());
             serviceRegistration = bundleContext.registerService(AgentEndpoint.class, this, null);
         }
 
@@ -65,10 +66,13 @@ public class SessionManagerTests
         @Override
         public synchronized void connectToMatcher(Session session) {
             super.connectToMatcher(session);
+            if (context == null) {
+                LOGGER.error("Context is really null of agent {}", getAgentId());
+            }
             context.submit(new Runnable() {
                 @Override
                 public void run() {
-                    publishBid(Bid.flatDemand(getMarketBasis(), Math.random() * 100));
+                    publishBid(Bid.flatDemand(getStatus().getMarketBasis(), Math.random() * 100));
                 }
             });
         }
@@ -89,7 +93,7 @@ public class SessionManagerTests
 
         public TestMatcher(BundleContext bundleContext) {
             init(MATCHER_ID);
-            configure(MB, "testcluster", 0);
+            configure(MB, "testcluster", 100);
             serviceRegistration = bundleContext.registerService(MatcherEndpoint.class, this, null);
         }
 
@@ -109,6 +113,7 @@ public class SessionManagerTests
     @Override
     protected void setUp() throws Exception {
         bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
+        assertNotNull("These unit tests should be executed in an OSGi environment", bundleContext);
     }
 
     public void testSimple() throws InterruptedException {
@@ -162,10 +167,11 @@ public class SessionManagerTests
     }
 
     public void testConcurrent() throws InterruptedException {
+        // for (int runNr = 1; runNr < 250; runNr++) {
+        // LOGGER.info("Run number {}", runNr);
         TestMatcher testMatcher = new TestMatcher(bundleContext);
-
         List<AgentCreator> creators = new ArrayList<SessionManagerTests.AgentCreator>();
-        int THREAD_COUNT = 20, AGENTS_PER_THREAD = 20;
+        int THREAD_COUNT = 25, AGENTS_PER_THREAD = 25;
         for (int ix = 0; ix < THREAD_COUNT; ix++) {
             creators.add(new AgentCreator(bundleContext, AGENTS_PER_THREAD));
         }
@@ -178,7 +184,7 @@ public class SessionManagerTests
         }
 
         assertEquals("Some of the agents did not receive a price update", 0, totalFailed);
-
         testMatcher.close();
+        // }
     }
 }

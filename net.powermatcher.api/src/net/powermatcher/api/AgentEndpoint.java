@@ -16,12 +16,31 @@ public interface AgentEndpoint
     extends Agent {
 
     /**
+     * The {@link Status} object describes the current status and configuration of an {@link AgentEndpoint}. This status
+     * can be queried through the {@link AgentEndpoint#getStatus()} method and will give a snapshot of the state at that
+     * time.
+     */
+    interface Status
+        extends Agent.Status {
+        /**
+         * @return the current {@link Session} for the connection from this {@link AgentEndpoint} to the
+         *         {@link MatcherEndpoint}.
+         * @throws IllegalStateException
+         *             when the agent is not connected (see {@link #isConnected()})
+         */
+        Session getSession();
+    }
+
+    /**
      * @return the id of the desired parent {@link Agent}.
      */
     String getDesiredParentId();
 
+    @Override
+    Status getStatus();
+
     /**
-     * Connects this {@link AgentEndpoint} instance to a {@link MatcherEndpoint} .
+     * Connects this {@link AgentEndpoint} instance to a {@link MatcherEndpoint}.
      *
      * @param session
      *            the {@link Session} that will link this {@link AgentEndpoint} with a {@link MatcherEndpoint}.

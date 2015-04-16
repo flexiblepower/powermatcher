@@ -20,7 +20,7 @@ public class SessionImpl
     private final AgentEndpoint agentEndpoint;
     private final MatcherEndpoint matcherEndpoint;
     private final PotentialSession potentialSession;
-    private final String clusterId;
+    private final String agentId, matcherId, clusterId;
     private MarketBasis marketBasis;
 
     private volatile boolean connected;
@@ -30,18 +30,22 @@ public class SessionImpl
         this.agentEndpoint = agentEndpoint;
         this.matcherEndpoint = matcherEndpoint;
         this.potentialSession = potentialSession;
-        clusterId = matcherEndpoint.getClusterId();
+
+        agentId = agentEndpoint.getAgentId();
+        matcherId = matcherEndpoint.getAgentId();
+        clusterId = matcherEndpoint.getStatus().getClusterId();
+
         connected = false;
     }
 
     @Override
     public String getAgentId() {
-        return agentEndpoint.getAgentId();
+        return agentId;
     }
 
     @Override
     public String getMatcherId() {
-        return matcherEndpoint.getAgentId();
+        return matcherId;
     }
 
     @Override
@@ -70,9 +74,7 @@ public class SessionImpl
 
     void setConnected() {
         if (marketBasis == null) {
-            throw new IllegalStateException("No MarketBasis has been set by the matcher ["
-                                            + matcherEndpoint.getAgentId()
-                                            + "]");
+            throw new IllegalStateException("No MarketBasis has been set by the matcher [" + matcherId + "]");
         }
         connected = true;
     }
@@ -82,9 +84,7 @@ public class SessionImpl
         if (connected) {
             agentEndpoint.handlePriceUpdate(priceUpdate);
         } else {
-            LOGGER.debug("Sending a price update while not connected from agent ["
-                         + matcherEndpoint.getAgentId()
-                         + "]");
+            LOGGER.debug("Sending a price update while not connected from agent [" + agentId + "]");
         }
     }
 
@@ -93,9 +93,7 @@ public class SessionImpl
         if (connected) {
             matcherEndpoint.handleBidUpdate(this, bidUpdate);
         } else {
-            LOGGER.debug("Sending a bid update while not connected from agent ["
-                         + agentEndpoint.getAgentId()
-                         + "]");
+            LOGGER.debug("Sending a bid update while not connected from agent [" + agentId + "]");
         }
     }
 

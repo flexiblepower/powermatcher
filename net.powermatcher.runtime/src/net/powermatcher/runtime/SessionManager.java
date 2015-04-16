@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import net.powermatcher.api.Agent;
@@ -35,7 +36,7 @@ public class SessionManager {
 
     // This part is for giving each agent an instance of the PowerMatcherContext without setting it twice
     private final FlexiblePowerContext runtimeContext = new PowerMatcherContext();
-    private final ConcurrentSkipListSet<String> agents = new ConcurrentSkipListSet<String>();
+    private final Set<String> agents = new ConcurrentSkipListSet<String>();
 
     private void addAgent(Agent agent) {
         if (agents.add(agent.getAgentId())) {
@@ -66,8 +67,9 @@ public class SessionManager {
      */
     @Reference(dynamic = true, multiple = true, optional = true)
     public void addMatcherEndpoint(MatcherEndpoint matcherEndpoint) {
-        String agentId = matcherEndpoint.getAgentId();
+        addAgent(matcherEndpoint);
 
+        String agentId = matcherEndpoint.getAgentId();
         synchronized (potentialSessions) {
             // Check for duplicate
             if (matcherEndpoints.containsKey(agentId)) {
@@ -85,10 +87,9 @@ public class SessionManager {
                 ps.setMatcherEndpoint(matcherEndpoint);
             }
 
-            LOGGER.debug("Agent with id [{}] added", agentId);
+            LOGGER.debug("MatcherEndpoint with id [{}] added", agentId);
         }
 
-        addAgent(matcherEndpoint);
         tryConnect();
     }
 
@@ -100,6 +101,8 @@ public class SessionManager {
      *            the {@link MatcherEndpoint} to be removed
      */
     public void removeMatcherEndpoint(MatcherEndpoint matcherEndpoint) {
+        removeAgent(matcherEndpoint);
+
         String agentId = matcherEndpoint.getAgentId();
 
         synchronized (potentialSessions) {
@@ -110,8 +113,6 @@ public class SessionManager {
             }
             matcherEndpoints.remove(agentId);
         }
-
-        removeAgent(matcherEndpoint);
     }
 
     /**
@@ -122,6 +123,8 @@ public class SessionManager {
      */
     @Reference(dynamic = true, multiple = true, optional = true)
     public void addAgentEndpoint(AgentEndpoint agentEndpoint) {
+        addAgent(agentEndpoint);
+
         String agentId = agentEndpoint.getAgentId();
         String matcherId = agentEndpoint.getDesiredParentId();
         synchronized (potentialSessions) {
@@ -140,10 +143,9 @@ public class SessionManager {
             PotentialSession ps = new PotentialSession(agentEndpoint);
             ps.setMatcherEndpoint(matcherEndpoints.get(matcherId));
             potentialSessions.get(matcherId).add(ps);
-            LOGGER.debug("Agent with id [{}] added", agentId);
+            LOGGER.debug("AgentEndpoint with id [{}] added", agentId);
         }
 
-        addAgent(agentEndpoint);
         tryConnect();
     }
 
@@ -155,6 +157,8 @@ public class SessionManager {
      *            the {@link AgentEndpoint} to be removed
      */
     public void removeAgentEndpoint(AgentEndpoint agentEndpoint) {
+        removeAgent(agentEndpoint);
+
         String agentId = agentEndpoint.getAgentId();
         String matcherId = agentEndpoint.getDesiredParentId();
         PotentialSession currentSession = null;
@@ -172,8 +176,6 @@ public class SessionManager {
         if (currentSession != null) {
             currentSession.disconnect();
         }
-
-        removeAgent(agentEndpoint);
     }
 
     /**

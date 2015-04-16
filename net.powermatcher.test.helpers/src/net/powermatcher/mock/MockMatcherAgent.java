@@ -1,9 +1,8 @@
 package net.powermatcher.mock;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
+import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.MarketBasis;
@@ -11,24 +10,53 @@ import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.messages.PriceUpdate;
 
 /**
- *
+ * This {@link MockMatcherAgent} can be used in testcases when a simple matcher is needed. It can only connect to a
+ * single agent and you can manually send a price update.
+ * 
  * @author FAN
  * @version 2.0
  */
 public class MockMatcherAgent
-    extends MockAgent
+    extends MockObservableAgent
     implements MatcherEndpoint {
 
-    private final Map<String, Object> matcherProperties;
-    private BidUpdate lastReceivedBid;
-    private MarketBasis marketBasis;
     private final String clusterId;
+    private final MarketBasis marketBasis;
 
-    public MockMatcherAgent(String agentId, String clusterId) {
+    private volatile Session session;
+    private volatile BidUpdate lastReceivedBid;
+
+    public MockMatcherAgent(String agentId, String clusterId, MarketBasis marketBasis) {
         super(agentId);
         this.clusterId = clusterId;
-        matcherProperties = new HashMap<String, Object>();
-        matcherProperties.put("matcherId", agentId);
+        this.marketBasis = marketBasis;
+    }
+
+    @Override
+    public AgentEndpoint.Status getStatus() {
+        final MarketBasis marketBasis = this.marketBasis;
+        final String clusterId = this.clusterId;
+        return new AgentEndpoint.Status() {
+            @Override
+            public boolean isConnected() {
+                return true;
+            }
+
+            @Override
+            public MarketBasis getMarketBasis() {
+                return marketBasis;
+            }
+
+            @Override
+            public String getClusterId() {
+                return clusterId;
+            }
+
+            @Override
+            public Session getSession() {
+                return null;
+            }
+        };
     }
 
     /**
@@ -68,30 +96,14 @@ public class MockMatcherAgent
     }
 
     /**
-     * @return the current value of matcherProperties.
+     * @return The current session with the connected agent
      */
-    public Map<String, Object> getMatcherProperties() {
-        return matcherProperties;
-    }
-
-    /**
-     * @return the current value of marketBasis.
-     */
-    public MarketBasis getMarketBasis() {
-        return marketBasis;
-    }
-
-    public void setMarketBasis(MarketBasis marketBasis) {
-        this.marketBasis = marketBasis;
+    public Session getSession() {
+        return session;
     }
 
     public void publishPrice(PriceUpdate priceUpdate) {
         session.updatePrice(priceUpdate);
-    }
-
-    @Override
-    public String getClusterId() {
-        return clusterId;
     }
 
     public void assertTotalBid(double... expectedDemand) {
@@ -104,10 +116,5 @@ public class MockMatcherAgent
                 throw new AssertionError(Arrays.toString(expectedDemand) + " != " + Arrays.toString(realDemand));
             }
         }
-    }
-
-    @Override
-    public boolean isConnected() {
-        return true;
     }
 }

@@ -200,16 +200,6 @@ public class WebsocketClient
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * This specific implementation checks to see if the websocket is open.
-     */
-    @Override
-    public boolean isConnected() {
-        return super.isConnected() && isRemoteConnected();
-    }
-
-    /**
      * Determines whether the Websocket is connected.
      *
      * @return true when connected, false otherwise
@@ -246,7 +236,7 @@ public class WebsocketClient
             PmJsonSerializer serializer = new PmJsonSerializer();
             PmMessage pmMessage = serializer.deserialize(message);
 
-            if (!isConnected()) {
+            if (!getStatus().isConnected()) {
                 if (pmMessage.getPayloadType() == PayloadType.CLUSTERINFO) {
                     // Sync marketbasis and clusterid with local session, for new
                     // connections
@@ -302,7 +292,7 @@ public class WebsocketClient
         PmJsonSerializer serializer = new PmJsonSerializer();
         String message = serializer.serializeBidUpdate(update);
 
-        if (isConnected()) {
+        if (isRemoteConnected()) {
             try {
                 remoteSession.getRemote().sendString(message);
                 LOGGER.debug("Sent bid update to server {}", update);
