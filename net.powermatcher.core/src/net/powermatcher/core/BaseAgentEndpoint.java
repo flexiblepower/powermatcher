@@ -120,8 +120,7 @@ public abstract class BaseAgentEndpoint
     }
 
     /**
-     * This method should always be called during activation of the agent. It sets the agentId and desiredParentId. This
-     * will also call the {@link #init(String)} method, so that call is no longer needed.
+     * This method should always be called during activation of the agent. It sets the agentId and desiredParentId.
      *
      * @param agentId
      *            The agentId that should be used by this {@link BaseAgent}. This will be returned when the
@@ -182,11 +181,11 @@ public abstract class BaseAgentEndpoint
 
     /**
      * Publishes a new bid to its matcher by creating a new {@link BidUpdate} using a generated bidnumber. The call will
-     * be ignored if {@link #isConnected()} returns <code>false</code>.
+     * be ignored if the Agent is not connected.
      *
      * @param newBid
      *            The new bid that is to be sent to the connected matcher
-     * @return The {@link BidUpdate} that has been set or <code>null</code> if {@link #isConnected()} returns false.
+     * @return The {@link BidUpdate} that has been set or <code>null</code> if not connected.
      */
     protected final BidUpdate publishBid(Bid newBid) {
         AgentEndpoint.Status currentStatus = getStatus();

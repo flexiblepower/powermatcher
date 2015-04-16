@@ -23,7 +23,7 @@ public interface MatcherEndpoint
      *            the {@link Session} that will link this {@link AgentEndpoint} with a {@link MatcherEndpoint}.
      *
      * @throws IllegalArgumentException
-     *             when this matcher is not connected to the cluster (e.g. {@link #isConnected()} returns false)
+     *             when this matcher is not connected to the cluster
      */
     void connectToAgent(Session session);
 
