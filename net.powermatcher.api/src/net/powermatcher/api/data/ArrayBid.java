@@ -383,7 +383,11 @@ public class ArrayBid
              */
             PricePoint flatEndPoint = null;
             double delta = 0.0d;
-            while (i < priceSteps - 1 && (delta = demandArray[i] - demandArray[i + 1]) == 0) {
+            while (i < priceSteps - 1) {
+                delta = demandArray[i] - demandArray[i + 1];
+                if (delta != 0) {
+                    break;
+                }
                 i += 1;
                 flatEnd = true;
             }
@@ -427,7 +431,7 @@ public class ArrayBid
                      * If i is not in a constantly inclining or declining segment, and the previous segment was flat,
                      * then move the end point of the flat segment one price step forward to convert it to a straight
                      * step.
-                     * 
+                     *
                      * This is to preserve the semantics of the straight step when converting between point and vector
                      * representation and back.
                      */
