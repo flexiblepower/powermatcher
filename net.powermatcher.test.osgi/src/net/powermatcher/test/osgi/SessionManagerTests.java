@@ -113,6 +113,7 @@ public class SessionManagerTests
     @Override
     protected void setUp() throws Exception {
         bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
+        assertNotNull("These unit tests should be executed in an OSGi environment", bundleContext);
     }
 
     public void testSimple() throws InterruptedException {

@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Base case for OSGI testcases
- * 
+ *
  * @author FAN
  * @version 2.0
  */
@@ -47,6 +47,7 @@ public abstract class OsgiTestCase
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        assertNotNull("These unit tests should be executed in an OSGi environment", context);
         clusterHelper = new ClusterHelper(context);
     }
 
