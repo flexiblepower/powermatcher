@@ -4,10 +4,13 @@ bin/
 generated/
 .svn/
 cnf/cache/
-cnf/releaserepo
+cnf/release/
 .gradle/
 .sonar/
 build/
 sonar-runner.properties
 RemoteSystemsTempFiles/.project
 */bin_test/*
+.recommenders/
+testdir/
+.com_puppetlabs_geppetto_pptp_target

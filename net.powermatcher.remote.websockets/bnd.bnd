@@ -1,0 +1,11 @@
+-buildpath:  \
+	${pm-buildpath},\
+	net.powermatcher.core;version=latest,\
+	com.google.gson,\
+    org.apache.felix.http.servlet-api;version=latest,\
+    org.apache.felix.http.jetty;version=latest
+-includeresource: \
+	{OSGI-INF/permissions.perm=permissions.perm},\
+	../cnf/gradle/LICENSE.txt
+    
+-sub: *.bnd

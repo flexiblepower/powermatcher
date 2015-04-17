@@ -19,6 +19,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 /**
+ * JUnit tests for the {@link Price} class.
+ * 
  * @author FAN
  * @version 2.0
  */

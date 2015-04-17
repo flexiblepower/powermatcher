@@ -3,15 +3,15 @@ package net.powermatcher.api.monitoring.events;
 import java.util.Date;
 
 import net.powermatcher.api.AgentEndpoint;
-import net.powermatcher.api.TimeService;
 import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.ObservableAgent;
 
 /**
- * The base class for update events.
+ * This immutable abstract data object defines the basis for a event. AgentEvent is an event worthy of notifying other
+ * object of.
  *
- * {@link AgentEndpoint} subclasses implement the {@link ObservableAgent} interface and can send an {@link AgentEvent}
- * to every {@link AgentObserver} that observes this class.
+ * Classes implementing the {@link ObservableAgent} interface and can send an {@link AgentEvent} to every
+ * {@link AgentObserver} that observes this class.
  *
  * @author FAN
  * @version 2.0
@@ -30,7 +30,7 @@ public abstract class AgentEvent {
     private final String agentId;
 
     /**
-     * The {@link Date} received from the {@link TimeService}
+     * The time at which this event occurred
      */
     private final Date timestamp;
 
@@ -42,7 +42,7 @@ public abstract class AgentEvent {
      * @param agentId
      *            The id of the {@link AgentEndpoint} subclass sending the UpdateEvent.
      * @param timestamp
-     *            The {@link Date} received from the {@link TimeService}
+     *            The time at which this event occurred
      */
     public AgentEvent(String clusterId, String agentId, Date timestamp) {
         this.clusterId = clusterId;
@@ -50,21 +50,37 @@ public abstract class AgentEvent {
         this.timestamp = timestamp;
     }
 
+    /**
+     * @return the current value of agentId.
+     */
     public String getAgentId() {
         return agentId;
     }
 
+    /**
+     * @return the current value of timestamp.
+     */
     public Date getTimestamp() {
         return timestamp;
     }
 
+    /**
+     * @return the current value of clusterId.
+     */
     public String getClusterId() {
         return clusterId;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
-        return "clusterId = " + this.clusterId + ", agentId = " + this.agentId + ", timestamp = " + this.timestamp;
+        return getClass().getSimpleName() + ": clusterId = "
+               + clusterId
+               + ", agentId = "
+               + agentId
+               + ", timestamp = "
+               + timestamp;
     }
-
 }

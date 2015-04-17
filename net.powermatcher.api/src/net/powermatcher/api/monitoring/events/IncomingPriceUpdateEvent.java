@@ -4,18 +4,16 @@ import java.util.Date;
 
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.Session;
-import net.powermatcher.api.TimeService;
-import net.powermatcher.api.data.Price;
-import net.powermatcher.api.data.PriceUpdate;
-import net.powermatcher.api.monitoring.Qualifier;
+import net.powermatcher.api.messages.PriceUpdate;
 
 /**
- * An {@link IncomingPriceUpdateEvent} is sent when an {@link AgentEndpoint} receives a new {@link Price}.
+ * An {@link IncomingPriceUpdateEvent} is sent when an {@link AgentEndpoint} receives a new {@link PriceUpdate}.
  *
  * @author FAN
  * @version 2.0
  */
-public class IncomingPriceUpdateEvent extends PriceUpdateEvent {
+public class IncomingPriceUpdateEvent
+    extends PriceUpdateEvent {
 
     /**
      * Constructs an instance of this class.
@@ -27,18 +25,12 @@ public class IncomingPriceUpdateEvent extends PriceUpdateEvent {
      * @param sessionId
      *            The id of the {@link Session} of the {@link AgentEndpoint} subclass sending the UpdateEvent
      * @param timestamp
-     *            The {@link Date} received from the {@link TimeService}
+     *            The time at which this event occurred
      * @param priceUpdate
      *            The received {@link PriceUpdate}.
      */
     public IncomingPriceUpdateEvent(String clusterId, String agentId, String sessionId, Date timestamp,
-            PriceUpdate priceUpdate, Qualifier qualifier) {
-        super(clusterId, agentId, sessionId, timestamp, priceUpdate, qualifier);
-    }
-
-    @Override
-    public String toString() {
-        return IncomingPriceUpdateEvent.class.getSimpleName() + " " + super.toString() + ", priceUpdate = "
-                + getPriceUpdate().toString();
+                                    PriceUpdate priceUpdate) {
+        super(clusterId, agentId, sessionId, timestamp, priceUpdate);
     }
 }

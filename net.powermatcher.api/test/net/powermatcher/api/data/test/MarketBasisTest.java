@@ -12,6 +12,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+/**
+ * JUnit tests for the {@link MarketBasis} class.
+ * 
+ * @author FAN
+ * @version 2.0
+ */
 public class MarketBasisTest {
 
     @Rule

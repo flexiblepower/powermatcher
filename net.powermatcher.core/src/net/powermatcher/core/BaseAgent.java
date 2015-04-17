@@ -1,6 +1,6 @@
 package net.powermatcher.core;
 
-import java.util.Observable;
+import java.util.Date;
 import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -10,109 +10,79 @@ import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.events.AgentEvent;
 
+import org.flexiblepower.context.FlexiblePowerContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Base implementation of an {@link Agent}. It provides basic functionality required in each {@link Agent}. Implements
- * the {@link Observable} interface, providing Observable functionality.
- * 
+ * the {@link ObservableAgent} interface to make sure the instance van send {@link AgentEvent}s to {@link AgentObserver}
+ * s.
+ *
  * @author FAN
  * @version 2.0
  */
-public abstract class BaseAgent implements ObservableAgent {
+public abstract class BaseAgent
+    implements ObservableAgent {
 
-    private String agentId;
+    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
-    private String clusterId;
+    protected volatile FlexiblePowerContext context;
 
-    private String desiredParentId;
+    /**
+     * @see net.powermatcher.api.Agent#setContext(org.flexiblepower.context.FlexiblePowerContext)
+     */
+    @Override
+    public void setContext(FlexiblePowerContext context) {
+        this.context = context;
+    }
 
-    private String servicePid;
+    /**
+     * Returns the current time in a {@link Date} object.
+     *
+     * @return A {@link Date} object, representing the current date and time
+     */
+    protected Date now() {
+        if (context == null) {
+            throw new IllegalStateException("The FlexiblePowerContext has not been set, is the PowerMatcher runtime active?");
+        }
+        return context.currentTime();
+    }
 
     /**
      * Collection of {@link Observer} services.
      */
     private final Set<AgentObserver> observers = new CopyOnWriteArraySet<AgentObserver>();
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void addObserver(AgentObserver observer) {
         observers.add(observer);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void removeObserver(AgentObserver observer) {
         observers.remove(observer);
     }
 
-    @Override
-    public String getAgentId() {
-        return this.agentId;
-    }
-
-    protected void setAgentId(String agentId) {
-        this.agentId = agentId;
-    }
-
-    protected void setServicePid(String servicePid) {
-        this.servicePid = servicePid;
-    }
-
-    @Override
-    public String getClusterId() {
-        return this.clusterId;
-    }
-
-    protected void setClusterId(String clusterId) {
-        this.clusterId = clusterId;
-    }
-
-    @Override
-    public String getDesiredParentId() {
-        return this.desiredParentId;
-    }
-
-    protected void setDesiredParentId(String desiredParentId) {
-        this.desiredParentId = desiredParentId;
-    }
-
-    @Override
-    public String getServicePid() {
-        return this.servicePid;
-    }
-
     /**
-     * Publish an {@link UpdateEvent} to the attached {@link Observer} services.
-     * 
+     * Publish an {@link AgentEvent} to the attached {@link Observer} services.
+     *
      * @param event
      *            The event to publish.
      */
-    public void publishEvent(AgentEvent event) {
+    protected final void publishEvent(AgentEvent event) {
         for (AgentObserver observer : observers) {
-            observer.update(event);
+            try {
+                observer.handleAgentEvent(event);
+            } catch (RuntimeException ex) {
+                LOGGER.warn("Could not publish an event to observer [{}]: {}", observer, ex.getMessage());
+            }
         }
     }
-
-    public boolean canEqual(Object other) {
-        return other instanceof BaseAgent;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        BaseDeviceAgent other = (BaseDeviceAgent) ((obj instanceof BaseDeviceAgent) ? obj : null);
-        if (other == null) {
-            return false;
-        }
-
-        if (this == other) {
-            return true;
-        }
-
-        return canEqual(other) && other.getAgentId() == this.getClusterId() && this.getAgentId() == other.getAgentId()
-                && this.getDesiredParentId() == other.getDesiredParentId();
-    }
-
-    @Override
-    public int hashCode() {
-        return 211 * ((agentId == null ? 0 : agentId.hashCode()) + (clusterId == null ? 0 : clusterId.hashCode()) + (desiredParentId == null ? 0
-                : desiredParentId.hashCode()));
-    }
-
 }
