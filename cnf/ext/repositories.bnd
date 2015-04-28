@@ -6,8 +6,8 @@
             local=${workspace}/cnf/release;\
             pretty=true,\
      aQute.bnd.deployer.repository.FixedIndexedRepo;\
-            name=FlexiblePower Base (snapshot);\
-            locations=http://fpai-ci.sensorlab.tno.nl/builds/flexiblepower-base/development/LATEST/repo/index.xml;\
+            name=FlexiblePower Base;\
+            locations=https://github.com/flexiblepower/flexiblepower-base/releases/download/15.04/index.xml;\
             cache=${workspace}/cnf/cache,\
      aQute.bnd.deployer.repository.FixedIndexedRepo;\
             name=FlexiblePower Bundle Hub - Build;\
