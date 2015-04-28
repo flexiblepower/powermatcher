@@ -2,7 +2,7 @@
 -runee: JavaSE-1.7
 -resolve: auto
 
--runrequires:  \
+-runrequires: \
 	osgi.identity;filter:='(osgi.identity=org.apache.felix.configadmin)',\
 	osgi.identity;filter:='(osgi.identity=org.apache.felix.http.jetty)',\
 	osgi.identity;filter:='(osgi.identity=org.apache.felix.metatype)',\
@@ -11,8 +11,9 @@
 	osgi.identity;filter:='(osgi.identity=org.apache.felix.webconsole.plugins.ds)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.examples)',\
 	osgi.identity;filter:='(osgi.identity=net.powermatcher.peakshaving)',\
-	osgi.identity;filter:='(osgi.identity=net.powermatcher.visualisation)'
--runbundles:  \
+	osgi.identity;filter:='(osgi.identity=net.powermatcher.visualisation)',\
+	osgi.identity;filter:='(osgi.identity=net.powermatcher.monitoring.csv)'
+-runbundles: \
 	biz.aQute.bnd.annotation;version='[2.4.0,2.4.1)',\
 	ch.qos.logback.classic;version='[1.1.2,1.1.3)',\
 	ch.qos.logback.core;version='[1.1.2,1.1.3)',\
@@ -21,6 +22,7 @@
 	net.powermatcher.api;version=latest,\
 	net.powermatcher.core;version=latest,\
 	net.powermatcher.examples;version=latest,\
+	net.powermatcher.monitoring.csv;version=latest,\
 	net.powermatcher.peakshaving;version=latest,\
 	net.powermatcher.runtime;version=latest,\
 	net.powermatcher.visualisation;version=latest,\

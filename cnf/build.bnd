@@ -7,6 +7,9 @@ Bundle-Category: PowerMatcher
 qualifier: SNAPSHOT-${tstamp}
 -includeresource: {OSGI-INF/permissions.perm=permissions.perm}
 
+-baseline: *
+-baselinerepo: PowerMatcher Current Release
+
 pm-buildpath: ${default-buildpath}, net.powermatcher.api;version=latest
 
 test: \

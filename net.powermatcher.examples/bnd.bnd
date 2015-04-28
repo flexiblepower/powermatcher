@@ -1,5 +1,5 @@
 -buildpath: ${pm-buildpath}, net.powermatcher.core;version=latest
 
-Bundle-Version: 2.0.0.${tstamp}
+Bundle-Version: 2.0.1.${tstamp}
 Private-Package:  net.powermatcher.examples*
 Service-Component:  *
