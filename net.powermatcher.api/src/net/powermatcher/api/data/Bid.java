@@ -36,7 +36,7 @@ public abstract class Bid {
      * @return A new {@link Bid} that represents a flat bid
      */
     public static Bid flatDemand(MarketBasis marketBasis, double demand) {
-        return new PointBid.Builder(marketBasis).add(0, demand).build();
+        return new PointBid.Builder(marketBasis).add(marketBasis.getMinimumPrice(), demand).build();
     }
 
     /**
