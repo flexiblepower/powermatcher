@@ -12,7 +12,7 @@ import net.powermatcher.api.messages.PriceUpdate;
 /**
  * This {@link MockMatcherAgent} can be used in testcases when a simple matcher is needed. It can only connect to a
  * single agent and you can manually send a price update.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
@@ -107,7 +107,7 @@ public class MockMatcherAgent
     }
 
     public void assertTotalBid(double... expectedDemand) {
-        double[] realDemand = lastReceivedBid.getBid().toArrayBid().getDemand();
+        double[] realDemand = lastReceivedBid.getBid().getDemand();
         if (expectedDemand.length != realDemand.length) {
             throw new AssertionError(Arrays.toString(expectedDemand) + " != " + Arrays.toString(realDemand));
         }

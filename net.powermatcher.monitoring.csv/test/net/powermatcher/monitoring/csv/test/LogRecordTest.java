@@ -8,7 +8,10 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-import net.powermatcher.api.data.ArrayBid;
+import org.junit.Before;
+import org.junit.Test;
+
+import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.messages.BidUpdate;
@@ -20,9 +23,6 @@ import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
 import net.powermatcher.monitoring.csv.BidUpdateLogRecord;
 import net.powermatcher.monitoring.csv.LogRecord;
 import net.powermatcher.monitoring.csv.PriceUpdateLogRecord;
-
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * JUnit tests for the {@link LogRecord} class.
@@ -45,7 +45,7 @@ public class LogRecordTest {
     private OutgoingBidUpdateEvent outgoingBidEvent;
     private IncomingPriceUpdateEvent incomingPriceUpdateEvent;
     private OutgoingPriceUpdateEvent outgoingPriceUpdateEvent;
-    private ArrayBid bid;
+    private Bid bid;
     private BidUpdate bidUpdate;
     private Price price;
     private PriceUpdate priceUpdate;
@@ -60,7 +60,7 @@ public class LogRecordTest {
         bidNumber = 1;
         demand = new double[] { 4.0, 3.0, 2.0, 1.0, 0.0 };
         dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        bid = new ArrayBid(marketBasis, demand);
+        bid = new Bid(marketBasis, demand);
         bidUpdate = new BidUpdate(bid, bidNumber);
         price = new Price(marketBasis, 10);
         priceUpdate = new PriceUpdate(price, bidNumber);
@@ -81,7 +81,7 @@ public class LogRecordTest {
         assertThat(bidLogRecord.getEventTimestamp(), is(equalTo(timeStamp)));
         assertThat((SimpleDateFormat) bidLogRecord.getDateFormat(), is(equalTo(dateFormat)));
         assertThat(bidLogRecord.getLogTime(), is(equalTo(logTime)));
-        assertThat(bidLogRecord.getBidUpdate().getBid().toArrayBid(), is(equalTo(bid)));
+        assertThat(bidLogRecord.getBidUpdate().getBid(), is(equalTo(bid)));
     }
 
     @Test
@@ -95,7 +95,7 @@ public class LogRecordTest {
         assertThat(bidLogRecord.getEventTimestamp(), is(equalTo(timeStamp)));
         assertThat((SimpleDateFormat) bidLogRecord.getDateFormat(), is(equalTo(dateFormat)));
         assertThat(bidLogRecord.getLogTime(), is(equalTo(logTime)));
-        assertThat(bidLogRecord.getBidUpdate().getBid().toArrayBid(), is(equalTo(bid)));
+        assertThat(bidLogRecord.getBidUpdate().getBid(), is(equalTo(bid)));
     }
 
     @Test
@@ -103,7 +103,8 @@ public class LogRecordTest {
         Calendar c = Calendar.getInstance();
         c.set(2014, 12, 12);
         Date logTime = c.getTime();
-        PriceUpdateLogRecord priceUpdateLogRecord = new PriceUpdateLogRecord(incomingPriceUpdateEvent, logTime,
+        PriceUpdateLogRecord priceUpdateLogRecord = new PriceUpdateLogRecord(incomingPriceUpdateEvent,
+                                                                             logTime,
                                                                              dateFormat);
         assertThat(priceUpdateLogRecord.getClusterId(), is(equalTo(clusterId)));
         assertThat(priceUpdateLogRecord.getAgentId(), is(equalTo(agentId)));
@@ -118,7 +119,8 @@ public class LogRecordTest {
         Calendar c = Calendar.getInstance();
         c.set(2014, 12, 12);
         Date logTime = c.getTime();
-        PriceUpdateLogRecord priceUpdateLogRecord = new PriceUpdateLogRecord(outgoingPriceUpdateEvent, logTime,
+        PriceUpdateLogRecord priceUpdateLogRecord = new PriceUpdateLogRecord(outgoingPriceUpdateEvent,
+                                                                             logTime,
                                                                              dateFormat);
         assertThat(priceUpdateLogRecord.getClusterId(), is(equalTo(clusterId)));
         assertThat(priceUpdateLogRecord.getAgentId(), is(equalTo(agentId)));

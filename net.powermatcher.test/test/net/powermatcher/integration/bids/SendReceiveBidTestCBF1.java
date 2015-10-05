@@ -8,11 +8,10 @@ import static org.junit.Assert.assertThat;
 import java.io.IOException;
 import java.util.zip.DataFormatException;
 
-import net.powermatcher.api.data.ArrayBid;
+import org.junit.Test;
+
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.messages.PriceUpdate;
-
-import org.junit.Test;
 
 /**
  *
@@ -44,8 +43,8 @@ public class SendReceiveBidTestCBF1
             assertEquals(bid, concentrator.getLastReceivedBid().getBid());
 
             // Check if the published bid by concentrator is received at the auctioneer
-            ArrayBid lastReceivedBid = auctioneer.getLastReceivedBid().getBid().toArrayBid();
-            ArrayBid aggregatedBid = auctioneer.getAggregatedBid().toArrayBid();
+            Bid lastReceivedBid = auctioneer.getLastReceivedBid().getBid();
+            Bid aggregatedBid = auctioneer.getAggregatedBid();
             assertThat(lastReceivedBid.getDemand(), is(equalTo(aggregatedBid.getDemand())));
             assertThat(lastReceivedBid.getMarketBasis(), is(equalTo(aggregatedBid.getMarketBasis())));
 

@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.zip.DataFormatException;
 
-import net.powermatcher.api.data.ArrayBid;
-import net.powermatcher.api.data.MarketBasis;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import net.powermatcher.api.data.Bid;
+import net.powermatcher.api.data.MarketBasis;
 
 /**
  *
@@ -23,7 +23,7 @@ public class CsvExpectedResultsReader {
     private CsvReader csvReader;
     private MarketBasis marketBasis;
 
-    private ArrayBid aggregatedBid;
+    private Bid aggregatedBid;
     private double equilibriumPrice;
 
     public CsvExpectedResultsReader(String filename) throws IOException, DataFormatException {
@@ -46,7 +46,7 @@ public class CsvExpectedResultsReader {
 
         // Get aggregated bid from second line
         List<String> demandList = csvReader.nextLine();
-        aggregatedBid = new ArrayBid(marketBasis, createAggregatedBid(demandList));
+        aggregatedBid = new Bid(marketBasis, createAggregatedBid(demandList));
 
         // Get equilibrium price from the third line
         List<String> priceList = csvReader.nextLine();
@@ -113,7 +113,7 @@ public class CsvExpectedResultsReader {
         }
     }
 
-    public ArrayBid getAggregatedBid() {
+    public Bid getAggregatedBid() {
         return aggregatedBid;
     }
 

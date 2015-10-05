@@ -1,16 +1,12 @@
 package net.powermatcher.remote.websockets.json;
 
-import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
-import net.powermatcher.api.data.PointBid;
 import net.powermatcher.api.data.Price;
-import net.powermatcher.api.data.PricePoint;
 import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.remote.websockets.data.BidModel;
 import net.powermatcher.remote.websockets.data.MarketBasisModel;
-import net.powermatcher.remote.websockets.data.PricePointModel;
 import net.powermatcher.remote.websockets.data.PriceUpdateModel;
 
 /**
@@ -37,13 +33,7 @@ public class ModelMapper {
         MarketBasis marketBasis = convertMarketBasis(bidModel.getMarketBasis());
 
         // Include either pricepoints or demand and not both.
-        PricePointModel[] pricePointsModel = bidModel.getPricePoints();
-        if (pricePointsModel == null || pricePointsModel.length == 0) {
-            bidUpdate = new BidUpdate(new ArrayBid(marketBasis, bidModel.getDemand()), bidModel.getBidNumber());
-        } else {
-            bidUpdate = new BidUpdate(new PointBid(marketBasis, convertPricePoints(marketBasis, pricePointsModel)),
-                                      bidModel.getBidNumber());
-        }
+        bidUpdate = new BidUpdate(new Bid(marketBasis, bidModel.getDemand()), bidModel.getBidNumber());
 
         return bidUpdate;
     }
@@ -56,47 +46,10 @@ public class ModelMapper {
      * @return a mapped {@link PriceUpdate}
      */
     public static PriceUpdate mapPriceUpdate(PriceUpdateModel priceUpdateModel) {
-        Price price = new Price(convertMarketBasis(priceUpdateModel.getMarketBasis()), priceUpdateModel.getPriceValue());
+        Price price = new Price(convertMarketBasis(priceUpdateModel.getMarketBasis()),
+                                priceUpdateModel.getPriceValue());
         PriceUpdate priceUpdate = new PriceUpdate(price, priceUpdateModel.getBidNumber());
         return priceUpdate;
-    }
-
-    /**
-     * Convert a list of {@link PricePointModel} to a list of {@link PricePoint}
-     *
-     * @param marketBasis
-     *            the marketbasis to use
-     * @param pricePointsModel
-     *            the list of pricepointmodels
-     * @return a list of {@link PricePoint}
-     */
-    public static PricePoint[] convertPricePoints(MarketBasis marketBasis, PricePointModel[] pricePointsModel) {
-        // Convert price points
-        PricePoint[] pricePoints = new PricePoint[pricePointsModel.length];
-        for (int i = 0; i < pricePoints.length; i++) {
-            pricePoints[i] = new PricePoint(marketBasis, pricePointsModel[i].getPrice(),
-                                            pricePointsModel[i].getDemand());
-        }
-
-        return pricePoints;
-    }
-
-    /**
-     * Convert a list of {@link PricePoint} to a list of {@link PricePointModel}
-     *
-     * @param pricePointsModel
-     *            the list of pricepoint
-     * @return a list of {@link PricePointModel}
-     */
-    public static PricePointModel[] convertPricePoints(PricePoint[] pricePoints) {
-        PricePointModel[] pricePointsModel = new PricePointModel[pricePoints.length];
-        for (int i = 0; i < pricePoints.length; i++) {
-            pricePointsModel[i] = new PricePointModel();
-            pricePointsModel[i].setDemand(pricePoints[i].getDemand());
-            pricePointsModel[i].setPrice(pricePoints[i].getPrice().getPriceValue());
-        }
-
-        return pricePointsModel;
     }
 
     /**
@@ -124,8 +77,10 @@ public class ModelMapper {
      * @return a {@link MarketBasis}
      */
     public static MarketBasis convertMarketBasis(MarketBasisModel marketBasisModel) {
-        MarketBasis marketBasis = new MarketBasis(marketBasisModel.getCommodity(), marketBasisModel.getCurrency(),
-                                                  marketBasisModel.getPriceSteps(), marketBasisModel.getMinimumPrice(),
+        MarketBasis marketBasis = new MarketBasis(marketBasisModel.getCommodity(),
+                                                  marketBasisModel.getCurrency(),
+                                                  marketBasisModel.getPriceSteps(),
+                                                  marketBasisModel.getMinimumPrice(),
                                                   marketBasisModel.getMaximumPrice());
         return marketBasis;
     }

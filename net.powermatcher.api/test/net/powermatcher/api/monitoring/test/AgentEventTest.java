@@ -7,7 +7,10 @@ import static org.junit.Assert.assertThat;
 
 import java.util.Date;
 
-import net.powermatcher.api.data.ArrayBid;
+import org.junit.Before;
+import org.junit.Test;
+
+import net.powermatcher.api.data.ArrayBidBuilder;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
@@ -18,9 +21,6 @@ import net.powermatcher.api.monitoring.events.IncomingBidUpdateEvent;
 import net.powermatcher.api.monitoring.events.IncomingPriceUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingBidUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
-
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * JUnit tests for the {@link AgentEvent} class.
@@ -47,14 +47,19 @@ public class AgentEventTest {
         timestamp = new Date();
         fromAgent = "message from agent";
         marketBasis = new MarketBasis("water", "EURO", 10, 0, 10);
-        bid = new ArrayBid.Builder(marketBasis).demand(0).build();
+        bid = new ArrayBidBuilder(marketBasis).demand(0).build();
         bidUpdate = new BidUpdate(bid, 9);
         priceUpdate = new PriceUpdate(new Price(marketBasis, 10.0), 0);
     }
 
     @Test
     public void testIncomingBidEvent() {
-        IncomingBidUpdateEvent ibe = new IncomingBidUpdateEvent(clusterId, agentId, sessionId, timestamp, fromAgent, bidUpdate);
+        IncomingBidUpdateEvent ibe = new IncomingBidUpdateEvent(clusterId,
+                                                                agentId,
+                                                                sessionId,
+                                                                timestamp,
+                                                                fromAgent,
+                                                                bidUpdate);
         assertThat(ibe.getClusterId(), is(equalTo(clusterId)));
         assertThat(ibe.getAgentId(), is(equalTo(agentId)));
         assertThat(ibe.getSessionId(), is(equalTo(sessionId)));
@@ -65,7 +70,12 @@ public class AgentEventTest {
 
     @Test
     public void testIncomingBidEventToString() {
-        IncomingBidUpdateEvent ibe = new IncomingBidUpdateEvent(clusterId, agentId, sessionId, timestamp, fromAgent, bidUpdate);
+        IncomingBidUpdateEvent ibe = new IncomingBidUpdateEvent(clusterId,
+                                                                agentId,
+                                                                sessionId,
+                                                                timestamp,
+                                                                fromAgent,
+                                                                bidUpdate);
         String ibetoString = ibe.toString();
         assertThat(ibetoString, is(notNullValue()));
     }

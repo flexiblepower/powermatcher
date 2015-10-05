@@ -3,8 +3,6 @@ package net.powermatcher.integration.auctioneer;
 import java.io.IOException;
 import java.util.zip.DataFormatException;
 
-import net.powermatcher.api.data.ArrayBid;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -207,6 +205,6 @@ public class AuctioneerResilienceTestIAQ2
 
         sendBidsToMatcher();
 
-        checkAggregatedBid((ArrayBid) auctioneer.getAggregatedBid());
+        checkAggregatedBid(auctioneer.getAggregatedBid());
     }
 }

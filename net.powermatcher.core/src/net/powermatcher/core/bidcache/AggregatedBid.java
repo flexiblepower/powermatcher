@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.messages.BidUpdate;
@@ -14,7 +13,7 @@ import net.powermatcher.api.messages.BidUpdate;
  * are aggregated into a single bid. This object is immutable and can only be created using the {@link Builder}.
  */
 public final class AggregatedBid
-    extends ArrayBid {
+    extends Bid {
     /**
      * A Builder that makes it easier to create an {@link AggregatedBid}. The idea is that you can call the
      * {@link #addAgentBid(String, BidUpdate)} or {@link #addBid(Bid)} several times to define the {@link AggregatedBid}
@@ -72,7 +71,7 @@ public final class AggregatedBid
 
         public Builder addBid(Bid bid) {
             if (bid.getMarketBasis().equals(marketBasis)) {
-                double[] demand = bid.toArrayBid().getDemand();
+                double[] demand = bid.getDemand();
                 for (int ix = 0; ix < marketBasis.getPriceSteps(); ix++) {
                     aggregatedBid[ix] += demand[ix];
                 }
@@ -96,7 +95,7 @@ public final class AggregatedBid
         this.agentBidReferences = Collections.unmodifiableMap(agentBidReferences);
     }
 
-    public AggregatedBid(ArrayBid bid, Map<String, Integer> agentBidReferences) {
+    public AggregatedBid(Bid bid, Map<String, Integer> agentBidReferences) {
         super(bid);
         this.agentBidReferences = Collections.unmodifiableMap(new HashMap<String, Integer>(agentBidReferences));
     }

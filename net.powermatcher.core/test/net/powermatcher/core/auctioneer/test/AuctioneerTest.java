@@ -7,8 +7,11 @@ import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+
+import org.junit.Before;
+import org.junit.Test;
+
 import net.powermatcher.api.Session;
-import net.powermatcher.api.data.ArrayBid;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.messages.BidUpdate;
@@ -22,9 +25,6 @@ import net.powermatcher.mock.MockContext;
 import net.powermatcher.mock.MockDeviceAgent;
 import net.powermatcher.mock.SimpleSession;
 import net.powermatcher.test.helpers.PropertiesBuilder;
-
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * JUnit tests for the {@link Auctioneer} class.
@@ -133,8 +133,9 @@ public class AuctioneerTest {
 
     @Test(expected = IllegalStateException.class)
     public void testUpdateBidNullSession() {
-        auctioneer.handleBidUpdate(null, new BidUpdate(new ArrayBid(marketBasis,
-                                                                    new double[] { 5.0, 4.0, 3.0, 1.0, 0.0 }), 0));
+        auctioneer.handleBidUpdate(null, new BidUpdate(new Bid(marketBasis,
+                                                               new double[] { 5.0, 4.0, 3.0, 1.0, 0.0 }),
+                                                       0));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -156,7 +157,7 @@ public class AuctioneerTest {
         new SimpleSession(mockAgent, auctioneer).connect();
 
         double[] demandArray = new double[] { 2, 1, 0, -1, -2 };
-        Bid bid = new ArrayBid(marketBasis, demandArray);
+        Bid bid = new Bid(marketBasis, demandArray);
         mockAgent.sendBid(bid, 0);
 
         assertThat(observer.incomingBidEvent.getClusterId(), is(equalTo(CLUSTER_ID)));
@@ -175,7 +176,7 @@ public class AuctioneerTest {
         new SimpleSession(mockAgent, auctioneer).connect();
 
         double[] demandArray = new double[] { 2, 1, 0, -1, -2 };
-        Bid bid = new ArrayBid(marketBasis, demandArray);
+        Bid bid = new Bid(marketBasis, demandArray);
         mockAgent.sendBid(bid, 0);
         assertThat(mockAgent.getLastPriceUpdate(), is(nullValue()));
         mockContext.doTaskOnce();

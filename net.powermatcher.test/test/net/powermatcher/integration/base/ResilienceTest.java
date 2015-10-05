@@ -6,15 +6,14 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.DataFormatException;
 
-import net.powermatcher.api.data.ArrayBid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.core.bidcache.AggregatedBid;
 import net.powermatcher.integration.util.CsvBidReader;
 import net.powermatcher.integration.util.CsvExpectedResultsReader;
 import net.powermatcher.test.helpers.TestClusterHelper;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -43,7 +42,7 @@ public class ResilienceTest {
     protected void sendBidsToMatcher() throws IOException, DataFormatException {
         AggregatedBid.Builder aggregatedDemand = new AggregatedBid.Builder(cluster.getMarketBasis());
 
-        ArrayBid bid = null;
+        Bid bid = null;
         int ix = 0;
         while ((bid = bidReader.nextBid()) != null) {
             aggregatedDemand.addBid(bid);
@@ -76,7 +75,7 @@ public class ResilienceTest {
         return "input/" + testID + "/Bids" + csvSuffix;
     }
 
-    protected void checkAggregatedBid(ArrayBid aggregatedBid) {
+    protected void checkAggregatedBid(Bid aggregatedBid) {
         assertArrayEquals(resultsReader.getAggregatedBid().getDemand(), aggregatedBid.getDemand(), 0);
     }
 }

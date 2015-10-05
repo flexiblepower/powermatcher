@@ -3,11 +3,11 @@ package net.powermatcher.integration.concentrator;
 import java.io.IOException;
 import java.util.zip.DataFormatException;
 
-import net.powermatcher.api.data.Price;
-import net.powermatcher.api.messages.PriceUpdate;
-
 import org.junit.Assert;
 import org.junit.Test;
+
+import net.powermatcher.api.data.Price;
+import net.powermatcher.api.messages.PriceUpdate;
 
 /**
  * Functional tests for the Concentrator.
@@ -23,7 +23,7 @@ public class ConcentratorResilienceTestICF
 
         sendBidsToMatcher();
 
-        checkAggregatedBid(auctioneer.getLastReceivedBid().getBid().toArrayBid());
+        checkAggregatedBid(auctioneer.getLastReceivedBid().getBid());
     }
 
     /**
@@ -81,7 +81,8 @@ public class ConcentratorResilienceTestICF
         cluster.performTasks();
         // Send price
         PriceUpdate equilibrium = new PriceUpdate(new Price(cluster.getMarketBasis(),
-                                                            resultsReader.getEquilibriumPrice()), 1);
+                                                            resultsReader.getEquilibriumPrice()),
+                                                  1);
 
         auctioneer.publishPrice(equilibrium);
         // Check the received price

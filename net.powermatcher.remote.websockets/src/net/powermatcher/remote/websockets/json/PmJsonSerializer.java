@@ -1,18 +1,16 @@
 package net.powermatcher.remote.websockets.json;
 
-import net.powermatcher.api.data.ArrayBid;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
-import net.powermatcher.api.data.PointBid;
 import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.remote.websockets.data.BidModel;
 import net.powermatcher.remote.websockets.data.ClusterInfoModel;
 import net.powermatcher.remote.websockets.data.PmMessage;
 import net.powermatcher.remote.websockets.data.PriceUpdateModel;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 /**
  * Implements a serializer for the net.powermatcher.api.data data types to JSON. Items are wrapped in a
@@ -39,11 +37,7 @@ public class PmJsonSerializer {
         bidModel.setMarketBasis(ModelMapper.convertMarketBasis(bid.getMarketBasis()));
 
         // Include either pricepoints or demand, not both.
-        if (bid instanceof ArrayBid) {
-            bidModel.setDemand(((ArrayBid) bid).getDemand());
-        } else {
-            bidModel.setPricePoints(ModelMapper.convertPricePoints(((PointBid) bid).getPricePoints()));
-        }
+        bidModel.setDemand(bid.getDemand());
 
         // Create PM Message with bid information
         PmMessage message = new PmMessage();

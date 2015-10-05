@@ -4,7 +4,7 @@ import net.powermatcher.api.data.Bid;
 
 /**
  * Bid model class to transfer {@link Bid} data over the wire.
- * 
+ *
  * @author FAN
  * @version 2.0
  */
@@ -18,11 +18,6 @@ public class BidModel {
      * Demand array for each price step in the market basis.
      */
     private double[] demand;
-
-    /**
-     * Price points in a bid curve .
-     */
-    private PricePointModel[] pricePoints;
 
     /**
      * Holds the bidNumber.
@@ -49,17 +44,6 @@ public class BidModel {
 
     public void setDemand(double[] demand) {
         this.demand = demand;
-    }
-
-    /**
-     * @return the current value of pricePoints.
-     */
-    public PricePointModel[] getPricePoints() {
-        return pricePoints;
-    }
-
-    public void setPricePoints(PricePointModel[] pricePoints) {
-        this.pricePoints = pricePoints;
     }
 
     /**

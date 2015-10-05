@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;
-import net.powermatcher.api.data.ArrayBid;
+import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.messages.PriceUpdate;
@@ -79,7 +79,7 @@ public class TestClusterHelper
     }
 
     public void sendBid(int agentIx, int bidNr, double... demandArray) {
-        getAgent(agentIx).sendBid(new ArrayBid(marketBasis, demandArray), bidNr);
+        getAgent(agentIx).sendBid(new Bid(marketBasis, demandArray), bidNr);
     }
 
     public void sendBids(int baseId, double[]... demandArrays) {

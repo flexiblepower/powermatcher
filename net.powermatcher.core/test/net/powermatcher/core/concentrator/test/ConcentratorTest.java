@@ -7,8 +7,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+
+import org.junit.Before;
+import org.junit.Test;
+
 import net.powermatcher.api.Session;
-import net.powermatcher.api.data.ArrayBid;
+import net.powermatcher.api.data.ArrayBidBuilder;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
@@ -20,9 +24,6 @@ import net.powermatcher.mock.MockDeviceAgent;
 import net.powermatcher.mock.MockMatcherAgent;
 import net.powermatcher.mock.SimpleSession;
 import net.powermatcher.test.helpers.PropertiesBuilder;
-
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * JUnit test for the {@link Concentrator} class.
@@ -113,8 +114,9 @@ public class ConcentratorTest {
 
         concentrator
                     .handleBidUpdate(mockAgent.getSession(),
-                                     new BidUpdate(new ArrayBid.Builder(new MarketBasis("a", "b", 2, 0, 2)).demand(0)
-                                                                                                           .build(), 0));
+                                     new BidUpdate(new ArrayBidBuilder(new MarketBasis("a", "b", 2, 0, 2)).demand(0)
+                                                                                                          .build(),
+                                                   0));
     }
 
     @Test
@@ -126,11 +128,11 @@ public class ConcentratorTest {
         new SimpleSession(mockAgent, concentrator).connect();
 
         double[] demandArray = new double[] { 2, 1, 0, -1, -2 };
-        ArrayBid arrayBid = new ArrayBid(marketBasis, demandArray);
+        Bid arrayBid = new Bid(marketBasis, demandArray);
         mockAgent.sendBid(new BidUpdate(arrayBid, 1));
         context.doTaskOnce();
-        ArrayBid expectedBid = new ArrayBid(arrayBid);
-        assertThat(mockMatcherAgent.getLastReceivedBid().getBid().toArrayBid().getDemand(),
+        Bid expectedBid = new Bid(arrayBid);
+        assertThat(mockMatcherAgent.getLastReceivedBid().getBid().getDemand(),
                    is(equalTo(expectedBid.getDemand())));
     }
 
@@ -148,7 +150,7 @@ public class ConcentratorTest {
         new SimpleSession(mockAgent, concentrator).connect();
 
         int sentBidNumber = 5;
-        Bid bid = new ArrayBid(marketBasis, new double[] { 2, 1, 0, -1, -1 });
+        Bid bid = new Bid(marketBasis, new double[] { 2, 1, 0, -1, -1 });
         mockAgent.sendBid(new BidUpdate(bid, sentBidNumber));
         context.doTaskOnce();
 
@@ -173,7 +175,7 @@ public class ConcentratorTest {
         context.jump(1001);
         mockMatcherAgent.resetLastReceivedBid();
         double[] demandArray = new double[] { 2, 1, 0, -1, -2 };
-        ArrayBid arrayBid = new ArrayBid(marketBasis, demandArray);
+        Bid arrayBid = new Bid(marketBasis, demandArray);
 
         // Currently no cool down, should sent BidUpdate right away
         mockAgent.sendBid(new BidUpdate(arrayBid, 1));

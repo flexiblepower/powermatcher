@@ -7,15 +7,6 @@ import java.util.concurrent.ScheduledFuture;
 import javax.measure.Measure;
 import javax.measure.unit.SI;
 
-import net.powermatcher.api.AgentEndpoint;
-import net.powermatcher.api.data.Bid;
-import net.powermatcher.api.data.PointBid;
-import net.powermatcher.api.data.Price;
-import net.powermatcher.api.data.PricePoint;
-import net.powermatcher.api.messages.PriceUpdate;
-import net.powermatcher.api.monitoring.ObservableAgent;
-import net.powermatcher.core.BaseAgentEndpoint;
-
 import org.flexiblepower.context.FlexiblePowerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +16,13 @@ import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
+import net.powermatcher.api.AgentEndpoint;
+import net.powermatcher.api.data.Bid;
+import net.powermatcher.api.data.Price;
+import net.powermatcher.api.data.PricePoint;
+import net.powermatcher.api.messages.PriceUpdate;
+import net.powermatcher.api.monitoring.ObservableAgent;
+import net.powermatcher.core.BaseAgentEndpoint;
 
 /**
  * {@link PVPanelAgent} is a implementation of a {@link BaseAgentEndpoint}. It represents a dummy freezer.
@@ -47,20 +45,20 @@ public class PVPanelAgent
 
     public static interface Config {
         @Meta.AD(deflt = "pvpanel", description = "The unique identifier of the agent")
-        String agentId();
+               String agentId();
 
         @Meta.AD(deflt = "concentrator",
                  description = "The agent identifier of the parent matcher to which this agent should be connected")
         public String desiredParentId();
 
         @Meta.AD(deflt = "30", description = "Number of seconds between bid updates")
-        long bidUpdateRate();
+             long bidUpdateRate();
 
         @Meta.AD(deflt = "-700", description = "The mimimum value of the random demand.")
-        double minimumDemand();
+               double minimumDemand();
 
         @Meta.AD(deflt = "-600", description = "The maximum value the random demand.")
-        double maximumDemand();
+               double maximumDemand();
     }
 
     /**
@@ -111,7 +109,7 @@ public class PVPanelAgent
     /**
      * {@inheritDoc}
      */
-    void doBidUpdate() {
+         void doBidUpdate() {
         AgentEndpoint.Status currentStatus = getStatus();
         if (currentStatus.isConnected()) {
             double demand = minimumDemand + (maximumDemand - minimumDemand) * generator.nextDouble();

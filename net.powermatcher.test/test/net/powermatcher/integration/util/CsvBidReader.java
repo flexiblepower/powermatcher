@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.zip.DataFormatException;
 
-import net.powermatcher.api.data.ArrayBid;
+import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 
 /**
@@ -40,11 +40,11 @@ public class CsvBidReader {
         csvReader = new CsvReader(inputFile);
     }
 
-    public ArrayBid nextBid() throws IOException, DataFormatException {
+    public Bid nextBid() throws IOException, DataFormatException {
         List<String> demandList = null;
         while ((demandList = csvReader.nextLine()) != null) {
             try {
-                return new ArrayBid(marketBasis, demandFromList(demandList));
+                return new Bid(marketBasis, demandFromList(demandList));
             } catch (IllegalArgumentException ex) {
                 // Illegal bid, ignore line
             }

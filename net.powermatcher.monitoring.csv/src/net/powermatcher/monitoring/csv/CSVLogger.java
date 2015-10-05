@@ -13,14 +13,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.powermatcher.api.data.ArrayBid;
-import net.powermatcher.api.data.Bid;
-import net.powermatcher.api.data.MarketBasis;
-import net.powermatcher.api.data.PointBid;
-import net.powermatcher.api.data.PricePoint;
-import net.powermatcher.api.messages.BidUpdate;
-import net.powermatcher.api.monitoring.ObservableAgent;
-import net.powermatcher.api.monitoring.events.AgentEvent;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
@@ -28,6 +20,11 @@ import aQute.bnd.annotation.component.Modified;
 import aQute.bnd.annotation.component.Reference;
 import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
+import net.powermatcher.api.data.Bid;
+import net.powermatcher.api.data.MarketBasis;
+import net.powermatcher.api.messages.BidUpdate;
+import net.powermatcher.api.monitoring.ObservableAgent;
+import net.powermatcher.api.monitoring.events.AgentEvent;
 
 /**
  * {@link CSVLogger} is an implementation of {@link AgentEventLogger} where the {@link AgentEvent}s are logged to a
@@ -46,33 +43,33 @@ public class CSVLogger
      * The header for the bidlog file
      */
     private static final String[] BID_HEADER_ROW = new String[] { "logTime",
-                                                                 "clusterId",
-                                                                 "agentId",
-                                                                 "commodity",
-                                                                 "currency",
-                                                                 "minimumPrice",
-                                                                 "maximumPrice",
-                                                                 "minimumDemand",
-                                                                 "maximumDemand",
-                                                                 "effectiveDemand",
-                                                                 "effectivePrice",
-                                                                 "lastUpdateTime",
-                                                                 "bidNumber",
-                                                                 "demand",
-                                                                 "pricePoints" };
+                                                                  "clusterId",
+                                                                  "agentId",
+                                                                  "commodity",
+                                                                  "currency",
+                                                                  "minimumPrice",
+                                                                  "maximumPrice",
+                                                                  "minimumDemand",
+                                                                  "maximumDemand",
+                                                                  "effectiveDemand",
+                                                                  "effectivePrice",
+                                                                  "lastUpdateTime",
+                                                                  "bidNumber",
+                                                                  "demand",
+                                                                  "pricePoints" };
 
     /**
      * The header for the pricelog file
      */
     private static final String[] PRICE_HEADER_ROW = new String[] { "logTime",
-                                                                   "clusterId",
-                                                                   "id",
-                                                                   "commodity",
-                                                                   "currency",
-                                                                   "minimumPrice",
-                                                                   "maximumPrice",
-                                                                   "priceValue",
-                                                                   "lastUpdateTime" };
+                                                                    "clusterId",
+                                                                    "id",
+                                                                    "commodity",
+                                                                    "currency",
+                                                                    "minimumPrice",
+                                                                    "maximumPrice",
+                                                                    "priceValue",
+                                                                    "lastUpdateTime" };
 
     /**
      * OSGI configuration of the {@link CSVLogger}
@@ -80,30 +77,30 @@ public class CSVLogger
     public static interface Config {
         @Meta.AD(required = false,
                  description = "Filter for specific agentId's. When no filters are supplied, it will log everything.")
-        List<String> filter();
+            List<String> filter();
 
         @Meta.AD(name = "eventType", description = "The AgentEventType this logger has to log.")
-        AgentEventType eventType();
+                       AgentEventType eventType();
 
         @Meta.AD(deflt = "event_log_::yyyyMMdd::.csv",
                  description = "The pattern for the file name of the log file. "
                                + "Dataformat strings are placed between the delimeter '::'")
-        String logFilenamePattern();
+               String logFilenamePattern();
 
         @Meta.AD(deflt = "yyyy-MM-dd HH:mm:ss", description = "The date format for the timestamps in the log.")
-        String dateFormat();
+               String dateFormat();
 
         @Meta.AD(deflt = ";", description = "The field separator the logger will use.")
-        String separator();
+               String separator();
 
         @Meta.AD(required = true, description = "The location of the log files.")
-        String logLocation();
+               String logLocation();
 
         @Meta.AD(deflt = "30", description = "Time in seconds between file dumps.")
-        long logUpdateRate();
+             long logUpdateRate();
 
         @Meta.AD(deflt = "csvLogger")
-        String loggerId();
+               String loggerId();
     }
 
     /**
@@ -314,48 +311,32 @@ public class CSVLogger
         StringBuilder demandBuilder = new StringBuilder();
         StringBuilder pricePointBuiler = new StringBuilder();
 
-        if (bid instanceof ArrayBid) {
-            ArrayBid temp = (ArrayBid) bid;
+        Bid temp = bid;
 
-            for (Double d : temp.getDemand()) {
-                if (demandBuilder.length() > 0) {
-                    demandBuilder.append("#");
-                }
-                demandBuilder.append(d);
+        for (Double d : temp.getDemand()) {
+            if (demandBuilder.length() > 0) {
+                demandBuilder.append("#");
             }
-        } else if (bid instanceof PointBid) {
-
-            PointBid temp = (PointBid) bid;
-
-            if (temp.getPricePoints() != null) {
-
-                for (PricePoint p : temp.getPricePoints()) {
-                    if (pricePointBuiler.length() > 0) {
-                        pricePointBuiler.append("|");
-                    }
-                    pricePointBuiler.append(MarketBasis.PRICE_FORMAT.format(p.getPrice().getPriceValue()));
-                    pricePointBuiler.append("|").append(MarketBasis.DEMAND_FORMAT.format(p.getDemand()));
-                }
-            }
+            demandBuilder.append(d);
         }
 
         return new String[] { getDateFormat().format(logRecord.getLogTime()),
-                             logRecord.getClusterId(),
-                             logRecord.getAgentId(),
-                             marketBasis.getCommodity(),
-                             marketBasis.getCurrency(),
-                             MarketBasis.PRICE_FORMAT.format(marketBasis.getMinimumPrice()),
-                             MarketBasis.PRICE_FORMAT.format(marketBasis.getMaximumPrice()),
-                             MarketBasis.DEMAND_FORMAT.format(bid.getMinimumDemand()),
-                             MarketBasis.DEMAND_FORMAT.format(bid.getMaximumDemand()),
-                             // TODO where/what is the "effective demand"?
-                             MarketBasis.DEMAND_FORMAT.format(0),
-                             // TODO where/what is the "effective price"?
-                             MarketBasis.PRICE_FORMAT.format(0),
-                             getDateFormat().format(logRecord.getEventTimestamp()),
-                             String.valueOf(bidUpdate.getBidNumber()),
-                             demandBuilder.toString(),
-                             pricePointBuiler.toString() };
+                              logRecord.getClusterId(),
+                              logRecord.getAgentId(),
+                              marketBasis.getCommodity(),
+                              marketBasis.getCurrency(),
+                              MarketBasis.PRICE_FORMAT.format(marketBasis.getMinimumPrice()),
+                              MarketBasis.PRICE_FORMAT.format(marketBasis.getMaximumPrice()),
+                              MarketBasis.DEMAND_FORMAT.format(bid.getMinimumDemand()),
+                              MarketBasis.DEMAND_FORMAT.format(bid.getMaximumDemand()),
+                              // TODO where/what is the "effective demand"?
+                              MarketBasis.DEMAND_FORMAT.format(0),
+                              // TODO where/what is the "effective price"?
+                              MarketBasis.PRICE_FORMAT.format(0),
+                              getDateFormat().format(logRecord.getEventTimestamp()),
+                              String.valueOf(bidUpdate.getBidNumber()),
+                              demandBuilder.toString(),
+                              pricePointBuiler.toString() };
     }
 
     /**
@@ -370,13 +351,13 @@ public class CSVLogger
         MarketBasis marketbasis = logRecord.getPriceUpdate().getPrice().getMarketBasis();
 
         return new String[] { getDateFormat().format(logRecord.getLogTime()),
-                             logRecord.getClusterId(),
-                             logRecord.getAgentId(),
-                             marketbasis.getCommodity(),
-                             marketbasis.getCurrency(),
-                             MarketBasis.PRICE_FORMAT.format(marketbasis.getMinimumPrice()),
-                             MarketBasis.PRICE_FORMAT.format(marketbasis.getMaximumPrice()),
-                             MarketBasis.PRICE_FORMAT.format(logRecord.getPriceUpdate().getPrice().getPriceValue()),
-                             getDateFormat().format(logRecord.getEventTimestamp()) };
+                              logRecord.getClusterId(),
+                              logRecord.getAgentId(),
+                              marketbasis.getCommodity(),
+                              marketbasis.getCurrency(),
+                              MarketBasis.PRICE_FORMAT.format(marketbasis.getMinimumPrice()),
+                              MarketBasis.PRICE_FORMAT.format(marketbasis.getMaximumPrice()),
+                              MarketBasis.PRICE_FORMAT.format(logRecord.getPriceUpdate().getPrice().getPriceValue()),
+                              getDateFormat().format(logRecord.getEventTimestamp()) };
     }
 }

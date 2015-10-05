@@ -37,6 +37,6 @@ public class ConcentratorResilienceTestICQ
 
         sendBidsToMatcher();
 
-        checkAggregatedBid(auctioneer.getLastReceivedBid().getBid().toArrayBid());
+        checkAggregatedBid(auctioneer.getLastReceivedBid().getBid());
     }
 }

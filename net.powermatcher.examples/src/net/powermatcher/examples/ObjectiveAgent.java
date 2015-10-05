@@ -4,14 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import net.powermatcher.api.AgentEndpoint;
-import net.powermatcher.api.data.Bid;
-import net.powermatcher.api.monitoring.AgentObserver;
-import net.powermatcher.api.monitoring.ObservableAgent;
-import net.powermatcher.api.monitoring.events.AgentEvent;
-import net.powermatcher.api.monitoring.events.AggregatedBidEvent;
-import net.powermatcher.core.BaseAgentEndpoint;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +13,13 @@ import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
 import aQute.bnd.annotation.metatype.Configurable;
 import aQute.bnd.annotation.metatype.Meta;
+import net.powermatcher.api.AgentEndpoint;
+import net.powermatcher.api.data.Bid;
+import net.powermatcher.api.monitoring.AgentObserver;
+import net.powermatcher.api.monitoring.ObservableAgent;
+import net.powermatcher.api.monitoring.events.AgentEvent;
+import net.powermatcher.api.monitoring.events.AggregatedBidEvent;
+import net.powermatcher.core.BaseAgentEndpoint;
 
 /**
  * An Objective Agent is a special type of PowerMatcher agent, that can be used to utilize the flexibility available in
@@ -44,7 +43,7 @@ import aQute.bnd.annotation.metatype.Meta;
  * @version 2.0
  */
 @Component(designateFactory = ObjectiveAgent.Config.class, immediate = true, provide = {
-                                                                                        ObservableAgent.class })
+                                                                                         ObservableAgent.class })
 public class ObjectiveAgent
     extends BaseAgentEndpoint
     implements AgentObserver {
@@ -54,10 +53,10 @@ public class ObjectiveAgent
     @Meta.OCD
     public static interface Config {
         @Meta.AD(description = "AgentID of this agent", deflt = "objectiveagent")
-        String agentId();
+               String agentId();
 
         @Meta.AD(description = "AgentID of the Auctioneer", deflt = "auctioneer")
-        String auctioneerId();
+               String auctioneerId();
     }
 
     /**
@@ -141,7 +140,7 @@ public class ObjectiveAgent
      * This specific implementation sends a static {@link Bid} to manipulate the cluster.
      */
     private void handleAggregatedBid(Bid aggregatedBid) {
-        LOGGER.info("Received aggregated bid: [{}] ", aggregatedBid.toArrayBid().getDemand());
+        LOGGER.info("Received aggregated bid: [{}] ", aggregatedBid.getDemand());
         AgentEndpoint.Status currentStatus = getStatus();
         if (currentStatus.isConnected()) {
             // Can the cluster produce more than the asked amount of energy?

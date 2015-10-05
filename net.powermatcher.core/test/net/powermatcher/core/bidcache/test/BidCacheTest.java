@@ -5,13 +5,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
+
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.core.bidcache.AggregatedBid;
 import net.powermatcher.core.bidcache.BidCache;
-
-import org.junit.Test;
 
 public class BidCacheTest {
     private static final MarketBasis MB = new MarketBasis("Electricity", "EUR", 100, 0, 1);
@@ -22,7 +23,7 @@ public class BidCacheTest {
 
         AggregatedBid aggregatedBid = bidCache.aggregate();
         assertTrue(aggregatedBid.getAgentBidReferences().isEmpty());
-        assertArrayEquals(Bid.flatDemand(MB, 0).toArrayBid().getDemand(), aggregatedBid.getDemand(), 0);
+        assertArrayEquals(Bid.flatDemand(MB, 0).getDemand(), aggregatedBid.getDemand(), 0);
 
         assertSame(aggregatedBid, bidCache.aggregate());
 
@@ -34,7 +35,7 @@ public class BidCacheTest {
         assertEquals(2, aggregatedBid.getAgentBidReferences().size());
         assertTrue(aggregatedBid.getAgentBidReferences().containsKey("agent1"));
         assertTrue(aggregatedBid.getAgentBidReferences().containsKey("agent2"));
-        assertArrayEquals(Bid.flatDemand(MB, 50).toArrayBid().getDemand(), aggregatedBid.getDemand(), 0);
+        assertArrayEquals(Bid.flatDemand(MB, 50).getDemand(), aggregatedBid.getDemand(), 0);
 
         assertSame(aggregatedBid, bidCache.aggregate());
 
@@ -45,7 +46,7 @@ public class BidCacheTest {
         assertEquals(1, aggregatedBid.getAgentBidReferences().size());
         assertFalse(aggregatedBid.getAgentBidReferences().containsKey("agent1"));
         assertTrue(aggregatedBid.getAgentBidReferences().containsKey("agent2"));
-        assertArrayEquals(Bid.flatDemand(MB, -50).toArrayBid().getDemand(), aggregatedBid.getDemand(), 0);
+        assertArrayEquals(Bid.flatDemand(MB, -50).getDemand(), aggregatedBid.getDemand(), 0);
 
         assertSame(aggregatedBid, bidCache.aggregate());
     }

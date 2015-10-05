@@ -3,8 +3,6 @@ package net.powermatcher.integration.auctioneer;
 import java.io.IOException;
 import java.util.zip.DataFormatException;
 
-import net.powermatcher.api.data.ArrayBid;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -95,7 +93,7 @@ public class AuctioneerResilienceTestIAQ1
      */
     @Test
     public void qualityAggregationTestIAQ1EquilibriumSmallNumberOfBidsTest3IAF3T1() throws IOException,
-                                                                                   DataFormatException {
+                                                                                    DataFormatException {
         performAggregatedBidTest("IAQ/IAQ1/IAF3/Test1", null);
     }
 
@@ -122,7 +120,7 @@ public class AuctioneerResilienceTestIAQ1
      */
     @Test
     public void qualityAggregationTestIAQ1EquilibriumSmallNumberOfBidsTestIAF3T2() throws IOException,
-                                                                                  DataFormatException {
+                                                                                   DataFormatException {
         performAggregatedBidTest("IAQ/IAQ1/IAF3/Test2", null);
     }
 
@@ -208,6 +206,6 @@ public class AuctioneerResilienceTestIAQ1
 
         sendBidsToMatcher();
 
-        checkAggregatedBid((ArrayBid) auctioneer.getAggregatedBid());
+        checkAggregatedBid(auctioneer.getAggregatedBid());
     }
 }
