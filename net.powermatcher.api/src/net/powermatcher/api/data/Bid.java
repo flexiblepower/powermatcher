@@ -15,10 +15,6 @@ public class Bid {
      * The {@link MarketBasis} of the cluster.
      */
     protected final MarketBasis marketBasis;
-    // /**
-    // * In the calculatePricePoints, 2 floating points will be compared. The significance is set here.
-    // */
-    // private static final int PRECISION = 5; // TODO is this relevant?
 
     /**
      * The array of <code>double</code> values that make up the bid curve.
@@ -74,11 +70,25 @@ public class Bid {
         return new PointBidBuilder(marketBasis).add(marketBasis.getMinimumPrice(), demand).build();
     }
 
-    public static ArrayBidBuilder create(MarketBasis marketBasis) {
+    /**
+     * Construct a new {@link Bid} using the Builder pattern with the {@link ArrayBidBuilder}.
+     *
+     * @param marketBasis
+     *            {@link MarketBasis} to be used for the Bid.
+     * @return An instance of the {@link ArrayBidBuilder}
+     */
+    public static ArrayBidBuilder createUsingArray(MarketBasis marketBasis) {
         return new ArrayBidBuilder(marketBasis);
     }
 
-    public static PointBidBuilder createWithPricePoints(MarketBasis marketBasis) {
+    /**
+     * Construct a new {@link Bid} using the Builder pattern with the {@link PointBidBuilder}.
+     *
+     * @param marketBasis
+     *            {@link MarketBasis} to be used for the Bid.
+     * @return An instance of the {@link PointBidBuilder}
+     */
+    public static PointBidBuilder create(MarketBasis marketBasis) {
         return new PointBidBuilder(marketBasis);
     }
 
@@ -101,39 +111,6 @@ public class Bid {
         checkDescending(demandArray);
         this.demandArray = Arrays.copyOf(demandArray, demandArray.length);
     }
-
-    /**
-     * A copy constructor to create a copy of the given Bid and its bidNumber.
-     *
-     * @param bid
-     *            The {@link Bid} you want to copy.
-     */
-    public Bid(Bid bid) {
-        if (bid.marketBasis == null) {
-            throw new IllegalArgumentException("marketBasis is not allowed to be null");
-        }
-        marketBasis = bid.marketBasis;
-        demandArray = Arrays.copyOf(bid.demandArray, bid.demandArray.length);
-    }
-
-    // /**
-    // * A constructor used to create an instance of this class, based on a {@link PointBid}.
-    // *
-    // * @param base
-    // * The {@link PointBid} this Bid will be based on.
-    // */
-    // Bid(PointBid base) {
-    // marketBasis = base.getMarketBasis();
-    //
-    // int priceSteps = marketBasis.getPriceSteps();
-    // demandArray = new double[priceSteps];
-    //
-    // for (int ix = 0; ix < priceSteps; ix++) {
-    // demandArray[ix] = base.getDemandAt(new PriceStep(marketBasis, ix));
-    // }
-    //
-    // pointBid = base;
-    // }
 
     /**
      * {@inheritDoc}
@@ -275,122 +252,6 @@ public class Bid {
     public MarketBasis getMarketBasis() {
         return marketBasis;
     }
-
-    // /**
-    // * @return a {@link PricePoint} <code>array</code> representation of the demand array.
-    // */
-    // PricePoint[] calculatePricePoints() {
-    // int priceSteps = marketBasis.getPriceSteps();
-    // List<PricePoint> points = new ArrayList<PricePoint>(priceSteps);
-    // /*
-    // * Flag to indicate if the last price point is the start of a flat segment.
-    // */
-    // boolean flatStart = false;
-    // /*
-    // * Flag to indicate if the last price point is the end point of a flat segment.
-    // */
-    // boolean flatEnd = false;
-    // int i = 0;
-    // while (i < priceSteps - 1) {
-    // /*
-    // * Search for the last price step in the flat segment, if any. At the end of this loop delta is the
-    // * difference for the next demand after the flat segment.
-    // */
-    // PricePoint flatEndPoint = null;
-    // double delta = 0.0d;
-    // while (i < priceSteps - 1) {
-    // delta = demandArray[i] - demandArray[i + 1];
-    // if (delta != 0) {
-    // break;
-    // }
-    // i += 1;
-    // flatEnd = true;
-    // }
-    // /*
-    // * Add a point at i for the following two cases: 1) If not at the end of the demand array, add the next
-    // * point for i and remember that this point is the end of a flat segment. 2) Add a final point if past the
-    // * end of the demand array, but the previous point was not the beginning of a flat segment.
-    // */
-    // if (i < priceSteps - 1 || !flatStart) {
-    // flatEndPoint = newPoint(i);
-    // points.add(flatEndPoint);
-    // flatStart = false;
-    // }
-    // i += 1;
-    //
-    // // TODO Refactor this code to not nest more than 3
-    // // if/for/while/switch/try statements.
-    // /*
-    // * If not at the end of the demand array, check if the following segment is a step or an inclining segment.
-    // */
-    // if (i < priceSteps - 1) {
-    // if (Math.abs((demandArray[i] - demandArray[i + 1]) - delta) < Math.pow(10, PRECISION * -1)) {
-    // /*
-    // * Here i is in a constantly inclining or declining segment. Search for the last price step in the
-    // * segment.
-    // */
-    // while (i < priceSteps - 1
-    // && Math.abs((demandArray[i] - demandArray[i + 1]) - delta) < Math.pow(10,
-    // PRECISION * -1)) {
-    // i += 1;
-    // }
-    // /*
-    // * If not at the end of the demand array, add the end point for the segment.
-    // */
-    // if (i < priceSteps - 1) {
-    // points.add(newPoint(i));
-    // i += 1;
-    // }
-    // } else if (flatEnd && flatEndPoint != null) {
-    // /*
-    // * If i is not in a constantly inclining or declining segment, and the previous segment was flat,
-    // * then move the end point of the flat segment one price step forward to convert it to a straight
-    // * step.
-    // *
-    // * This is to preserve the semantics of the straight step when converting between point and vector
-    // * representation and back.
-    // */
-    // flatEndPoint = newPoint(i);
-    // }
-    // }
-    //
-    // flatStart = endSegment(priceSteps, points, flatStart, i);
-    // }
-    //
-    // return points.toArray(new PricePoint[points.size()]);
-    // }
-    //
-    // /**
-    // * Adds a point at location for the following two cases: 1) Add a point for the start of the next flat segment and
-    // * loop. 2) Add a final point if the last step of the demand array is the end of an inclining or declining
-    // segment.
-    // *
-    // * @param priceSteps
-    // * @param points
-    // * @param flatStart
-    // * @param location
-    // * @return boolean indicating if the nextPoint is the start of a new flat segment
-    // */
-    // private boolean endSegment(int priceSteps, List<PricePoint> points, boolean flatStart, int location) {
-    // if (location == priceSteps - 1
-    // || (location < priceSteps - 1 && demandArray[location] - demandArray[location + 1] == 0)) {
-    // points.add(newPoint(location));
-    // return true;
-    // }
-    // return false;
-    // }
-    //
-    // /**
-    // * Created a {@link PricePoint} based on a given priceStep value.
-    // *
-    // * @param priceStep
-    // * the pricestep used to calculate the {@link PriceStep} and determin the demand that belongs to that
-    // * value
-    // * @return a {@link PricePoint}, based on on the priceStep paramater.
-    // */
-    // private PricePoint newPoint(int priceStep) {
-    // return new PricePoint(new PriceStep(marketBasis, priceStep).toPrice(), demandArray[priceStep]);
-    // }
 
     /**
      * Subtract the other bid curve from this bid curve. Subtract is the inverse of aggregate. The other bid does not

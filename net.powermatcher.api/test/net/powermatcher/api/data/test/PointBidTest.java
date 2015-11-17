@@ -53,8 +53,8 @@ public class PointBidTest {
                                           pricePoint(marketBasisFiveSteps, 7, 2.0) };
         pricePoints2 = new PricePoint[] { pricePoint(marketBasisTenSteps, 1, 25.0),
                                           pricePoint(marketBasisTenSteps, 7, 20.0) };
-        bid1 = Bid.createWithPricePoints(marketBasisFiveSteps).addAll(pricePoints1).build();
-        bid2 = Bid.createWithPricePoints(marketBasisTenSteps).addAll(pricePoints2).build();
+        bid1 = Bid.create(marketBasisFiveSteps).addAll(pricePoints1).build();
+        bid2 = Bid.create(marketBasisTenSteps).addAll(pricePoints2).build();
     }
 
     /**
@@ -73,7 +73,7 @@ public class PointBidTest {
 
     @Test
     public void testConstructor() {
-        Bid bid = Bid.createWithPricePoints(marketBasisFiveSteps)
+        Bid bid = Bid.create(marketBasisFiveSteps)
                      .add(pricePoint(marketBasisFiveSteps, -1, 10.0))
                      .add(pricePoint(marketBasisFiveSteps, 7, 2.0))
                      .build();
@@ -85,7 +85,7 @@ public class PointBidTest {
     public void testBuilderMarketBasisNull() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("marketBasis is not allowed to be null");
-        Bid.createWithPricePoints(null).build();
+        Bid.create(null).build();
     }
 
     @Test
@@ -160,7 +160,7 @@ public class PointBidTest {
         assertThat(bid1.equals(bid2), is(false));
         assertThat(bid2.equals(bid1), is(false));
 
-        PointBidBuilder builder = Bid.createWithPricePoints(marketBasisFiveSteps);
+        PointBidBuilder builder = Bid.create(marketBasisFiveSteps);
         for (PricePoint pp : pricePoints1) {
             builder.add(pp);
         }
@@ -172,7 +172,7 @@ public class PointBidTest {
         MarketBasis equalsBasis = new MarketBasis(COMMODITY_ELECTRICITY, CURRENCY_EUR, 5, -1.0d, 7.0d);
         PricePoint[] equalsArray = new PricePoint[] { pricePoint(marketBasisFiveSteps, -1, 10.0),
                                                       pricePoint(marketBasisFiveSteps, 7, 2.0) };
-        Bid otherBid = Bid.createWithPricePoints(equalsBasis).addAll(equalsArray).build();
+        Bid otherBid = Bid.create(equalsBasis).addAll(equalsArray).build();
         assertThat(bid1.equals(otherBid), is(true));
         assertThat(testBid.equals(otherBid), is(true));
 
@@ -185,23 +185,23 @@ public class PointBidTest {
 
     @Test
     public void testHashCode() {
-        Bid one = Bid.createWithPricePoints(marketBasisTenSteps).addAll(pricePoints2).build();
-        Bid other = Bid.createWithPricePoints(marketBasisTenSteps).addAll(pricePoints2).build();
+        Bid one = Bid.create(marketBasisTenSteps).addAll(pricePoints2).build();
+        Bid other = Bid.create(marketBasisTenSteps).addAll(pricePoints2).build();
         assertThat(one.equals(other), is(true));
         assertThat(other.equals(one), is(true));
         assertThat(one.hashCode(), is(equalTo(other.hashCode())));
 
-        other = Bid.createWithPricePoints(marketBasisFiveSteps).addAll(pricePoints1).build();
+        other = Bid.create(marketBasisFiveSteps).addAll(pricePoints1).build();
         assertThat(one.hashCode(), is(not(equalTo(other.hashCode()))));
 
-        other = Bid.createWithPricePoints(marketBasisFiveSteps).addAll(pricePoints1).build();
+        other = Bid.create(marketBasisFiveSteps).addAll(pricePoints1).build();
         assertThat(one.hashCode(), is(not(equalTo(other.hashCode()))));
     }
 
     @Test
     public void testConversionToArray() {
         MarketBasis marketBasis = new MarketBasis(COMMODITY_ELECTRICITY, CURRENCY_EUR, 7, -1, 5);
-        Bid bid = Bid.createWithPricePoints(marketBasis)
+        Bid bid = Bid.create(marketBasis)
                      .add(1, 100)
                      .add(1, 50)
                      .add(2, 50)

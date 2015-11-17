@@ -97,14 +97,14 @@ public class BidTest {
 
     @Test
     public void testCopyConstructorBidNumber() {
-        Bid copiedBid = new Bid(bid1);
+        Bid copiedBid = new Bid(bid1.getMarketBasis(), bid1.getDemand());
         assertThat(copiedBid.getMarketBasis(), is(equalTo(marketBasisFiveSteps)));
         assertThat(copiedBid.getDemand(), is(equalTo(demandFive)));
     }
 
     @Test
     public void testCopyConstructor() {
-        Bid copiedBid = new Bid(bid1);
+        Bid copiedBid = new Bid(bid1.getMarketBasis(), bid1.getDemand());
         assertThat(copiedBid.getMarketBasis(), is(equalTo(marketBasisFiveSteps)));
         assertThat(copiedBid.getDemand(), is(equalTo(demandFive)));
     }
@@ -394,7 +394,7 @@ public class BidTest {
     public void testBidResponse() {
         MarketBasis marketBasis = new MarketBasis(COMMODITY_ELECTRICITY, CURRENCY_EUR, 100, 0, 1);
         Bid bid1 = Bid.flatDemand(marketBasis, -1500);
-        Bid bid2 = Bid.createWithPricePoints(marketBasis).add(0.434, 1700).add(0.434, 0).build();
+        Bid bid2 = Bid.create(marketBasis).add(0.434, 1700).add(0.434, 0).build();
 
         Bid aggregated = bid1.aggregate(bid2);
 

@@ -99,7 +99,7 @@ public class PeakShavingConcentratorTest {
         Bid arrayBid = new Bid(marketBasis, demandArray);
         deviceAgent.sendBid(arrayBid, 9);
         context.doTaskOnce();
-        Bid expectedBid = new Bid(arrayBid);
+        Bid expectedBid = new Bid(arrayBid.getMarketBasis(), arrayBid.getDemand());
         assertThat(matcher.getLastReceivedBid().getBid(), is(equalTo(expectedBid)));
         assertThat(matcher.getLastReceivedBid().getBidNumber(), is(equalTo(1)));
     }

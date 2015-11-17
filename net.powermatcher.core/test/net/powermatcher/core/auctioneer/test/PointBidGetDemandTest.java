@@ -36,7 +36,7 @@ public class PointBidGetDemandTest {
         new SimpleSession(timeshifter, auctioneer).connect();
 
         uncontrolled.sendBid(Bid.flatDemand(marketBasis, -200), 0);
-        Bid bid = Bid.createWithPricePoints(marketBasis).add(0.01, 2000).add(0.01, 0).build();
+        Bid bid = Bid.create(marketBasis).add(0.01, 2000).add(0.01, 0).build();
         timeshifter.sendBid(bid, 0);
 
         // The auctioneer should pick a price in which the timeshifter does not consume, since this is closest to the

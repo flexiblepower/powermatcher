@@ -96,7 +96,7 @@ public final class AggregatedBid
     }
 
     public AggregatedBid(Bid bid, Map<String, Integer> agentBidReferences) {
-        super(bid);
+        super(bid.getMarketBasis(), bid.getDemand());
         this.agentBidReferences = Collections.unmodifiableMap(new HashMap<String, Integer>(agentBidReferences));
     }
 

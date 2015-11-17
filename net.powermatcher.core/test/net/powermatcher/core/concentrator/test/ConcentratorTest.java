@@ -131,7 +131,7 @@ public class ConcentratorTest {
         Bid arrayBid = new Bid(marketBasis, demandArray);
         mockAgent.sendBid(new BidUpdate(arrayBid, 1));
         context.doTaskOnce();
-        Bid expectedBid = new Bid(arrayBid);
+        Bid expectedBid = new Bid(arrayBid.getMarketBasis(), arrayBid.getDemand());
         assertThat(mockMatcherAgent.getLastReceivedBid().getBid().getDemand(),
                    is(equalTo(expectedBid.getDemand())));
     }
