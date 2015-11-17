@@ -36,8 +36,12 @@ public class Price
         } else if (Double.isNaN(price)) {
             throw new IllegalArgumentException("Price NaN is not valid");
         } else if (price < marketBasis.getMinimumPrice() || price > marketBasis.getMaximumPrice()) {
-            throw new IllegalArgumentException("Price " + price + " is out of bounds [" + marketBasis.getMinimumPrice()
-                                               + ", " + marketBasis.getMaximumPrice() + "]");
+            throw new IllegalArgumentException("Price " + price
+                                               + " is out of bounds ["
+                                               + marketBasis.getMinimumPrice()
+                                               + ", "
+                                               + marketBasis.getMaximumPrice()
+                                               + "]");
         }
         this.marketBasis = marketBasis;
         priceValue = price;
@@ -62,7 +66,7 @@ public class Price
      */
     public PriceStep toPriceStep() {
         double priceStep = (priceValue - marketBasis.getMinimumPrice()) / marketBasis.getPriceIncrement();
-        return new PriceStep(marketBasis, (int) Math.ceil(priceStep));
+        return new PriceStep(marketBasis, (int) Math.round(priceStep));
     }
 
     /**

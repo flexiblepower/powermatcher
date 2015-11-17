@@ -24,7 +24,7 @@ import net.powermatcher.api.data.PriceStep;
  * @author FAN
  * @version 2.0
  */
-public class ArrayBidTest {
+public class BidTest {
 
     private static final String CURRENCY_EUR = "EUR";
     private static final String COMMODITY_ELECTRICITY = "electricity";
@@ -389,4 +389,18 @@ public class ArrayBidTest {
         String bid1String = bid1.toString();
         assertThat(bid1String.startsWith("Bid"), is(true));
     }
+
+    @Test
+    public void testBidResponse() {
+        MarketBasis marketBasis = new MarketBasis(COMMODITY_ELECTRICITY, CURRENCY_EUR, 100, 0, 1);
+        Bid bid1 = Bid.flatDemand(marketBasis, -1500);
+        Bid bid2 = Bid.createWithPricePoints(marketBasis).add(0.434, 1700).add(0.434, 0).build();
+
+        Bid aggregated = bid1.aggregate(bid2);
+
+        Price price = aggregated.calculateIntersection(0);
+
+        assertEquals(1700, bid2.getDemandAt(price), 0.001);
+    }
+
 }
