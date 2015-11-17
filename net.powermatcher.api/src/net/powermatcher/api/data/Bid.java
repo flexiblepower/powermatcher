@@ -78,7 +78,7 @@ public class Bid {
         return new ArrayBidBuilder(marketBasis);
     }
 
-    public static PointBidBuilder createWithPoints(MarketBasis marketBasis) {
+    public static PointBidBuilder createWithPricePoints(MarketBasis marketBasis) {
         return new PointBidBuilder(marketBasis);
     }
 

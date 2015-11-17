@@ -29,6 +29,9 @@ public final class PointBidBuilder {
      *            the {@link MarketBasis} of the cluster.
      */
     public PointBidBuilder(final MarketBasis marketBasis) {
+        if (marketBasis == null) {
+            throw new IllegalArgumentException("marketBasis is not allowed to be null");
+        }
         this.marketBasis = marketBasis;
         pricePoints = new TreeSet<PricePoint>();
     }
@@ -42,6 +45,21 @@ public final class PointBidBuilder {
      */
     public PointBidBuilder add(PricePoint pricePoint) {
         pricePoints.add(pricePoint);
+        return this;
+    }
+
+    /**
+     * Adds the supplied pricePoints the PricePoint array.
+     *
+     * @param pricePoints
+     *            Array of PricePoints to add
+     *
+     * @return this instance of the Builder with the array
+     */
+    public PointBidBuilder addAll(PricePoint[] pricePoints) {
+        for (PricePoint pp : pricePoints) {
+            this.pricePoints.add(pp);
+        }
         return this;
     }
 
@@ -69,46 +87,47 @@ public final class PointBidBuilder {
         int priceSteps = marketBasis.getPriceSteps();
         double[] demandArray = new double[priceSteps];
 
+        PricePoint[] sortedPricePoints = pricePoints.toArray(new PricePoint[pricePoints.size()]);
+        // Sort from low price to high price
+        Arrays.sort(sortedPricePoints);
+
         for (int ix = 0; ix < priceSteps; ix++) {
-            demandArray[ix] = getDemandAt(new PriceStep(marketBasis, ix).toPrice());
+            demandArray[ix] = getDemandAt(new PriceStep(marketBasis, ix).toPrice(), sortedPricePoints);
         }
         return new Bid(marketBasis, demandArray);
     }
 
-    private double getDemandAt(Price price) {
-        PricePoint[] pricePoints = this.pricePoints.toArray(new PricePoint[this.pricePoints.size()]);
-        Arrays.sort(pricePoints);
-        double minimumDemand = pricePoints[0].getDemand();
-        double maximumDemand = pricePoints[pricePoints.length - 1].getDemand();
+    private double getDemandAt(Price price, PricePoint[] sortedPricePoints) {
+        double demandMinimumPrice = sortedPricePoints[0].getDemand();
+        double demandMaximumPrice = sortedPricePoints[sortedPricePoints.length - 1].getDemand();
 
-        if (pricePoints.length == 1) {
+        if (sortedPricePoints.length == 1) {
             // Flat bid, send any demand (they are all the same)
-            return maximumDemand;
-        } else if (price.compareTo(pricePoints[0].getPrice()) < 0) {
+            return demandMaximumPrice;
+        } else if (price.compareTo(sortedPricePoints[0].getPrice()) < 0) {
             // If the price is lower than the lowest price, return the maximum
             // demand
-            return maximumDemand;
-        } else if (price.equals(pricePoints[0].getPrice())) {
-            // If the first matcher, it could be that the second is at the same price. If that is the case, use the
-            // second, otherwise the first.
-            PricePoint secondPricePoint = pricePoints[1];
-            if (price.equals(secondPricePoint.getPrice())) {
-                return secondPricePoint.getDemand();
-            } else {
-                return maximumDemand;
-            }
-        } else if (price.compareTo(pricePoints[pricePoints.length - 1].getPrice()) >= 0) {
-            // If the price is higher than the highest price, return the minimum
-            // demand
-            return minimumDemand;
+            return demandMinimumPrice;
+            // } else if (price.equals(pricePoints[0].getPrice())) { TODO remove?
+            // // If the first matcher, it could be that the second is at the same price. If that is the case, use the
+            // // second, otherwise the first.
+            // PricePoint secondPricePoint = pricePoints[1];
+            // if (price.equals(secondPricePoint.getPrice())) {
+            // return secondPricePoint.getDemand();
+            // } else {
+            // return demandMaximumPrice;
+            // }
+        } else if (price.compareTo(sortedPricePoints[sortedPricePoints.length - 1].getPrice()) >= 0) {
+            // If the price is higher than the highest price, return the minimum demand
+            return demandMaximumPrice;
         } else {
             // We have a normal case that is somewhere in between the lower and higher demands
 
             // First determine which 2 pricepoints it is in between
-            int lowIx = 0, highIx = pricePoints.length;
+            int lowIx = 0, highIx = sortedPricePoints.length;
             while (highIx - lowIx > 1) {
                 int middleIx = (lowIx + highIx) / 2;
-                PricePoint middle = pricePoints[middleIx];
+                PricePoint middle = sortedPricePoints[middleIx];
 
                 int cmp = middle.getPrice().compareTo(price);
                 if (cmp < 0) {
@@ -118,16 +137,17 @@ public final class PointBidBuilder {
                 } else {
                     // Found at least 1 point that is equal in price.
                     // This is the special case with an open and closed node. Always the lower demand should be chosen.
-                    PricePoint nextPoint = pricePoints[middleIx + 1];
-                    if (price.equals(nextPoint.getPrice())) {
-                        return nextPoint.getDemand();
-                    } else {
-                        middle.getDemand();
+                    // We are going to look for the last node with price 'price'
+                    int currentIx = middleIx;
+                    while (currentIx + 1 < sortedPricePoints.length
+                           && sortedPricePoints[currentIx + 1].getPrice().equals(price)) {
+                        currentIx++;
                     }
+                    return sortedPricePoints[currentIx].getDemand();
                 }
             }
-            PricePoint lower = pricePoints[lowIx];
-            PricePoint higher = pricePoints[highIx];
+            PricePoint lower = sortedPricePoints[lowIx];
+            PricePoint higher = sortedPricePoints[highIx];
 
             // Now calculate the demand between the 2 points
             // First the factor (between 0 and 1) of where the price is on the line
