@@ -17,7 +17,6 @@ import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.PointBidBuilder;
 import net.powermatcher.api.data.Price;
 import net.powermatcher.api.data.PricePoint;
-import net.powermatcher.api.data.PriceStep;
 
 /***
  * JUnit tests for the{
@@ -124,22 +123,34 @@ public class PointBidTest {
 
     @Test
     public void testGetDemandAtPriceStep() {
-        assertEquals(10.0, bid1.getDemandAt(new PriceStep(bid1.getMarketBasis(), 0)), DEMAND_ACCURACY);
-        assertEquals(8.0, bid1.getDemandAt(new PriceStep(bid1.getMarketBasis(), 1)), DEMAND_ACCURACY);
-        assertEquals(6.0, bid1.getDemandAt(new PriceStep(bid1.getMarketBasis(), 2)), DEMAND_ACCURACY);
-        assertEquals(4.0, bid1.getDemandAt(new PriceStep(bid1.getMarketBasis(), 3)), DEMAND_ACCURACY);
-        assertEquals(2.0, bid1.getDemandAt(new PriceStep(bid1.getMarketBasis(), 4)), DEMAND_ACCURACY);
+        assertEquals(10.0, bid1.getDemandAt(Price.fromPriceIndex(bid1.getMarketBasis(), 0)), DEMAND_ACCURACY);
+        assertEquals(8.0, bid1.getDemandAt(Price.fromPriceIndex(bid1.getMarketBasis(), 1)), DEMAND_ACCURACY);
+        assertEquals(6.0, bid1.getDemandAt(Price.fromPriceIndex(bid1.getMarketBasis(), 2)), DEMAND_ACCURACY);
+        assertEquals(4.0, bid1.getDemandAt(Price.fromPriceIndex(bid1.getMarketBasis(), 3)), DEMAND_ACCURACY);
+        assertEquals(2.0, bid1.getDemandAt(Price.fromPriceIndex(bid1.getMarketBasis(), 4)), DEMAND_ACCURACY);
 
-        assertEquals(25, bid2.getDemandAt(new PriceStep(bid2.getMarketBasis(), 0)), DEMAND_ACCURACY);
-        assertEquals(25, bid2.getDemandAt(new PriceStep(bid2.getMarketBasis(), 1)), DEMAND_ACCURACY);
-        assertEquals(25, bid2.getDemandAt(new PriceStep(bid2.getMarketBasis(), 2)), DEMAND_ACCURACY);
-        assertEquals(25 - 15.0 / 27.0, bid2.getDemandAt(new PriceStep(bid2.getMarketBasis(), 3)), DEMAND_ACCURACY);
-        assertEquals(25 - 35.0 / 27.0, bid2.getDemandAt(new PriceStep(bid2.getMarketBasis(), 4)), DEMAND_ACCURACY);
-        assertEquals(25 - 55.0 / 27.0, bid2.getDemandAt(new PriceStep(bid2.getMarketBasis(), 5)), DEMAND_ACCURACY);
-        assertEquals(25 - 75.0 / 27.0, bid2.getDemandAt(new PriceStep(bid2.getMarketBasis(), 6)), DEMAND_ACCURACY);
-        assertEquals(25 - 95.0 / 27.0, bid2.getDemandAt(new PriceStep(bid2.getMarketBasis(), 7)), DEMAND_ACCURACY);
-        assertEquals(25 - 115.0 / 27.0, bid2.getDemandAt(new PriceStep(bid2.getMarketBasis(), 8)), DEMAND_ACCURACY);
-        assertEquals(20, bid2.getDemandAt(new PriceStep(bid2.getMarketBasis(), 9)), DEMAND_ACCURACY);
+        assertEquals(25, bid2.getDemandAt(Price.fromPriceIndex(bid2.getMarketBasis(), 0)), DEMAND_ACCURACY);
+        assertEquals(25, bid2.getDemandAt(Price.fromPriceIndex(bid2.getMarketBasis(), 1)), DEMAND_ACCURACY);
+        assertEquals(25, bid2.getDemandAt(Price.fromPriceIndex(bid2.getMarketBasis(), 2)), DEMAND_ACCURACY);
+        assertEquals(25 - 15.0 / 27.0,
+                     bid2.getDemandAt(Price.fromPriceIndex(bid2.getMarketBasis(), 3)),
+                     DEMAND_ACCURACY);
+        assertEquals(25 - 35.0 / 27.0,
+                     bid2.getDemandAt(Price.fromPriceIndex(bid2.getMarketBasis(), 4)),
+                     DEMAND_ACCURACY);
+        assertEquals(25 - 55.0 / 27.0,
+                     bid2.getDemandAt(Price.fromPriceIndex(bid2.getMarketBasis(), 5)),
+                     DEMAND_ACCURACY);
+        assertEquals(25 - 75.0 / 27.0,
+                     bid2.getDemandAt(Price.fromPriceIndex(bid2.getMarketBasis(), 6)),
+                     DEMAND_ACCURACY);
+        assertEquals(25 - 95.0 / 27.0,
+                     bid2.getDemandAt(Price.fromPriceIndex(bid2.getMarketBasis(), 7)),
+                     DEMAND_ACCURACY);
+        assertEquals(25 - 115.0 / 27.0,
+                     bid2.getDemandAt(Price.fromPriceIndex(bid2.getMarketBasis(), 8)),
+                     DEMAND_ACCURACY);
+        assertEquals(20, bid2.getDemandAt(Price.fromPriceIndex(bid2.getMarketBasis(), 9)), DEMAND_ACCURACY);
     }
 
     @Test

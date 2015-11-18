@@ -178,10 +178,10 @@ public class Bid {
 
     private Price interpolate(int leftIx, int rightIx, double targetDemand) {
         double leftPrice = rightIx == 0 ? marketBasis.getMinimumPrice()
-                                        : new PriceStep(marketBasis, leftIx).toPrice().getPriceValue();
+                                        : Price.fromPriceIndex(marketBasis, leftIx).getPriceValue();
         double rightPrice = leftIx == demandArray.length - 1 ? marketBasis.getMaximumPrice()
-                                                             : new PriceStep(marketBasis, rightIx).toPrice()
-                                                                                                  .getPriceValue();
+                                                             : Price.fromPriceIndex(marketBasis, rightIx)
+                                                                    .getPriceValue();
 
         double leftDemand = demandArray[leftIx];
         double rightDemand = demandArray[rightIx];
@@ -216,34 +216,17 @@ public class Bid {
     }
 
     /**
-     * Calculates the demand at the intersection in the Bid curve with the priceStep in a demand array.
-     *
-     * Implementation note: you should always override either this method or the {@link #getDemandAt(PriceStep)} method.
-     * The default implementation is to call the other.
+     * Calculates the demand at the intersection in the Bid curve with the Price in a demand array.
      *
      * @param price
      *            the {@link Price} you want to know the demand of.
      * @return the calculated demand
      */
     public double getDemandAt(Price price) {
-        return getDemandAt(price.toPriceStep());
-    }
-
-    /**
-     * Calculates the demand at the intersection with the Bid curve at the given {@link PriceStep}.
-     *
-     * Implementation note: you should always override either this method or the {@link #getDemandAt(Price)} method. The
-     * default implementation is to call the other.
-     *
-     * @param priceStep
-     *            the {@link PriceStep} you want to know the demand of.
-     * @return the calculated demand
-     */
-    public double getDemandAt(final PriceStep priceStep) {
-        if (!priceStep.getMarketBasis().equals(marketBasis)) {
+        if (!price.getMarketBasis().equals(marketBasis)) {
             throw new IllegalArgumentException("The marketbasis of the pricestep does not equal this market basis");
         }
-        return demandArray[priceStep.getPriceStep()];
+        return demandArray[price.getPriceIndex()];
     }
 
     /**

@@ -16,7 +16,6 @@ import net.powermatcher.api.data.ArrayBidBuilder;
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
-import net.powermatcher.api.data.PriceStep;
 
 /**
  * JUnit tests for the {@link Bid} class.
@@ -279,22 +278,22 @@ public class BidTest {
 
     @Test
     public void testGetDemandAtPriceStep() {
-        PriceStep priceStep = new PriceStep(marketBasisFiveSteps, 4);
+        Price priceStep = Price.fromPriceIndex(marketBasisFiveSteps, 4);
         double demand = bid1.getDemandAt(priceStep);
         assertThat(demand, is(equalTo(0.0)));
 
-        priceStep = new PriceStep(marketBasisFiveSteps, 2);
+        priceStep = Price.fromPriceIndex(marketBasisFiveSteps, 2);
         demand = bid1.getDemandAt(priceStep);
         assertThat(demand, is(equalTo(50.0)));
 
-        priceStep = new PriceStep(marketBasisTenSteps, 2);
+        priceStep = Price.fromPriceIndex(marketBasisTenSteps, 2);
         demand = bid3.getDemandAt(priceStep);
         assertThat(demand, is(equalTo(50.0)));
     }
 
     @Test
     public void testGetDemandAtPriceStepDifferingMarkerBasis() {
-        PriceStep priceStep = new PriceStep(marketBasisTenSteps, 4);
+        Price priceStep = Price.fromPriceIndex(marketBasisTenSteps, 4);
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("The marketbasis of the pricestep does not equal this market basis");
         bid1.getDemandAt(priceStep);

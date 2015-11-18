@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.zip.DataFormatException;
 
+import org.junit.After;
+
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.integration.base.ResilienceTest;
 import net.powermatcher.integration.util.AuctioneerWrapper;
@@ -14,8 +16,6 @@ import net.powermatcher.integration.util.CsvExpectedResultsReader;
 import net.powermatcher.mock.MockDeviceAgent;
 import net.powermatcher.test.helpers.PropertiesBuilder;
 import net.powermatcher.test.helpers.TestClusterHelper;
-
-import org.junit.After;
 
 /**
  *
@@ -35,10 +35,10 @@ public class AuctioneerResilienceTest
         MarketBasis marketBasis = resultsReader.getMarketBasis();
         auctioneer = new AuctioneerWrapper();
         Map<String, Object> auctioneerProperties = new PropertiesBuilder().agentId("auctioneer")
-                                                                         .marketBasis(marketBasis)
-                                                                         .minTimeBetweenPriceUpdates(1000)
-                                                                         .clusterId("testCluster")
-                                                                         .build();
+                                                                          .marketBasis(marketBasis)
+                                                                          .minTimeBetweenPriceUpdates(1000)
+                                                                          .clusterId("testCluster")
+                                                                          .build();
         auctioneer.activate(auctioneerProperties);
 
         cluster = new TestClusterHelper(marketBasis, auctioneer);
@@ -56,7 +56,7 @@ public class AuctioneerResilienceTest
 
         // Verify the price received by the agents
         for (MockDeviceAgent agent : cluster) {
-            assertEquals(expPrice, agent.getLastPriceUpdate().getPrice().toPriceStep().toPrice().getPriceValue(), 0);
+            assertEquals(expPrice, agent.getLastPriceUpdate().getPrice().getPriceValue(), 0);
         }
     }
 

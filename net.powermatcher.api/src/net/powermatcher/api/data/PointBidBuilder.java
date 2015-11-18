@@ -92,7 +92,7 @@ public final class PointBidBuilder {
         Arrays.sort(sortedPricePoints);
 
         for (int ix = 0; ix < priceSteps; ix++) {
-            demandArray[ix] = getDemandAt(new PriceStep(marketBasis, ix).toPrice(), sortedPricePoints);
+            demandArray[ix] = getDemandAt(Price.fromPriceIndex(marketBasis, ix), sortedPricePoints);
         }
         return new Bid(marketBasis, demandArray);
     }
@@ -108,15 +108,6 @@ public final class PointBidBuilder {
             // If the price is lower than the lowest price, return the maximum
             // demand
             return demandMinimumPrice;
-            // } else if (price.equals(pricePoints[0].getPrice())) { TODO remove?
-            // // If the first matcher, it could be that the second is at the same price. If that is the case, use the
-            // // second, otherwise the first.
-            // PricePoint secondPricePoint = pricePoints[1];
-            // if (price.equals(secondPricePoint.getPrice())) {
-            // return secondPricePoint.getDemand();
-            // } else {
-            // return demandMaximumPrice;
-            // }
         } else if (price.compareTo(sortedPricePoints[sortedPricePoints.length - 1].getPrice()) >= 0) {
             // If the price is higher than the highest price, return the minimum demand
             return demandMaximumPrice;

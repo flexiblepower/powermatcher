@@ -38,7 +38,7 @@ public class MarketBasis {
     private final String currency;
 
     /**
-     * The number of price steps used when converting a {@link PointBid} to an {@link ArrayBid}.
+     * The number of price steps used in an {@link ArrayBid}.
      */
     private final int priceSteps;
 
@@ -66,7 +66,10 @@ public class MarketBasis {
      * @param maximumPrice
      *            the maximum price that is valid in this market (inclusive)
      */
-    public MarketBasis(final String commodity, final String currency, final int priceSteps, final double minimumPrice,
+    public MarketBasis(final String commodity,
+                       final String currency,
+                       final int priceSteps,
+                       final double minimumPrice,
                        final double maximumPrice) {
         if (commodity == null) {
             throw new NullPointerException("commodity");
@@ -143,7 +146,8 @@ public class MarketBasis {
         } else {
             MarketBasis other = (MarketBasis) obj;
             return commodity.equals(other.commodity) && currency.equals(other.currency)
-                   && maximumPrice == other.maximumPrice && minimumPrice == other.minimumPrice
+                   && maximumPrice == other.maximumPrice
+                   && minimumPrice == other.minimumPrice
                    && priceSteps == other.priceSteps;
         }
     }

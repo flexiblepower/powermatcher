@@ -15,8 +15,8 @@ import aQute.bnd.annotation.metatype.Meta;
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.data.Bid;
+import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
-import net.powermatcher.api.data.PriceStep;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.concentrator.Concentrator;
@@ -162,27 +162,31 @@ public class PeakShavingConcentrator
         Bid originalBid = info.getOriginalBid();
         Bid transformedBid = info.getSentBid();
 
-        PriceStep priceStep = price.toPriceStep();
-        double transformedDemand = transformedBid.getDemandAt(priceStep);
-        double realDemand = originalBid.getDemandAt(priceStep);
+        int priceIndex = price.getPriceIndex();
+        double transformedDemand = transformedBid.getDemandAt(price);
+        double realDemand = originalBid.getDemandAt(price);
+
+        MarketBasis marketBasis = price.getMarketBasis();
 
         if (transformedDemand < realDemand) {
             // Increase the price step until this is no longer true
-            while (transformedDemand < realDemand && !priceStep.isMaximum()) {
-                priceStep = priceStep.increment();
-                realDemand = originalBid.getDemandAt(priceStep);
+            while (transformedDemand < realDemand && priceIndex < marketBasis.getPriceSteps()) {
+                priceIndex += 1;
+                realDemand = originalBid.getDemandAt(Price.fromPriceIndex(marketBasis, priceIndex));
             }
         } else if (transformedDemand > realDemand) {
             // Decrease the price step until this is no longer true
-            while (transformedDemand > realDemand && !priceStep.isMinimum()) {
-                priceStep = priceStep.decrement();
-                realDemand = originalBid.getDemandAt(priceStep);
+            while (transformedDemand > realDemand && priceIndex >= 0) {
+                priceIndex -= 1;
+                realDemand = originalBid.getDemandAt(Price.fromPriceIndex(marketBasis, priceIndex));
             }
         }
 
-        allocatedFlow = originalBid.getDemandAt(priceStep);
+        Price newPrice = Price.fromPriceIndex(marketBasis, priceIndex);
 
-        return priceStep.toPrice();
+        allocatedFlow = originalBid.getDemandAt(newPrice);
+
+        return newPrice;
     }
 
     /**

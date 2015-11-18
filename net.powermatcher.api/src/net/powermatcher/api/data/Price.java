@@ -5,7 +5,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
 /**
- * This immutable data object represents a price in the powermatcher cluster.
+ * This immutable data object represents a price in the PowerMatcher cluster.
  *
  * @author FAN
  * @version 2.0
@@ -18,7 +18,8 @@ public class Price
     private final MarketBasis marketBasis;
 
     /**
-     * the <code>double</code> value of this Price instance.
+     * The <code>double</code> value of this Price instance. This value is a price as indicated by the commodity and
+     * currency in the {@link MarketBasis}.
      */
     private final double priceValue;
 
@@ -55,18 +56,28 @@ public class Price
     }
 
     /**
-     * @return the current value of priceValue.
+     * @return The <code>double</code> value of this Price instance. This value is a price as indicated by the commodity
+     *         and currency in the {@link MarketBasis}.
      */
     public double getPriceValue() {
         return priceValue;
     }
 
     /**
-     * @return The {@link PriceStep} representation of this Price.
+     * @return The price-step value of this Price instance. The PriceStep corresponds to an index in the demand array of
+     *         a {@link Bid}, but is represented by a <code>double</code>. To get the actual index, use the
+     *         #getPriceIndex().
      */
-    public PriceStep toPriceStep() {
-        double priceStep = (priceValue - marketBasis.getMinimumPrice()) / marketBasis.getPriceIncrement();
-        return new PriceStep(marketBasis, (int) Math.round(priceStep));
+    public double getPriceStep() {
+        return (priceValue - marketBasis.getMinimumPrice()) / marketBasis.getPriceIncrement();
+    }
+
+    /**
+     * @return The price-index value of this Price instance. The PriceIndex corresponds directly to an index in the
+     *         demand array of {@link Bid}.
+     */
+    public int getPriceIndex() {
+        return (int) Math.round(getPriceStep());
     }
 
     /**
@@ -131,5 +142,37 @@ public class Price
         } else {
             return 0;
         }
+    }
+
+    /**
+     * Construct a new {@link Price} object based on a priceStep value.
+     *
+     * @param marketBasis
+     *            MarketBasis to be used for the Price
+     * @param priceStep
+     *            priceStep value to be used for the {@link Price} object
+     * @return new {@link Price} object
+     */
+    public static Price fromPriceStep(MarketBasis marketBasis, double priceStep) {
+        if (marketBasis == null) {
+            throw new IllegalArgumentException("marketBasis cannot be null");
+        }
+        if (priceStep < 0 || priceStep > marketBasis.getPriceSteps()) {
+            throw new IllegalArgumentException("priceStep is not in the range of the marketBasis");
+        }
+        return new Price(marketBasis, marketBasis.getMinimumPrice() + priceStep * marketBasis.getPriceIncrement());
+    }
+
+    /**
+     * Construct a new {@link Price} object based on a priceIndex value.
+     *
+     * @param marketBasis
+     *            MarketBasis to be used for the Price
+     * @param priceIndex
+     *            priceIndex value to be used for the {@link Price} object
+     * @return new {@link Price} object
+     */
+    public static Price fromPriceIndex(MarketBasis marketBasis, int priceIndex) {
+        return Price.fromPriceStep(marketBasis, priceIndex);
     }
 }
