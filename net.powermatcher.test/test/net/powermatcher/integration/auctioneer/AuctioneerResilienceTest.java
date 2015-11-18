@@ -59,7 +59,7 @@ public class AuctioneerResilienceTest
         for (MockDeviceAgent agent : cluster) {
             Price actualPrice = agent.getLastPriceUpdate().getPrice();
             // The tests expect a price which was transformed to a priceIndex and back
-            // TODO wouldn't it be better to ajust teh expected results?
+            // TODO wouldn't it be better to adjust the expected results?
             Price transformedPrice = Price.fromPriceIndex(actualPrice.getMarketBasis(), actualPrice.getPriceIndex());
             assertEquals(expPrice, transformedPrice.getPriceValue(), 0);
         }
