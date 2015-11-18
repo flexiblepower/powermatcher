@@ -9,6 +9,7 @@ import java.util.zip.DataFormatException;
 import org.junit.After;
 
 import net.powermatcher.api.data.MarketBasis;
+import net.powermatcher.api.data.Price;
 import net.powermatcher.integration.base.ResilienceTest;
 import net.powermatcher.integration.util.AuctioneerWrapper;
 import net.powermatcher.integration.util.CsvBidReader;
@@ -56,7 +57,11 @@ public class AuctioneerResilienceTest
 
         // Verify the price received by the agents
         for (MockDeviceAgent agent : cluster) {
-            assertEquals(expPrice, agent.getLastPriceUpdate().getPrice().getPriceValue(), 0);
+            Price actualPrice = agent.getLastPriceUpdate().getPrice();
+            // The tests expect a price which was transformed to a priceIndex and back
+            // TODO wouldn't it be better to ajust teh expected results?
+            Price transformedPrice = Price.fromPriceIndex(actualPrice.getMarketBasis(), actualPrice.getPriceIndex());
+            assertEquals(expPrice, transformedPrice.getPriceValue(), 0);
         }
     }
 
