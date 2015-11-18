@@ -390,17 +390,4 @@ public class BidTest {
         assertThat(bid1String.startsWith("Bid"), is(true));
     }
 
-    @Test
-    public void testBidResponse() {
-        MarketBasis marketBasis = new MarketBasis(COMMODITY_ELECTRICITY, CURRENCY_EUR, 100, 0, 1);
-        Bid bid1 = Bid.flatDemand(marketBasis, -1500);
-        Bid bid2 = Bid.create(marketBasis).add(0.434, 1700).add(0.434, 0).build();
-
-        Bid aggregated = bid1.aggregate(bid2);
-
-        Price price = aggregated.calculateIntersection(0);
-
-        assertEquals(1700, bid2.getDemandAt(price), 0.001);
-    }
-
 }
