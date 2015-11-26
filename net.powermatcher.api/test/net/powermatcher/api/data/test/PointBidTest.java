@@ -6,6 +6,7 @@ import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -226,5 +227,24 @@ public class PointBidTest {
         double[] expectedDemandArray = new double[] { 100, 100, 50, 50, 0, -100, -100 };
 
         assertArrayEquals(expectedDemandArray, demandArray, DEMAND_ACCURACY);
+    }
+
+    @Test
+    public void testEpsilon() {
+        // purpose of this test is to see if there are no IllegalArgumentExceptions due to rounding errors
+        MarketBasis marketBasis = new MarketBasis(COMMODITY_ELECTRICITY, CURRENCY_EUR, 100, 0, 1);
+        // Should be OK
+        Bid.create(marketBasis).add(0.17, 1000.0).add(0.83, 1000.0).build();
+
+        // Should be OK
+        Bid.create(marketBasis).add(0.17, 1000.0).add(0.83, 999.9999999999999).build();
+
+        // Should not be OK
+        try {
+            Bid.create(marketBasis).add(0.17, 1000.0).add(0.83, 1000.000000001).build();
+            fail();
+        } catch (IllegalArgumentException e) {
+            // it was supposed to throw an exception
+        }
     }
 }

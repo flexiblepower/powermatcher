@@ -5,12 +5,17 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
- * A builder class to create an {@link PointBid} instance.
+ * A builder class to create an {@link Bid} instance.
  *
  * @author FAN
  * @version 2.0
  */
 public final class PointBidBuilder {
+
+    /**
+     * Epsilon for correcting rounding errors
+     */
+    private final static double EPSILON = 0.0000000001;
 
     /**
      * The {@link MarketBasis} of the cluster.
@@ -91,8 +96,15 @@ public final class PointBidBuilder {
         // Sort from low price to high price
         Arrays.sort(sortedPricePoints);
 
+        double last = Double.POSITIVE_INFINITY;
         for (int ix = 0; ix < priceSteps; ix++) {
             demandArray[ix] = getDemandAt(Price.fromPriceIndex(marketBasis, ix), sortedPricePoints);
+            // Ensure we still have a (not strictly) descending array when rounding issues occur
+            if (demandArray[ix] > last && demandArray[ix] - EPSILON < last) {
+                // Second value is higher, but not significantly. Fix this by using the last value.
+                demandArray[ix] = last;
+            }
+            last = demandArray[ix];
         }
         return new Bid(marketBasis, demandArray);
     }
@@ -101,7 +113,7 @@ public final class PointBidBuilder {
         double demandMinimumPrice = sortedPricePoints[0].getDemand();
         double demandMaximumPrice = sortedPricePoints[sortedPricePoints.length - 1].getDemand();
 
-        if (sortedPricePoints.length == 1) {
+        if (demandMinimumPrice == demandMaximumPrice) {
             // Flat bid, send any demand (they are all the same)
             return demandMaximumPrice;
         } else if (price.compareTo(sortedPricePoints[0].getPrice()) < 0) {

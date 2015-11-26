@@ -1,10 +1,10 @@
 package net.powermatcher.api;
 
+import org.flexiblepower.context.FlexiblePowerContext;
+
 import net.powermatcher.api.data.Bid;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.data.Price;
-
-import org.flexiblepower.context.FlexiblePowerContext;
 
 /**
  * {@link Agent} defines the interface with the basic functionality needed to act as an agent in a Powermatcher cluster.
@@ -18,12 +18,12 @@ public interface Agent {
      * through the {@link Agent#getStatus()} method and will give a snapshot of the state at that time.
      */
     interface Status {
-        /**
-         * @return the id of the cluster, as received from its {@link Agent} parent.
-         * @throws IllegalStateException
-         *             when the agent is not connected (see {@link #isConnected()})
-         */
-        String getClusterId();
+               /**
+                * @return the id of the cluster, as received from its {@link Agent} parent.
+                * @throws IllegalStateException
+                *             when the agent is not connected (see {@link #isConnected()})
+                */
+               String getClusterId();
 
         /**
          * @return the current {@link MarketBasis} on which this {@link Agent} is running and basing its {@link Bid}s
@@ -31,7 +31,7 @@ public interface Agent {
          * @throws IllegalStateException
          *             when the agent is not connected (see {@link #isConnected()})
          */
-        MarketBasis getMarketBasis();
+                    MarketBasis getMarketBasis();
 
         /**
          * For a agent to be connect, the {@link #setContext(FlexiblePowerContext)} has been called and the agent has
@@ -44,19 +44,19 @@ public interface Agent {
          *
          * @return <code>true</code> when the agent is connected to the cluster.
          */
-        boolean isConnected();
+                boolean isConnected();
     }
 
     /**
      * @return the mandatory unique id of the {@link Agent}.
      */
-    String getAgentId();
+           String getAgentId();
 
     /**
      * @return The current {@link Status} of the {@link Agent}. This returns a snapshot of the state that won't change.
      *         If used at a later time, the snapshot should be refreshed.
      */
-    Status getStatus();
+           Status getStatus();
 
     /**
      * Give the agent a reference to a {@link FlexiblePowerContext}. This should be done by the runtime bundle after the
@@ -65,5 +65,5 @@ public interface Agent {
      * @param context
      *            reference to the {@link FlexiblePowerContext}
      */
-    void setContext(FlexiblePowerContext context);
+         void setContext(FlexiblePowerContext context);
 }
