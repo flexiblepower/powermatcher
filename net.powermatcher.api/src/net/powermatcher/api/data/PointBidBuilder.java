@@ -15,7 +15,7 @@ public final class PointBidBuilder {
     /**
      * Epsilon for correcting rounding errors
      */
-    private final static double EPSILON = 0.0000000001;
+    private static final double EPSILON = 0.0000000001;
 
     /**
      * The {@link MarketBasis} of the cluster.
