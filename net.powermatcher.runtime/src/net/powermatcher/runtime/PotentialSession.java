@@ -1,12 +1,13 @@
 package net.powermatcher.runtime;
 
+import org.flexiblepower.context.FlexiblePowerContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.powermatcher.api.Agent.Status;
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Represents a matching pair of {@link MatcherEndpoint} and {@link AgentEndpoint}. A PotentialSession always has an
@@ -18,13 +19,16 @@ public class PotentialSession {
 
     private final AgentEndpoint agentEndpoint;
     private MatcherEndpoint matcherEndpoint;
+    private final FlexiblePowerContext context;
+
     private volatile SessionImpl session;
 
-    public PotentialSession(AgentEndpoint agentEndpoint) {
+    public PotentialSession(AgentEndpoint agentEndpoint, FlexiblePowerContext context) {
         if (agentEndpoint == null) {
             throw new NullPointerException("Agent can not be null");
         }
         this.agentEndpoint = agentEndpoint;
+        this.context = context;
     }
 
     public AgentEndpoint getAgentEndpoint() {
@@ -64,7 +68,7 @@ public class PotentialSession {
             Status matcherStatus = matcherEndpoint.getStatus();
             Status agentStatus = agentEndpoint.getStatus();
             if (matcherStatus.isConnected() && !agentStatus.isConnected()) {
-                session = new SessionImpl(agentEndpoint, matcherEndpoint, this);
+                session = new SessionImpl(agentEndpoint, matcherEndpoint, this, context);
                 synchronized (session) {
                     try {
                         // This synchronized block makes sure the whole connection is made before updates can be sent

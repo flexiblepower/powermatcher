@@ -8,17 +8,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-import net.powermatcher.api.Agent;
-import net.powermatcher.api.AgentEndpoint;
-import net.powermatcher.api.MatcherEndpoint;
-import net.powermatcher.api.Session;
-
 import org.flexiblepower.context.FlexiblePowerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Reference;
+import net.powermatcher.api.Agent;
+import net.powermatcher.api.AgentEndpoint;
+import net.powermatcher.api.MatcherEndpoint;
+import net.powermatcher.api.Session;
 
 /**
  * The {@link SessionManager} is an OSGi Component which is responsible for connecting PowerMatcher Agents. To be
@@ -140,7 +139,7 @@ public class SessionManager {
                 }
             }
 
-            PotentialSession ps = new PotentialSession(agentEndpoint);
+            PotentialSession ps = new PotentialSession(agentEndpoint, runtimeContext);
             ps.setMatcherEndpoint(matcherEndpoints.get(matcherId));
             potentialSessions.get(matcherId).add(ps);
             LOGGER.debug("AgentEndpoint with id [{}] added", agentId);

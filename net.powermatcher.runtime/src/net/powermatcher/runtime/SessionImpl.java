@@ -2,15 +2,16 @@ package net.powermatcher.runtime;
 
 import java.util.UUID;
 
+import org.flexiblepower.context.FlexiblePowerContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.MatcherEndpoint;
 import net.powermatcher.api.Session;
 import net.powermatcher.api.data.MarketBasis;
 import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.messages.PriceUpdate;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SessionImpl
     implements Session {
@@ -22,14 +23,19 @@ public class SessionImpl
     private final PotentialSession potentialSession;
     private final String agentId, matcherId, clusterId;
     private MarketBasis marketBasis;
+    private final FlexiblePowerContext context;
 
     private volatile boolean connected;
 
-    public SessionImpl(AgentEndpoint agentEndpoint, MatcherEndpoint matcherEndpoint, PotentialSession potentialSession) {
+    public SessionImpl(AgentEndpoint agentEndpoint,
+                       MatcherEndpoint matcherEndpoint,
+                       PotentialSession potentialSession,
+                       FlexiblePowerContext context) {
         sessionId = UUID.randomUUID().toString();
         this.agentEndpoint = agentEndpoint;
         this.matcherEndpoint = matcherEndpoint;
         this.potentialSession = potentialSession;
+        this.context = context;
 
         agentId = agentEndpoint.getAgentId();
         matcherId = matcherEndpoint.getAgentId();
@@ -80,18 +86,30 @@ public class SessionImpl
     }
 
     @Override
-    public synchronized void updatePrice(PriceUpdate priceUpdate) {
+    public synchronized void updatePrice(final PriceUpdate priceUpdate) {
         if (connected) {
-            agentEndpoint.handlePriceUpdate(priceUpdate);
+            // PriceUpdate is handled in a separate runnable to avoid deadlocks
+            context.submit(new Runnable() {
+                @Override
+                public void run() {
+                    agentEndpoint.handlePriceUpdate(priceUpdate);
+                }
+            });
         } else {
             LOGGER.debug("Sending a price update while not connected from agent [" + agentId + "]");
         }
     }
 
     @Override
-    public synchronized void updateBid(BidUpdate bidUpdate) {
+    public synchronized void updateBid(final BidUpdate bidUpdate) {
         if (connected) {
-            matcherEndpoint.handleBidUpdate(this, bidUpdate);
+            // BidUpdate is handled in a separate runnable to avoid deadlocks
+            context.submit(new Runnable() {
+                @Override
+                public void run() {
+                    matcherEndpoint.handleBidUpdate(SessionImpl.this, bidUpdate);
+                }
+            });
         } else {
             LOGGER.debug("Sending a bid update while not connected from agent [" + agentId + "]");
         }
