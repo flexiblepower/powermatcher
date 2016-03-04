@@ -113,7 +113,11 @@ public class Bid {
     }
 
     /**
-     * {@inheritDoc}
+     * Adds this {@link Bid} with another and creates a new {@link Bid}.
+     *
+     * @param other
+     *            The {@link Bid} this should be added to
+     * @return A new {@link Bid} object
      */
     public Bid aggregate(Bid other) {
         if (!other.marketBasis.equals(marketBasis)) {
@@ -128,7 +132,11 @@ public class Bid {
     }
 
     /**
-     * {@inheritDoc}
+     * Calculates the {@link Price} for which the demand is closest to targetDemand (expressed in Watts).
+     *
+     * @param targetDemand
+     *            The demand expressed in watts
+     * @return The {@link Price} for which the demand in this {@link Bid} is closests to the targetDemand
      */
     public Price calculateIntersection(double targetDemand) {
         int leftIx = 0, rightIx = demandArray.length - 1;
@@ -195,14 +203,14 @@ public class Bid {
     }
 
     /**
-     * {@inheritDoc}
+     * @return the maximum demand (expressed in watts) in this bid
      */
     public double getMaximumDemand() {
         return demandArray[0];
     }
 
     /**
-     * {@inheritDoc}
+     * @return the minimum demand (expressed in watts) in this bid
      */
     public double getMinimumDemand() {
         return demandArray[demandArray.length - 1];
