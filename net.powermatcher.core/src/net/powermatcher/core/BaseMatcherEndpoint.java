@@ -19,9 +19,15 @@ import net.powermatcher.api.messages.PriceUpdate;
 import net.powermatcher.api.monitoring.events.AggregatedBidEvent;
 import net.powermatcher.api.monitoring.events.IncomingBidUpdateEvent;
 import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
+import net.powermatcher.core.auctioneer.Auctioneer;
 import net.powermatcher.core.bidcache.AggregatedBid;
 import net.powermatcher.core.bidcache.BidCache;
+import net.powermatcher.core.concentrator.Concentrator;
 
+/**
+ * This is an abstract class providing base functionality for a {@link MatcherEndpoint}. This class can be extended to
+ * build a matcher, such as a {@link Concentrator} or an {@link Auctioneer}.
+ */
 public abstract class BaseMatcherEndpoint
     extends BaseAgent
     implements MatcherEndpoint {
@@ -87,16 +93,30 @@ public abstract class BaseMatcherEndpoint
         }
     }
 
+    /**
+     * PowerMatcher is an event driven system. The RateLimitedBidPublisher makes sure that when aggregating bids, not
+     * too much (aggregated) {@link BidUpdate}s are being send. The RateLimitedBidPublisher introduces a cooling-off
+     * period (typically one second). If a {@link BidUpdate} is being sent within this cooling-off period, a new
+     * {@link AggregatedBid} will not be generated until the cooling-off period is finished. If multiple
+     * {@link BidUpdate}s have been send in the cooling-off period, only one {@link AggregatedBid} will be generated
+     * after the period.
+     */
     public class RateLimitedBidPublisher
         implements Runnable {
         private final long minTimeBetweenUpdates;
 
         // Timestamp at which the cool down period ends (and the Concentrator is allow to send a new BidUpdate again)
-        private volatile long coolDownEnds = 0;
+        private volatile long coolingOffEnds = 0;
 
         // Indicates if there is already a BidUpdate scheduled at the end of the cooldown period
         private volatile Future<?> bidUpdateSchedule = null;
 
+        /**
+         * Create a new RateLimitedBidPublisher instance
+         *
+         * @param minTimeBetweenUpdates
+         *            The minimum time (expressed in milliseconds) between two {@link BidUpdate}s (typically 1000ms).
+         */
         public RateLimitedBidPublisher(long minTimeBetweenUpdates) {
             this.minTimeBetweenUpdates = minTimeBetweenUpdates;
         }
@@ -118,20 +138,21 @@ public abstract class BaseMatcherEndpoint
             } finally {
                 synchronized (this) {
                     bidUpdateSchedule = null;
-                    coolDownEnds = context.currentTimeMillis() + minTimeBetweenUpdates;
+                    coolingOffEnds = context.currentTimeMillis() + minTimeBetweenUpdates;
                 }
             }
         }
 
         synchronized void schedule() {
             if (bidUpdateSchedule == null) {
-                long waitTime = coolDownEnds - context.currentTimeMillis();
+                // There is no aggregation scheduled yet
+                long waitTime = coolingOffEnds - context.currentTimeMillis();
                 if (waitTime > 0) {
-                    // We're in the cooldown period
+                    // We're in the cooling-off period
                     bidUpdateSchedule = context.schedule(this,
                                                          Measure.valueOf(waitTime, SI.MILLI(SI.SECOND)));
                 } else {
-                    // Not in a cooldown period, do it right away!
+                    // Not in a cooling-off period, do it right away!
                     bidUpdateSchedule = context.submit(this);
                 }
             }
@@ -217,7 +238,8 @@ public abstract class BaseMatcherEndpoint
                 sessions.put(session.getAgentId(), session);
                 LOGGER.info("Agent connected with session [{}]", session.getSessionId());
             } else {
-                throw new IllegalStateException("An agent with id [" + session.getAgentId() + "] was already connected");
+                throw new IllegalStateException("An agent with id [" + session.getAgentId()
+                                                + "] was already connected");
             }
         }
     }
