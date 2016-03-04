@@ -28,7 +28,7 @@ import net.powermatcher.monitoring.csv.PriceUpdateLogRecord;
  * JUnit tests for the {@link LogRecord} class.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class LogRecordTest {
 

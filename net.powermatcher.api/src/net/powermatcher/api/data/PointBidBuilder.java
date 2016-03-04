@@ -8,7 +8,7 @@ import java.util.TreeSet;
  * A builder class to create an {@link Bid} instance.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public final class PointBidBuilder {
 

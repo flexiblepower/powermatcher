@@ -40,7 +40,7 @@ import com.google.gson.JsonObject;
  * {@link HttpServlet} used by the visualizer frontend.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 @Component(
            provide = Servlet.class,

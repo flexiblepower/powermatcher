@@ -27,7 +27,7 @@ import aQute.bnd.annotation.metatype.Meta;
  * hierarchy in the form of price update messages.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 @Component(designateFactory = Auctioneer.Config.class,
            immediate = true,

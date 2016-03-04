@@ -6,7 +6,7 @@ import net.powermatcher.api.data.MarketBasis;
  * CusterInfo model class to transfer clusterId and {@link MarketBasis} data over the wire.
  * 
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class ClusterInfoModel {
     private MarketBasisModel marketBasis;

@@ -16,7 +16,7 @@ import net.powermatcher.api.monitoring.events.OutgoingBidUpdateEvent;
  * {@link BaseAgentEndpoint} defines the basic functionality of any Device Agent.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public abstract class BaseAgentEndpoint
     extends BaseAgent

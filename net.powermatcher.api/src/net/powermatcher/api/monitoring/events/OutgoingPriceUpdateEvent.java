@@ -10,7 +10,7 @@ import net.powermatcher.api.messages.PriceUpdate;
  * An {@link OutgoingPriceUpdateEvent} is sent when an {@link AgentEndpoint} sends a new {@link PriceUpdate}.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class OutgoingPriceUpdateEvent
     extends PriceUpdateEvent {

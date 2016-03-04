@@ -17,7 +17,7 @@
 // * A testSuite class used to run all test in this eclipse project.
 // * 
 // * @author FAN
-// * @version 2.0
+// * @version 2.1
 // */
 //@RunWith(Suite.class)
 //@Suite.SuiteClasses({ AuctioneerTest.class, ObjectiveAuctioneerTest.class,

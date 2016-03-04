@@ -6,7 +6,7 @@ import net.powermatcher.api.messages.PriceUpdate;
  * PriceUpdate model class to transfer {@link PriceUpdate} data over the wire.
  * 
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class PriceUpdateModel {
 

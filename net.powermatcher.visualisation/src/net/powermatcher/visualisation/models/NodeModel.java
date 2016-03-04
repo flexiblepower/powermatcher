@@ -6,7 +6,7 @@ import net.powermatcher.api.Agent;
  * A data object representing a node in the visualizer tree. A node represents a running {@link Agent} instance.
  * 
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class NodeModel implements Comparable<NodeModel> {
 

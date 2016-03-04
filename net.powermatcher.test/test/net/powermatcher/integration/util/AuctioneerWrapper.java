@@ -13,7 +13,7 @@ import net.powermatcher.mock.MockContext;
 /**
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class AuctioneerWrapper
     extends Auctioneer {

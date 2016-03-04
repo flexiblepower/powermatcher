@@ -16,7 +16,7 @@ import aQute.bnd.annotation.metatype.Meta;
  * {@link ObservableAgent}s and it can receive {@link AgentEvent}s from them.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 @Component(immediate = true, designate = ConsoleObserver.Config.class)
 public class ConsoleObserver

@@ -51,7 +51,7 @@ import com.google.gson.JsonSyntaxException;
  * JSON over a TCP connection.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 @WebSocket()
 @Component(designateFactory = WebsocketClient.Config.class,

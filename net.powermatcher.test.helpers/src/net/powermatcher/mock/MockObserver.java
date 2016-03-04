@@ -6,7 +6,7 @@ import net.powermatcher.api.monitoring.events.AgentEvent;
 /**
  * 
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class MockObserver implements AgentObserver {
 

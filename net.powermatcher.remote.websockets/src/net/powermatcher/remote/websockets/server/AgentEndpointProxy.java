@@ -31,7 +31,7 @@ import org.osgi.framework.ServiceRegistration;
  * over a TCP connection.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class AgentEndpointProxy
     extends BaseAgentEndpoint

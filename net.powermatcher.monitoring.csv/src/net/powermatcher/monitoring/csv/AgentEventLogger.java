@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  * specific logging method in the dumpLogs() method.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public abstract class AgentEventLogger
     extends BaseObserver {

@@ -31,7 +31,7 @@ import net.powermatcher.core.BaseAgentEndpoint;
  * {@link Price}.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 @Component(designateFactory = Freezer.Config.class,
            immediate = true,

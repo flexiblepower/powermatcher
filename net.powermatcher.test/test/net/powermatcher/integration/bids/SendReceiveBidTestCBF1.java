@@ -16,7 +16,7 @@ import net.powermatcher.api.messages.PriceUpdate;
 /**
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class SendReceiveBidTestCBF1
     extends BidResilienceTest {

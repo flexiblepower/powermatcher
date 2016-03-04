@@ -30,7 +30,7 @@ import net.powermatcher.test.helpers.PropertiesBuilder;
  * JUnit tests for the {@link Auctioneer} class.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class AuctioneerTest {
     private static final MarketBasis marketBasis = new MarketBasis("electricity", "EUR", 5, 0, 10);;

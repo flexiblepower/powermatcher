@@ -9,7 +9,7 @@ import net.powermatcher.api.monitoring.events.PriceUpdateEvent;
  * {@link AgentEventLogger} to be able to select an {@link AgentEventType} in the Apache Felix config admin.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public enum AgentEventType {
 

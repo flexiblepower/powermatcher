@@ -35,7 +35,7 @@ import aQute.bnd.annotation.metatype.Meta;
  * {@link Auctioneer} and forward them to its connected agents.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 @Component(designateFactory = Concentrator.Config.class, immediate = true,
            provide = { AgentEndpoint.class, ObservableAgent.class, MatcherEndpoint.class })

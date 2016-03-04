@@ -26,7 +26,7 @@ import net.powermatcher.api.Session;
  * an {@link Session} instance.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 @Component(immediate = true)
 public class SessionManager {

@@ -6,7 +6,7 @@ package net.powermatcher.remote.websockets.data;
  * this message contains a type indicator to allow the different objects to be transferred reliably.
  * 
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class PmMessage {
     /**

@@ -24,7 +24,7 @@ import org.junit.Test;
  * ascertain which Price is is corresponding to which Bid, it could start sending Bids in response to the wrong Prices.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class OscillationPreventionTest {
     private static final String AUCTIONEER_ID = "auctioneer";

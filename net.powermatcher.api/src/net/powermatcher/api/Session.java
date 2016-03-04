@@ -10,7 +10,7 @@ import net.powermatcher.api.messages.PriceUpdate;
  * Powermatcher cluster.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public interface Session {
 

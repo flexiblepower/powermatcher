@@ -7,7 +7,7 @@ import java.util.Arrays;
  * curve. This is used because it is easy to perform calculations with.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class Bid {
 

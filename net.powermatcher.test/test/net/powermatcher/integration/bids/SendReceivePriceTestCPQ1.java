@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * Validate the correct behaviour of the components when incorrect prices are inserted.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class SendReceivePriceTestCPQ1
     extends BidResilienceTest {

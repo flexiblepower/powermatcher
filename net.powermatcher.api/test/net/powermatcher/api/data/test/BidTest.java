@@ -21,7 +21,7 @@ import net.powermatcher.api.data.Price;
  * JUnit tests for the {@link Bid} class.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class BidTest {
 

@@ -13,7 +13,7 @@ import net.powermatcher.api.data.MarketBasis;
 /**
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class CsvExpectedResultsReader {
 

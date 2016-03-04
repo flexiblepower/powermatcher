@@ -10,7 +10,7 @@ import net.powermatcher.api.monitoring.events.PriceUpdateEvent;
  * {@link PriceUpdateLogRecord} is an implementation of {@link LogRecord} that stores a {@link PriceUpdateEvent}.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class PriceUpdateLogRecord
     extends LogRecord {

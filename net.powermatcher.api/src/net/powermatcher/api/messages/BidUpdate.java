@@ -7,7 +7,7 @@ import net.powermatcher.api.data.Bid;
  * This immutable data object is a message that sends a {@link Bid} with a corresponding bidNumber.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class BidUpdate {
     private final Bid bid;

@@ -23,7 +23,7 @@ import org.junit.rules.ExpectedException;
  * JUnit tests for the {@link SessionManager} class.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class SessionManagerTest {
 

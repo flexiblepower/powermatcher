@@ -14,7 +14,7 @@ import net.powermatcher.api.monitoring.ObservableAgent;
  * {@link AgentObserver} that observes this class.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 
 public abstract class AgentEvent {

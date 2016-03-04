@@ -6,7 +6,7 @@ import net.powermatcher.api.data.Bid;
  * Bid model class to transfer {@link Bid} data over the wire.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class BidModel {
     /**

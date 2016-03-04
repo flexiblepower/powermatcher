@@ -10,7 +10,7 @@ import net.powermatcher.core.bidcache.AggregatedBid;
  * This store keeps track of send bids to be able to retrieve them later
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  *
  */
 public class BidHistoryStore {

@@ -4,7 +4,7 @@ package net.powermatcher.api.data;
  * PricePoint represents a Price and the demand that goes with it.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class PricePoint
     implements Comparable<PricePoint> {

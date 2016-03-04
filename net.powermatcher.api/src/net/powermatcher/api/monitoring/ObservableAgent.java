@@ -7,7 +7,7 @@ import net.powermatcher.api.Agent;
  * {@link AgentObserver}.
  * 
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public interface ObservableAgent extends Agent {
 

@@ -13,7 +13,7 @@ import net.powermatcher.api.messages.BidUpdate;
  * {@link MatcherEndpoint}.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public abstract class BidUpdateEvent
     extends AgentEvent {

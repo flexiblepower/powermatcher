@@ -6,7 +6,7 @@ import net.powermatcher.api.Agent;
  * A data object representing a SubMenu item for the visualizer.
  * 
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class SubMenuItemModel {
 

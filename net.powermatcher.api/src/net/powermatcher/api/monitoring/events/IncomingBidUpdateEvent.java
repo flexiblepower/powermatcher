@@ -11,7 +11,7 @@ import net.powermatcher.api.messages.BidUpdate;
  * An {@link IncomingBidUpdateEvent} is sent when an {@link AgentEndpoint} receives a new {@link Bid}.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class IncomingBidUpdateEvent
     extends BidUpdateEvent {

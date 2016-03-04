@@ -40,7 +40,7 @@ import net.powermatcher.core.BaseAgentEndpoint;
  * cluster for no flexbility by sending a must-off bid.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 @Component(designateFactory = ObjectiveAgent.Config.class, immediate = true, provide = {
                                                                                          ObservableAgent.class })

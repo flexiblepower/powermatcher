@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  * events.
  * 
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public abstract class BaseObserver implements AgentObserver {
 

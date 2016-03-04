@@ -17,7 +17,7 @@ import net.powermatcher.remote.websockets.data.PriceUpdateModel;
  * {@link PmMessage} and correct type is set.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class PmJsonSerializer {
 

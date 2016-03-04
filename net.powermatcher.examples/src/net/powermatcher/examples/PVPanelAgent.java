@@ -30,7 +30,7 @@ import net.powermatcher.core.BaseAgentEndpoint;
  * with the returned {@link Price}.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 @Component(designateFactory = PVPanelAgent.Config.class,
            immediate = true,

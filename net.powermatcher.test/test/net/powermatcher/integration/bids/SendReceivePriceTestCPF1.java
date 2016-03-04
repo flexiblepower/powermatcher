@@ -13,7 +13,7 @@ import org.junit.Test;
 /**
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class SendReceivePriceTestCPF1
     extends BidResilienceTest {

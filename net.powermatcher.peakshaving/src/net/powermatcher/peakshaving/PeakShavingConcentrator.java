@@ -35,7 +35,7 @@ import net.powermatcher.core.concentrator.TransformingConcentrator;
  * comment.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 @Component(designateFactory = PeakShavingConcentrator.Config.class,
            immediate = true,

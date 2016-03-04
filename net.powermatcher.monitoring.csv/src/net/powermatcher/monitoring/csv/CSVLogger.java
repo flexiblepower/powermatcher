@@ -31,7 +31,7 @@ import net.powermatcher.api.monitoring.events.AgentEvent;
  * comma separated file.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 @Component(immediate = true, designateFactory = CSVLogger.Config.class)
 public class CSVLogger

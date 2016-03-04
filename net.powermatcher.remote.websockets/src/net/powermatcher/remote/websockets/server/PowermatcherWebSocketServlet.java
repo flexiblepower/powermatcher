@@ -21,7 +21,7 @@ import aQute.bnd.annotation.metatype.Meta;
  * Servlet which activates the PowerMatcher WebSocket communication.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 @Component(designateFactory = PowermatcherWebSocketServlet.Config.class, provide = Servlet.class)
 public class PowermatcherWebSocketServlet

@@ -11,7 +11,7 @@ import net.powermatcher.api.monitoring.events.AgentEvent;
  * LogRecord is an abstract class that contains the basic information needed to log an {@link AgentEvent}.
  * 
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public abstract class LogRecord {
     /**

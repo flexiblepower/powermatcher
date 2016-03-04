@@ -29,7 +29,7 @@ import net.powermatcher.test.helpers.PropertiesBuilder;
  * JUnit test for the {@link Concentrator} class.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  **/
 public class ConcentratorTest {
     private static final int MIN_TIME_BETWEEN_BIDS = 1000;

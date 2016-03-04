@@ -13,7 +13,7 @@ import net.powermatcher.remote.websockets.data.PriceUpdateModel;
  * Helper class to mapp between net.powermatcher.api.data classes and model classed for wire transfer.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class ModelMapper {
 

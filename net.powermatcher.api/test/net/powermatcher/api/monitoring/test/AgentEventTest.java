@@ -26,7 +26,7 @@ import net.powermatcher.api.monitoring.events.OutgoingPriceUpdateEvent;
  * JUnit tests for the {@link AgentEvent} class.
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class AgentEventTest {
     private String clusterId;

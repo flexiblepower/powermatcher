@@ -10,7 +10,7 @@ import org.junit.rules.ExpectedException;
 /**
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class AuctioneerResilienceTestIAQ2
     extends AuctioneerResilienceTest {

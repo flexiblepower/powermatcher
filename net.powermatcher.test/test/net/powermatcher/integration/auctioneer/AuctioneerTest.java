@@ -16,7 +16,7 @@ import org.junit.Test;
  * of agents can be added and removed using the functions addAgents() and removeAgents().
  *
  * @author FAN
- * @version 2.0
+ * @version 2.1
  */
 public class AuctioneerTest {
     private static final String AUCTIONEER_NAME = "auctioneer";
