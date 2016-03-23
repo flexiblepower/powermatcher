@@ -9,6 +9,12 @@ import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.WebSocketException;
+import org.eclipse.jetty.websocket.api.WebSocketListener;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+
 import net.powermatcher.api.AgentEndpoint;
 import net.powermatcher.api.messages.BidUpdate;
 import net.powermatcher.api.messages.PriceUpdate;
@@ -20,15 +26,9 @@ import net.powermatcher.remote.websockets.data.PmMessage;
 import net.powermatcher.remote.websockets.json.ModelMapper;
 import net.powermatcher.remote.websockets.json.PmJsonSerializer;
 
-import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.WebSocketException;
-import org.eclipse.jetty.websocket.api.WebSocketListener;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-
 /**
- * WebSocket implementation of an {@link AgentEndpointProxy}. Enabled two agents to communicate via WebSockets and JSON
- * over a TCP connection.
+ * WebSocket implementation of an {@link AgentEndpoint}. Enabled two agents to communicate via WebSockets and JSON over
+ * a TCP connection.
  *
  * @author FAN
  * @version 2.1
@@ -53,6 +53,7 @@ public class AgentEndpointProxy
 
         Map<String, String> query = splitQuery(remoteSession.getUpgradeRequest().getRequestURI());
         String remoteAgentId = query.get("agentId");
+        String connectionId = query.get("connectionId");
         if (remoteAgentId == null || remoteAgentId.isEmpty()) {
             remoteSession.close();
             LOGGER.warn("Rejecting connection from remote agent from [{}], missing the agentId",
@@ -60,17 +61,24 @@ public class AgentEndpointProxy
             return;
         }
 
+        register(remoteSession, remoteAgentId, connectionId);
+        LOGGER.debug("Connected to remote agent {} with connectionId {} on {}",
+                     remoteAgentId,
+                     connectionId,
+                     remoteSession.getRemoteAddress());
+    }
+
+    protected void register(Session remoteSession, String remoteAgentId, String connectionId) {
         String agentId = "remote-" + remoteSession.getRemoteAddress().getHostString() + "-" + remoteAgentId;
         init(agentId, desiredParentId);
-
         Hashtable<String, Object> properties = new Hashtable<String, Object>();
         properties.put("agentId", agentId);
         properties.put("desiredParentId", desiredParentId);
+        properties.put("connectionId", connectionId);
         serviceRegistration = bundleContext.registerService(new String[] { ObservableAgent.class.getName(),
-                                                                          AgentEndpoint.class.getName() },
+                                                                           AgentEndpoint.class.getName() },
                                                             this,
-                                                            null);
-        LOGGER.debug("Connected to remote agent {} on {}", remoteAgentId, remoteSession.getRemoteAddress());
+                                                            properties);
     }
 
     /**
