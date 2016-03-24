@@ -3,11 +3,12 @@ package net.powermatcher.test.osgi;
 import static net.powermatcher.test.osgi.ClusterHelper.AGENT_ID_CONCENTRATOR;
 import static net.powermatcher.test.osgi.ClusterHelper.AGENT_ID_FREEZER;
 import static net.powermatcher.test.osgi.ClusterHelper.AGENT_ID_PV_PANEL;
+
+import org.osgi.service.cm.Configuration;
+
 import net.powermatcher.api.data.Price;
 import net.powermatcher.test.helpers.PropertiesBuilder;
 import net.powermatcher.test.helpers.TestingObserver;
-
-import org.osgi.service.cm.Configuration;
 
 public class RemoteClusterTests
     extends OsgiTestCase {
@@ -138,6 +139,7 @@ public class RemoteClusterTests
                                       .minTimeBetweenBidUpdates(0)
                                       .add("powermatcherUrl",
                                            "ws://localhost:8181/powermatcher/websocket")
+                                      .add("connectionId", "connection1")
                                       .add("reconnectTimeout", 1)
                                       .add("connectTimeout", 60);
     }
