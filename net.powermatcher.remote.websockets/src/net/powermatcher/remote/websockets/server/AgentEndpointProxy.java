@@ -37,10 +37,10 @@ public class AgentEndpointProxy
     extends BaseAgentEndpoint
     implements WebSocketListener {
 
-    private final BundleContext bundleContext;
-    private final String desiredParentId;
-    private ServiceRegistration<?> serviceRegistration;
-    private Session remoteSession;
+    protected final BundleContext bundleContext;
+    protected final String desiredParentId;
+    protected ServiceRegistration<?> serviceRegistration;
+    protected Session remoteSession;
 
     public AgentEndpointProxy(BundleContext bundleContext, String desiredParentId) {
         this.bundleContext = bundleContext;
@@ -90,7 +90,7 @@ public class AgentEndpointProxy
      * @throws UnsupportedEncodingException
      *             when URL is incorrect.
      */
-    private static Map<String, String> splitQuery(URI url) {
+    protected static Map<String, String> splitQuery(URI url) {
         try {
             Map<String, String> query_pairs = new LinkedHashMap<String, String>();
             String query = url.getQuery();
