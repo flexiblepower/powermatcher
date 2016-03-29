@@ -1,6 +1,6 @@
 Bundle-Version: 2.0.1.${tstamp}
-Private-Package: \
+Service-Component: *
+Export-Package: \
 	net.powermatcher.remote.websockets.server,\
 	net.powermatcher.remote.websockets.data,\
 	net.powermatcher.remote.websockets.json
-Service-Component: *
