@@ -1,4 +1,4 @@
-Bundle-Version: 2.0.1.${tstamp}
+Bundle-Version: 2.1.0.${tstamp}
 Service-Component: *
 Export-Package: \
 	net.powermatcher.remote.websockets.server,\
