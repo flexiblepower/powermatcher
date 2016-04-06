@@ -42,7 +42,7 @@ import net.powermatcher.core.BaseAgentEndpoint;
  * @author FAN
  * @version 2.1
  */
-@Component(designateFactory = ObjectiveAgent.Config.class, immediate = true, provide = {
+@Component(designateFactory = ObjectiveAgent.Config.class, immediate = true, provide = { AgentEndpoint.class,
                                                                                          ObservableAgent.class })
 public class ObjectiveAgent
     extends BaseAgentEndpoint
