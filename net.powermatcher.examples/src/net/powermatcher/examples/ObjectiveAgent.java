@@ -65,7 +65,7 @@ public class ObjectiveAgent
     private Config config;
 
     /**
-     * List to temporarely store ObservableAgents that are received before the component is activated. This list is
+     * List to temporarily store ObservableAgents that are received before the component is activated. This list is
      * emptied in the activate method.
      */
     private final List<ObservableAgent> observableAgents = new ArrayList<ObservableAgent>();
@@ -87,7 +87,7 @@ public class ObjectiveAgent
             // Retry now the component is activated
             addObservableAgent(observableAgent);
         }
-        observableAgents.isEmpty();
+        observableAgents.clear();
     }
 
     /**
@@ -112,7 +112,7 @@ public class ObjectiveAgent
     @Reference(multiple = true, optional = true, dynamic = true)
     public void addObservableAgent(ObservableAgent agent) {
         if (config == null) {
-            // The component is not yet activated, we'll try again the activate method
+            // The component is not yet activated, we'll try again in the activate method
             observableAgents.add(agent);
         } else {
             // The component is activated
@@ -125,7 +125,7 @@ public class ObjectiveAgent
 
     public void removeObservableAgent(ObservableAgent agent) {
         if (config == null) {
-            // The component is not yet activated, we'll try again the activate method
+            // The component is not yet activated, we'll try again in the activate method
             observableAgents.remove(agent);
         } else {
             // The component is activated
