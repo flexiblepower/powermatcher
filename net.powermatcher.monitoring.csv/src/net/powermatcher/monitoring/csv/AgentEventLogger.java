@@ -3,17 +3,18 @@ package net.powermatcher.monitoring.csv;
 import java.text.DateFormat;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.powermatcher.api.monitoring.events.AgentEvent;
 import net.powermatcher.api.monitoring.events.BidUpdateEvent;
 import net.powermatcher.api.monitoring.events.PriceUpdateEvent;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This is the basic class to store incoming {@link AgentEvent}s. Subclasses of this abstract class implements their
@@ -48,7 +49,8 @@ public abstract class AgentEventLogger
     private ScheduledFuture<?> scheduledFuture;
 
     /**
-     * Scheduler that can schedule commands to run after a given delay, or to execute periodically.
+     * Scheduler that can schedule commands to run after a given delay, or to execute periodically. Scheduler is lazy
+     * initialized.
      */
     private ScheduledExecutorService scheduler;
 
@@ -77,6 +79,11 @@ public abstract class AgentEventLogger
      * Sets the scheduledFuture
      */
     private void createScheduledFuture() {
+        if (scheduler == null) {
+            scheduler = Executors.newScheduledThreadPool(1);
+            // Scheduler shuts down in baseDecative()
+        }
+
         if (scheduledFuture != null) {
             scheduledFuture.cancel(false);
         }
@@ -105,7 +112,8 @@ public abstract class AgentEventLogger
             if (event instanceof BidUpdateEvent) {
                 logRecord = new BidUpdateLogRecord((BidUpdateEvent) event, event.getTimestamp(), getDateFormat());
             } else if (event instanceof PriceUpdateEvent) {
-                logRecord = new PriceUpdateLogRecord((PriceUpdateEvent) event, event.getTimestamp(),
+                logRecord = new PriceUpdateLogRecord((PriceUpdateEvent) event,
+                                                     event.getTimestamp(),
                                                      getDateFormat());
             }
 
@@ -119,6 +127,8 @@ public abstract class AgentEventLogger
      */
     public void baseDeactivate() {
         scheduledFuture.cancel(false);
+        scheduler.shutdownNow();
+        scheduler = null;
     }
 
     /**
