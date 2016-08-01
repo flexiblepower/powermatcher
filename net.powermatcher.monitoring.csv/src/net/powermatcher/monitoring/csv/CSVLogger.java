@@ -37,8 +37,6 @@ import net.powermatcher.api.monitoring.events.AgentEvent;
 public class CSVLogger
     extends AgentEventLogger {
 
-    private static final String LINE_SEPERATOR = System.getProperty("line.seperator");
-
     /**
      * The header for the bidlog file
      */
@@ -250,13 +248,15 @@ public class CSVLogger
                 w.write(s);
                 w.write(separator);
             }
-            w.write(LINE_SEPERATOR);
+            w.newLine();
         } catch (IOException e) {
+            getLogger().error("Error while writing to CSV file", e);
         } finally {
             if (w != null) {
                 try {
                     w.close();
                 } catch (IOException e) {
+                    getLogger().error("Error while writing to CSV file", e);
                 }
             }
         }
