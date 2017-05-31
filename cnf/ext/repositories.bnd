@@ -23,7 +23,7 @@
             cache=${workspace}/cnf/cache,\
      aQute.bnd.deployer.repository.FixedIndexedRepo;\
             name=PowerMatcher Current Release;\
-            locations=https://github.com/flexiblepower/powermatcher/releases/download/v2.0/index.xml;\
+            locations=https://github.com/flexiblepower/powermatcher/releases/download/v2.1/index.xml;\
             cache=${workspace}/cnf/cache
 
 -releaserepo: Release
