@@ -231,9 +231,9 @@ public class VisualisationPlugin
                 }
             }
         } catch (IOException e) {
-            LOGGER.equals(e.getMessage());
+            LOGGER.info(e.getMessage());
         } catch (InvalidSyntaxException e) {
-            LOGGER.equals(e.getMessage());
+            LOGGER.info(e.getMessage());
         }
 
         for (NodeModel nm : nodes.values()) {
