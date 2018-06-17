@@ -59,7 +59,7 @@ public class CsvExpectedResultsReader {
             int i = 0;
             for (String item : demandList) {
                 try {
-                    demand[i] = new Double(item);
+                    demand[i] = Double.valueOf(item);
                 } catch (NumberFormatException e) {
                     throw new DataFormatException("Exception while parsing demand string : cannot convert" + item
                                                   + " to double");
@@ -75,7 +75,7 @@ public class CsvExpectedResultsReader {
     private double createEquilibriumPrice(List<String> priceList) throws DataFormatException {
         if (priceList != null && priceList.size() == 1) {
             try {
-                return new Double(priceList.get(0));
+                return Double.parseDouble(priceList.get(0));
             } catch (NumberFormatException e) {
                 throw new DataFormatException("Parse exception : cannot convert equilibrium" + priceList.get(0)
                                               + " to double");
