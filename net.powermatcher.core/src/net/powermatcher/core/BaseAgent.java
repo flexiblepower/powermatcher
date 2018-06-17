@@ -1,18 +1,17 @@
 package net.powermatcher.core;
 
 import java.util.Date;
-import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+
+import org.flexiblepower.context.FlexiblePowerContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.powermatcher.api.Agent;
 import net.powermatcher.api.monitoring.AgentObserver;
 import net.powermatcher.api.monitoring.ObservableAgent;
 import net.powermatcher.api.monitoring.events.AgentEvent;
-
-import org.flexiblepower.context.FlexiblePowerContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Base implementation of an {@link Agent}. It provides basic functionality required in each {@link Agent}. Implements
@@ -50,7 +49,7 @@ public abstract class BaseAgent
     }
 
     /**
-     * Collection of {@link Observer} services.
+     * Collection of {@link AgentObserver} services.
      */
     private final Set<AgentObserver> observers = new CopyOnWriteArraySet<AgentObserver>();
 
@@ -71,7 +70,7 @@ public abstract class BaseAgent
     }
 
     /**
-     * Publish an {@link AgentEvent} to the attached {@link Observer} services.
+     * Publish an {@link AgentEvent} to the attached {@link AgentObserver} services.
      *
      * @param event
      *            The event to publish.
