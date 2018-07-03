@@ -80,7 +80,7 @@ public class CsvBidReader {
         int i = 0;
         for (String item : demandList) {
             try {
-                demand[i] = new Double(item);
+                demand[i] = Double.valueOf(item);
             } catch (NumberFormatException e) {
                 throw new DataFormatException("Parse exception : cannot convert" + item + " to double");
             }
